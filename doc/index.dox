@@ -1,0 +1,45 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2008 GearBox Team
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+
+// here we can easily add software categories later
+// e.g. a Pioneer driver could classify itself as belonging to both gbx_sensors and gbx_actuators
+/*!
+
+@defgroup gbx_libs Libraries
+@defgroup gbx_utils Utilities
+@defgroup gbx_examples Examples
+
+@defgroup gbx_cpp C++
+@defgroup gbx_c C
+
+@defgroup gbx_linux Linux
+@defgroup gbx_win Windows
+*/
+
+// without this gap between two doxygen definitions, the last group does not get 
+// populated properly for some reason.
+
+/*!
+@mainpage GearBox: Peer-Reviewed Open-Source Libraries for Robotics
+
+
+@section gbx_doc_index_more_info Where to start
+
+- Read general information about the project: @ref gbx_doc_overview
+- Get set up: @ref gbx_doc_getting
+- Browse through the <strong><a href="modules.html" style="text-decoration:none">currently available software</a></strong><br>
+
+Note: The documentation on this web page matches the latest release. A web page is also <a href="http://gearbox.sourceforge.net/head/gearbox">generated every 30 min</a> from the latest SVN version.
+
+@section gbx_doc_index_news News
+
+- 06-Feb-08 Project created.
+*/

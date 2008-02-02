@@ -1,0 +1,32 @@
+/*!
+
+@ingroup gbx_libs
+@ingroup gbx_win
+@ingroup gbx_c
+@defgroup gbx_library_basic libbasic
+@brief Does something %basic.
+
+@par General notes
+
+All double's and int's are initialized to zero.
+
+For a full list of functions and classes see @ref basic.
+
+Header file:
+@verbatim
+#include <basic/basic.h>
+@endverbatim
+
+@par Responsible Developer
+Alex Makarenko
+  
+*/
+
+/*!
+@namespace basic
+@brief Does something basic.
+
+This namespace is part of a library which does something basic.
+
+@see @ref gbx_library_basic 
+*/

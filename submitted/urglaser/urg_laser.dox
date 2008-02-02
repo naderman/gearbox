@@ -1,0 +1,41 @@
+/*!
+
+@ingroup gbx_libs
+@ingroup gbx_c
+@defgroup gbx_library_urglaser liburglaser
+@brief Hokuyo URG laser scanner driver.
+
+For a full list of functions and classes see @ref urglaser.
+
+Header file:
+@verbatim
+#include <urglaser/urg_laser.h>
+@endverbatim
+
+@par Responsible Developer
+
+
+@par Style guidelines
+
+- Naming conventions:
+  - Class methods start with a capital letter.
+  - Underscores in member, variable and type names.
+  - #define'd values in all capitals.
+- Formatting:
+  - 4 space indentation.
+  - Function declarations on one line.
+  - Space between function name and arguments.
+- C++ API.
+  - Functionality provided through classes with utility structures.
+- Units?
+
+*/
+
+/*!
+@namespace urglaser
+@brief URG laser scanner driver name space.
+
+This namespace is part of a library which provides a driver for the URG laser scanner driver.
+
+@see @ref gbx_library_urglaser
+*/

@@ -1,0 +1,21 @@
+Building
+--------
+
+The example can be built by making a directory (anywhere on your system where
+you have write permissions will do), changing to that directory and executing
+CMake with the example's source directory as an argument. For example, if you
+have installed GearBox into /usr/local, you could do the following:
+
+$ cd ~
+$ mkdir urglaser_example
+$ cd urglaser_example
+$ ccmake /usr/local/share/gearbox/urglaser/
+
+Running
+-------
+
+The example requires that you specify a path to the laser scanner's port and,
+optionally, a baud rate and whether to use an RS232 connection or not. For
+example:
+
+./urg_example -p /dev/ttyS1 -b 115200 -s

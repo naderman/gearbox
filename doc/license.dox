@@ -1,0 +1,39 @@
+/*
+ * GearBox Project: Components for robotics 
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2008 GearBox Team
+ *
+ * This copy of GearBox is licensed to you under the terms described in the
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+
+@page gbx_doc_license GearBox License and Copyright
+
+@section gbx_doc_license_license License
+
+The GearBox project does not, as a policy, require code to conform to any 
+specific license to be included in the distribution. However, the code is required 
+to have a license and the license must be Open Source. That is the official policy.
+
+For a complete up-to-date list of licenses see the @b LICENSE file included in your distribution.
+
+Generally speaking, most of the code in the GearBox libraries and components is covered under the <a href="http://www.fsf.org/copyleft/lgpl.html" target="_blank">Library GNU Public License (LGPL)</a> as defined by the Free Software Foundation (FSF). Most of the remaining code is licensed under the <a href="http://www.fsf.org/copyleft/gpl.html" target="_blank">GNU Public License (GPL)</a>, also defined by the FSF.
+
+The LGPL (as opposed to the GPL) is used whenever possible to allow commercial enterprises to build closed-source products using GearBox technology. 
+
+@section gbx_doc_license_copyright Copyright
+
+Copyright belongs to developers and major contributors. The copyright is recorded in a comment block at the top of every source file. We would like to leave it up to the current copyright holders to distinguish between "major" and "minor" contributions.
+
+Here's how it works. The creators of newly-added code put their names as copyright holders. Major contributions by other people are acknowledged by the current copyright holders by adding new names. 
+
+In other words:
+- if you are not on the list: don't add yourself.
+- if you are on the list: be nice to others.
+
+It seems fair.
+
+*/

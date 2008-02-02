@@ -1,0 +1,37 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2008 GearBox Team
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+
+@page gbx_doc_lifecycle Source Code Life Cycle in GearBox
+
+We hope that this project will attract a diverse group of developers. If this happens we think that a clear set of written down rules would help to avoid misunderstandings.
+
+@section gbx_doc_lifecycle_fsm Life of Code as a State Machine
+
+@image html gbx_src_life_cycle.png
+
+@section gbx_doc_lifecycle_submit Submission
+
+TBD
+
+@section gbx_doc_lifecycle_review Review and Acceptance
+
+TBD
+
+@section gbx_doc_lifecycle_maintain Maintanence
+
+TBD
+
+@section gbx_doc_lifecycle_retire Retirement
+
+TBD
+
+*/
