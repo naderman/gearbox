@@ -6,9 +6,6 @@
 
 #include <gearbox/urglaser/urg_laser.h>
 
-#define URG04_MIN_STEP 44
-#define URG04_MAX_STEP 725
-
 int main (int argc, char **argv)
 {
     int opt, baud = 115200;
@@ -43,63 +40,58 @@ int main (int argc, char **argv)
         }
     }
 
-    // Open the laser
-    urglaser::urg_laser laser;                  // Laser scanner object
-    if (laser.Open (port, useSerial, baud) < 0)
+    try
     {
-        printf ("Failed to open laser.\n");
-        return 1;
-    }
+        // Open the laser
+        urglaser::urg_laser laser;                  // Laser scanner object
+        laser.Open (port, useSerial, baud);
 
-    // Get the laser serial number
-    int serial = 0;
-    if ((serial = laser.GetIDInfo ()) < 0)
+        // Set the laser to verbose mode (so we see more information in the console)
+        laser.SetVerbose (true);
+        // Set the timeout to 1000ms
+//         laser.SetTimeOut (1000);
+
+        // Get the laser serial number
+        int serial = 0;
+        serial = laser.GetIDInfo ();
+        printf ("Laser serial number:\t%d\n", serial);
+
+        // Get the laser configuration
+        urglaser::urg_laser_config_t config;        // Laser configuration structure
+        laser.GetSensorConfig (&config);
+        printf ("Laser configuration:\n"
+                "Min angle: %f\tMax angle: %f\tResolution: %f\tMax range: %f\n",
+                config.min_angle, config.max_angle, config.resolution, config.max_range);
+
+        // Calculate the minimum and maximum indices to retrieve - this is only necessary if you want
+        // less than the full scan, otherwise simply don't supply min_i and max_i to urg_laser.GetReadings()
+        // and the full scan will be returned.
+        int minIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.min_angle / config.resolution));
+        int maxIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.max_angle / config.resolution));
+
+        // Get range readings from the laser
+        urglaser::urg_laser_readings_t readings;    // Laser readings structure
+        printf ("Getting readings from %d to %d\n", minIndex, maxIndex);
+        unsigned int numRead = laser.GetReadings (&readings, minIndex, maxIndex);
+        printf ("Got %d range readings:\n", numRead);
+        for (unsigned int ii = 0; ii < numRead; ii++)
+        {
+            float angle = config.min_angle + (ii * config.resolution);
+            if (readings.Readings[ii] < 20)         // Values less than 20 indicate no return in the scan
+                printf ("%f: %f\t\t", angle, config.max_range);
+            else
+                printf ("%f: %d\t\t", angle, readings.Readings[ii]);
+        }
+        printf ("\n");
+
+        // Close the laser
+        laser.Close ();
+    }
+    catch (urglaser::urg_exception e)
     {
-        printf ("Failed to get laser serial number.\n");
-        return 1;
+        printf ("Caught exception: (%d) %s\n", e.error_code, e.error_desc.c_str ());
+        return -1;
     }
-    printf ("Laser serial number:\t%d\n", serial);
-
-    // Get the laser configuration
-    urglaser::urg_laser_config_t config;        // Laser configuration structure
-    if (laser.GetSensorConfig (&config) < 0)
-    {
-        printf ("Failed to get laser configuration.\n");
-        return 1;
-    }
-    printf ("Laser configuration:\n"
-            "Min angle: %f\tMax angle: %f\tResolution: %f\tMax range: %f\n",
-            config.min_angle, config.max_angle, config.resolution, config.max_range);
-
-    // Calculate the minimum and maximum indices to retrieve
-    int minIndex = static_cast<int> (round (384 + config.min_angle / config.resolution));
-    int maxIndex = static_cast<int> (round (384 + config.max_angle / config.resolution));
-    // Ancient firmware versions need some hard limits set, just in case
-    if (minIndex < URG04_MIN_STEP)
-        minIndex = URG04_MIN_STEP;
-    if (maxIndex > URG04_MAX_STEP)
-        maxIndex = URG04_MAX_STEP;
-
-    // Get range readings from the laser
-    urglaser::urg_laser_readings_t readings;    // Laser readings structure
-    printf ("Getting readings from %d to %d\n", minIndex, maxIndex);
-    if (laser.GetReadings (&readings, minIndex, maxIndex) < 0)
-    {
-        printf ("Failed to get laser scan data.\n");
-        return 1;
-    }
-    printf ("Got %d range readings:\n", maxIndex - minIndex);
-    for (unsigned int ii = 0; ii < (maxIndex - minIndex); ii++)
-    {
-        if (readings.Readings[ii] < 20)         // Values less than 20 indicate no return in the scan
-            printf ("%f\t", config.max_range);
-        else
-            printf ("%f\t", readings.Readings[ii]);
-    }
-    printf ("\n");
-
-    // Close the laser
-    laser.Close ();
 
     return 0;
 }

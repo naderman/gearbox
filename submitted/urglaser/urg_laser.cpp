@@ -12,10 +12,12 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <poll.h>
+#include <sstream>
 
 #include "urg_laser.h"
 
 using namespace urglaser;
+using namespace std;
 
 #ifndef M_PI
     #define M_PI        3.14159265358979323846
@@ -30,297 +32,45 @@ using namespace urglaser;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// Reads characters (and throws them away) until the nth occurence of char c.
+// Constructor
+///////////////////////////////////////////////////////////////////////////////
+urg_laser::urg_laser (void)
+{
+    // Defaults to SCIP version 1
+    SCIP_Version = 1;
+    laser_port   = NULL;
+    verbose      = false;
+    poll_timeout = -1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Destructor
+///////////////////////////////////////////////////////////////////////////////
+urg_laser::~urg_laser (void)
+{
+    if (PortOpen ())
+        Close ();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Read functions
+///////////////////////////////////////////////////////////////////////////////
 int urg_laser::ReadUntil_nthOccurence (int file, int n, char c)
 {
-    int retval = 0;
-    unsigned char Buffer[2];
-    Buffer[0] = 0;
-    Buffer[1] = 0;
+    int retval = 0, bytes_read = 0;
+    unsigned char buffer[2];
+    buffer[0] = 0;
+    buffer[1] = 0;
     for (int i = 0; i < n; i++)
     {
         do
         {
-            retval = ReadUntil (file, &Buffer[0], 1, -1);
-        } while (Buffer[0] != c && retval > 0);
+            retval = ReadUntil (file, &buffer[0], 1, poll_timeout);
+            if (retval > 0)
+                bytes_read += retval;
+        } while (buffer[0] != c && retval > 0);
     }
-    return retval;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// API
-// This is intended to find out which protocol the Hokuyo supports. Old
-//  Firmware Revisions support protocol SCIP1.0, and a max range of 4
-//  meters Since Firmware Revision 3.0.00, it's called SCIP2.0, and the max
-//  range is 5.6 meters (hey!)
-int urg_laser::GetSCIPVersion (void)
-{
-    unsigned char Buffer [18];
-    memset (Buffer, 0, 18);
-    int file = fileno (laser_port);
-    /////////////////
-    // try SCIP1 first:
-    /////////////////
-    tcflush (fileno (laser_port), TCIFLUSH);
-    fprintf (laser_port, "V\n");
-
-    // check the returned command
-    memset (Buffer, 0, 18);
-    ReadUntil (file, Buffer, 4, -1);
-
-    if (strncmp ((const char *) Buffer, "V\n0\n", 4) != 0)
-    {
-        // SCIP1.0 failed, so we test it with SCIP2.0:
-        tcflush (fileno (laser_port), TCIFLUSH);
-        fprintf (laser_port, "VV\n");
-
-        int file = fileno (laser_port);
-
-        // check the returned command
-        memset (Buffer, 0, 18);
-        ReadUntil (file, Buffer, 7, -1);
-        tcflush (fileno (laser_port), TCIFLUSH);
-
-        if (strncmp ((const char *) Buffer, "VV\n00P\n", 7) != 0)
-        {
-            fprintf (stderr, "> E: GetSCIPVersion: Error reading after VV command. Answer: %s\n", Buffer);
-            return (-1);
-        }
-
-        // Set SCIP version 2 and return
-        SCIP_Version = 2;
-        return (0);
-    }
-
-    // we are currently in SCIP 1.0
-    else
-    {
-        Buffer[0] = 0;
-        // Read the rest of the values, up till right before firmware version
-        ReadUntil_nthOccurence (file, 2, (char)0xa);
-        // Read "FIRM:"
-        memset (Buffer, 0, 18);
-        ReadUntil (file, Buffer, 5, -1);
-
-        if (strncmp ((const char *) Buffer, "FIRM:", 5) != 0)
-            fprintf (stderr, "> W: GetSCIPVersion: Warning, 'FIRM:' is not where it is supposed to be!\n");
-
-        // Read the firmware version major value
-        ReadUntil (file, Buffer, 1, -1);
-        Buffer[1] = 0;
-        int firmware = atol ((const char*)Buffer);
-
-        ReadUntil_nthOccurence (file, 4, (char)0xa);
-        if (firmware < 3)
-        {
-            // Set SCIP version 1 and return
-            SCIP_Version = 1;
-            return 0;
-        }
-        else
-        {
-            // try to switch to SCIP2.0
-            tcflush (fileno (laser_port), TCIFLUSH);
-            fprintf (laser_port, "SCIP2.0\n");
-
-            // check the returned command
-            memset (Buffer, 0, 18);
-            ReadUntil (file, Buffer, 2, -1);
-            if (strncmp ((const char *) Buffer, "SC", 2) != 0)
-            {
-                // Set SCIP version 1 and return
-                SCIP_Version = 1;
-                return 0;
-            }
-            else
-            {
-                memset (&Buffer[2], 0, 16);
-                ReadUntil (file, &Buffer[2], 8, -1);
-                if (strncmp ((const char *) Buffer, "SCIP2.0\n0\n", 11) != 0)
-                {
-                    // Set SCIP version 1 and return
-                    SCIP_Version = 1;
-                    return (0);
-                }
-                // Set SCIP version 2, turn laser on and return
-                SCIP_Version = 2;
-                fprintf (laser_port, "BM\n");
-                ReadUntil_nthOccurence (file, 3, (char)0xa);
-                tcflush (fileno (laser_port), TCIFLUSH);
-                return 0;
-            }
-        }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// API
-int urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
-{
-    if (SCIP_Version == 1)
-    {
-        unsigned char Buffer[10];
-        memset (Buffer, 0, 10);
-        tcflush (fileno (laser_port), TCIFLUSH);
-        // send the command
-        fprintf (laser_port, "V\n");
-
-        int file = fileno (laser_port);
-
-        // check the returned command
-        ReadUntil (file, Buffer, 4, -1);
-
-        if (strncmp ((const char *) Buffer, "V\n0\n", 4) != 0)
-        {
-            fprintf (stderr, "> E: GetSensorConfig: Error reading command result: %s\n", Buffer);
-            tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
-        }
-
-        // The following might not work on all versions of the hokuyos
-        // since it reads out the Product description returned by 'V'
-
-        ReadUntil_nthOccurence (file, 2, (char)0xa);
-
-        // Read FIRM:
-        ReadUntil (file, Buffer, 5, -1);
-
-        if (strncmp ((const char *) Buffer, "FIRM:", 5) == 0)
-        {
-            // Read the firmware version major value
-            ReadUntil (file, Buffer, 1, -1);
-            Buffer[1] = 0;
-            int firmware = atol ((const char*)Buffer);
-
-            if (firmware < 3)
-            {
-                ReadUntil_nthOccurence (file, 4, (char)0xa);
-                tcflush (fileno (laser_port), TCIFLUSH);
-                return (-1);
-            }
-        }
-
-        ReadUntil_nthOccurence(file, 1, (char)'(');
-        ReadUntil_nthOccurence(file, 1, (char)'-');
-
-        int i = 0;
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-        } while (Buffer[i++] != '[');
-
-        Buffer[i-1] = 0;
-        int max_range = atol((const char*)Buffer);
-
-        ReadUntil_nthOccurence (file, 2, (char)',');
-        i = 0;
-        do
-        {
-            ReadUntil(file, &Buffer[i], 1, -1);
-        } while (Buffer[i++] != '-');
-
-        Buffer[i-1] = 0;
-        int min_i = atol ((const char*)Buffer);
-        i = 0;
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-        } while (Buffer[i++] != '[');
-        Buffer[i-1] = 0;
-
-        int max_i = atol ((const char*)Buffer);
-
-        ReadUntil (file, Buffer, 4, -1);
-        if (strncmp ((const char *) Buffer, "step", 4) != 0)
-        {
-            fprintf (stderr, "> E: GetSensorConfig: Error reading angle_min_idx and angle_max_idx. Using an older firmware?\n");
-            tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
-        }
-        cfg->max_range  = max_range;
-        cfg->min_angle  = (min_i-384)*cfg->resolution;
-        cfg->max_angle  = (max_i-384)*cfg->resolution;
-        fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
-                RTOD (cfg->min_angle), RTOD (cfg->max_angle), RTOD (cfg->resolution), cfg->max_range);
-        tcflush (fileno(laser_port), TCIFLUSH);
-    }
-    else                        // SCIP_Version = 2
-    {
-        // ask hokuyo: PP
-        unsigned char Buffer[10];
-        memset (Buffer, 0, 10);
-        tcflush (fileno (laser_port), TCIFLUSH);
-
-        // send the command
-        fprintf (laser_port, "PP\n");
-
-        int file = fileno (laser_port);
-
-        // check the returned command
-        ReadUntil (file, Buffer,7, -1);
-
-        if (strncmp ((const char *) Buffer, "PP\n00P\n", 7) != 0)
-        {
-            fprintf (stderr, "> E: GetSensorConfig: Error reading command result: %s\n", Buffer);
-            tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
-        }
-        int i = 0;
-        ReadUntil_nthOccurence (file, 2, (char)0xa);
-        // read DMAX
-        ReadUntil_nthOccurence (file, 1, ':');
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            i++;
-        } while (Buffer[i-1] != ';');
-        Buffer[i-1] = 0;
-        cfg->max_range = atol ((const char*)Buffer);
-        cfg->max_range /= 1000;
-
-        // read angular resolution
-        ReadUntil_nthOccurence (file, 1, ':');
-        i = 0;
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            i++;
-        } while (Buffer[i-1] != ';');
-        Buffer[i-1] = 0;
-        cfg->resolution = DTOR (360.0 / atol ((const char*)Buffer));
-
-        // read AMIN
-        ReadUntil_nthOccurence (file, 1, ':');
-        i = 0;
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            i++;
-        } while (Buffer[i-1] != ';');
-        Buffer[i-1] = 0;
-        cfg->min_angle = atol ((const char*)Buffer);
-        cfg->min_angle -= 384.0;
-        cfg->min_angle *= cfg->resolution;
-
-        // read AMAX
-        ReadUntil_nthOccurence (file, 1, ':');
-        i=0;
-        do
-        {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            i++;
-        } while (Buffer[i-1] != ';');
-        Buffer[i-1] = 0;
-        cfg->max_angle = atol ((const char*)Buffer);
-        cfg->max_angle -= 384.0;
-        cfg->max_angle *= cfg->resolution;
-
-        ReadUntil_nthOccurence (file, 4, (char)0xa);
-
-        fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
-                RTOD (cfg->min_angle), RTOD (cfg->max_angle), RTOD (cfg->resolution), cfg->max_range);
-    }
-    return (0);
+    return bytes_read;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,68 +90,81 @@ int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
         {
             if ((retval = poll (ufd, 1, timeout)) < 0)
             {
-                perror ("> E: poll():");
-                return (-1);
+                stringstream error_desc;
+                error_desc << "Error in ReadUntil at poll(): " << errno << ":" << strerror (errno);
+                throw urg_exception (URG_ERR_READPOLL, error_desc.str ());
             }
             else if (retval == 0)
             {
-                fprintf (stderr, "> W: Timed out on read\n");
-                return (-1);
+                stringstream error_desc;
+                error_desc << "Timed out on poll in ReadUntil";
+                throw urg_exception (URG_ERR_READTIMEOUT, error_desc.str ());
             }
         }
 
         ret = read (fd, &buf[current], len-current);
         if (ret < 0)
-            return ret;
+        {
+            stringstream error_desc;
+            error_desc << "Error in ReadUntil at read(): " << errno << ":" << strerror (errno);
+            throw urg_exception (URG_ERR_READ, error_desc.str ());
+        }
 
         current += ret;
         if (current > 2 && current < len && buf[current-2] == '\n' && buf[current-1] == '\n')
         {
-            fprintf (stderr, "> E: ReadUntil: Got an end of command while waiting for more data, this is bad.\n");
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Got an end of command while waiting for more data.";
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
     } while (current < len);
-    return len;
+    return current;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-urg_laser::urg_laser (void)
-{
-    // Defaults to SCIP version 1
-    SCIP_Version = 1;
-    laser_port   = NULL;
-}
-
+// Port control functions
 ///////////////////////////////////////////////////////////////////////////////
-urg_laser::~urg_laser (void)
-{
-    if (PortOpen ())
-        fclose (laser_port);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// API
-int urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout)
+int urg_laser::ChangeBaud (int curr_baud, int new_baud)
 {
     struct termios newtio;
     int fd;
     fd = fileno (laser_port);
 
+    switch (new_baud)
+    {
+        case 19200:
+            new_baud = B19200;
+            break;
+        case 57600:
+            new_baud = B57600;
+            break;
+        case 115200:
+            new_baud = B115200;
+            break;
+        default:
+            stringstream error_desc;
+            error_desc << "Unknown baud rate: " << new_baud;
+            throw urg_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
+    }
+
     if (tcgetattr (fd, &newtio) < 0)
     {
-        perror ("> E: urg_laser::ChangeBaud:tcgetattr():");
         close (fd);
-        return (-1);
+        stringstream error_desc;
+        error_desc << "Error in ChangeBaud at tcgetattr: " << errno << ":" << strerror (errno);
+        throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
     }
+
     cfmakeraw (&newtio);
     cfsetispeed (&newtio, curr_baud);
     cfsetospeed (&newtio, curr_baud);
 
     if (tcsetattr (fd, TCSAFLUSH, &newtio) < 0 )
     {
-        perror ("> E: urg_laser::ChangeBaud:tcsetattr():");
         close (fd);
-        return (-1);
+        stringstream error_desc;
+        error_desc << "Error in ChangeBaud at tcsetattr: " << errno << ":" << strerror (errno);
+        throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
     }
 
     unsigned char buf[17];
@@ -438,8 +201,8 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout)
             buf[6] = '0';
             break;
         default:
-            fprintf (stderr, "> W: unknown baud rate %d\n", new_baud);
-            return (-1);
+            // Already checked above
+            break;
         }
         buf[7] = '0';
         buf[8] = '0';
@@ -450,7 +213,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout)
         buf[13] = '0';
         buf[14] = '\n';
     }
-    else				// SCIP 2
+    else                // SCIP 2
     {
         buf[0] = 'S';
         buf[1] = 'S';
@@ -481,8 +244,8 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout)
             buf[7] = '0';
             break;
         default:
-            fprintf (stderr, "> W: unknown baud rate %d\n", new_baud);
-            return (-1);
+            // Already checked above
+            break;
         }
         buf[8] = '\n';
     }
@@ -493,40 +256,42 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout)
     // The docs say that the response ends in 'status LF LF', where
     // status is '0' if everything went alright.  But it seems that
     // the response actually ends in 'LF status LF'.
-    if (((len = ReadUntil (fd, buf, sizeof (buf), timeout)) < 0) ||
+    if (((len = ReadUntil (fd, buf, sizeof (buf), poll_timeout)) < 0) ||
         (buf[15] != '0'))
     {
-        fprintf (stderr, "> W: failed to change baud rate\n");
-        return (-1);
+        if (verbose)
+            fprintf (stderr, "urg_laser: Warning: Failed to change baud rate to %d\n", new_baud);
+        return -1;
     }
     else
     {
         if (tcgetattr (fd, &newtio) < 0)
         {
-            perror ("> E: urg_laser::ChangeBaud:tcgetattr():");
             close (fd);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error in ChangeBaud at tcgetattr: " << errno << ":" << strerror (errno);
+            throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
         }
         cfmakeraw (&newtio);
         cfsetispeed (&newtio, new_baud);
         cfsetospeed (&newtio, new_baud);
         if (tcsetattr (fd, TCSAFLUSH, &newtio) < 0 )
         {
-            perror ("> E: urg_laser::ChangeBaud:tcsetattr():");
             close (fd);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error in ChangeBaud at tcsetattr: " << errno << ":" << strerror (errno);
+            throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
         }
         else
         {
             usleep (200000);
-            return (0);
         }
     }
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// API
-int urg_laser::Open (const char *port_name, bool use_serial, int baud)
+void urg_laser::Open (const char *port_name, bool use_serial, int baud)
 {
     if (PortOpen ())
         this->Close ();
@@ -534,30 +299,41 @@ int urg_laser::Open (const char *port_name, bool use_serial, int baud)
     laser_port = fopen (port_name, "r+");
     if (laser_port == NULL)
     {
-        fprintf (stderr, "> E: Open: Failed to open Port: %s error = %d:%s\n",
-                port_name, errno, strerror (errno));
-        return (-1);
+        stringstream error_desc;
+        error_desc << "Failed to open port " << port_name << " << with error " << errno << ":" << strerror (errno);
+        throw urg_exception (URG_ERR_OPEN_FAILED, error_desc.str ());
     }
 
     int fd = fileno (laser_port);
     if (use_serial)
     {
-        fprintf (stderr, "> I: Trying to connect at 19200\n");
-        if (this->ChangeBaud (B19200, baud, 100) != 0)
+        if (verbose)
         {
-            fprintf (stderr, "> I: Trying to connect at 57600\n");
-            if (this->ChangeBaud (B57600, baud, 100) != 0)
+            fprintf (stderr, "> I: Trying to connect at 19200\n");
+        }
+        if (this->ChangeBaud (B19200, baud) != 0)
+        {
+            if (verbose)
             {
-                fprintf (stderr, "> I: Trying to connect at 115200\n");
-                if (this->ChangeBaud (B115200, baud, 100) != 0)
+                fprintf (stderr, "> I: Trying to connect at 57600\n");
+            }
+            if (this->ChangeBaud (B57600, baud) != 0)
+            {
+                if (verbose)
                 {
-                    fprintf (stderr, "> E: failed to connect at any baud\n");
+                    fprintf (stderr, "> I: Trying to connect at 115200\n");
+                }
+                if (this->ChangeBaud (B115200, baud) != 0)
+                {
                     close (fd);
-                    return (-1);
+                    stringstream error_desc;
+                    error_desc << "Failed to connect at any baud";
+                    throw urg_exception (URG_ERR_CONNECT_FAILED, error_desc.str ());
                 }
             }
         }
-        fprintf (stderr, "> I: Successfully changed baud rate\n");
+        if (verbose)
+            fprintf (stderr, "> I: Successfully changed baud rate\n");
     }
     else
     {
@@ -576,22 +352,22 @@ int urg_laser::Open (const char *port_name, bool use_serial, int baud)
         GetSCIPVersion ();
         tcflush (fd, TCIOFLUSH);
     }
-
-    return (0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// API
-int urg_laser::Close (void)
+void urg_laser::Close (void)
 {
-    int retval;
-
     assert (this->laser_port);
 
     tcflush (fileno (this->laser_port), TCIOFLUSH);
-    retval = fclose (this->laser_port);
+    if (fclose (this->laser_port) != 0)
+    {
+        stringstream error_desc;
+        error_desc << "Error closing port: " << errno << ":" << strerror (errno);
+        this->laser_port = NULL;
+        throw urg_exception (URG_ERR_CLOSE_FAILED, error_desc.str ());
+    }
     this->laser_port = NULL;
-    return (retval);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -601,15 +377,26 @@ bool urg_laser::PortOpen (void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// API
-int urg_laser::GetReadings (urg_laser_readings_t * readings, int min_i, int max_i)
+// Laser sensor access functions
+///////////////////////////////////////////////////////////////////////////////
+unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned int min_i, unsigned int max_i)
 {
-    unsigned char Buffer[16];
-    //memset (Buffer, 0, 11);
-    assert (readings);
+    unsigned char buffer[16];
+    unsigned int num_readings_read = 0;
+
+    if (readings == NULL)
+    {
+        stringstream error_desc;
+        error_desc << "NULL destination buffer";
+        throw urg_exception (URG_ERR_NODESTINATION, error_desc.str ());
+    }
 
     if (!PortOpen ())
-        return (-3);
+    {
+        stringstream error_desc;
+        error_desc << "Laser port is not open";
+        throw urg_exception (URG_ERR_NOPORT, error_desc.str ());
+    }
 
     if (SCIP_Version == 1)
     {
@@ -620,39 +407,57 @@ int urg_laser::GetReadings (urg_laser_readings_t * readings, int min_i, int max_
         int file = fileno (laser_port);
 
         // check the returned command
-        ReadUntil (file, Buffer, 10, -1);
+        ReadUntil (file, buffer, 10, poll_timeout);
 
-        if (strncmp ((const char *) Buffer, "G00076801", 9) != 0)
+        if (strncmp ((const char *) buffer, "G00076801", 9) != 0)
         {
-            fprintf (stderr, "> E: GetReadings: Error reading command result: %s\n", Buffer);
             tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
-        ReadUntil (file, Buffer, 2, -1);
+        ReadUntil (file, buffer, 2, poll_timeout);
 
-        if (Buffer[0] != '0')
-            return Buffer[0] - '0';
-
-        for (int i=0; ; ++i)
+        if (buffer[0] != '0')
         {
-            ReadUntil (file, Buffer, 2, -1);
+            stringstream error_desc;
+            error_desc << "Error reported by laser scanner: " << buffer[0] - '0';
+            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+        }
 
-            if (Buffer[0] == '\n' && Buffer[1] == '\n')
+        for (unsigned int i=0; ; ++i)
+        {
+            ReadUntil (file, buffer, 2, poll_timeout);
+
+            if (buffer[0] == '\n' && buffer[1] == '\n')
                 break;
-
-            else if (Buffer[0] == '\n')
+            else if (buffer[0] == '\n')
             {
-                Buffer[0] = Buffer[1];
-                if (ReadUntil (file, &Buffer[1], 1, -1) < 0)
-                return -1;
+                buffer[0] = buffer[1];
+                ReadUntil (file, &buffer[1], 1, poll_timeout);
             }
 
             if (i < MAX_READINGS)
-                readings->Readings[i] = ((Buffer[0]-0x30) << 6) | (Buffer[1]-0x30);
+            {
+                readings->Readings[i] = ((buffer[0]-0x30) << 6) | (buffer[1]-0x30);
+                num_readings_read++;
+            }
             else
-                fprintf (stderr, "> W: Got too many readings! %d\n",i);
+            {
+                stringstream error_desc;
+                error_desc << "Got too many readings: " << i;
+                throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            }
+        }
+
+        // Shift the range readings down by min_i if necessary
+        if (min_i > 0)
+        {
+            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i) * sizeof (readings->Readings[0]));
+            // Don't forget to adjust the number of readings to account for this
+            num_readings_read -= (MAX_READINGS - max_i) + min_i;
         }
     }
     else // SCIP_Version == 2
@@ -664,81 +469,96 @@ int urg_laser::GetReadings (urg_laser_readings_t * readings, int min_i, int max_
         int file = fileno (laser_port);
 
         // check the returned command
-        ReadUntil (file, Buffer, 13, -1);
+        ReadUntil (file, buffer, 13, poll_timeout);
 
-        if (strncmp ((const char *) Buffer, "GD0000076801", 12) != 0)
+        if (strncmp ((const char *) buffer, "GD0000076801", 12) != 0)
         {
-            fprintf (stderr, "> E: GetReadings: Error reading command result: %s\n", Buffer);
             tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
-        ReadUntil (file, Buffer, 3, -1);
-        Buffer[2] = 0;
-        if (Buffer[0] != '0' || Buffer[1] != '0')
-            return (Buffer[0] - '0')*10 + (Buffer[1] - '0');
+        ReadUntil (file, buffer, 3, poll_timeout);
+        buffer[2] = 0;
+        if (buffer[0] != '0' || buffer[1] != '0')
+        {
+            stringstream error_desc;
+            error_desc << "Error reported by laser scanner: " << (buffer[0] - '0')*10 + (buffer[1] - '0');
+            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+        }
 
         ReadUntil_nthOccurence (file, 2, (char)0xa);
 
         // NOTE: This only works for 769 requested samples.. (64 data bytes
         // blocks are not the best choice for 3-byte values...)
 
-        for (int i = 0; ; ++i)
+        for (unsigned int i = 0; ; ++i)
         {
-            ReadUntil (file, Buffer, 3, -1);
+            ReadUntil (file, buffer, 3, poll_timeout);
 
-            //printf ("[%d of %d] 0x%x 0x%x 0x%x\n", i, MAX_READINGS, Buffer[0], Buffer[1], Buffer [2]);
-
-            if ((Buffer[1] == '\n') && (Buffer[2] == '\n'))
+            if ((buffer[1] == '\n') && (buffer[2] == '\n'))
                 break;
-            else if (Buffer[2] == '\n')
-            {
-                if (ReadUntil(file, &Buffer[1], 2, -1) < 0)
-                    return (-1);
-            }
-            else if (Buffer[0] == '\n')
+            else if (buffer[2] == '\n')
+                ReadUntil (file, &buffer[1], 2, poll_timeout);
+            else if (buffer[0] == '\n')
             {
                 if (i <= MAX_READINGS)
                 {
-                    readings->Readings[i - 1] = ((readings->Readings[i - 1] & 0xFFC0) | (Buffer[1]-0x30));
-                    Buffer [0] = Buffer [2];
-                    if (ReadUntil (file, &Buffer[1], 2, -1) < 0)
-                        return (-1);
+                    readings->Readings[i - 1] = ((readings->Readings[i - 1] & 0xFFC0) | (buffer[1]-0x30));
+                    buffer [0] = buffer [2];
+                    ReadUntil (file, &buffer[1], 2, poll_timeout);
                 }
                 else
-                    fprintf (stderr, "> E: Got too many readings! %d\n",i);
+                {
+                    stringstream error_desc;
+                    error_desc << "Got too many readings: " << i;
+                    throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                }
             }
-            else if (Buffer[1] == '\n')
+            else if (buffer[1] == '\n')
             {
-                Buffer[0] = Buffer[2];
-                if (ReadUntil (file, &Buffer[1], 2, -1) < 0)
-                    return (-1);
+                buffer[0] = buffer[2];
+                ReadUntil (file, &buffer[1], 2, poll_timeout);
             }
 
             if (i < MAX_READINGS)
             {
-                readings->Readings[i] = ((Buffer[0]-0x30) << 12) | ((Buffer[1]-0x30) << 6) | (Buffer[2]-0x30);
+                readings->Readings[i] = ((buffer[0]-0x30) << 12) | ((buffer[1]-0x30) << 6) | (buffer[2]-0x30);
                 if ((readings->Readings[i] > 5600) && (i >= min_i) && (i <= max_i))
-                    fprintf (stderr, "> W: [%d] read error: %i is bigger than 5.6 meters\n", i, readings->Readings[i]);
+                {
+                    stringstream error_desc;
+                    error_desc << "Reading " << i << " value of " << readings->Readings[i] << " is bigger than 5.6 metres.";
+                    throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                }
             }
             else
-                fprintf (stderr, "> E: Got too many readings! %d\n",i);
+            {
+                stringstream error_desc;
+                error_desc << "Got too many readings: " << i;
+                throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            }
         }
     }
-    return (0);
+
+    return num_readings_read;
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// API
 int urg_laser::GetIDInfo (void)
 {
-    unsigned char Buffer [18];
-    memset (Buffer, 0, 18);
+    unsigned char buffer [18];
+    memset (buffer, 0, 18);
     int i;
     int id;
+
     if (!PortOpen ())
-        return -3;
+    {
+        stringstream error_desc;
+        error_desc << "Laser port is not open";
+        throw urg_exception (URG_ERR_NOPORT, error_desc.str ());
+    }
 
     tcflush (fileno (laser_port), TCIFLUSH);
 
@@ -750,44 +570,49 @@ int urg_laser::GetIDInfo (void)
         int file = fileno (laser_port);
 
         // check the returned command
-        ReadUntil (file, Buffer, 2, -1);
+        ReadUntil (file, buffer, 2, poll_timeout);
 
-        if (strncmp ((const char *) Buffer, "V", 1) != 0)
+        if (strncmp ((const char *) buffer, "V", 1) != 0)
         {
-            fprintf (stderr, "> E: GetIDInfo: Error reading command result: %s\n", Buffer);
             tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
-        ReadUntil (file, Buffer, 2, -1);
+        ReadUntil (file, buffer, 2, poll_timeout);
 
-        if (Buffer[0] != '0')
-            return Buffer[0] - '0';
+        if (buffer[0] != '0')
+        {
+            stringstream error_desc;
+            error_desc << "Error reported by laser scanner: " << buffer[0] - '0';
+            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+        }
 
-        Buffer[0] = 0;
+        buffer[0] = 0;
         // Read the rest of the values
         for (i = 0; i < 4; i++)
         {
             do
             {
-                ReadUntil (file, &Buffer[0], 1, -1);
-            } while (Buffer[0] != 0xa);
+                ReadUntil (file, &buffer[0], 1, poll_timeout);
+            } while (buffer[0] != 0xa);
         }
 
         // Read "SERI:H"
-        ReadUntil (file, Buffer, 6, -1);
+        ReadUntil (file, buffer, 6, poll_timeout);
         // Read the serial number value
         for (i = 0; ; i++)
         {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            if (Buffer[i] == 0xa)
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            if (buffer[i] == 0xa)
                 break;
         }
 
-        id = atol ((const char*)Buffer);
+        id = atol ((const char*)buffer);
         // Read the last LF
-        ReadUntil (file, Buffer, 1, -1);
+        ReadUntil (file, buffer, 1, poll_timeout);
     }
     else // SCIP_Version == 2
     {
@@ -797,41 +622,338 @@ int urg_laser::GetIDInfo (void)
         int file = fileno (laser_port);
 
         // check the returned command
-        ReadUntil (file, Buffer, 7, -1);
+        ReadUntil (file, buffer, 7, poll_timeout);
 
-        if (strncmp ((const char *) Buffer, "VV\n00P\n", 7) != 0)
+        if (strncmp ((const char *) buffer, "VV\n00P\n", 7) != 0)
         {
-            fprintf (stderr, "> E: GetIDInfo: Error reading command result: %s\n", Buffer);
             tcflush (fileno (laser_port), TCIFLUSH);
-            return (-1);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
-        Buffer[0] = 0;
+        buffer[0] = 0;
         // Read the rest of the values
         for (i = 0; i < 4; i++)
         {
             do
             {
-            ReadUntil (file, &Buffer[0], 1, -1);
-            } while (Buffer[0] != 0xa);
+                ReadUntil (file, &buffer[0], 1, poll_timeout);
+            } while (buffer[0] != 0xa);
         }
 
         // Read "SERI:H"
-        ReadUntil (file, Buffer, 6, -1);
+        ReadUntil (file, buffer, 6, poll_timeout);
         // Read the serial number value
         for (i = 0; ; i++)
         {
-            ReadUntil (file, &Buffer[i], 1, -1);
-            if (Buffer[i] == ';')
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            if (buffer[i] == ';')
             {
-            Buffer[i] = 0;
-            break;
+                buffer[i] = 0;
+                break;
             }
         }
 
-        id = atol ((const char*)Buffer);
+        id = atol ((const char*)buffer);
 
-        ReadUntil (file, Buffer, 3, -1);
+        ReadUntil (file, buffer, 3, poll_timeout);
     }
+
     return id;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
+{
+    memset (cfg, 0, sizeof (urg_laser_config_t));
+
+    if (SCIP_Version == 1)
+    {
+        unsigned char buffer[10];
+        memset (buffer, 0, 10);
+        tcflush (fileno (laser_port), TCIFLUSH);
+        // send the command
+        fprintf (laser_port, "V\n");
+
+        // Set the default resolution
+        cfg->resolution = DTOR (270.0) / static_cast<float> (MAX_READINGS);
+
+        int file = fileno (laser_port);
+
+        // check the returned command
+        ReadUntil (file, buffer, 4, poll_timeout);
+
+        if (strncmp ((const char *) buffer, "V\n0\n", 4) != 0)
+        {
+            tcflush (fileno (laser_port), TCIFLUSH);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+        }
+
+        // The following might not work on all versions of the hokuyos
+        // since it reads out the Product description returned by 'V'
+
+        ReadUntil_nthOccurence (file, 2, (char)0xa);
+
+        // Read FIRM:
+        ReadUntil (file, buffer, 5, poll_timeout);
+
+        if (strncmp ((const char *) buffer, "FIRM:", 5) == 0)
+        {
+            // Read the firmware version major value
+            ReadUntil (file, buffer, 1, poll_timeout);
+            buffer[1] = 0;
+            int firmware = atol ((const char*)buffer);
+
+            if (firmware < 3)
+            {
+                ReadUntil_nthOccurence (file, 4, (char)0xa);
+                tcflush (fileno (laser_port), TCIFLUSH);
+                stringstream error_desc;
+                error_desc << "Bad firmware version: " << firmware;
+                throw urg_exception (URG_ERR_BADFIRMWARE, error_desc.str ());
+            }
+        }
+
+        ReadUntil_nthOccurence(file, 1, (char)'(');
+        ReadUntil_nthOccurence(file, 1, (char)'-');
+
+        int i = 0;
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+        } while (buffer[i++] != '[');
+
+        buffer[i-1] = 0;
+        int max_range = atol((const char*)buffer);
+
+        ReadUntil_nthOccurence (file, 2, (char)',');
+        i = 0;
+        do
+        {
+            ReadUntil(file, &buffer[i], 1, poll_timeout);
+        } while (buffer[i++] != '-');
+
+        buffer[i-1] = 0;
+        int min_i = atol ((const char*)buffer);
+        i = 0;
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+        } while (buffer[i++] != '[');
+        buffer[i-1] = 0;
+
+        int max_i = atol ((const char*)buffer);
+
+        ReadUntil (file, buffer, 4, poll_timeout);
+        if (strncmp ((const char *) buffer, "step", 4) != 0)
+        {
+            tcflush (fileno (laser_port), TCIFLUSH);
+            stringstream error_desc;
+            error_desc << "Error reading angle_min_idx and angle_max_idx. Check firmware version.";
+            throw urg_exception (URG_ERR_READ, error_desc.str ());
+        }
+        cfg->max_range  = max_range;
+        cfg->min_angle  = (min_i-384)*cfg->resolution;
+        cfg->max_angle  = (max_i-384)*cfg->resolution;
+        if (verbose)
+        {
+            fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+                    cfg->min_angle, cfg->max_angle, cfg->resolution, cfg->max_range);
+        }
+        tcflush (fileno(laser_port), TCIFLUSH);
+    }
+    else                        // SCIP_Version = 2
+    {
+        // ask hokuyo: PP
+        unsigned char buffer[10];
+        memset (buffer, 0, 10);
+        tcflush (fileno (laser_port), TCIFLUSH);
+
+        // send the command
+        fprintf (laser_port, "PP\n");
+
+        int file = fileno (laser_port);
+
+        // check the returned command
+        ReadUntil (file, buffer,7, poll_timeout);
+
+        if (strncmp ((const char *) buffer, "PP\n00P\n", 7) != 0)
+        {
+            tcflush (fileno (laser_port), TCIFLUSH);
+            stringstream error_desc;
+            error_desc << "Error reading command result: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+        }
+        int i = 0;
+        ReadUntil_nthOccurence (file, 2, (char)0xa);
+        // read DMAX
+        ReadUntil_nthOccurence (file, 1, ':');
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            i++;
+        } while (buffer[i-1] != ';');
+        buffer[i-1] = 0;
+        cfg->max_range = atol ((const char*)buffer);
+        cfg->max_range /= 1000;
+
+        // read angular resolution
+        ReadUntil_nthOccurence (file, 1, ':');
+        i = 0;
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            i++;
+        } while (buffer[i-1] != ';');
+        buffer[i-1] = 0;
+        cfg->resolution = DTOR (360.0 / atol ((const char*)buffer));
+
+        // read AMIN
+        ReadUntil_nthOccurence (file, 1, ':');
+        i = 0;
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            i++;
+        } while (buffer[i-1] != ';');
+        buffer[i-1] = 0;
+        cfg->min_angle = atol ((const char*)buffer);
+        cfg->min_angle -= 384.0;
+        cfg->min_angle *= cfg->resolution;
+
+        // read AMAX
+        ReadUntil_nthOccurence (file, 1, ':');
+        i=0;
+        do
+        {
+            ReadUntil (file, &buffer[i], 1, poll_timeout);
+            i++;
+        } while (buffer[i-1] != ';');
+        buffer[i-1] = 0;
+        cfg->max_angle = atol ((const char*)buffer);
+        cfg->max_angle -= 384.0;
+        cfg->max_angle *= cfg->resolution;
+
+        ReadUntil_nthOccurence (file, 4, (char)0xa);
+
+        if (verbose)
+        {
+            fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+                    RTOD (cfg->min_angle), RTOD (cfg->max_angle), RTOD (cfg->resolution), cfg->max_range);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int urg_laser::GetSCIPVersion (void)
+{
+    unsigned char buffer [18];
+    memset (buffer, 0, 18);
+    int file = fileno (laser_port);
+    /////////////////
+    // try SCIP1 first:
+    /////////////////
+    tcflush (fileno (laser_port), TCIFLUSH);
+    fprintf (laser_port, "V\n");
+
+    // check the returned command
+    memset (buffer, 0, 18);
+    ReadUntil (file, buffer, 4, poll_timeout);
+
+    if (strncmp ((const char *) buffer, "V\n0\n", 4) != 0)
+    {
+        // SCIP1.0 failed, so we test it with SCIP2.0:
+        tcflush (fileno (laser_port), TCIFLUSH);
+        fprintf (laser_port, "VV\n");
+
+        int file = fileno (laser_port);
+
+        // check the returned command
+        memset (buffer, 0, 18);
+        ReadUntil (file, buffer, 7, poll_timeout);
+        tcflush (fileno (laser_port), TCIFLUSH);
+
+        if (strncmp ((const char *) buffer, "VV\n00P\n", 7) != 0)
+        {
+            stringstream error_desc;
+            error_desc << "Error reading after VV command. Answer: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+        }
+
+        // Set SCIP version 2 and return
+        SCIP_Version = 2;
+        return SCIP_Version;
+    }
+
+    // we are currently in SCIP 1.0
+    else
+    {
+        buffer[0] = 0;
+        // Read the rest of the values, up till right before firmware version
+        ReadUntil_nthOccurence (file, 2, (char)0xa);
+        // Read "FIRM:"
+        memset (buffer, 0, 18);
+        ReadUntil (file, buffer, 5, poll_timeout);
+
+        if (strncmp ((const char *) buffer, "FIRM:", 5) != 0)
+        {
+            stringstream error_desc;
+            error_desc << "FIRM: is not where it is supposed to be: " << buffer;
+            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+        }
+
+        // Read the firmware version major value
+        ReadUntil (file, buffer, 1, poll_timeout);
+        buffer[1] = 0;
+        int firmware = atol ((const char*)buffer);
+
+        ReadUntil_nthOccurence (file, 4, (char)0xa);
+        if (firmware < 3)
+        {
+            // Set SCIP version 1 and return
+            SCIP_Version = 1;
+            return SCIP_Version;
+        }
+        else
+        {
+            // try to switch to SCIP2.0
+            tcflush (fileno (laser_port), TCIFLUSH);
+            fprintf (laser_port, "SCIP2.0\n");
+
+            // check the returned command
+            memset (buffer, 0, 18);
+            ReadUntil (file, buffer, 2, poll_timeout);
+            if (strncmp ((const char *) buffer, "SC", 2) != 0)
+            {
+                // Set SCIP version 1 and return
+                SCIP_Version = 1;
+                return SCIP_Version;
+            }
+            else
+            {
+                memset (&buffer[2], 0, 16);
+                ReadUntil (file, &buffer[2], 8, poll_timeout);
+                if (strncmp ((const char *) buffer, "SCIP2.0\n0\n", 11) != 0)
+                {
+                    // Set SCIP version 1 and return
+                    SCIP_Version = 1;
+                    return SCIP_Version;
+                }
+                // Set SCIP version 2, turn laser on and return
+                SCIP_Version = 2;
+                fprintf (laser_port, "BM\n");
+                ReadUntil_nthOccurence (file, 3, (char)0xa);
+                tcflush (fileno (laser_port), TCIFLUSH);
+                return SCIP_Version;
+            }
+        }
+    }
+
+    // Shouldn't get here
+    stringstream error_desc;
+    error_desc << "Unknown SCIP version";
+    throw urg_exception (URG_ERR_SCIPVERSION, error_desc.str ());
 }

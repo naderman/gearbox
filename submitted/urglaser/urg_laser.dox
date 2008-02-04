@@ -13,7 +13,10 @@ Header file:
 @endverbatim
 
 @par Responsible Developer
+  Geoffrey Biggs
 
+@par Copyright
+  Toby Collett, Nico Blodow, Geoffrey Biggs
 
 @par Style guidelines
 
@@ -27,7 +30,8 @@ Header file:
   - Space between function name and arguments.
 - C++ API.
   - Functionality provided through classes with utility structures.
-- Units?
+- Units:
+  - All internal units are in millimetres and radians.
 
 */
 

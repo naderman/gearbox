@@ -19,3 +19,6 @@ optionally, a baud rate and whether to use an RS232 connection or not. For
 example:
 
 ./urg_example -p /dev/ttyS1 -b 115200 -s
+
+This will start the example, looking for the laser on port /dev/ttyS1 and
+using a baud rate of 115200bps in RS232 mode.
