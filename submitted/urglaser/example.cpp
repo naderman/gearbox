@@ -49,7 +49,7 @@ int main (int argc, char **argv)
         // Set the laser to verbose mode (so we see more information in the console)
         laser.SetVerbose (true);
         // Set the timeout to 1000ms
-//         laser.SetTimeOut (1000);
+        laser.SetTimeOut (1000);
 
         // Get the laser serial number
         int serial = 0;
@@ -68,6 +68,12 @@ int main (int argc, char **argv)
         // and the full scan will be returned.
         int minIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.min_angle / config.resolution));
         int maxIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.max_angle / config.resolution));
+
+        // Change the baud rate
+        if (laser.ChangeBaud (19200, 57600) == 0)
+            printf ("Changed baud rate to 57600.\n");
+        else
+            printf ("Unable to change baud rate.\n");
 
         // Get range readings from the laser
         urglaser::urg_laser_readings_t readings;    // Laser readings structure

@@ -129,21 +129,39 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
     struct termios newtio;
     int fd;
     fd = fileno (laser_port);
+    int new_baud_constant;
+
+    switch (curr_baud)
+    {
+        case 19200:
+            curr_baud = B19200;
+            break;
+        case 57600:
+            curr_baud = B57600;
+            break;
+        case 115200:
+            curr_baud = B115200;
+            break;
+        default:
+            stringstream error_desc;
+            error_desc << "Unknown current baud rate: " << curr_baud;
+            throw urg_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
+    }
 
     switch (new_baud)
     {
         case 19200:
-            new_baud = B19200;
+            new_baud_constant = B19200;
             break;
         case 57600:
-            new_baud = B57600;
+            new_baud_constant = B57600;
             break;
         case 115200:
-            new_baud = B115200;
+            new_baud_constant = B115200;
             break;
         default:
             stringstream error_desc;
-            error_desc << "Unknown baud rate: " << new_baud;
+            error_desc << "Unknown new baud rate: " << new_baud;
             throw urg_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
     }
 
@@ -174,7 +192,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
     if (SCIP_Version == 1)
     {
         buf[0] = 'S';
-        switch (new_baud)
+        switch (new_baud_constant)
         {
         case B19200:
             buf[1] = '0';
@@ -273,8 +291,8 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
             throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
         }
         cfmakeraw (&newtio);
-        cfsetispeed (&newtio, new_baud);
-        cfsetospeed (&newtio, new_baud);
+        cfsetispeed (&newtio, new_baud_constant);
+        cfsetospeed (&newtio, new_baud_constant);
         if (tcsetattr (fd, TCSAFLUSH, &newtio) < 0 )
         {
             close (fd);
@@ -311,19 +329,19 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
         {
             fprintf (stderr, "> I: Trying to connect at 19200\n");
         }
-        if (this->ChangeBaud (B19200, baud) != 0)
+        if (this->ChangeBaud (19200, baud) != 0)
         {
             if (verbose)
             {
                 fprintf (stderr, "> I: Trying to connect at 57600\n");
             }
-            if (this->ChangeBaud (B57600, baud) != 0)
+            if (this->ChangeBaud (57600, baud) != 0)
             {
                 if (verbose)
                 {
                     fprintf (stderr, "> I: Trying to connect at 115200\n");
                 }
-                if (this->ChangeBaud (B115200, baud) != 0)
+                if (this->ChangeBaud (115200, baud) != 0)
                 {
                     close (fd);
                     stringstream error_desc;
