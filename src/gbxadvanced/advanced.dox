@@ -2,7 +2,7 @@
 
 @ingroup gbx_libs
 @ingroup gbx_cpp
-@ingroup gbx_algoritms
+@ingroup gbx_algorithms
 @defgroup gbx_library_advanced libGbxAdvanced
 @brief Does something %advanced.
 
