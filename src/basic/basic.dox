@@ -3,6 +3,7 @@
 @ingroup gbx_libs
 @ingroup gbx_win
 @ingroup gbx_c
+@ingroup gbx_hadware
 @defgroup gbx_library_basic libbasic
 @brief Does something %basic.
 
