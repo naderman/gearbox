@@ -28,7 +28,7 @@ PROJDIR=$HOME/svndoc/gearbox
 MODULENAME=gearbox
 TARBALL=$MODULENAME-head-doc.tar.gz
 # destination
-HEADDIR=/home/groups/g/ge/gearbox/htdocs/head_doc
+HEADDIR=/home/groups/g/ge/gearbox/htdocs/head
 
 did_update=0
 
