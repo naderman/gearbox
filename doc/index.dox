@@ -18,6 +18,7 @@
 @defgroup gbx_examples Examples
 
 @defgroup gbx_hardware Hardware Drivers
+@defgroup gbx_algorithms Algorithms
 
 @defgroup gbx_cpp C++
 @defgroup gbx_c C
