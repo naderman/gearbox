@@ -14,12 +14,12 @@ force () {
     fi
 }
 
-TARBALL=hydro-release-doc.tar.gz
+TARBALL=gearbox-release-doc.tar.gz
 
 force ls
 force doxyorca doxyfile
 force cd html
 force tar --exclude=$TARBALL -zcvf $TARBALL *
-force scp $TARBALL acfr@shell.sourceforge.net:
+force scp $TARBALL shell.sourceforge.net:
 
-ssh acfr@shell.sourceforge.net "cd /home/groups/o/or/orca-robotics/htdocs/hydro; mv ~/$TARBALL .; tar -zxvf $TARBALL"
+ssh shell.sourceforge.net "cd /home/groups/g/ge/gearbox/htdocs/; mv ~/$TARBALL .; tar -zxvf $TARBALL"
