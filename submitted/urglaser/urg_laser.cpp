@@ -278,7 +278,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         (buf[15] != '0'))
     {
         if (verbose)
-            fprintf (stderr, "urg_laser: Warning: Failed to change baud rate to %d\n", new_baud);
+            fprintf (stderr, "urg_laser: W: Failed to change baud rate to %d\n", new_baud);
         return -1;
     }
     else
@@ -327,20 +327,17 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
     {
         if (verbose)
         {
-            fprintf (stderr, "> I: Trying to connect at 19200\n");
+            fprintf (stderr, "urg_laser: I: Connecting using serial connection to %s\n", port_name);
+            fprintf (stderr, "urg_laser: I: Trying to connect at 19200\n");
         }
         if (this->ChangeBaud (19200, baud) != 0)
         {
             if (verbose)
-            {
-                fprintf (stderr, "> I: Trying to connect at 57600\n");
-            }
+                fprintf (stderr, "urg_laser: I: Trying to connect at 57600\n");
             if (this->ChangeBaud (57600, baud) != 0)
             {
                 if (verbose)
-                {
-                    fprintf (stderr, "> I: Trying to connect at 115200\n");
-                }
+                    fprintf (stderr, "urg_laser: I: Trying to connect at 115200\n");
                 if (this->ChangeBaud (115200, baud) != 0)
                 {
                     close (fd);
@@ -351,10 +348,12 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
             }
         }
         if (verbose)
-            fprintf (stderr, "> I: Successfully changed baud rate\n");
+            fprintf (stderr, "urg_laser: I: Successfully changed baud rate\n");
     }
     else
     {
+        if (verbose)
+            fprintf (stderr, "urg_laser: I: Connecting using USB connection to %s\n", port_name);
         // set up new settings
         struct termios newtio;
         memset (&newtio, 0, sizeof (newtio));
@@ -376,6 +375,9 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
 void urg_laser::Close (void)
 {
     assert (this->laser_port);
+
+    if (verbose)
+        fprintf (stderr, "urg_laser: I: Closing port\n");
 
     tcflush (fileno (this->laser_port), TCIOFLUSH);
     if (fclose (this->laser_port) != 0)
@@ -503,7 +505,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
         if (buffer[0] != '0' || buffer[1] != '0')
         {
             stringstream error_desc;
-            error_desc << "Error reported by laser scanner: " << (buffer[0] - '0')*10 + (buffer[1] - '0');
+            error_desc << "Error reported by laser scanner: " << (buffer[0] - '0') * 10 + (buffer[1] - '0');
             throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
         }
 
@@ -544,6 +546,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
             if (i < MAX_READINGS)
             {
                 readings->Readings[i] = ((buffer[0]-0x30) << 12) | ((buffer[1]-0x30) << 6) | (buffer[2]-0x30);
+                num_readings_read++;
                 if ((readings->Readings[i] > 5600) && (i >= min_i) && (i <= max_i))
                 {
                     stringstream error_desc;
@@ -557,6 +560,14 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
                 error_desc << "Got too many readings: " << i;
                 throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
             }
+        }
+
+        // Shift the range readings down by min_i if necessary
+        if (min_i > 0)
+        {
+            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i) * sizeof (readings->Readings[0]));
+            // Don't forget to adjust the number of readings to account for this
+            num_readings_read -= (MAX_READINGS - max_i) + min_i;
         }
     }
 
@@ -721,9 +732,11 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
         if (strncmp ((const char *) buffer, "FIRM:", 5) == 0)
         {
             // Read the firmware version major value
-            ReadUntil (file, buffer, 1, poll_timeout);
+            ReadUntil (file, buffer, 5, poll_timeout);
             buffer[1] = 0;
             int firmware = atol ((const char*)buffer);
+            if (verbose)
+                fprintf (stderr, "urg_laser: I: Firmware major version is %d\n", firmware);
 
             if (firmware < 3)
             {
@@ -778,7 +791,7 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
         cfg->max_angle  = (max_i-384)*cfg->resolution;
         if (verbose)
         {
-            fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+            fprintf (stderr, "urg_laser: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
                     cfg->min_angle, cfg->max_angle, cfg->resolution, cfg->max_range);
         }
         tcflush (fileno(laser_port), TCIFLUSH);
@@ -816,7 +829,6 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
         } while (buffer[i-1] != ';');
         buffer[i-1] = 0;
         cfg->max_range = atol ((const char*)buffer);
-        cfg->max_range /= 1000;
 
         // read angular resolution
         ReadUntil_nthOccurence (file, 1, ':');
@@ -859,8 +871,8 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
 
         if (verbose)
         {
-            fprintf (stderr, "> I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
-                    RTOD (cfg->min_angle), RTOD (cfg->max_angle), RTOD (cfg->resolution), cfg->max_range);
+            fprintf (stderr, "urg_laser: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+                    cfg->min_angle, cfg->max_angle, cfg->resolution, cfg->max_range);
         }
     }
 }
@@ -924,9 +936,11 @@ int urg_laser::GetSCIPVersion (void)
         }
 
         // Read the firmware version major value
-        ReadUntil (file, buffer, 1, poll_timeout);
+        ReadUntil (file, buffer, 5, poll_timeout);
         buffer[1] = 0;
         int firmware = atol ((const char*)buffer);
+        if (verbose)
+            fprintf (stderr, "urg_laser: I: Firmware major version is %d\n", firmware);
 
         ReadUntil_nthOccurence (file, 4, (char)0xa);
         if (firmware < 3)
