@@ -74,7 +74,7 @@ int main (int argc, char **argv)
         int minIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.min_angle / config.resolution));
         int maxIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.max_angle / config.resolution));
 
-        if (useSerial)
+        if (useSerial && version == 1)      // Baud rate changing is not currently supported on SCIP v2 scanners
         {
             // Change the baud rate
             if (laser.ChangeBaud (19200, 57600) == 0)
