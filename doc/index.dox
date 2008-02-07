@@ -17,6 +17,8 @@
 @defgroup gbx_utils Utilities
 @defgroup gbx_examples Examples
 
+@defgroup gbx_hardware Hardware Drivers
+
 @defgroup gbx_cpp C++
 @defgroup gbx_c C
 
