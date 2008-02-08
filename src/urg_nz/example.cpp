@@ -42,7 +42,7 @@ int main (int argc, char **argv)
 
     try
     {
-        urg_nz::urg_nz laser;                  // Laser scanner object
+        urg_nz::urg_laser laser;                  // Laser scanner object
         // Set the laser to verbose mode (so we see more information in the console)
         laser.SetVerbose (true);
 

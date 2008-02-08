@@ -34,7 +34,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////////
-urg_nz::urg_nz (void)
+urg_laser::urg_laser (void)
 {
     // Defaults to SCIP version 1
     SCIP_Version = 1;
@@ -46,7 +46,7 @@ urg_nz::urg_nz (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Destructor
 ///////////////////////////////////////////////////////////////////////////////
-urg_nz::~urg_nz (void)
+urg_laser::~urg_laser (void)
 {
     if (PortOpen ())
         Close ();
@@ -55,7 +55,7 @@ urg_nz::~urg_nz (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Read functions
 ///////////////////////////////////////////////////////////////////////////////
-int urg_nz::ReadUntil_nthOccurence (int file, int n, char c)
+int urg_laser::ReadUntil_nthOccurence (int file, int n, char c)
 {
     int retval = 0, bytes_read = 0;
     unsigned char buffer[2];
@@ -74,7 +74,7 @@ int urg_nz::ReadUntil_nthOccurence (int file, int n, char c)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int urg_nz::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
+int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
 {
     int ret;
     int current=0;
@@ -124,7 +124,7 @@ int urg_nz::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
 ///////////////////////////////////////////////////////////////////////////////
 // Port control functions
 ///////////////////////////////////////////////////////////////////////////////
-int urg_nz::ChangeBaud (int curr_baud, int new_baud)
+int urg_laser::ChangeBaud (int curr_baud, int new_baud)
 {
     struct termios newtio;
     int fd;
@@ -309,7 +309,7 @@ int urg_nz::ChangeBaud (int curr_baud, int new_baud)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_nz::Open (const char *port_name, bool use_serial, int baud)
+void urg_laser::Open (const char *port_name, bool use_serial, int baud)
 {
     if (PortOpen ())
         this->Close ();
@@ -372,7 +372,7 @@ void urg_nz::Open (const char *port_name, bool use_serial, int baud)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_nz::Close (void)
+void urg_laser::Close (void)
 {
     assert (this->laser_port);
 
@@ -391,7 +391,7 @@ void urg_nz::Close (void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool urg_nz::PortOpen (void)
+bool urg_laser::PortOpen (void)
 {
     return laser_port != NULL;
 }
@@ -399,7 +399,7 @@ bool urg_nz::PortOpen (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Laser sensor access functions
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int urg_nz::GetReadings (urg_nz_laser_readings_t *readings, unsigned int min_i, unsigned int max_i)
+unsigned int urg_laser::GetReadings (urg_nz_laser_readings_t *readings, unsigned int min_i, unsigned int max_i)
 {
     unsigned char buffer[16];
     unsigned int num_readings_read = 0;
@@ -575,7 +575,7 @@ unsigned int urg_nz::GetReadings (urg_nz_laser_readings_t *readings, unsigned in
 }
 
 //////////////////////////////////////////////////////////////////////////////
-int urg_nz::GetIDInfo (void)
+int urg_laser::GetIDInfo (void)
 {
     unsigned char buffer [18];
     memset (buffer, 0, 18);
@@ -693,7 +693,7 @@ int urg_nz::GetIDInfo (void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_nz::GetSensorConfig (urg_nz_laser_config_t *cfg)
+void urg_laser::GetSensorConfig (urg_nz_laser_config_t *cfg)
 {
     memset (cfg, 0, sizeof (urg_nz_laser_config_t));
 
@@ -878,7 +878,7 @@ void urg_nz::GetSensorConfig (urg_nz_laser_config_t *cfg)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int urg_nz::GetSCIPVersion (void)
+int urg_laser::GetSCIPVersion (void)
 {
     unsigned char buffer [18];
     memset (buffer, 0, 18);

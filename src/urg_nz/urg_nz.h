@@ -54,7 +54,7 @@ typedef struct urg_nz_laser_readings
     /** Array of range readings in millimetres. Values less than 20 indicate no return in the scan
     (i.e. there was nothing detected within the laser range). */
     unsigned short Readings[MAX_READINGS];
-} urg_laser_readings_t;
+} urg_nz_laser_readings_t;
 
 /** @brief URG laser scanner configuration information. */
 typedef struct urg_nz_laser_config
@@ -67,7 +67,7 @@ typedef struct urg_nz_laser_config
     float resolution;
     /** Maximum range in millimetres. */
     float max_range;
-} urg_laser_config_t;
+} urg_nz_laser_config_t;
 
 /** @brief URG error class. */
 class urg_nz_exception
@@ -77,7 +77,7 @@ class urg_nz_exception
 
         @param code Error code of the error.
         @param desc Description of the error. */
-        urg_exception (unsigned int code, std::string desc)
+        urg_nz_exception (unsigned int code, std::string desc)
             : error_code (code), error_desc (desc)
         {}
 
@@ -95,14 +95,14 @@ To use a serial connection, ensure that you do not also have a USB cable connect
 force the scanner into USB mode, preventing the serial connection from functioning correctly.
 
 All functions may throw instances of @ref urg_nz_exception. */
-class urg_nz
+class urg_laser
 {
     public:
         /** @brief Constructor for URG laser scanner class. */
-        urg_nz (void);
+        urg_laser (void);
 
         /** @brief Destructor for URG laser scanner class. */
-        ~urg_nz (void);
+        ~urg_laser (void);
 
         /** @internal Read from the specified file descriptor until a specified number of bytes is received.
 
