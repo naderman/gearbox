@@ -7,3 +7,4 @@ MESSAGE ( STATUS "== SRC ==" )
 
 ADD_SUBDIRECTORY ( basicexample )
 ADD_SUBDIRECTORY ( gbxadvancedexample )
+ADD_SUBDIRECTORY ( urg_nz )
