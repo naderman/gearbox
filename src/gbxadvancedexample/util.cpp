@@ -8,15 +8,15 @@
  *
  */
 
-#include <basic/util.h>
+#include <basicexample/util.h>
 #include "util.h"
 
-namespace advanced
+namespace advancedexample
 {
 
 bool someAdvancedFunction( int i )
 {
-    return basic::someBasicFunction( i );
+    return basicexample::someBasicFunction( i );
 }
 
 }

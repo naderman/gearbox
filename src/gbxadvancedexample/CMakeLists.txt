@@ -1,11 +1,11 @@
-SET ( lib_name GbxAdvanced )
+SET ( lib_name GbxAdvancedExample )
 GBX_ADD_LICENSE( GPL )
 
 SET ( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
-SET( dep_libs basic )
+SET( dep_libs basicexample )
 GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
 
 IF ( build )
@@ -18,6 +18,6 @@ IF ( build )
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
 
-    GBX_ADD_HEADERS( gbxadvanced ${hdrs} )
+    GBX_ADD_HEADERS( gbxadvancedexample ${hdrs} )
 
 ENDIF ( build )

@@ -1,4 +1,4 @@
-SET ( lib_name basic )
+SET ( lib_name basicexample )
 GBX_ADD_LICENSE( LGPL )
 
 SET ( build TRUE )
@@ -13,7 +13,7 @@ IF ( build )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
 
-    GBX_ADD_HEADERS( basic ${hdrs} )
+    GBX_ADD_HEADERS( basicexample ${hdrs} )
     # the custom command above is equivalent to this
 #     INSTALL( FILES ${hdrs} DESTINATION include/gearbox/basic )
 

@@ -8,10 +8,10 @@
  *
  */
 
-#ifndef GBX_ADVANCED_UTILITY_H
-#define GBX_ADVANCED_UTILITY_H
+#ifndef GBX_ADVANCEDEXAMPLE_UTILITY_H
+#define GBX_ADVANCEDEXAMPLE_UTILITY_H
 
-namespace advanced
+namespace advancedexample
 {
 
 //! Cool advanced fuction.

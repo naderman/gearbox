@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef BASIC_DEFS_H
-#define BASIC_DEFS_H
+#ifndef BASICEXAMPLE_DEFS_H
+#define BASICEXAMPLE_DEFS_H
 
 #define SMALL 1
 

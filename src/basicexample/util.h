@@ -8,12 +8,12 @@
  *
  */
 
-#ifndef BASIC_UTILITY_H
-#define BASIC_UTILITY_H
+#ifndef BASICEXAMPLE_UTILITY_H
+#define BASICEXAMPLE_UTILITY_H
 
-#include <basic/defs.h>
+#include <basicexample/defs.h>
 
-namespace basic
+namespace basicexample
 {
 
 //! Cool basic fuction.

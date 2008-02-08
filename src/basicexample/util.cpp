@@ -10,7 +10,7 @@
 
 #include "util.h"
 
-namespace basic
+namespace basicexample
 {
 
 bool someBasicFunction( int i )
