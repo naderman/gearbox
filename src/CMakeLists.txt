@@ -5,5 +5,5 @@ MESSAGE ( STATUS "== SRC ==" )
 # When adding new directories, please maintain order of inter-dependencies.
 # Otherwise, maintain alphabetical order.
 
-ADD_SUBDIRECTORY ( basic )
-ADD_SUBDIRECTORY ( gbxadvanced )
+ADD_SUBDIRECTORY ( basicexample )
+ADD_SUBDIRECTORY ( gbxadvancedexample )
