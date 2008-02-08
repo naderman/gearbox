@@ -10,5 +10,4 @@ IF ( GBX_BUILD_SUBMITTED )
     # When adding new directories, please maintain order of inter-dependencies.
     # Otherwise, maintain alphabetical order.
 
-    ADD_SUBDIRECTORY ( urglaser )
 ENDIF ( GBX_BUILD_SUBMITTED )
