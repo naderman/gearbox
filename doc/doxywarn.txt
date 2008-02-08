@@ -1,0 +1,1 @@
+/home/makara/svn/gearbox/doc/devguide.dox:20: Warning: unable to resolve reference to `gbx_doc_submission' for \ref command
