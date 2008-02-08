@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <gearbox/urglaser/urg_laser.h>
+#include <gearbox/urg_nz/urg_nz.h>
 
 int main (int argc, char **argv)
 {
@@ -42,7 +42,7 @@ int main (int argc, char **argv)
 
     try
     {
-        urglaser::urg_laser laser;                  // Laser scanner object
+        urg_nz::urg_nz laser;                  // Laser scanner object
         // Set the laser to verbose mode (so we see more information in the console)
         laser.SetVerbose (true);
 
@@ -62,7 +62,7 @@ int main (int argc, char **argv)
         printf ("Laser serial number:\t%d\n", serial);
 
         // Get the laser configuration
-        urglaser::urg_laser_config_t config;        // Laser configuration structure
+        urg_nz::urg_nz_laser_config_t config;        // Laser configuration structure
         laser.GetSensorConfig (&config);
         printf ("Laser configuration:\n"
                 "Min angle: %f\tMax angle: %f\tResolution: %f\tMax range: %f\n",
@@ -71,8 +71,8 @@ int main (int argc, char **argv)
         // Calculate the minimum and maximum indices to retrieve - this is only necessary if you want
         // less than the full scan, otherwise simply don't supply min_i and max_i to urg_laser.GetReadings()
         // and the full scan will be returned.
-        int minIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.min_angle / config.resolution));
-        int maxIndex = static_cast<int> (round ((urglaser::MAX_READINGS / 2) + config.max_angle / config.resolution));
+        int minIndex = static_cast<int> (round ((urg_nz::MAX_READINGS / 2) + config.min_angle / config.resolution));
+        int maxIndex = static_cast<int> (round ((urg_nz::MAX_READINGS / 2) + config.max_angle / config.resolution));
 
         if (useSerial && version == 1)      // Baud rate changing is not currently supported on SCIP v2 scanners
         {
@@ -84,7 +84,7 @@ int main (int argc, char **argv)
         }
 
         // Get range readings from the laser
-        urglaser::urg_laser_readings_t readings;    // Laser readings structure
+        urg_nz::urg_nz_laser_readings_t readings;    // Laser readings structure
         printf ("Getting readings from %d to %d\n", minIndex, maxIndex);
         unsigned int numRead = laser.GetReadings (&readings, minIndex, maxIndex);
         printf ("Got %d range readings:\n", numRead);
@@ -101,7 +101,7 @@ int main (int argc, char **argv)
         // Close the laser
         laser.Close ();
     }
-    catch (urglaser::urg_exception e)
+    catch (urg_nz::urg_nz_exception e)
     {
         printf ("Caught exception: (%d) %s\n", e.error_code, e.error_desc.c_str ());
         return -1;

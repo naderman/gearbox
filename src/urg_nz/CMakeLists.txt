@@ -1,4 +1,4 @@
-SET ( lib_name urglaser )
+SET ( lib_name urg_nz )
 GBX_ADD_LICENSE( GPL )
 
 SET ( build TRUE )
@@ -9,8 +9,8 @@ IF ( build )
 
     INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
-    SET( hdrs urg_laser.h )
-    SET( srcs urg_laser.cpp )
+    SET( hdrs urg_nz.h )
+    SET( srcs urg_nz.cpp )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
 

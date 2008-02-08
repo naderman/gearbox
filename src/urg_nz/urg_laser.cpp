@@ -14,9 +14,9 @@
 #include <poll.h>
 #include <sstream>
 
-#include "urg_laser.h"
+#include "urg_nz.h"
 
-using namespace urglaser;
+using namespace urg_nz;
 using namespace std;
 
 #ifndef M_PI
@@ -34,7 +34,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////////////////
-urg_laser::urg_laser (void)
+urg_nz::urg_nz (void)
 {
     // Defaults to SCIP version 1
     SCIP_Version = 1;
@@ -46,7 +46,7 @@ urg_laser::urg_laser (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Destructor
 ///////////////////////////////////////////////////////////////////////////////
-urg_laser::~urg_laser (void)
+urg_nz::~urg_nz (void)
 {
     if (PortOpen ())
         Close ();
@@ -55,7 +55,7 @@ urg_laser::~urg_laser (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Read functions
 ///////////////////////////////////////////////////////////////////////////////
-int urg_laser::ReadUntil_nthOccurence (int file, int n, char c)
+int urg_nz::ReadUntil_nthOccurence (int file, int n, char c)
 {
     int retval = 0, bytes_read = 0;
     unsigned char buffer[2];
@@ -74,7 +74,7 @@ int urg_laser::ReadUntil_nthOccurence (int file, int n, char c)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
+int urg_nz::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
 {
     int ret;
     int current=0;
@@ -92,13 +92,13 @@ int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
             {
                 stringstream error_desc;
                 error_desc << "Error in ReadUntil at poll(): " << errno << ":" << strerror (errno);
-                throw urg_exception (URG_ERR_READPOLL, error_desc.str ());
+                throw urg_nz_exception (URG_ERR_READPOLL, error_desc.str ());
             }
             else if (retval == 0)
             {
                 stringstream error_desc;
                 error_desc << "Timed out on poll in ReadUntil";
-                throw urg_exception (URG_ERR_READTIMEOUT, error_desc.str ());
+                throw urg_nz_exception (URG_ERR_READTIMEOUT, error_desc.str ());
             }
         }
 
@@ -107,7 +107,7 @@ int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
         {
             stringstream error_desc;
             error_desc << "Error in ReadUntil at read(): " << errno << ":" << strerror (errno);
-            throw urg_exception (URG_ERR_READ, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_READ, error_desc.str ());
         }
 
         current += ret;
@@ -115,7 +115,7 @@ int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
         {
             stringstream error_desc;
             error_desc << "Got an end of command while waiting for more data.";
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
     } while (current < len);
     return current;
@@ -124,7 +124,7 @@ int urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout)
 ///////////////////////////////////////////////////////////////////////////////
 // Port control functions
 ///////////////////////////////////////////////////////////////////////////////
-int urg_laser::ChangeBaud (int curr_baud, int new_baud)
+int urg_nz::ChangeBaud (int curr_baud, int new_baud)
 {
     struct termios newtio;
     int fd;
@@ -145,7 +145,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         default:
             stringstream error_desc;
             error_desc << "Unknown current baud rate: " << curr_baud;
-            throw urg_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
     }
 
     switch (new_baud)
@@ -162,7 +162,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         default:
             stringstream error_desc;
             error_desc << "Unknown new baud rate: " << new_baud;
-            throw urg_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_BADBAUDRATE, error_desc.str ());
     }
 
     if (tcgetattr (fd, &newtio) < 0)
@@ -170,7 +170,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         close (fd);
         stringstream error_desc;
         error_desc << "Error in ChangeBaud at tcgetattr: " << errno << ":" << strerror (errno);
-        throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
     }
 
     cfmakeraw (&newtio);
@@ -182,7 +182,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         close (fd);
         stringstream error_desc;
         error_desc << "Error in ChangeBaud at tcsetattr: " << errno << ":" << strerror (errno);
-        throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
     }
 
     unsigned char buf[17];
@@ -278,7 +278,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
         (buf[15] != '0'))
     {
         if (verbose)
-            fprintf (stderr, "urg_laser: W: Failed to change baud rate to %d\n", new_baud);
+            fprintf (stderr, "urg_nz: W: Failed to change baud rate to %d\n", new_baud);
         return -1;
     }
     else
@@ -288,7 +288,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
             close (fd);
             stringstream error_desc;
             error_desc << "Error in ChangeBaud at tcgetattr: " << errno << ":" << strerror (errno);
-            throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
         }
         cfmakeraw (&newtio);
         cfsetispeed (&newtio, new_baud_constant);
@@ -298,7 +298,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
             close (fd);
             stringstream error_desc;
             error_desc << "Error in ChangeBaud at tcsetattr: " << errno << ":" << strerror (errno);
-            throw urg_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_CHANGEBAUD, error_desc.str ());
         }
         else
         {
@@ -309,7 +309,7 @@ int urg_laser::ChangeBaud (int curr_baud, int new_baud)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_laser::Open (const char *port_name, bool use_serial, int baud)
+void urg_nz::Open (const char *port_name, bool use_serial, int baud)
 {
     if (PortOpen ())
         this->Close ();
@@ -319,7 +319,7 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
     {
         stringstream error_desc;
         error_desc << "Failed to open port " << port_name << " << with error " << errno << ":" << strerror (errno);
-        throw urg_exception (URG_ERR_OPEN_FAILED, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_OPEN_FAILED, error_desc.str ());
     }
 
     int fd = fileno (laser_port);
@@ -327,33 +327,33 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
     {
         if (verbose)
         {
-            fprintf (stderr, "urg_laser: I: Connecting using serial connection to %s\n", port_name);
-            fprintf (stderr, "urg_laser: I: Trying to connect at 19200\n");
+            fprintf (stderr, "urg_nz: I: Connecting using serial connection to %s\n", port_name);
+            fprintf (stderr, "urg_nz: I: Trying to connect at 19200\n");
         }
         if (this->ChangeBaud (19200, baud) != 0)
         {
             if (verbose)
-                fprintf (stderr, "urg_laser: I: Trying to connect at 57600\n");
+                fprintf (stderr, "urg_nz: I: Trying to connect at 57600\n");
             if (this->ChangeBaud (57600, baud) != 0)
             {
                 if (verbose)
-                    fprintf (stderr, "urg_laser: I: Trying to connect at 115200\n");
+                    fprintf (stderr, "urg_nz: I: Trying to connect at 115200\n");
                 if (this->ChangeBaud (115200, baud) != 0)
                 {
                     close (fd);
                     stringstream error_desc;
                     error_desc << "Failed to connect at any baud";
-                    throw urg_exception (URG_ERR_CONNECT_FAILED, error_desc.str ());
+                    throw urg_nz_exception (URG_ERR_CONNECT_FAILED, error_desc.str ());
                 }
             }
         }
         if (verbose)
-            fprintf (stderr, "urg_laser: I: Successfully changed baud rate\n");
+            fprintf (stderr, "urg_nz: I: Successfully changed baud rate\n");
     }
     else
     {
         if (verbose)
-            fprintf (stderr, "urg_laser: I: Connecting using USB connection to %s\n", port_name);
+            fprintf (stderr, "urg_nz: I: Connecting using USB connection to %s\n", port_name);
         // set up new settings
         struct termios newtio;
         memset (&newtio, 0, sizeof (newtio));
@@ -372,12 +372,12 @@ void urg_laser::Open (const char *port_name, bool use_serial, int baud)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_laser::Close (void)
+void urg_nz::Close (void)
 {
     assert (this->laser_port);
 
     if (verbose)
-        fprintf (stderr, "urg_laser: I: Closing port\n");
+        fprintf (stderr, "urg_nz: I: Closing port\n");
 
     tcflush (fileno (this->laser_port), TCIOFLUSH);
     if (fclose (this->laser_port) != 0)
@@ -385,13 +385,13 @@ void urg_laser::Close (void)
         stringstream error_desc;
         error_desc << "Error closing port: " << errno << ":" << strerror (errno);
         this->laser_port = NULL;
-        throw urg_exception (URG_ERR_CLOSE_FAILED, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_CLOSE_FAILED, error_desc.str ());
     }
     this->laser_port = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool urg_laser::PortOpen (void)
+bool urg_nz::PortOpen (void)
 {
     return laser_port != NULL;
 }
@@ -399,7 +399,7 @@ bool urg_laser::PortOpen (void)
 ///////////////////////////////////////////////////////////////////////////////
 // Laser sensor access functions
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned int min_i, unsigned int max_i)
+unsigned int urg_nz::GetReadings (urg_nz_laser_readings_t *readings, unsigned int min_i, unsigned int max_i)
 {
     unsigned char buffer[16];
     unsigned int num_readings_read = 0;
@@ -408,14 +408,14 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
     {
         stringstream error_desc;
         error_desc << "NULL destination buffer";
-        throw urg_exception (URG_ERR_NODESTINATION, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_NODESTINATION, error_desc.str ());
     }
 
     if (!PortOpen ())
     {
         stringstream error_desc;
         error_desc << "Laser port is not open";
-        throw urg_exception (URG_ERR_NOPORT, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_NOPORT, error_desc.str ());
     }
 
     if (SCIP_Version == 1)
@@ -434,7 +434,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
@@ -444,7 +444,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
         {
             stringstream error_desc;
             error_desc << "Error reported by laser scanner: " << buffer[0] - '0';
-            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_LASERERROR, error_desc.str ());
         }
 
         for (unsigned int i=0; ; ++i)
@@ -468,7 +468,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
             {
                 stringstream error_desc;
                 error_desc << "Got too many readings: " << i;
-                throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
             }
         }
 
@@ -496,7 +496,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
@@ -506,7 +506,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
         {
             stringstream error_desc;
             error_desc << "Error reported by laser scanner: " << (buffer[0] - '0') * 10 + (buffer[1] - '0');
-            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_LASERERROR, error_desc.str ());
         }
 
         ReadUntil_nthOccurence (file, 2, (char)0xa);
@@ -534,7 +534,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
                 {
                     stringstream error_desc;
                     error_desc << "Got too many readings: " << i;
-                    throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                    throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
                 }
             }
             else if (buffer[1] == '\n')
@@ -551,14 +551,14 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
                 {
                     stringstream error_desc;
                     error_desc << "Reading " << i << " value of " << readings->Readings[i] << " is bigger than 5.6 metres.";
-                    throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                    throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
                 }
             }
             else
             {
                 stringstream error_desc;
                 error_desc << "Got too many readings: " << i;
-                throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+                throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
             }
         }
 
@@ -575,7 +575,7 @@ unsigned int urg_laser::GetReadings (urg_laser_readings_t *readings, unsigned in
 }
 
 //////////////////////////////////////////////////////////////////////////////
-int urg_laser::GetIDInfo (void)
+int urg_nz::GetIDInfo (void)
 {
     unsigned char buffer [18];
     memset (buffer, 0, 18);
@@ -586,7 +586,7 @@ int urg_laser::GetIDInfo (void)
     {
         stringstream error_desc;
         error_desc << "Laser port is not open";
-        throw urg_exception (URG_ERR_NOPORT, error_desc.str ());
+        throw urg_nz_exception (URG_ERR_NOPORT, error_desc.str ());
     }
 
     tcflush (fileno (laser_port), TCIFLUSH);
@@ -606,7 +606,7 @@ int urg_laser::GetIDInfo (void)
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // check the returned status
@@ -616,7 +616,7 @@ int urg_laser::GetIDInfo (void)
         {
             stringstream error_desc;
             error_desc << "Error reported by laser scanner: " << buffer[0] - '0';
-            throw urg_exception (URG_ERR_LASERERROR, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_LASERERROR, error_desc.str ());
         }
 
         buffer[0] = 0;
@@ -658,7 +658,7 @@ int urg_laser::GetIDInfo (void)
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         buffer[0] = 0;
@@ -693,9 +693,9 @@ int urg_laser::GetIDInfo (void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
+void urg_nz::GetSensorConfig (urg_nz_laser_config_t *cfg)
 {
-    memset (cfg, 0, sizeof (urg_laser_config_t));
+    memset (cfg, 0, sizeof (urg_nz_laser_config_t));
 
     if (SCIP_Version == 1)
     {
@@ -718,7 +718,7 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // The following might not work on all versions of the hokuyos
@@ -736,7 +736,7 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
             buffer[1] = 0;
             int firmware = atol ((const char*)buffer);
             if (verbose)
-                fprintf (stderr, "urg_laser: I: Firmware major version is %d\n", firmware);
+                fprintf (stderr, "urg_nz: I: Firmware major version is %d\n", firmware);
 
             if (firmware < 3)
             {
@@ -744,7 +744,7 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
                 tcflush (fileno (laser_port), TCIFLUSH);
                 stringstream error_desc;
                 error_desc << "Bad firmware version: " << firmware;
-                throw urg_exception (URG_ERR_BADFIRMWARE, error_desc.str ());
+                throw urg_nz_exception (URG_ERR_BADFIRMWARE, error_desc.str ());
             }
         }
 
@@ -784,14 +784,14 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading angle_min_idx and angle_max_idx. Check firmware version.";
-            throw urg_exception (URG_ERR_READ, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_READ, error_desc.str ());
         }
         cfg->max_range  = max_range;
         cfg->min_angle  = (min_i-384)*cfg->resolution;
         cfg->max_angle  = (max_i-384)*cfg->resolution;
         if (verbose)
         {
-            fprintf (stderr, "urg_laser: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+            fprintf (stderr, "urg_nz: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
                     cfg->min_angle, cfg->max_angle, cfg->resolution, cfg->max_range);
         }
         tcflush (fileno(laser_port), TCIFLUSH);
@@ -816,7 +816,7 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
             tcflush (fileno (laser_port), TCIFLUSH);
             stringstream error_desc;
             error_desc << "Error reading command result: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
         int i = 0;
         ReadUntil_nthOccurence (file, 2, (char)0xa);
@@ -871,14 +871,14 @@ void urg_laser::GetSensorConfig (urg_laser_config_t *cfg)
 
         if (verbose)
         {
-            fprintf (stderr, "urg_laser: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
+            fprintf (stderr, "urg_nz: I: URG-04 specifications: [min_angle, max_angle, resolution, max_range] = [%f, %f, %f, %f]\n",
                     cfg->min_angle, cfg->max_angle, cfg->resolution, cfg->max_range);
         }
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int urg_laser::GetSCIPVersion (void)
+int urg_nz::GetSCIPVersion (void)
 {
     unsigned char buffer [18];
     memset (buffer, 0, 18);
@@ -910,7 +910,7 @@ int urg_laser::GetSCIPVersion (void)
         {
             stringstream error_desc;
             error_desc << "Error reading after VV command. Answer: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // Set SCIP version 2 and return
@@ -932,7 +932,7 @@ int urg_laser::GetSCIPVersion (void)
         {
             stringstream error_desc;
             error_desc << "FIRM: is not where it is supposed to be: " << buffer;
-            throw urg_exception (URG_ERR_PROTOCOL, error_desc.str ());
+            throw urg_nz_exception (URG_ERR_PROTOCOL, error_desc.str ());
         }
 
         // Read the firmware version major value
@@ -940,7 +940,7 @@ int urg_laser::GetSCIPVersion (void)
         buffer[1] = 0;
         int firmware = atol ((const char*)buffer);
         if (verbose)
-            fprintf (stderr, "urg_laser: I: Firmware major version is %d\n", firmware);
+            fprintf (stderr, "urg_nz: I: Firmware major version is %d\n", firmware);
 
         ReadUntil_nthOccurence (file, 4, (char)0xa);
         if (firmware < 3)
@@ -987,5 +987,5 @@ int urg_laser::GetSCIPVersion (void)
     // Shouldn't get here
     stringstream error_desc;
     error_desc << "Unknown SCIP version";
-    throw urg_exception (URG_ERR_SCIPVERSION, error_desc.str ());
+    throw urg_nz_exception (URG_ERR_SCIPVERSION, error_desc.str ());
 }

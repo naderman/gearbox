@@ -7,9 +7,9 @@ CMake with the example's source directory as an argument. For example, if you
 have installed GearBox into /usr/local, you could do the following:
 
 $ cd ~
-$ mkdir urglaser_example
-$ cd urglaser_example
-$ ccmake /usr/local/share/gearbox/urglaser/
+$ mkdir urg_nz_example
+$ cd urg_nz_example
+$ ccmake /usr/local/share/gearbox/urg_nz/
 
 Running
 -------
@@ -18,7 +18,7 @@ The example requires that you specify a path to the laser scanner's port and,
 optionally, a baud rate and whether to use an RS232 connection or not. For
 example:
 
-./urg_example -p /dev/ttyS1 -b 115200 -s
+./urg_nz_example -p /dev/ttyS1 -b 115200 -s
 
 This will start the example, looking for the laser on port /dev/ttyS1 and
 using a baud rate of 115200bps in RS232 mode.

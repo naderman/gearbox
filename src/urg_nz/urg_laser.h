@@ -8,11 +8,11 @@
 
 #include <string>
 
-/** @ingroup gbx_library_urglaser
+/** @ingroup gbx_library_urg_nz
 @{
 */
 
-namespace urglaser
+namespace urg_nz
 {
 
 /** The maximum number of readings the laser is capable of returning. */
@@ -49,7 +49,7 @@ const unsigned int URG_ERR_SCIPVERSION     = 13;
 const unsigned int URG_ERR_LASERERROR      = 14;
 
 /** @brief Range readings from a URG laser scanner. */
-typedef struct urg_laser_readings
+typedef struct urg_nz_laser_readings
 {
     /** Array of range readings in millimetres. Values less than 20 indicate no return in the scan
     (i.e. there was nothing detected within the laser range). */
@@ -57,7 +57,7 @@ typedef struct urg_laser_readings
 } urg_laser_readings_t;
 
 /** @brief URG laser scanner configuration information. */
-typedef struct urg_laser_config
+typedef struct urg_nz_laser_config
 {
     /** Start angle the laser is capable of scanning from (inclusive), in radians.*/
     float min_angle;
@@ -70,7 +70,7 @@ typedef struct urg_laser_config
 } urg_laser_config_t;
 
 /** @brief URG error class. */
-class urg_exception
+class urg_nz_exception
 {
     public:
         /** @brief URG error constructor.
@@ -94,15 +94,15 @@ Provides an interface for interacting with a Hokuyo URG laser scanner.
 To use a serial connection, ensure that you do not also have a USB cable connected, as this will
 force the scanner into USB mode, preventing the serial connection from functioning correctly.
 
-All functions may throw instances of @ref urg_exception. */
-class urg_laser
+All functions may throw instances of @ref urg_nz_exception. */
+class urg_nz
 {
     public:
         /** @brief Constructor for URG laser scanner class. */
-        urg_laser (void);
+        urg_nz (void);
 
         /** @brief Destructor for URG laser scanner class. */
-        ~urg_laser (void);
+        ~urg_nz (void);
 
         /** @internal Read from the specified file descriptor until a specified number of bytes is received.
 
@@ -170,7 +170,7 @@ class urg_laser
         @param min_i The minimum scan index to retrieve. Must be at least 0. Default is 0.
         @param max_i The maximum scan index to retrieve. Must be no greater than @ref MAX_READINGS. Default is @ref MAX_READINGS.
         @return The number of range readings read. */
-        unsigned int GetReadings (urg_laser_readings_t *readings, unsigned int min_i = 0, unsigned int max_i = MAX_READINGS);
+        unsigned int GetReadings (urg_nz_laser_readings_t *readings, unsigned int min_i = 0, unsigned int max_i = MAX_READINGS);
 
         /** @brief Get the laser scanner identification information.
 
@@ -180,7 +180,7 @@ class urg_laser
         /** @brief Get the laser scanner configuration (resolution, scan angles, etc.)
 
         @param cfg Pointer to a @ref urg_laser_config_t structure to store the configuration in. */
-        void GetSensorConfig (urg_laser_config_t *cfg);
+        void GetSensorConfig (urg_nz_laser_config_t *cfg);
 
         /** @brief Get the protocol version used by the connected laser scanner.
 
@@ -208,6 +208,6 @@ class urg_laser
         int poll_timeout;
 };
 
-}; // namespace urglaser
+}; // namespace urg_nz
 
 /** @} */
