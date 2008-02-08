@@ -37,6 +37,7 @@
 @section gbx_doc_index_more_info Where to start
 
 - Read general information about the project: @ref gbx_doc_overview
+- Summary of rules: @ref gbx_doc_constitution
 - Get set up: @ref gbx_doc_getting
 - Browse through the <strong><a href="modules.html" style="text-decoration:none">currently available software</a></strong><br>
 
