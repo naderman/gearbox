@@ -10,21 +10,17 @@
 
 /*!
 
-@page gbx_doc_lifecycle Source Code Life Cycle in GearBox
+@page gbx_doc_practices Guide to Common Practices
 
-We hope that this project will attract a diverse group of developers. If this happens we think that a clear set of written down rules would help to avoid misunderstandings.
+Project rules are described in @ref gbx_doc_principles_operation "Principles of Project Operation". Questions may still arise on how to apply these rules in practice. We'll update these notes as the project matures and we figure out what works well and what doesn't.
 
-@section gbx_doc_lifecycle_fsm Life of Code as a State Machine
+Notes on common life cycle 'events':
+- @ref gbx_doc_practices_submit
+- @ref gbx_doc_practices_review
+- @ref gbx_doc_practices_maintain
+- @ref gbx_doc_practices_retire
 
-@image html gbx_src_life_cycle.png
-
-Notes on common 'events':
-- @ref gbx_doc_lifecycle_submit
-- @ref gbx_doc_lifecycle_review
-- @ref gbx_doc_lifecycle_maintain
-- @ref gbx_doc_lifecycle_retire
-
-@section gbx_doc_lifecycle_submit Submission
+@section gbx_doc_practices_submit Submission
 
 Send an email to the @e gearbox-devel mailing list describing the code you would like to submit. The more information the better but keep in mind that only 3 criteria will be used to make the acceptance decision at this point. The code must be
 - relevant to robotics (therefore you should describe what the code is supposed to do)
@@ -72,15 +68,15 @@ the library and query the submitter for more information on their
 intentions for the library before choosing to accept for submission or
 reject.
 
-@section gbx_doc_lifecycle_review Review and Acceptance
+@section gbx_doc_practices_review Review and Acceptance
 
 TBD
 
-@section gbx_doc_lifecycle_maintain Maintanence
+@section gbx_doc_practices_maintain Maintanence
 
 TBD
 
-@section gbx_doc_lifecycle_retire Retirement
+@section gbx_doc_practices_retire Retirement
 
 TBD
 

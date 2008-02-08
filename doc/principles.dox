@@ -12,6 +12,10 @@
 
 @page gbx_doc_principles Principles of Project Operation
   
+We hope that this project will attract a diverse group of developers. If this happens we think that a clear set of written down rules would help to avoid misunderstandings.
+
+The rules on the pages are brief. We also maintain a page with @ref gbx_doc_practices "more practical instructions and a guide to common practices".
+
 @section gbx_doc_principles_toc Table of contents
 
 - @ref gbx_doc_principles_tools
