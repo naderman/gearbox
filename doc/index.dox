@@ -37,7 +37,7 @@
 @section gbx_doc_index_more_info Where to start
 
 - Read general information about the project: @ref gbx_doc_overview
-- Summary of rules: @ref gbx_doc_constitution
+- Read on how the project operates: @ref gbx_doc_principles
 - Get set up: @ref gbx_doc_getting
 - Browse through the <strong><a href="modules.html" style="text-decoration:none">currently available software</a></strong><br>
 
@@ -45,5 +45,5 @@ Note: The documentation on this web page matches the latest release. A web page 
 
 @section gbx_doc_index_news News
 
-- 06-Feb-08 Project created.
+- 01-Feb-08 Project created. @ref gbx_doc_announce "A half-page announcement".
 */
