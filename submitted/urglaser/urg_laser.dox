@@ -3,6 +3,7 @@
 @ingroup gbx_libs
 @ingroup gbx_hardware
 @ingroup gbx_c
+@ingroup gbx_linux
 @defgroup gbx_library_urglaser liburglaser
 @brief Hokuyo URG laser scanner driver.
 
