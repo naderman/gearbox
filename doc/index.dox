@@ -41,7 +41,7 @@
 - Get set up: @ref gbx_doc_getting
 - Browse through the <strong><a href="modules.html" style="text-decoration:none">currently available software</a></strong><br>
 
-Note: The documentation on this web page matches the latest release. A web page is also <a href="http://gearbox.sourceforge.net/head/gearbox">generated every 30 min</a> from the latest SVN version.
+Note: The documentation on this web page matches the latest release. A web page is also <a href="http://gearbox.sourceforge.net/head">generated every 30 min</a> from the latest SVN version.
 
 @section gbx_doc_index_news News
 

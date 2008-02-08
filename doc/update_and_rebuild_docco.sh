@@ -5,6 +5,21 @@
 #
 # Usage: try_rebuild_docco [--force]
 
+force () {
+    echo "$*"
+    $*
+
+    status=$?
+
+    if [ $status -ne 0 ]; then
+        echo "Problem executing '$*'"
+        exit 1
+    else
+        echo "Executed '$*' OK"
+    fi
+}
+
+
 forced=0
 if [ $# -eq 1 ]
 then
@@ -70,12 +85,9 @@ mv temp_index.html html/index.html
 #
 # Copy it to sourceforge
 #
-rm -rf $MODULENAME
-mv html $MODULENAME
-tar -zcvf $TARBALL $MODULENAME
-echo "scp $TARBALL shell.sf.net:$HEADDIR/."
-scp  $TARBALL shell.sf.net:$HEADDIR/.
-echo "ssh shell.sf.net 'cd $HEADDIR; tar -zxf $TARBALL'"
-ssh shell.sf.net "cd $HEADDIR; tar -zxf $TARBALL"
+force cd html
+force tar --exclude=$TARBALL -zcvf $TARBALL *
+force scp $TARBALL shell.sourceforge.net:$HEADDIR/.
+ssh shell.sourceforge.net "cd $HEADDIR; tar -zxvf $TARBALL"
 
 echo "Finished $0 at: `date`"
