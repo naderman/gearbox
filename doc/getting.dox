@@ -21,13 +21,9 @@ GearBox distribution has one official dependency <a href="http://www.cmake.org/"
 - Option 1. Download <strong><a href="http://sourceforge.net/project/showfiles.php?group_id=216468" style="text-decoration:none">the latest distribution of GearBox</a></strong>
 
 - Option 2. Checkout source from SVN
-    - Anonymous checkout:
+    - Anonymous checkout (your username/password will be asked on commit):
 @verbatim
 $ svn co https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk gearbox
-@endverbatim
-    - Checkout for registered developers:
-@verbatim
-$ svn co --username [your-sf-username] https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk gearbox
 @endverbatim
     - See links @ref gbx_doc_version_control "to get started" with SVN.
     - See <strong><a href="http://sourceforge.net/svn/?group_id=216468" style="text-decoration:none">more detailed SourceForge SVN instructions.</a></strong>
@@ -42,7 +38,7 @@ Detailed instructions are available for these platforms/distributions:
 The instructions below are quite general, follow them if your platform/distribution combination is not described above:
 
     -# Download and install <a href="http://www.cmake.org/">CMake: Cross-Platform Make</a> which is used to build the GearBox distribution.
-    - Minimum version required 2.4-patch 2 (latest tested: 2.4-patch 7).
+    - Minimum version required 2.4-patch 4 (latest tested: 2.4-patch 7).
         - Full instructions are available from the <a href="http://www.cmake.org/HTML/Download.html">download page</a>.
     -# Download and install any optional dependencies you'd like. Or just skip this step and do it later.
         - You may want to take a look at our notes on @ref gbx_doc_depends.
