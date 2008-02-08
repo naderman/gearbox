@@ -25,14 +25,11 @@ Follow these simple steps to create an overlay:
 -# Create a directory to store the overlay in, for example \b /usr/local/portage
 -# Set the \b PORTDIR_OVERLAY variable in \b /etc/make.conf to include this directory.
 
-[\b TODO I hope that once we get plenty of libraries, I can get gearbox into the main gentoo portage distribution. That would remove
-this step and probably the next two steps, too.]
-
 @section gbx_doc_installgentoo_copyebuild Download and copy ebuild
 
-Download the Gearbox ebuild from the Gearbox download page. [\b TODO need to find a place to put this in the repository.] This ebuild must be copied into
-the local overlay so that portage can find it. Extract the downloaded files into your local overlay directory. This should create a
-subdirectory called \b dev-libs with a subdirectory called \b gearbox inside it.
+Download the Gearbox ebuild from the GearBox download page. This ebuild must be copied into the local overlay so that portage can
+find it. Extract the downloaded files into your local overlay directory. This should create a subdirectory called \b dev-libs with
+a subdirectory called \b gearbox inside it.
 
 @section gbx_doc_installgentoo_keywordebuild Keyword the ebuild
 
@@ -51,18 +48,18 @@ The Gearbox ebuild provides many USE flags to control which libraries are instal
 specifying them on the command line, for example:
 
 @verbatim
-USE="urglaser" emerge gearbox -av
+USE="urg_nz" emerge gearbox -av
 @endverbatim
 
 Alternatively, they can be set more permanantly be specifying them in /etc/portage/package.use:
 
 @verbatim
-dev-libs/gearbox urglaser
+dev-libs/gearbox urg_nz
 @endverbatim
 
 A full list of available USE flags is given below. For a list of those provided by your current ebuild for Gearbox,
 run \b equery \b uses \b gearbox.
-<table><tr><td>urglaser</td><td>Enables the Hokuyo URG laser driver library</td></tr>
+<table><tr><td>urg_nz</td><td>Enables the "urgnz" Hokuyo URG laser driver library</td></tr>
 </table>
 
 @section gbx_doc_installgentoo_install Install
