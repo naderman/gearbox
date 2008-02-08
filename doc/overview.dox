@@ -1,5 +1,5 @@
 /*
- * GearBox Project: Components for robotics 
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
  *               http://gearbox.sf.net/
  * Copyright (c) 2008 GearBox Team
  *
@@ -14,21 +14,27 @@
 
 @par Goals
 
-Insert from new documents.
+Provide software tools which could be integrated into complete systems with one of many software integration frameworks.
 
-@ref gbx_doc_principles
+@par Licence
 
-@par Licence and Copyright
+The GearBox project does not, as a policy, require code to conform to any 
+specific license to be included in the distribution. However, the code is required 
+to have a license and the license must be Open Source. That is the official policy.
 
-- GearBox software is released under open source licenses. For a complete up-to-date list of licenses see the @b LICENSE file included in your distribution.
-- Copyright belongs to developers and major contributors. 
-- @ref gbx_doc_license "Read more..."
+For a complete up-to-date list of licenses see the @b LICENSE file included in your distribution.
+
+@par Copyright
+
+Copyright belongs to developers and major contributors. The copyright is recorded in a comment block at the top of every source file.
+
+@par Complete Description of Rules
+
+For a complete set of project rules see @ref gbx_doc_principles
 
 @par OS support
 
-- full Linux support
-
-In principle GearBox can be deployed as widely as CMake allows.
+In principle GearBox can be deployed as widely as CMake allows. For a detailed list of OS support see the list of <strong><a href="modules.html" style="text-decoration:none">currently available software</a></strong>.
 
 @par History
 

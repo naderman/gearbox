@@ -137,7 +137,7 @@ Regular frequent releases every 1.5-3 months.
 
 @subsection gbx_doc_principles_operation_ownership 2.3 Ownership of source code
 
-Copyright belongs to authors and major contributors.
+Copyright belongs to authors and major contributors. The copyright is recorded in a comment block at the top of every source file. It is up to the current copyright holders to distinguish between "major" and "minor" contributions.
 
 @section gbx_doc_principles_freedoms 3. Freedoms
 
