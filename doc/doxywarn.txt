@@ -1,7 +1,0 @@
-/home/makara/svn/gearbox/doc/devguide.dox:20: Warning: unable to resolve reference to `gbx_doc_submission' for \ref command
-/home/makara/svn/gearbox/submitted/urglaser/urg_laser.dox:19: Warning: explicit link request to 'define' could not be resolved
-/home/makara/svn/gearbox/submitted/urglaser/urg_laser.h:124: Warning: argument `PortName' of command @param is not found in the argument list of urglaser::urg_laser::Open(const char *port_name, bool use_serial, int baud)
-/home/makara/svn/gearbox/submitted/urglaser/urg_laser.h:124: Warning: The following parameters of urglaser::urg_laser::Open(const char *port_name, bool use_serial, int baud) are not documented:
-  parameter port_name
-/home/makara/svn/gearbox/submitted/urglaser/urg_laser.h:167: Warning: unable to resolve reference to `urg_laser_readings_t' for \ref command
-/home/makara/svn/gearbox/submitted/urglaser/urg_laser.h:180: Warning: unable to resolve reference to `urg_laser_config_t' for \ref command
