@@ -14,10 +14,13 @@ force () {
     fi
 }
 
+# doxygen
+DOXYGENCMD=/usr/bin/doxygen
+DOXYFILE=doxyfile
 TARBALL=gearbox-release-doc.tar.gz
 
 force ls
-force doxyorca doxyfile
+force $DOXYGENCMD $DOXYFILE
 force cd html
 force tar --exclude=$TARBALL -zcvf $TARBALL *
 force scp $TARBALL shell.sourceforge.net:
