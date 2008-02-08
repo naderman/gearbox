@@ -1,5 +1,5 @@
 /*
- * Gearbox Project
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
  * http://gearbox.sf.net/
  * Copyright (c) 2008 Gearbox team
  *
