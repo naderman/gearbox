@@ -91,6 +91,9 @@ class urg_exception
 
 Provides an interface for interacting with a Hokuyo URG laser scanner.
 
+To use a serial connection, ensure that you do not also have a USB cable connected, as this will
+force the scanner into USB mode, preventing the serial connection from functioning correctly.
+
 All functions may throw instances of @ref urg_exception. */
 class urg_laser
 {
