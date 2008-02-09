@@ -205,6 +205,11 @@ MACRO ( GBX_WRITE_MANIFEST )
         WRITE_FILE ( ${manifest_file} "SET( ${UPPERA}_INSTALLED 0)" APPEND )
     ENDFOREACH( A ${LIBRARY_NOT_LIST} )
 
+    WRITE_FILE ( ${manifest_file} " " APPEND )
+
+    STRING ( TOUPPER ${PROJECT_NAME} upper_project_name )
+    WRITE_FILE ( ${manifest_file} "SET( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
+
     INSTALL( FILES ${manifest_file} DESTINATION . )
 ENDMACRO ( GBX_WRITE_MANIFEST )
 
