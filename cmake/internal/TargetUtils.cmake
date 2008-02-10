@@ -5,7 +5,7 @@
 #
 MACRO( GBX_ADD_EXECUTABLE name )
   ADD_EXECUTABLE( ${name} ${ARGN} )
-  INSTALL( TARGETS ${name} RUNTIME DESTINATION bin/ )
+  INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
   SET( templist ${COMPONENT_LIST} )
   LIST ( APPEND templist ${name} )
 #   MESSAGE ( STATUS "DEBUG: ${templist}" )
