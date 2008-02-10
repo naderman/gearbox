@@ -15,7 +15,7 @@ IF ( build )
 
     GBX_ADD_HEADERS( basicexample ${hdrs} )
     # the custom command above is equivalent to this
-#     INSTALL( FILES ${hdrs} DESTINATION include/gearbox/basic )
+#     INSTALL( FILES ${hdrs} DESTINATION include/gearbox/basicexample )
 
 #     IF ( GBX_BUILD_TESTS )
 #         ADD_SUBDIRECTORY ( test )
