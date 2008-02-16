@@ -16,6 +16,12 @@
 
 Provide software tools which could be integrated into complete systems with one of many software integration frameworks.
 
+GearBox is not a framework. It does not contain any "glue" code to help you assemble a complete system.
+
+GearBox does not compete with any existing or future frameworks. Frameworks are still and will continue to be required to customize the available software to a particular application. But the task of designing and implementing a framework is hard enough without having to worry about the nitty-gritty of algorithm and driver implemention. 
+
+More on the rationale and the objectives for the project can be found in @ref gbx_doc_publications "GearBox Publications".
+
 @par Licence
 
 The GearBox project does not, as a policy, require code to conform to any 
