@@ -1,12 +1,13 @@
 /*
- * Orca-Robotics Project: Components for robotics 
- *               http://orca-robotics.sf.net/
- * Copyright (c) 2004-2008 Mathew Ridley, Alex Brooks
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Mathew Ridley
  *
  * This distribution is licensed to you under the terms described in
  * the LICENSE file included in this distribution.
  *
  */
+
 /*!
 @ingroup gbx_libs
 @ingroup gbx_cpp
@@ -18,22 +19,27 @@
 
 C++ class wrapping a serial port. For a full list of functions and classes see @ref gbxserialacfr.
 
-Header file:
+@par Header file
+
 @verbatim
 #include <gbxserialacfr/serial.h>
 @endverbatim
 
-Other serial libraries:
-- http://libserial.sourceforge.net (GPL)
-- http://qextserialport.sourceforge.net (requires Qt)
+@par Other serial libraries
+
+  - http://libserial.sourceforge.net (GPL)
+  - http://qextserialport.sourceforge.net (requires Qt)
 
 @par Tested On
 
   - rs232 only (ie not rs422)
   - For USB-to-serial devices, tested on FTDI-based devices only
 
+@par Copyright
+  Alex Brooks, Mathew Ridley
+
 @par Responsible Developer
-Alex Brooks
+  Alex Brooks
   
 */
 

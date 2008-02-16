@@ -11,6 +11,8 @@ using namespace std;
 
 //
 // A simple utility program for testing serial ports in loopback.
+//   Put the port in loopback (ie connect pins 2 & 3), then type stuff.
+//   It should be echoed back on the terminal.
 //
 
 std::vector<std::string>

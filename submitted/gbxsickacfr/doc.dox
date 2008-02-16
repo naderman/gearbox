@@ -1,6 +1,6 @@
 /*
- * Orca-Robotics Project: Components for robotics 
- *               http://orca-robotics.sf.net/
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
  * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
  *
  * This distribution is licensed to you under the terms described in
@@ -9,31 +9,48 @@
  */
 
 /*!
-@ingroup hydro_drivers_laserscanner2d
-@ingroup hydro_cpp
-@ingroup hydro_linux
-@defgroup hydro_driver_laserscanner2dsickacfr LaserScanner2dSickAcfr
+@ingroup gbx_drivers_laserscanner2d
+@ingroup gbx_cpp
+@ingroup gbx_linux
+@defgroup gbx_driver_laserscanner2dsickacfr LaserScanner2dSickAcfr
 @brief ACFR driver for SICK laser range-finder.
 
 Drives SICK hardware, directly connected to the computer. 
 
+@par Header file
+
+@verbatim
+#include <gbxsickacfr/driver.h>
+@endverbatim
+
+@par Example
+  See test/test.cpp
+
+@par Copyright
+  Alex Brooks, Alexei Makarenko, Tobias Kaupp
+
+@par Responsible Developer
+  Alex Brooks
+  
 @par Dependencies
 
 - libIceUtil (for timing/threads/mutexes)
-- libHydroSerial and libHydroSerialDevice
+- libGbxSerialAcfr
 
 @par Limitations
- 
+
 - This is a Linux-only implementation.  
 - It has not been tested at 500k baud.
+- It has only been tested on the LMS-291
 
-@par Extra configuration
+*/
 
-- @c SickAcfr.Device (string)
-  - The unix device to use
-  - Default: "/dev/ttyS0"
-- @c SickAcfr.Baudrate (int) [bps]
-  - Valid Values: { 9600, 19200, 38400, 500000 }
-  - Default: 38400
+/*!
+@brief SICK laser driver
+@namespace gbxsickacfr
+
+This namespace is part of a SICK laser driver
+
+@see @ref gbx_library_gbxsickacfr
 
 */

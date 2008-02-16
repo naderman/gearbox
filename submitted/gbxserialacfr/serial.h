@@ -1,7 +1,7 @@
 /*
- * Orca-Robotics Project: Components for robotics 
- *               http://orca-robotics.sf.net/
- * Copyright (c) 2004-2008 Mathew Ridley, Alex Brooks
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Mathew Ridley
  *
  * This distribution is licensed to you under the terms described in
  * the LICENSE file included in this distribution.

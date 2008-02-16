@@ -10,6 +10,7 @@ using namespace std;
 
 //
 // A simple utility program for testing serial ports.
+//   Listens for incoming data, echoes it to the terminal.
 //
 
 std::string

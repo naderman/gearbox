@@ -1,3 +1,13 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <gbxserialacfr/lockfile/lockfile.h>

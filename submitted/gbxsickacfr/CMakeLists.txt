@@ -15,15 +15,13 @@ GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
 SET( int_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialDeviceAcfr )
 
 IF ( build )
-    # allow subdir's to include themselves and each other
-#     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
 
     ADD_SUBDIRECTORY( gbxutilacfr )
     ADD_SUBDIRECTORY( gbxiceutilacfr )
     ADD_SUBDIRECTORY( gbxserialdeviceacfr )
     
     INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
-#     INCLUDE( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
+    INCLUDE( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
 
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )

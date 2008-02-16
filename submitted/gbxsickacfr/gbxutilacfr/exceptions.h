@@ -1,6 +1,6 @@
 /*
- * Orca-Robotics Project: Components for robotics 
- *               http://orca-robotics.sf.net/
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
  * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
  *
  * This distribution is licensed to you under the terms described in
@@ -22,7 +22,7 @@
 #define ERROR_MACROS_HPP_
 
 #if defined(STRINGIZE_HELPER) || defined(STRINGIZE) || defined(ERROR_INFO)
-#   error HydroUtil error macros have already been defined elsewhere 
+#   error GbxUtilAcfr error macros have already been defined elsewhere 
 #endif
 
 #define STRINGIZE_HELPER(exp) #exp
@@ -39,7 +39,7 @@ namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 /*!
-@brief Base class for all Hydro exceptions.
+@brief Base class for all GbxUtilAcfr exceptions.
 
 Can be caught as a std::exception due to inheritance.
 

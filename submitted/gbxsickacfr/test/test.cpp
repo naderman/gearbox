@@ -1,3 +1,13 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,14 +23,14 @@
 
 using namespace std;
 
-
+//
+// Instantiates the laser driver, reads a few scans
+//
 int main( int argc, char **argv )
 {
     int opt;
-//     int baud = 115200;
-//     bool useSerial = false;
+    int baud = 38400;
     string port = "/dev/ttyS0";
-    int maxCount = 1;
 
     // Get some options from the command line
     while ((opt = getopt (argc, argv, "p:c:")) != -1)
@@ -28,53 +38,38 @@ int main( int argc, char **argv )
         switch (opt)
         {
             case 'p':
-//                 strncpy (port, optarg, 256);
                 port = optarg;
                 break;
-            case 'c':
-                maxCount = atoi( optarg );
+            case 'b':
+                baud = atoi (optarg);
                 break;
-//             case 'b':
-//                 baud = atoi (optarg);
-//                 if (baud != 19200 && baud != 57600 && baud != 115200)
-//                 {
-//                     printf ("Baud rate must be one of 19200, 57600 or 115200.\n");
-//                     return 1;
-//                 }
-//                 break;
-//             case 's':
-//                 useSerial = true;
-//                 break;
             default:
-                printf ("Usage: %s [-p port] [-b baud] [-s]\n\n"
-                        "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0\n"
-                        "-b baud\tBaud rate to connect at (19200, 57600 or 115200).\t"
-                        "-s\tUse RS232 connection instead of USB.\n", argv[0]);
+                cout << "Usage: " << argv[0] << " [-p port] [-b baud]" << endl << endl
+                     << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
+                     << "-b baud\tBaud rate to connect at (19200, 57600 or 115200)." << endl;
                 return 1;
         }
     }
 
-
+    // Set up the laser's configuration
     gbxsickacfr::Config config;
-
     config.minRange = 0.0;
     config.maxRange = 80.0;
     config.fieldOfView = 180.0*DEG2RAD_RATIO;
     config.startAngle = -90.0*DEG2RAD_RATIO;
     config.numberOfSamples = 181;
-    config.baudRate = 38400;
+    config.baudRate = baud;
     config.device = port;
+    if ( !config.validate() ) {
+        cout << "Test: Invalid laser configuration: " << config.toString() << endl;
+    }
+    cout << "Using configuration: " << config.toString() << endl;
 
+    // Instantiate objects to handle messages from the driver
     gbxsickacfr::gbxutilacfr::TrivialTracer tracer;
     gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
 
-    if ( !config.validate() ) {
-        tracer.error( "Test: Failed to validate laser configuration. "+config.toString() );
-    }
-
-    tracer.info( "Validated configuration structure: "+config.toString() );
-
-    // initialize
+    // Instantiate the driver itself
     gbxsickacfr::Driver* device;
     try 
     {
@@ -82,47 +77,34 @@ int main( int argc, char **argv )
     }
     catch ( const std::exception& e )
     {
-        stringstream ss; ss<<"Test: Failed to init device: "<<e.what();
-        tracer.error( ss.str() );
+        cout <<"Test: Failed to init device: "<<e.what() << endl;
         return 1;
     }
 
-    // allocated data storage
-    vector<float> ranges;
-    vector<unsigned char> intensities;
-    ranges.resize( config.numberOfSamples );
-    intensities.resize( config.numberOfSamples );
-
-    // create data structure
+    // Create data structure to store sensor data
+    vector<float>         ranges( config.numberOfSamples );
+    vector<unsigned char> intensities( config.numberOfSamples );
     gbxsickacfr::Data data;
     data.ranges      = &(ranges[0]);
     data.intensities = &(intensities[0]);
 
-    int count = 0;
-    while ( count < maxCount )
+    // Read a few times
+    const int numReads = 3;
+    for ( int i=0; i < numReads; i++ )
     {
-        // catch exceptions!!!
         try 
         {
-            // using default timeout of 1000ms
             device->read( data );
         }
         catch ( const std::exception& e )
         {
-            stringstream ss; ss<<"Test: Failed to read scan: "<<e.what();
-            tracer.error( ss.str() );
+            cout <<"Test: Failed to read scan: "<<e.what()<<endl;
         }
     
-    //         data.timeStampSec;
-    //         data.timeStampUsec;
-
-        stringstream ss; ss<<"Test: Got scan "<<count+1<<" of "<<maxCount;
-        tracer.info( ss.str() );
+        cout<<"Test: Got scan "<<i+1<<" of "<<numReads<<endl;
     
         if ( data.haveWarnings )
-            tracer.warning( "got warnings: "+data.warnings );
-
-        count++;
+            cout << "got warnings: " << data.warnings << endl;
     }
 
     return 0;
