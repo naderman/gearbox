@@ -1,0 +1,39 @@
+/*
+ * Orca-Robotics Project: Components for robotics 
+ *               http://orca-robotics.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+@ingroup hydro_drivers_laserscanner2d
+@ingroup hydro_cpp
+@ingroup hydro_linux
+@defgroup hydro_driver_laserscanner2dsickacfr LaserScanner2dSickAcfr
+@brief ACFR driver for SICK laser range-finder.
+
+Drives SICK hardware, directly connected to the computer. 
+
+@par Dependencies
+
+- libIceUtil (for timing)
+- libHydroSerial and libHydroSerialDevice
+
+@par Limitations
+ 
+- This is a Linux-only implementation.  
+- It has not been tested at 500k baud.
+
+@par Extra configuration
+
+- @c SickAcfr.Device (string)
+  - The unix device to use
+  - Default: "/dev/ttyS0"
+- @c SickAcfr.Baudrate (int) [bps]
+  - Valid Values: { 9600, 19200, 38400, 500000 }
+  - Default: 38400
+
+*/

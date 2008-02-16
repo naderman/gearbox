@@ -10,7 +10,7 @@ IF ( GBX_BUILD_SUBMITTED )
     # When adding new directories, please maintain order of inter-dependencies.
     # Otherwise, maintain alphabetical order.
 
-#     ADD_SUBDIRECTORY( gbxserialacfr )
-#     ADD_SUBDIRECTORY( gbxsickacfr )
+     ADD_SUBDIRECTORY( gbxserialacfr )
+     ADD_SUBDIRECTORY( gbxsickacfr )
 
 ENDIF ( GBX_BUILD_SUBMITTED )

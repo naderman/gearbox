@@ -1,0 +1,43 @@
+/*
+ * Orca-Robotics Project: Components for robotics 
+ *               http://orca-robotics.sf.net/
+ * Copyright (c) 2004-2008 Mathew Ridley, Alex Brooks
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+/*!
+@ingroup gbx_libs
+@ingroup gbx_cpp
+@ingroup gbx_linux
+@defgroup gbx_library_gbxserialacfr libGbxSerialAcfr
+@brief Simple serial port interface
+
+@par General notes
+
+C++ class wrapping a serial port. For a full list of functions and classes see @ref gbxserialacfr.
+
+Header file:
+@verbatim
+#include <gbxserialacfr/serial.h>
+@endverbatim
+
+Other serial libraries:
+- http://libserial.sourceforge.net (GPL)
+- http://qextserialport.sourceforge.net (requires Qt)
+
+@par Responsible Developer
+Alex Brooks
+  
+*/
+
+/*!
+@brief Simple serial port interface
+@namespace gbxserialacfr
+
+This namespace is part of a library which contains C++ class for wrapping a serial port.
+
+@see @ref gbx_library_gbxserialacfr
+
+*/
