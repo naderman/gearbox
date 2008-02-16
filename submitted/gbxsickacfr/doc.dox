@@ -19,7 +19,7 @@ Drives SICK hardware, directly connected to the computer.
 
 @par Dependencies
 
-- libIceUtil (for timing)
+- libIceUtil (for timing/threads/mutexes)
 - libHydroSerial and libHydroSerialDevice
 
 @par Limitations
