@@ -27,6 +27,11 @@ Other serial libraries:
 - http://libserial.sourceforge.net (GPL)
 - http://qextserialport.sourceforge.net (requires Qt)
 
+@par Tested On
+
+  - rs232 only (ie not rs422)
+  - For USB-to-serial devices, tested on FTDI-based devices only
+
 @par Responsible Developer
 Alex Brooks
   
