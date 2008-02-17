@@ -107,5 +107,6 @@ int main( int argc, char **argv )
             cout << "got warnings: " << data.warnings << endl;
     }
 
+    delete device;
     return 0;
 }
