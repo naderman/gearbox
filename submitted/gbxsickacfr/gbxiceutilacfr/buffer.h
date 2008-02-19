@@ -43,13 +43,17 @@ gbxiceutilacfr::Buffer<double> buffer( 10, gbxiceutilacfr::BufferTypeCircular );
 double data;
 while (1)
 {
+    int ret = 0;
     try {
         buffer.getAndPop( data );
     }
     catch ( const gbxutilacfr::Exception & e ) {
-        buffer.getAndPopNext( data );
+        ret = buffer.getAndPopNext( data, TIMEOUT_MS );
     }
-    // do something with data
+    if ( ret == 0 )
+    {
+        // do something with data
+    }
 }
 @endverbatim
 
