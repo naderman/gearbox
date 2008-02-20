@@ -66,7 +66,8 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    gbxsickacfr::gbxutilacfr::TrivialTracer tracer;
+    const bool debug=false;
+    gbxsickacfr::gbxutilacfr::TrivialTracer tracer( debug );
     gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
 
     // Instantiate the driver itself
