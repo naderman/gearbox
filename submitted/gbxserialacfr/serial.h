@@ -51,6 +51,7 @@ public:
 
     //! Opens a device @ref dev.
     //! Throws exceptions on error.
+    //! If timeouts are enabled, they default to 1sec.
     //! If useLockFile is set to true, Serial will use the file-system to 
     //! prevent concurrent access to a serial device by multiple instances of Serial.
     Serial( const std::string &dev,

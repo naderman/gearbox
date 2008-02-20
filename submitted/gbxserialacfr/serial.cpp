@@ -348,8 +348,8 @@ Serial::Serial( const std::string &dev,
                 bool useLockFile )
     : dev_(dev),
       portFd_(-1),
-      timeoutSec_(0),
-      timeoutUSec_(0),
+      timeoutSec_(1),
+      timeoutUSec_(1),
       timeoutsEnabled_(enableTimeouts),
       debugLevel_(debuglevel)
 {
