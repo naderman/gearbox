@@ -87,7 +87,7 @@ std::string
 Config::toString() const
 {
     std::stringstream ss;
-    ss << "Laser driver config: minr="<<minRange<<" maxr="<<maxRange<<" fov="<<RAD2DEG(fieldOfView)<<"deg start="<<RAD2DEG(startAngle)<<"deg num="<<numberOfSamples;
+    ss << "Laser driver config: device="<<device<<", baudRate="<<baudRate<<", minr="<<minRange<<", maxr="<<maxRange<<", fov="<<RAD2DEG(fieldOfView)<<"deg, start="<<RAD2DEG(startAngle)<<"deg, num="<<numberOfSamples;
     return ss.str();
 }
 

@@ -417,7 +417,7 @@ Serial::close()
         perror("Serial::close():close()");
     }
 
-    //Make sure that we force this back to an invalid state
+    // Make sure that we force this back to an invalid state
     portFd_ = -1;
 }
 
