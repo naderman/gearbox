@@ -25,6 +25,11 @@ C++ class wrapping a serial port. For a full list of functions and classes see @
 #include <gbxserialacfr/serial.h>
 @endverbatim
 
+@par Example
+  See:
+    - test/serialechotest.cpp
+    - test/serialloopbacktest.cpp
+
 @par Other serial libraries
 
   - http://libserial.sourceforge.net (GPL)
@@ -33,14 +38,18 @@ C++ class wrapping a serial port. For a full list of functions and classes see @
 @par Tested On
 
   - rs232 only (ie not rs422)
+  - Not tested at 500k baud
   - For USB-to-serial devices, tested on FTDI-based devices only
+
+@par Style
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
 
 @par Copyright
   Alex Brooks, Mathew Ridley
 
 @par Responsible Developer
   Alex Brooks
-  
+
 */
 
 /*!

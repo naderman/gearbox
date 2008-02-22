@@ -110,7 +110,7 @@ namespace {
                 stringstream ss; ss << "device " << dev << " is already locked by process PID " << pidOfLocker;
                 throw LockFileException( ss.str() );
             }
-            else
+            else if ( errno == ESRCH )
             {
                 // The process which owns the lock no longer exists.  Clean up.
                 ret = unlink( lbuf );
@@ -130,7 +130,13 @@ namespace {
                     throw LockFileException( ss.str() );
                 }
             }
-        }        
+            else
+            {
+                stringstream ss;
+                ss << "lock_dev: Don't expect to see this errno after kill: " << strerror(errno);
+                throw LockFileException( ss.str() );
+            }
+        }
 
         ret = unlink(pbuf);
         if ( ret < 0 )
@@ -176,7 +182,11 @@ LockFile::LockFile( const std::string &dev,
 
 LockFile::~LockFile()
 {
-    unlock_dev( dev_.c_str(), lockPid_ );
+    // Don't allow exceptions from destructor
+    try {
+        unlock_dev( dev_.c_str(), lockPid_ );
+    }
+    catch ( ... ) {}
 }
 
 }

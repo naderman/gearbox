@@ -10,9 +10,6 @@
 #ifndef GBXSERIALACFR_SERIAL_H
 #define GBXSERIALACFR_SERIAL_H
 
-#include <termios.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include <string>
 #include <gbxserialacfr/uncopyable.h>
 #include <gbxserialacfr/lockfile/lockfile.h>
@@ -63,7 +60,7 @@ public:
     //! Destructor closes serial port
     ~Serial();
 
-    //! turn on/off debug messages
+    //! Debug messages are printed to stdout.  debugLevel should be in the range [0,3].
     void setDebugLevel( int debugLevel ) { debugLevel_ = debugLevel; }
 
     //! Sets the baud rate. Flushes any data.
@@ -73,10 +70,8 @@ public:
     void setTimeout(int sec, int usec);
 
     //! Reads up to @ref count bytes into buffer @ref buf.
-    //! Returns the number of bytes read.
-    //! Will never return <0 -- throws exceptions instead.
+    //! Returns the number of bytes read, or '-1' on timeout (if timeouts are enabled).
     //! If timeouts are not enabled, blocks till it gets something.
-    //! If timeouts are enabled, throws an exception if data isn't available.
     int read(void *buf, int count);
 
     //! Tries to read exactly @ref count bytes into @ref buf.  
@@ -99,7 +94,7 @@ public:
     //!                char buf[6];
     //!                serial.readLine( buf, 6 );
     //!
-    //!          where the two extra characters are for the '\n' and the terminating '\0'.
+    //!          where the two extra characters are for the "\n" and the terminating "\0".
     //!
     //! If timeouts are not enabled we might block forever, waiting for the number of bytes we want or an error.
     //!
@@ -122,7 +117,7 @@ public:
     //! Writes some data.  Returns the number of bytes written.
     int write(const void *buf, int count);
 
-    //! Writes a ('\0'-terminated) string. 
+    //! Writes a ("\0"-terminated) string. 
     //! Returns the number of bytes written.
     int writeString(const char *buf);
     inline int writeString(const std::string &s) {

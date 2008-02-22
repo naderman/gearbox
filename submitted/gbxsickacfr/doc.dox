@@ -26,6 +26,9 @@ Drives SICK hardware, directly connected to the computer.
 @par Example
   See test/test.cpp
 
+@par Style
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
+
 @par Copyright
   Alex Brooks, Alexei Makarenko, Tobias Kaupp
 

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip> 
+#include <assert.h>
 
 using namespace std;
 
@@ -57,7 +58,9 @@ int main( int argc, char **argv )
 //             cout<<"TRACE(serialechotest.cpp): &(data[0]): " << (int)(&(data[0])) << endl;
 //             cout<<"TRACE(serialechotest.cpp): data[0]: " << (int)(data[0]) << endl;
 
-            serial.read( &(data[0]), nBytes );
+            int numRead = serial.read( &(data[0]), nBytes );
+            // There were nBytes available, we should be able to read them all
+            assert( numRead == (int)nBytes );
 
             cout << "got data: " << toHexString( data ) << endl;
         }

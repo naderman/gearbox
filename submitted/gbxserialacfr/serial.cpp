@@ -8,6 +8,7 @@
  *
  */
 
+#include <termios.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -142,7 +143,7 @@ namespace gbxserialacfr {
 #endif
             default:
                 stringstream ss;
-                ss << "Serial::baud() Invalid baud rate: " << baudRate;
+                ss << "Serial::"<<__func__<<"() Invalid baud rate: " << baudRate;
                 throw SerialException( ss.str() );
             }            
         }
@@ -215,7 +216,7 @@ namespace gbxserialacfr {
                 return 4000000;
             default:
                 stringstream ss;
-                ss << "Serial::baud() Invalid baud rate: " << baudRate;
+                ss << "Serial::"<<__func__<<"() Invalid baud rate: " << baudRate;
                 throw SerialException( ss.str() );
             }            
         }
@@ -371,7 +372,7 @@ Serial::Serial( const std::string &dev,
         setBaudRate( baudRate );
     
         if(debugLevel_ > 2){
-            cout << "At end of Serial::Serial: " << getStatusString();
+            cout << "At end of Serial::Serial(): " << getStatusString();
         }
     }
     catch ( const SerialException &e )
@@ -404,17 +405,27 @@ void
 Serial::close()
 {
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): close()" << endl;
+    {
+        // AlexB: Not sure if cout::operator<< can throw, be careful just in case.
+        try {
+            cout<<"TRACE(serial.cpp): "<<__func__<<"()" << endl;
+        }
+        catch ( ... ) {}
+    }
 
     assert( portFd_ != -1 );
 
     if(tcdrain(portFd_))
     {
-        perror("Serial::close():tcdrain()");
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"():tcdrain()";
+        perror(ss.str().c_str());
     }
     if (::close(portFd_))
     {
-        perror("Serial::close():close()");
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"():close()";
+        perror(ss.str().c_str());
     }
 
     // Make sure that we force this back to an invalid state
@@ -427,16 +438,18 @@ Serial::setBaudRate(int baud)
     struct termios localOptions;
 
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): setBaudRate("<<baud<<")" << endl;
+        cout<<"TRACE(serial.cpp): "<<__func__<<"("<<baud<<")" << endl;
 
     if(portFd_==-1)
     {
-        throw SerialException( "Serial:baud() no valid device open" );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): no valid device open";
+        throw SerialException( ss.str() );
     }
     if(tcgetattr(portFd_, &localOptions) == -1)
     {
         stringstream ss;
-        ss << "Serial::baud():tcgetattr() Error reading attr: " << strerror(errno);
+        ss << "Serial::"<<__func__<<"():tcgetattr() Error reading attr: " << strerror(errno);
         throw SerialException( ss.str() );
     }
 
@@ -458,7 +471,7 @@ Serial::setBaudRate(int baud)
         if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0) 
         {
             stringstream ss;
-            ss << "Serial::setBaudRate("<<baud<<"): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
+            ss << "Serial::"<<__func__<<"("<<baud<<"): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
             throw SerialException( ss.str() );
         }
     
@@ -468,7 +481,7 @@ Serial::setBaudRate(int baud)
         if (ioctl(portFd_, TIOCSSERIAL, &serinfo) < 0) 
         {
             stringstream ss;
-            ss << "Serial::setBaudRate("<<baud<<"): error calling 'ioctl(portFd_, TIOCSSERIAL, &serinfo)': "<<strerror(errno);
+            ss << "Serial::"<<__func__<<"("<<baud<<"): error calling 'ioctl(portFd_, TIOCSSERIAL, &serinfo)': "<<strerror(errno);
             throw SerialException( ss.str() );
         }
     }
@@ -476,7 +489,7 @@ Serial::setBaudRate(int baud)
     if ( tcsetattr(portFd_, TCSAFLUSH, &localOptions) == -1 )
     {
         stringstream ss;
-        ss << "Serial::baud():tcsetattr() Error setting attr: " << strerror(errno);
+        ss << "Serial::"<<__func__<<"():tcsetattr() Error setting attr: " << strerror(errno);
         throw SerialException( ss.str() );
     }
 }
@@ -493,7 +506,7 @@ Serial::open(int flags)
     if ( portFd_ == -1 )
     {
         stringstream ss;
-        ss << "Serial::open(): failed to open '"<<dev_<<"': "<<strerror(errno);
+        ss << "Serial::"<<__func__<<"(): failed to open '"<<dev_<<"': "<<strerror(errno);
         throw SerialException( ss.str() );
     }
 
@@ -502,15 +515,13 @@ Serial::open(int flags)
     {
         close();
         stringstream ss;
-        ss << "Serial::open(): tcgetattr() failed for '"<<dev_<<"': "<<strerror(errno);
+        ss << "Serial::"<<__func__<<"(): tcgetattr() failed for '"<<dev_<<"': "<<strerror(errno);
         throw SerialException( ss.str() );
     }
 
     if(debugLevel_ > 2){
-        cout << "At beginning of open(): "<<getStatusString()<<endl;
+        cout << "At beginning of "<<__func__<<"(): "<<getStatusString()<<endl;
     }
-
-
 
     // enable receiver & ignore control lines
     localOptions.c_cflag |=  (CLOCAL | CREAD) ;
@@ -541,31 +552,32 @@ Serial::open(int flags)
     {
         close();
         stringstream ss;
-        ss << "Serial::open(): tcsetattr() failed for '"<<dev_<<"': "<<strerror(errno);
+        ss << "Serial::"<<__func__<<"(): tcsetattr() failed for '"<<dev_<<"': "<<strerror(errno);
         throw SerialException( ss.str() );
     }
 
     if ( debugLevel_ > 2 ){
-        cout << "At end of open():" << getStatusString();
+        cout << "At end of "<<__func__<<"():" << getStatusString();
     }
-
 }
 
 int
 Serial::read(void *buf, int count)
 {
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): read()" << endl;
+        cout<<"TRACE(serial.cpp): "<<__func__<<"()" << endl;
 
     int got = ::read(portFd_, buf, count);
     if ( got < 0 )
     {
-        throw SerialException( string("Serial::read(): ") + strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): " << strerror(errno);
+        throw SerialException( ss.str() );
     }
     
     if ( debugLevel_ > 1 )
     {
-        cout<<"TRACE(serial.cpp): read: '";
+        cout<<"TRACE(serial.cpp): just read: '";
         for ( int i=0; i < count; i++ )
             cout << ((char*)(buf))[i];
         cout << "'" << endl;
@@ -580,7 +592,7 @@ int
 Serial::readFull(void *buf, int count)
 {
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): readFull(): count=" << count << endl;
+        cout<<"TRACE(serial.cpp): "<<__func__<<"(): count=" << count << endl;
 
     char* bufPtr = static_cast<char*>(buf);
 
@@ -605,7 +617,9 @@ Serial::readFull(void *buf, int count)
         
         else
         {
-            throw SerialException( std::string("Serial::readFullWithTimeout: read(): ")+strerror(errno) );
+            stringstream ss;
+            ss << "Serial::"<<__func__<<": read(): "<<strerror(errno);
+            throw SerialException( ss.str() );
         }
    
     }
@@ -620,7 +634,7 @@ int
 Serial::readLine(void *buf, int count, char termchar)
 {
     if ( debugLevel_ > 0 ){
-        cout<<"TRACE(serial.cpp): readLine ";
+        cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
         if(timeoutsEnabled_){ 
             cout << "timeouts enabled"<<endl; 
         }else{
@@ -639,7 +653,9 @@ Serial::readLine(void *buf, int count, char termchar)
         //Check for buf overrun Must leave room for NULL terminator
         if ( dataPtr >= bufPtr + (count - 1) )
         {
-            throw SerialException( "Serial::readLine: Not enough room in buffer" );
+            stringstream ss;
+            ss << "Serial::"<<__func__<<": Not enough room in buffer";
+            throw SerialException( ss.str() );
         }
 
         int ret = ::read( portFd_, &nextChar, 1 );
@@ -662,7 +678,9 @@ Serial::readLine(void *buf, int count, char termchar)
             }
 
             //If we get here then it was a more serious error
-            throw SerialException( std::string( "Serial::readLine(): ")+strerror(errno) );
+            stringstream ss;
+            ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
+            throw SerialException( ss.str() );
         }
     
     } while (nextChar != termchar);
@@ -685,7 +703,9 @@ Serial::bytesAvailable()
 
     if(ret==-1)
     {
-        throw SerialException( std::string("Serial::bytesAvailable(): ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<": "<< strerror(errno);
+        throw SerialException( ss.str() );
     }
     return n_read;
 }
@@ -718,7 +738,9 @@ Serial::waitForDataOrTimeout()
     }
     if(selval<0)
     {
-        throw SerialException( std::string("Serial::waitForTimeout: select(): ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<": select(): "<<strerror(errno);
+        throw SerialException( ss.str() );
     }
     
     return GOT_DATA;
@@ -729,24 +751,28 @@ int
 Serial::writeString(const char *str)
 {
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): writeString(): writing '"<<str<<"'" << endl;
+        cout<<"TRACE(serial.cpp): "<<__func__<<"(): writing '"<<str<<"'" << endl;
 
     int put;
     put = ::write(portFd_, str, strlen(str) );
     if ( put < 0 )
     {
-        throw SerialException( string("Serial::write(): ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): " << strerror(errno);
+        throw SerialException( ss.str() );
     }
     else if ( put == 0 )
     {
-        throw SerialException( "Serial::writeString(): ::write() returned 0" );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): ::write() returned 0";
+        throw SerialException( ss.str() );
     }
     else if ( put < (int)(strlen(str)) )
     {
         // AlexB: Not sure what to do here...  This can happen eg if the buffer is full.
         //        I'm not convinced that we want to throw an exception, but chances are
         //        lots of users won't check the return code.
-        cout << "WARNING: Serial::writeString: only wrote " << put << " of " << strlen(str) << " bytes." << endl;
+        cout << "WARNING: Serial::"<<__func__<<": only wrote " << put << " of " << strlen(str) << " bytes." << endl;
     }
 
     if ( debugLevel_ > 1 )
@@ -765,7 +791,9 @@ Serial::getStatusString()
     if(tcgetattr(portFd_, &status) == -1)
     {
         close();
-        throw SerialException( std::string("Serial::getStatusString(): tcgetattr():")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): tcgetattr():"<<strerror(errno);
+        throw SerialException( ss.str() );
     }
 
     stringstream ss;
@@ -778,7 +806,7 @@ Serial::getStatusString()
     if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0) 
     {
         stringstream ss;
-        ss << "Serial::getStatusString(): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
+        ss << "Serial::"<<__func__<<"(): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
         throw SerialException( ss.str() );
     }
     ss << serinfo;
@@ -793,7 +821,9 @@ Serial::flush()
     int ret = tcflush(portFd_,TCIOFLUSH);
     if ( ret < 0 )
     {
-        throw SerialException( std::string("Serial::flush(): ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
+        throw SerialException( ss.str() );
     }
 }
 
@@ -803,7 +833,9 @@ Serial::drain()
     // wait till all output sent
     if(tcdrain(portFd_))
     {
-        throw SerialException( std::string("Serial::drain(): tcdrain: ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): tcdrain: "<<strerror(errno);
+        throw SerialException( ss.str() );
     }
 }
 
@@ -811,19 +843,27 @@ int
 Serial::write(const void *buf, int count)
 {
     if ( debugLevel_ > 0 )
-        cout<<"TRACE(serial.cpp): write()" << endl;
+        cout<<"TRACE(serial.cpp): "<<__func__<<"()" << endl;
 
     if ( count == 0 )
-        throw SerialException( "Serial::write() was called with zero bytes" );
+    {
+        stringstream ss;
+        ss << "Serial:: "<<__func__<<"() was called with zero bytes";
+        throw SerialException( ss.str() );
+    }
 
     int put = ::write(portFd_, buf, count);
     if ( put < 0 )
     {
-        throw SerialException( string("Serial::write(): ")+strerror(errno) );
+        stringstream ss;
+        ss << "Serial:: "<<__func__<<"(): "<<strerror(errno);
+        throw SerialException( ss.str() );
     }
     else if ( put == 0 )
     {
-        throw SerialException( "Serial::write(): ::write() returned 0" );
+        stringstream ss;
+        ss << "Serial::"<<__func__<<"(): ::write() returned 0";
+        throw SerialException( ss.str() );
     }
     if ( debugLevel_ > 1 )
     {
