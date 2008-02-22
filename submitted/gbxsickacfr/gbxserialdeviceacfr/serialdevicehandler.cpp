@@ -126,6 +126,9 @@ SerialDeviceHandler::walk()
                     tracer_.debug( "SerialDeviceHandler: Changing baud rate and flushing." );
                     baudRateChangePending_ = false;
                     serial_.setBaudRate( newBaudRate_ );
+                    // TODO: AlexB: not entirely sure if these are
+                    // necessary, they should either be removed or
+                    // added to the setBaudRate function.
                     serial_.flush();
                     serial_.drain();
                 }

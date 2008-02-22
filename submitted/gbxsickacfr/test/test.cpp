@@ -96,16 +96,23 @@ int main( int argc, char **argv )
         try 
         {
             device->read( data );
+
+            cout<<"Test: Got scan "<<i+1<<" of "<<numReads<<endl;
+            for ( int i=0; i < config.numberOfSamples; i++ )
+            {
+                const double angle = config.startAngle + i*config.fieldOfView/(double)(config.numberOfSamples-1);
+                cout << "  " << i << ": angle=" << angle*180.0/M_PI
+                     << "deg, range=" << data.ranges[i]
+                     << ", intensity=" << data.intensities[i] << endl;
+            }
+
+            if ( data.haveWarnings )
+                cout << "got warnings: " << data.warnings << endl;
         }
         catch ( const std::exception& e )
         {
             cout <<"Test: Failed to read scan: "<<e.what()<<endl;
-        }
-    
-        cout<<"Test: Got scan "<<i+1<<" of "<<numReads<<endl;
-    
-        if ( data.haveWarnings )
-            cout << "got warnings: " << data.warnings << endl;
+        }    
     }
 
     delete device;

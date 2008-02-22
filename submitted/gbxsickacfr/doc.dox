@@ -43,8 +43,7 @@ Drives SICK hardware, directly connected to the computer.
 @par Limitations
 
 - This is a Linux-only implementation.  
-- It has not been tested at 500k baud.
-- It has only been tested on the LMS-291
+- It works with those serial devices which @ref gbx_library_gbxserialacfr supports.
 
 */
 

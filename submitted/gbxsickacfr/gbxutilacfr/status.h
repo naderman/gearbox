@@ -21,10 +21,11 @@ namespace gbxutilacfr {
 
 @par Overview
 
-Status provides a machine-readable interface such that other components can 
-monitor this component's status. A single Status object is meant to be shared by all 
-threads in the component so the implementation must be thread-safe. The idea is that Status 
-tracks the state of a number of subsystems (most often one per thread).
+Status provides a machine-readable interface such that tools external
+to the library can monitor its status. A single Status object is meant
+to be shared by all threads in the library, so the implementation must
+be thread-safe. The idea is that Status tracks the state of a number
+of subsystems (most often one per thread).
 
 Each subsystem should first call addSubsystem(), to make the
 Status engine aware that it exists. If any other function is called before 
@@ -35,36 +36,18 @@ from each subsystem.  If the subsystem has not been heard from for
 longer than maxHeartbeatIntervalSec, it is assumed that the 
 subsystem has stalled (hung).
 
-The initial default state of Initialising. As soon as initialisation of the 
-subsystem is finished, you should call ok(). This maybe used by external tools
-as an indication that your subsystem is in "normal" working state.
-
-Status will publish the entire status of every subsystem whenever
-anything changes, or every @c Orca.Status.PublishPeriod, whichever
-occurs first.
+The initial default state is Initialising. As soon as initialisation
+of the subsystem is finished, you should call ok(). This maybe used by
+external tools as an indication that your subsystem is in "normal"
+working state.
 
 @par Local Calls
 
-After registering with setMaxHeartbeatInterval, components set
-their subsystems' status with the various calls.  Each of the calls
-is sufficient to let the Status engine know that the subsystem is alive.
-The special call 'heartbeat' lets Status know that the subsystem is
- alive without modifying its status.
-
-@par Configuration parameters
-
-- @c  Orca.Status.RequireIceStorm (bool)
-    - gbxutilacfr::Component sets up a status and tries to connect to an
-      IceStorm server on the same host in order to publish component's
-      status messages. This parameter determines what happens if no server
-      is found. If set to 0, the startup continues with status messages not
-      published remotely. If set to 1, the application exits.
-    - Default: 0
-
-- @c  Orca.Status.PublishPeriod (double)
-    - The minimum interval, in seconds, between remote publishing of status messages.
-      The actual interval will be less if status changes.
-    - Default: 30
+After registering with setMaxHeartbeatInterval, set the subsystems'
+status with the various calls.  Each of the calls is sufficient to let
+the Status engine know that the subsystem is alive.  The special call
+'heartbeat' lets Status know that the subsystem is alive without
+modifying its status.
 
 @sa Tracer
 */
@@ -92,7 +75,7 @@ public:
     subsystem is left unchanged and warning trace is produced.
     
     May also specify the maximum expected interval between heartbeats. 
-    When time since last heartbeat exceeds this, alarm is raised. Heartbeat interval is normally
+    When time since last heartbeat exceeds this, an alarm is raised. Heartbeat interval is normally
     positive, measured in seconds. Negative interval means infinite interval, this is the default behavior.
     
     The initial state of the subsystem is Initialising.
@@ -104,10 +87,10 @@ public:
     // Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void removeSubsystem( const std::string& subsystem )=0;
 
-    // Modifies maximum expected interval between heartbeats.
+    // Modifies maximum expected interval between heartbeats (in seconds).
     // When time since last heartbeat exceeds this, alarm is raised. 
     // Throws gbxutilacfr::Exception if the subsystem does not exist.
-    virtual void setMaxHeartbeatInterval( const std::string& subsystem, double interval )=0;
+    virtual void setMaxHeartbeatInterval( const std::string& subsystem, double intervalSec )=0;
 
     // Sets subsystem status to Initialising. Note that empty message is assumed if none is supplied.
     // Throws gbxutilacfr::Exception if the subsystem does not exist.

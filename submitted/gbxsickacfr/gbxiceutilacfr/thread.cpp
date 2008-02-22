@@ -92,31 +92,5 @@ void checkedSleep( const gbxiceutilacfr::ThreadPtr& thread, IceUtil::Time durati
     }
 }
 
-// void gbxiceutilacfr::stopAndJoin( const std::vector<gbxiceutilacfr::Thread *> &threads )
-// {
-//     std::vector<IceUtil::ThreadControl*> tc;
-//     for ( uint i=0; i < threads.size(); i++ )
-//     {
-//         if ( !threads[i] )
-//         {
-//             tc[i] = NULL;
-//             continue;
-//         }
-
-//         tc[i] = new IceUtil::ThreadControl( threads[i]->getThreadControl() );
-//         threads[i]->stop();
-//     }
-
-//     for ( uint i=0; i < threads.size(); i++ )
-//     {
-//         if ( tc[i] == NULL )
-//             continue;
-
-//         tc[i]->join();
-
-//         delete tc[i];
-//     }
-// }
-
 }
 } // namespace

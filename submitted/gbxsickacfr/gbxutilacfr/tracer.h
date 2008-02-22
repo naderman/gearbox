@@ -19,17 +19,15 @@ namespace gbxutilacfr {
 // 
 // @brief Local and remote tracing.
 // 
-// Orca Tracer is similar to the Ice Logger interface. We call it Tracer because
-// we use it to log trace statements, e.g. warnings, error messages, etc (not data).
+// Tracer is used to log human-readable trace statements, e.g. warnings, error messages, etc (not data).
 // 
-// A single Tracer object is meant to be shared by all threads in the component so the
+// A single Tracer object is meant to be shared by multiple threads, so the
 // implementation must be thread-safe.
 // 
 // When the tracing message is cheap to generate, simply call one of the tracing functions.
 // The routing to destinations will be performed internally.
 // 
 // @verbatim
-// Tracer* tracer = context().tracer();
 // std::string s = "something is wrong";
 // tracer->error( s );
 // @endverbatim
@@ -48,33 +46,10 @@ namespace gbxutilacfr {
 // }
 // @endverbatim
 // 
-// 
-// @par Tracer Configuration
-// 
-// - @c  Orca.Tracer.RequireIceStorm (bool)
-//     - gbxutilacfr::Component sets up a tracer and tries to connect to an
-//       IceStorm server on the same host in order to publish component's
-//       trace messages. This parameter determines what happens if no server
-//       is found. If set to 0, the startup continues with trace messages not
-//       published remotely. If set to 1, the application exits.
-//     - Default: 0
-// 
-// - @c  Orca.Tracer.Filename (string)
-//  - The name of the output file to which trace statements are
-//    saved. Each component creates its own file. If you want several
-//    component to write trace files and they execute in the same
-//    directory you have to set this property to unique file names in the
-//    component config file.
-//     - Default: "orca_component_trace.txt"
-//     
-// - @c  Orca.Tracer.Timestamp (bool)
-//     - Print timestamp before all trace statements.
-//     - Default: 1
-// 
 // Enum gbxutilacfr::Tracer::TraceType defines types of traced
 // information. Enum gbxutilacfr::Tracer::DestinationType defines possible
 // tracer destinations are. Verbosity levels range from 0 (nothing) to
-// 10 (everything). The built-in defaults as follows:
+// 10 (everything). The built-in defaults are as follows:
 // @verbatim
 //                 ToDisplay   ToNetwork   ToLog   ToFile
 // Info                1           0         0       0
@@ -83,34 +58,8 @@ namespace gbxutilacfr {
 // Debug               0           0         0       0
 // @endverbatim
 // 
-// The Tracer interface allows components to subscribe for tracing with the following functions:
-// - subscribeForComponentMessages
-// - subscribeForPlatformInfoMessages
-// - subscribeForPlatformWarningMessages
-// - subscribeForPlatformErrorMessages
-//
-// The first will get all messages sent ToNetwork by this component.
-// The last three will get all info/warning/error messages sent by components on this platform.
-//
-//
-// For ToNetwork tracing, any messages are sent to the component's topic,
-// something like: 'tracer/*@platformName/componentName'.
-// 
-// In addition, Tracer aggregates all ToNetwork info/warning/error messages for a
-// platform, sending them to the following topics: 
-//  - */info@platformName/*
-//  - */warning@platformName/*
-//  - */error@platformName/*
-// 
-// A sample configuration file which sets all parameters to sensible defaults is shown here.
-// 
-// @include libs/orcaice/orcarc
-//  *
 // @see Status
 //
-//
-// implem notes:
-//   - The local API of this class could also be defined as a local interface in Slice.
 class Tracer
 {
 public:
@@ -141,9 +90,9 @@ public:
     enum DestinationType {
         // Write to stardard display
         ToDisplay=0,
-        // Send over the network to an IceStorm topic
+        // Send over the network, details specific to Tracer implementation
         ToNetwork,
-        // Write to SysLog on Unix, EventLog on windows (currently only SysLog implemented)
+        // Write to SysLog on Unix, EventLog on windows
         ToLog,
         // Write to a file
         ToFile,
@@ -160,10 +109,6 @@ public:
         int verbosity[NumberOfTraceTypes][NumberOfDestinationTypes];
         // affects only the printout to stdout. Remote messages always have a timestamp.
         bool addTimestamp;
-        // If the message and source are identical, ignore this message
-//         bool ignoreRepeatedWarnings;
-        // If the message and source are identical, ignore this message
-//         bool ignoreRepeatedErrors;
     };
 
     // LOCAL INTERFACE

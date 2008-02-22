@@ -357,7 +357,7 @@ Driver::guessLaserBaudRate()
     {
         stringstream ss;
         ss << "Driver: Trying to connect at " << baudRates[baudRateI] << " baud.";
-        tracer_.debug( ss.str() );
+        tracer_.info( ss.str() );
 
         serialHandler_->setBaudRate( baudRates[baudRateI] );
             

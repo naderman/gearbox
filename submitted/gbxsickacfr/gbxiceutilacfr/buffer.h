@@ -87,7 +87,7 @@ public:
     //! Returns buffer type.
     BufferType type() const;
 
-    //! Returns TRUE if there's something in the buffer.
+    //! Returns FALSE if there's something in the buffer.
     bool isEmpty() const;
 
     //! Returns the number of items in the buffer.
