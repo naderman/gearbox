@@ -16,6 +16,6 @@ IF ( build )
 
     GBX_ADD_HEADERS( ${lib_name} ${hdrs} )
 
-    GBX_ADD_EXAMPLE( ${lib_name} example.cmake example.cpp example.readme )
+    GBX_ADD_EXAMPLE( ${lib_name} example.cmake example.cmake example.cpp example.readme )
 
 ENDIF ( build )
