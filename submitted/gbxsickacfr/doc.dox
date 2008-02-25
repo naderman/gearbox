@@ -50,6 +50,13 @@ Drives SICK hardware, directly connected to the computer.
 
 - This is a Linux-only implementation.  
 - It works with those serial devices which @ref gbx_library_gbxserialacfr supports.
+- Currently, timestamps are generated whenever a _full_ message
+  arrives.  This is sub-optimal, since the message may take a
+  significant amount of time to be transmitted over the serial
+  interface.  eg. 181 samples at 38400 baud takes about 75ms.
+  An improvement would be to timestamp the start of each message,
+  remembering that timestamp for subsequent reads from the serial port
+  until the end of the message finally arrives.
 
 */
 
