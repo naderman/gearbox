@@ -72,8 +72,8 @@ WARN_LOGFILE           = "doxywarn.txt"
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = . \
-                         ../src \
-                         ../submitted
+                         ../src #\
+                        #../submitted     #uncomment this if you want to see docs for submitted librarys
 FILE_PATTERNS          = *.cpp \
                          *.cxx \
                          *.hpp \
