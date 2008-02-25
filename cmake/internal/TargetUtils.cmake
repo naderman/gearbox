@@ -38,16 +38,16 @@ MACRO( GBX_ADD_HEADERS install_subdir )
 ENDMACRO( GBX_ADD_HEADERS install_subdir )
 
 #
-# GBX_ADD_EXAMPLE( install_subdir makefile [FILE0 FILE1 FILE2 ...] )
+# GBX_ADD_EXAMPLE( install_subdir makefile.in makefile.out [FILE0 FILE1 FILE2 ...] )
 #
 # Specialisation of INSTALL(FILES ...) for GearBox project to to install examples.
 # All files are installed into PREFIX/share/gearbox/${install_subdir}.
 # makefile is passed through CONFIGURE_FILE to add in correct include and library
 # paths based on the install prefix.
 #
-MACRO( GBX_ADD_EXAMPLE install_subdir makefile )
-    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile} ${CMAKE_CURRENT_BINARY_DIR}/${makefile} @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile} DESTINATION share/gearbox/${install_subdir} RENAME CMakeLists.txt )
+MACRO( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
+    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
+    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/gearbox/${install_subdir} RENAME CMakeLists.txt )
     INSTALL( FILES ${ARGN} DESTINATION share/gearbox/${install_subdir} )
 ENDMACRO( GBX_ADD_EXAMPLE install_subdir makefile )
 
