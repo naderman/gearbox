@@ -7,6 +7,6 @@ CMake with the example's source directory as an argument. For example, if you
 have installed GearBox into /usr/local, you could do the following:
 
 $ cd ~
-$ mkdir gbxserialacfr_example
-$ cd gbxserialacfr_example
-$ ccmake /usr/local/share/gearbox/gbxserialacfr
+$ mkdir gbxsickacfr_example
+$ cd gbxsickacfr_example
+$ ccmake /usr/local/share/gearbox/gbxsickacfr
