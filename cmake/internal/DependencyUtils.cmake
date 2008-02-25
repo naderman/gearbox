@@ -1,3 +1,23 @@
+MACRO( GBX_MAKE_OPTION_NAME option_name module_type module_name )
+
+    STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    IF ( NOT is_exe AND NOT is_lib )
+        MESSAGE ( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF ( NOT is_exe AND NOT is_lib )
+    IF ( is_exe AND is_lib )
+        MESSAGE ( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF ( is_exe AND is_lib )
+
+    STRING( TOUPPER ${module_name} module_name_upper )
+    IF ( is_exe )
+        SET( option_name "ENABLE_${module_name_upper}" )
+    ELSE ( is_exe )
+        SET( option_name "ENABLE_LIB_${module_name_upper}" )
+    ENDIF ( is_exe )
+
+ENDMACRO( GBX_MAKE_OPTION_NAME option_name module_name )
+
 #
 # GBX_REQUIRE_OPTION( cumulative_var [EXE | LIB] module_name default_option_value [option_name] [OPTION DESCRIPTION] )
 #
@@ -77,10 +97,10 @@ MACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
     STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
     STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
     IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
     ENDIF ( NOT is_exe AND NOT is_lib )
     IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
     ENDIF ( is_exe AND is_lib )
 
     # must dereference both var names once (!) and IF will evaluate their values
@@ -112,10 +132,10 @@ MACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
     STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
     STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
     IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
     ENDIF ( NOT is_exe AND NOT is_lib )
     IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
     ENDIF ( is_exe AND is_lib )
 
     IF ( ${ARGC} GREATER 5 )
@@ -129,10 +149,13 @@ MACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
     # must dereference both var and option names once (!) and IF will evaluate their values
     IF ( ${cumulative_var} AND NOT target_location  )
         SET( ${cumulative_var} FALSE )
+        GBX_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
         IF ( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
+            SET( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
         ELSE ( is_exe )
             GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
+            SET( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
         ENDIF ( is_exe )
     ENDIF ( ${cumulative_var} AND NOT target_location )
 
