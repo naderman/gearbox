@@ -18,6 +18,11 @@ namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 
+//!
+//! @brief A trivial implementation of the status API which prints to cout.
+//!
+//! @see Status
+//!
 class TrivialStatus : public Status
 {
 public:

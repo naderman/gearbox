@@ -50,6 +50,9 @@ C++ class wrapping a serial port. For a full list of functions and classes see @
 @par Responsible Developer
   Alex Brooks
 
+@par License
+  LGPL
+
 */
 
 /*!

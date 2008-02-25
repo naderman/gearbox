@@ -18,7 +18,7 @@
 namespace gbxsickacfr {
 namespace gbxserialdeviceacfr {
 
-// @brief A generic Response: a message received from the device
+//! @brief A generic Response: a message received from the device
 class IResponse : public IceUtil::Shared
 {
 public:
@@ -34,7 +34,7 @@ public:
 };
 typedef IceUtil::Handle<IResponse> IResponsePtr;
 
-// Response plus a timeStamp: a simple container to keep the two together
+//! Response plus a timeStamp: a simple container to keep the two together
 class TimedResponse {
 public:
 
@@ -48,10 +48,10 @@ public:
     IResponsePtr response;
 };
 
-//
-// The implementation of this class needs to be provided by the user.
-// It parses buffers to produce discrete messages (responses form the device)
-//
+//!
+//! The implementation of this class needs to be provided by the user.
+//! It parses buffers to produce discrete messages (responses form the device)
+//!
 class IResponseParser {
 
 public:
@@ -72,19 +72,19 @@ public:
 
 };
 
-//
-// @brief Handles the serial port.
-//
-// This thread waits for new messags to arrive from the device, parses
-// them and sticks them into a buffer for someone else to grab. 
-//
-// Read in this separate loop so we can hopefully grab the messages
-// as soon as they arrive, without relying on an external poller
-// which may be busy doing other stuff.
-// This will hopefully give us accurate timestamps.
-//
-// @author Alex Brooks
-//
+//!
+//! @brief Handles the serial port.
+//!
+//! This thread waits for new messags to arrive from the device, parses
+//! them and sticks them into a buffer for someone else to grab. 
+//!
+//! Read in this separate loop so we can hopefully grab the messages
+//! as soon as they arrive, without relying on an external poller
+//! which may be busy doing other stuff.
+//! This will hopefully give us accurate timestamps.
+//!
+//! @author Alex Brooks
+//!
 class SerialDeviceHandler : public gbxiceutilacfr::SubsystemThread
 {
 

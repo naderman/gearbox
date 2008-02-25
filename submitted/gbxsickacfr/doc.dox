@@ -29,11 +29,17 @@ Drives SICK hardware, directly connected to the computer.
 @par Style
   See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
 
+@par Units and Coordinate System
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_units.html
+
 @par Copyright
   Alex Brooks, Alexei Makarenko, Tobias Kaupp
 
 @par Responsible Developer
   Alex Brooks
+  
+@par License
+  LGPL
   
 @par Dependencies
 

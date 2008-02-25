@@ -69,8 +69,8 @@ public:
     //! Constructor
     Driver( const Config &config, gbxutilacfr::Tracer& tracer, gbxutilacfr::Status& status );
 
-    //! Blocks till new data is available, but shouldn't occupy the thread indefinitely.
-    //! Ranges and intensities can be expected to have been pre-sized correctly.
+    //! Blocks till new data is available, but not for longer than timeoutMs.
+    //! The ranges and intensities in 'data' are expected to have been pre-sized correctly.
     //! Throws exceptions on un-recoverable faults.
     //!
     //! The default timeout is greater than the scan inter-arrival time for all baudrates.

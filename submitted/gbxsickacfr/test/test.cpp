@@ -35,19 +35,19 @@ int main( int argc, char **argv )
     // Get some options from the command line
     while ((opt = getopt (argc, argv, "p:b:")) != -1)
     {
-        switch (opt)
+        switch ( opt )
         {
-            case 'p':
-                port = optarg;
-                break;
-            case 'b':
-                baud = atoi (optarg);
-                break;
-            default:
-                cout << "Usage: " << argv[0] << " [-p port] [-b baud]" << endl << endl
-                     << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
-                     << "-b baud\tBaud rate to connect at (19200, 57600 or 115200)." << endl;
-                return 1;
+        case 'p':
+            port = optarg;
+            break;
+        case 'b':
+            baud = atoi( optarg );
+            break;
+        default:
+            cout << "Usage: " << argv[0] << " [-p port] [-b baud]" << endl << endl
+                 << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
+                 << "-b baud\tBaud rate to connect at (19200, 57600 or 115200)." << endl;
+            return 1;
         }
     }
 

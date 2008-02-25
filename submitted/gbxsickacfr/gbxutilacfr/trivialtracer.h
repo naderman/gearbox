@@ -16,6 +16,11 @@
 namespace gbxsickacfr {
 namespace gbxutilacfr {
 
+//!
+//! @brief A simple implementation of the tracer API which prints to cout.
+//!
+//! @see Tracer
+//!
 class TrivialTracer : public Tracer
 {
 public:

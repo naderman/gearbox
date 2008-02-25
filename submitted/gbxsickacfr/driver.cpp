@@ -72,8 +72,7 @@ Config::Config() :
 bool
 Config::validate() const
 {
-    // baudRate ???
-    // device ???
+    // Don't bother verifying baudRate or device, the user will find out soon enough when the Driver bitches.
     if ( minRange < 0.0 ) return false;
     if ( maxRange <= 0.0 ) return false;
     if ( fieldOfView <= 0.0 || fieldOfView > DEG2RAD(360.0) ) return false;
@@ -227,7 +226,7 @@ Driver::waitForAckOrNack( bool &receivedAck )
         else
         {
             stringstream ss;
-            ss << "Weird return code from getAndPopNext: " << ret;
+            ss << "Weird return code from serialHandler_->getNextResponse: " << ret;
             throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
         }
     }    
@@ -310,7 +309,7 @@ Driver::desiredConfiguration()
     //        help with dazzle (ie sunlight interfering with the laser).
     //        I haven't had a chance to test it though, so I'm not game
     //        to set it.
-    cout<<"TRACE(sickacfrdriver.cpp): TODO: set availability?" << endl;
+    cout<<"TRACE(driver.cpp): TODO: set availability?" << endl;
     // c.availability = 0x01;
 
     return c;
