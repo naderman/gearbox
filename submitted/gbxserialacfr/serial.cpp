@@ -31,11 +31,8 @@
 // FIONREAD
 #  include <sys/filio.h>
 #endif
-// Ensure we have strnlen
-// #include <hydroportability/strnlen.h>
- 
-// copy the contents of this file below
-// start of <hydroportability/strnlen.h>
+
+// Ensure we have strnlen 
 // eg. Solaris doesn't define strnlen in string.h, so define it here.
 #if !HAVE_STRNLEN
 
@@ -56,12 +53,7 @@ inline size_t strnlen(const char *s, size_t maxlen)
     return ((p - s) + 1);
 }
 #endif
-// end of <hydroportability/strnlen.h>
 
-// define for a debug compile
-#define DEBUG
-
- 
 using namespace std;
 
 namespace gbxserialacfr {
@@ -343,15 +335,13 @@ namespace gbxserialacfr {
 //////////////////////////////////////////////////////////////////////
     
 Serial::Serial( const std::string &dev,
-                int baudRate,
-                bool enableTimeouts,
-                int debuglevel,
-                bool useLockFile )
+                int                baudRate,
+                const Timeout     &timeout,
+                int                debuglevel,
+                bool               useLockFile )
     : dev_(dev),
       portFd_(-1),
-      timeoutSec_(1),
-      timeoutUSec_(1),
-      timeoutsEnabled_(enableTimeouts),
+      timeout_(timeout),
       debugLevel_(debuglevel)
 {
     if ( useLockFile )
@@ -389,20 +379,21 @@ Serial::~Serial()
 }
 
 void 
-Serial::setTimeout(int sec, int usec) 
-{ 
-    if ( !timeoutsEnabled_ )
+Serial::setTimeout( const Timeout &timeout )
+{
+    bool newTimeoutsEnabled = !( timeout.sec == 0 && timeout.usec == 0 );
+    if ( timeoutsEnabled() != newTimeoutsEnabled )
     {
-        stringstream s;
-        s << "setTimeout() called for port" << dev_ <<" but timeouts not enabled!";
-        throw SerialException( s.str() );
+        stringstream ss;
+        ss << "setTimeout() for port " << dev_ 
+           <<" tried to change enabled state of timeouts!  Timeouts previously enabled: " << timeoutsEnabled();
+        throw SerialException( ss.str() );
     }
-
-    timeoutSec_=sec; timeoutUSec_=usec; 
+    timeout_ = timeout;
 }
 
 void
-Serial::close()
+Serial::close() throw()
 {
     if ( debugLevel_ > 0 )
     {
@@ -463,7 +454,8 @@ Serial::setBaudRate(int baud)
     if ( strstr( dev_.c_str(), "USB" ) == 0 )
     {
         //
-        // AlexB: For reasons I don't fully understand, this chunk is required to make the
+        // AlexB: TODO: fix this properly:
+        //        For reasons I don't fully understand, this chunk is required to make the
         //        laser work at standard baud rates.
         //
         struct serial_struct  serinfo;
@@ -499,7 +491,7 @@ Serial::open(int flags)
 {
     struct termios localOptions;
     
-    if ( timeoutsEnabled_ )
+    if ( timeoutsEnabled() )
         flags |= O_NONBLOCK;
 
     portFd_ = ::open(dev_.c_str(), flags|O_RDWR|O_NOCTTY);
@@ -606,7 +598,7 @@ Serial::readFull(void *buf, int count)
             got += ret;
         }
     
-        else if (timeoutsEnabled_ && (errno == EAGAIN) )
+        else if (timeoutsEnabled() && (errno == EAGAIN) )
         {
             if ( waitForDataOrTimeout() == TIMED_OUT )
             {
@@ -635,21 +627,21 @@ Serial::readLine(void *buf, int count, char termchar)
 {
     if ( debugLevel_ > 0 ){
         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
-        if(timeoutsEnabled_){ 
+        if(timeoutsEnabled()){ 
             cout << "timeouts enabled"<<endl; 
         }else{
             cout << "timeouts not enabled"<<endl;
         }
     }
 
-    //There must be at least room for a terminating char and NULL terminator!
+    // There must be at least room for a terminating char and NULL terminator!
     assert (count >= 2);
 
     char* dataPtr = static_cast<char*>(buf);
     const char* bufPtr = static_cast<char*>(buf);
     char nextChar = 0;
 
-    do{        
+    do {        
         //Check for buf overrun Must leave room for NULL terminator
         if ( dataPtr >= bufPtr + (count - 1) )
         {
@@ -665,8 +657,8 @@ Serial::readLine(void *buf, int count, char termchar)
         }
         else
         {
-            //If timeouts enabled and no data, wait and then go again
-            if( timeoutsEnabled_ &&  (ret == -1) && (errno == EAGAIN) )
+            // If timeouts enabled and no data, wait and then go again
+            if( timeoutsEnabled() &&  (ret == -1) && (errno == EAGAIN) )
             {
                 if(waitForDataOrTimeout() == GOT_DATA)
                 {
@@ -728,8 +720,8 @@ Serial::waitForDataOrTimeout()
     struct timeval tv;
     FD_ZERO(&rfds);
     FD_SET(portFd_, &rfds);
-    tv.tv_sec = timeoutSec_;
-    tv.tv_usec = timeoutUSec_;
+    tv.tv_sec = timeout_.sec;
+    tv.tv_usec = timeout_.usec;
     int selval = select(portFd_+1, &rfds, NULL, NULL, &tv);
     if(selval==0)
     {

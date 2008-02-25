@@ -18,10 +18,10 @@ namespace gbxsickacfr {
 SerialHandler::SerialHandler( const std::string &dev,
                     gbxutilacfr::Tracer       &tracer,
                     gbxutilacfr::Status       &status )
-    : serialPort_( dev.c_str(), 9600, true ),
+    : serialPort_( dev.c_str(), 9600, gbxserialacfr::Serial::Timeout( 0, 200000 ) ),
       serialDeviceHandler_( 
             new gbxserialdeviceacfr::SerialDeviceHandler( "LaserSerialHandler",
-                                            serialPort_, responseParser_, tracer, status ) ),
+                                                          serialPort_, responseParser_, tracer, status ) ),
       serialDeviceHandlerThreadPtr_( serialDeviceHandler_ )
 {
     serialDeviceHandler_->start();

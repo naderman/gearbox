@@ -97,14 +97,12 @@ public:
     //   - serialPort_: must have timeouts enabled
     //   - serialTimeout: the timout to use when reading fromt he serial port
     //                    (controls the frequency of the loop)
-    SerialDeviceHandler( const std::string               &subsysName,
-                         gbxserialacfr::Serial           &serialPort,
-                         IResponseParser                 &responseParser,
-                         gbxutilacfr::Tracer       &tracer,
-                         gbxutilacfr::Status       &status,
-                         int                             serialTimeoutSec=0,
-                         int                             serialTimeoutUsec=200000,
-                         int                             unparsedBytesWarnThreshold=20000 );
+    SerialDeviceHandler( const std::string     &subsysName,
+                         gbxserialacfr::Serial &serialPort,
+                         IResponseParser       &responseParser,
+                         gbxutilacfr::Tracer   &tracer,
+                         gbxutilacfr::Status   &status,
+                         int                    unparsedBytesWarnThreshold = 20000 );
 
     ~SerialDeviceHandler();
 

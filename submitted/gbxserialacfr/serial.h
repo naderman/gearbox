@@ -46,16 +46,25 @@ class Serial : public Uncopyable
 {
 public:
 
+    struct Timeout {
+        Timeout( int s, int us )
+            : sec(s), usec(us)
+            {}
+        int sec;
+        int usec;
+    };
+
     //! Opens a device @ref dev.
-    //! Throws exceptions on error.
-    //! If timeouts are enabled, they default to 1sec.
+    //! Throws SerialException's or LockFileException's (both derive from std::exception) on error.
+    //! Timeouts control the various read functions below.
+    //! A timeout value of (sec=0,usec=0) indicates 'timeouts disabled'.
     //! If useLockFile is set to true, Serial will use the file-system to 
     //! prevent concurrent access to a serial device by multiple instances of Serial.
     Serial( const std::string &dev,
-            int  baudRate,
-            bool enableTimeouts,
-            int  debuglevel = 0,
-            bool useLockFile = true );
+            int                baudRate,
+            const Timeout     &timeout,
+            int                debuglevel  = 0,
+            bool               useLockFile = true );
 
     //! Destructor closes serial port
     ~Serial();
@@ -66,8 +75,9 @@ public:
     //! Sets the baud rate. Flushes any data.
     void setBaudRate(int baud);
 
-    //! Sets timeout (timeouts must be enabled)
-    void setTimeout(int sec, int usec);
+    //! Sets timeout.  Can be used to change the value of timeouts if they're set,
+    //! but can't set the {en|dis}abled state of timeouts.
+    void setTimeout( const Timeout &timeout );
 
     //! Reads up to @ref count bytes into buffer @ref buf.
     //! Returns the number of bytes read, or '-1' on timeout (if timeouts are enabled).
@@ -150,13 +160,15 @@ private:
     void open(int flags=0);
 
     // Won't throw exceptions.
-    void close();
+    void close() throw();
+
+    bool timeoutsEnabled() const
+        { return !( timeout_.sec == 0 && timeout_.usec == 0 ); }
 
     const std::string dev_;
     int portFd_;
-    int timeoutSec_;
-    int timeoutUSec_;
-    bool timeoutsEnabled_;
+
+    Timeout timeout_;
     
     int debugLevel_;
 

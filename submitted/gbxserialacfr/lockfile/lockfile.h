@@ -16,9 +16,9 @@
 namespace gbxserialacfr {
 namespace lockfile {
 
-//
-// @brief Exception thrown by lockfile functions
-//
+//!
+//! @brief Exception thrown by lockfile functions
+//!
 class LockFileException : public std::exception
 { 
     std::string  message_;
@@ -31,17 +31,19 @@ public:
     virtual const char* what() const throw() { return message_.c_str(); }
 };
 
-//
-// Creates a lock-file which can be used to prevent multiple access to
-// a unique resource (eg "/dev/xxx").
-// Stores the PID of the locking process (lockPid), so it can check for stale lock-files.
-//
-// Throws LockFileException's on errors (including 'device locked').
-//
-// The destructor removes the lock-file (guarantees that no exceptions are thrown).
-//
-// For more info, see: http://tldp.org/HOWTO/Serial-HOWTO-14.html
-//
+//!
+//! Creates a lock-file (in /var/lock) which can be used to prevent multiple access to
+//! a unique resource (eg "/dev/xxx").
+//! Stores the PID of the locking process (lockPid), so it can check for stale lock-files.
+//!
+//! Throws LockFileException's on errors (including 'device locked').
+//!
+//! The destructor removes the lock-file (guarantees that no exceptions are thrown).
+//!
+//! For more info, see: http://tldp.org/HOWTO/Serial-HOWTO-14.html
+//!
+//! @author Alex Brooks
+//!
 class LockFile {
 public:
 

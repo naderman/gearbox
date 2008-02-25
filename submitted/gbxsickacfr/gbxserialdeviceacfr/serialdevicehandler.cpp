@@ -41,14 +41,12 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-SerialDeviceHandler::SerialDeviceHandler( const std::string               &subsysName,
-                                          gbxserialacfr::Serial           &serialPort,
-                                          IResponseParser                 &responseParser,
-                                          gbxutilacfr::Tracer       &tracer,
-                                          gbxutilacfr::Status       &status,
-                                          int                             serialTimeoutSec,
-                                          int                             serialTimeoutUsec,
-                                          int                             unparsedBytesWarnThreshold )
+SerialDeviceHandler::SerialDeviceHandler( const std::string     &subsysName,
+                                          gbxserialacfr::Serial &serialPort,
+                                          IResponseParser       &responseParser,
+                                          gbxutilacfr::Tracer   &tracer,
+                                          gbxutilacfr::Status   &status,
+                                          int                    unparsedBytesWarnThreshold )
     : gbxiceutilacfr::SubsystemThread( tracer, status, subsysName ),
       serial_(serialPort),
       responseParser_(responseParser),
@@ -59,8 +57,6 @@ SerialDeviceHandler::SerialDeviceHandler( const std::string               &subsy
       tracer_(tracer),
       status_(status)
 {
-    serial_.setTimeout( serialTimeoutSec, serialTimeoutUsec );
-
     status_.setMaxHeartbeatInterval( subsysName, 60 );
     status_.initialising( subsysName );
 }

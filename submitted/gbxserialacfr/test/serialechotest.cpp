@@ -35,9 +35,7 @@ int main( int argc, char **argv )
         exit(1);
     }
 
-    const bool enableTimeouts = true;
-    gbxserialacfr::Serial serial( argv[1], atoi(argv[2]), enableTimeouts );
-    serial.setTimeout( 1, 0 );
+    gbxserialacfr::Serial serial( argv[1], atoi(argv[2]), gbxserialacfr::Serial::Timeout(1,0) );
 
     std::vector<unsigned char> data;
     while ( true )
