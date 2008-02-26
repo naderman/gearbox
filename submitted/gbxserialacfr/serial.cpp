@@ -623,7 +623,7 @@ Serial::readFull(void *buf, int count)
 
 
 int 
-Serial::readLine(void *buf, int count, char termchar)
+Serial::readUntil(void *buf, int count, char termchar)
 {
     if ( debugLevel_ > 0 ){
         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";

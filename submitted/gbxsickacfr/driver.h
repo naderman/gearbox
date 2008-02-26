@@ -67,14 +67,22 @@ class Driver
 public: 
 
     //! Constructor
-    Driver( const Config &config, gbxutilacfr::Tracer& tracer, gbxutilacfr::Status& status );
-
-    //! Blocks till new data is available, but not for longer than timeoutMs.
-    //! The ranges and intensities in 'data' are expected to have been pre-sized correctly.
-    //! Throws exceptions on un-recoverable faults.
     //!
-    //! The default timeout is greater than the scan inter-arrival time for all baudrates.
-    void read( Data &data, int timeoutMs=1000 );
+    //! gbxutilacfr::Tracer and gbxutilacfr::Status allow
+    //! (human-readable and machine-readable respectively) external
+    //! monitorining of the driver's internal state.
+    Driver( const Config        &config,
+            gbxutilacfr::Tracer &tracer,
+            gbxutilacfr::Status &status );
+
+    //! Blocks till new data is available, but times out (and throws a gbxutilacfr::Exception)
+    //! if it has waited an abnormally long time without receiving a scan. 
+    //!
+    //! The ranges and intensities in 'data' are expected to have been pre-sized correctly.
+    //!
+    //! Throws gbxutilacfr::Exception's on un-recoverable faults.
+    //!
+    void read( Data &data );
 
 private: 
 

@@ -96,13 +96,13 @@ public:
     //!
     int readFull(void *buf, int count);
 
-    //! Reads a line of data up to @ref count bytes-1 (including @ref termchar), terminated by @ref termchar.
+    //! Reads up to @ref count bytes-1 (including @ref termchar), terminated by @ref termchar.
     //! Returns the number of bytes read.
-    //! After reading the line then the string will be NULL terminated.
+    //! After reading the data, the string will be NULL terminated.
     //!
     //! Example: if you expect to read the string "1234\n", you need something like:
     //!                char buf[6];
-    //!                serial.readLine( buf, 6 );
+    //!                serial.readUntil( buf, 6, '\n' );
     //!
     //!          where the two extra characters are for the "\n" and the terminating "\0".
     //!
@@ -113,7 +113,11 @@ public:
     //! NOTE: The timeout applies for each individual read() call.  We might have to make lots of them,
     //!       so the total time for which this function blocks might be longer than the specified timeout.
     //!
-    int readLine(void *buf, int count, char termchar='\n');
+    int readUntil(void *buf, int count, char termchar);
+
+    //! Short-hand for "readUntil(buf,count,'\n');"
+    int readLine(void *buf, int count)
+        { return readUntil(buf,count,'\n'); }
 
     //! Returns the number of bytes available for reading (non-blocking).
     int bytesAvailable();

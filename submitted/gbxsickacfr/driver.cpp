@@ -546,9 +546,12 @@ Driver::sendAndExpectResponse( const std::vector<uChar> &commandAndData, bool ig
 }
 
 void 
-Driver::read( Data &data, int timeoutMs )
+Driver::read( Data &data )
 {
     TimedLmsResponse response;
+
+    // This timeout is greater than the scan inter-arrival time for all baudrates.
+    const int timeoutMs = 1000;
     bool received = waitForResponseType( ACK_REQUEST_MEASURED_VALUES, response, timeoutMs );
     if ( !received )
     {
