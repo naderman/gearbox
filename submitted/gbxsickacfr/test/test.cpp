@@ -33,7 +33,7 @@ int main( int argc, char **argv )
     string port = "/dev/ttyS0";
 
     // Get some options from the command line
-    while ((opt = getopt (argc, argv, "p:b:")) != -1)
+    while ((opt = getopt(argc, argv, "p:b:")) != -1)
     {
         switch ( opt )
         {
