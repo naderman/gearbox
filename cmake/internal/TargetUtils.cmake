@@ -57,6 +57,33 @@ MACRO( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
     INSTALL( FILES ${ARGN} DESTINATION share/gearbox/${install_subdir} )
 ENDMACRO( GBX_ADD_EXAMPLE install_subdir makefile )
 
+#
+# GBX_ADD_PKGCONFIG( name cflags libflags [DEPENDENCY0 DEPENDENCY1 ...] )
+#
+# Creates a pkg-config file for library "name".
+# desc is a description of the library.
+# ext_deps is a list containing all the external libraries this one requires (pass by reference).
+# int_deps is a list containing all the internal libraries this library depends on (pass by reference).
+# cflags is appended to the "Cflags" value.
+# libflags is appended to the "Libs" value.
+# that should be linked with at the same time as linking to this library.
+#
+MACRO( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
+    SET( PKG_NAME ${name} )
+    SET( PKG_DESC ${desc} )
+    SET( PKG_CFLAGS ${cflags} )
+    SET( PKG_LIBFLAGS ${libflags} )
+    SET( PKG_EXTERNAL_DEPS ${${ext_deps}} )
+    SET( PKG_INTERNAL_DEPS "" )
+    IF( ${int_deps} )
+        FOREACH( A ${${int_deps}} )
+            SET( PKG_INTERNAL_DEPS "${PKG_INTERNAL_DEPS} -l${A}" )
+        ENDFOREACH( A ${${int_deps}} )
+    ENDIF( ${int_deps} )
+
+    CONFIGURE_FILE( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
+    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/gearbox/ )
+ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #
 # This is a mechanism to register special items which are not

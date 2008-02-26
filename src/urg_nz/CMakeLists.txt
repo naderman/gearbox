@@ -1,4 +1,5 @@
 SET ( lib_name urg_nz )
+set ( lib_desc "Hokuyo URG laser scanner driver" )
 GBX_ADD_LICENSE( GPL )
 
 SET ( build TRUE )
@@ -13,6 +14,7 @@ IF ( build )
     SET( srcs urg_nz.cpp )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} "" "" "" "" )
 
     GBX_ADD_HEADERS( ${lib_name} ${hdrs} )
 
