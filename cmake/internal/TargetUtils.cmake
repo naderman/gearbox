@@ -4,13 +4,16 @@
 # Usage: GBX_ADD_EXECUTABLE( name src1 src2 src3 )
 #
 MACRO( GBX_ADD_EXECUTABLE name )
-  ADD_EXECUTABLE( ${name} ${ARGN} )
-  INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
-  SET( templist ${COMPONENT_LIST} )
-  LIST ( APPEND templist ${name} )
+    ADD_EXECUTABLE( ${name} ${ARGN} )
+    SET_TARGET_PROPERTIES( ${name} PROPERTIES
+        INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+        BUILD_WITH_INSTALL_RPATH TRUE )
+    INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
+    SET( templist ${COMPONENT_LIST} )
+    LIST ( APPEND templist ${name} )
 #   MESSAGE ( STATUS "DEBUG: ${templist}" )
-  SET( COMPONENT_LIST ${templist} CACHE INTERNAL "Global list of components to build" FORCE )
-  MESSAGE( STATUS "Planning to Build Executable: ${name}" )
+    SET( COMPONENT_LIST ${templist} CACHE INTERNAL "Global list of components to build" FORCE )
+    MESSAGE( STATUS "Planning to Build Executable: ${name}" )
 ENDMACRO( GBX_ADD_EXECUTABLE name )
 
 #
@@ -20,6 +23,9 @@ ENDMACRO( GBX_ADD_EXECUTABLE name )
 #
 MACRO( GBX_ADD_LIBRARY name )
     ADD_LIBRARY( ${name} ${ARGN} )
+    SET_TARGET_PROPERTIES( ${name} PROPERTIES
+        INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+        BUILD_WITH_INSTALL_RPATH TRUE )
     INSTALL( TARGETS ${name} LIBRARY DESTINATION lib/gearbox )
     SET( templist ${LIBRARY_LIST} )
     LIST ( APPEND templist ${name} )
