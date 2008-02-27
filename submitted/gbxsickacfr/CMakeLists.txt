@@ -29,6 +29,7 @@ IF ( build )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} "Drives SICK hardware, directly connected to the computer." proj_libs int_libs "" "" )
 
     GBX_ADD_HEADERS( gbxsickacfr ${hdrs} )
 
