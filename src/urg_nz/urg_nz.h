@@ -166,7 +166,7 @@ class urg_laser
         The scan is a series of discrete values. They can be indexed, starting at 0 and going up to
         @ref MAX_READINGS. A subset of these values only can be returned using min_i and max_i.
 
-        @param readings Pointer to a @ref urg_laser_readings_t structure to store the data in.
+        @param readings Pointer to a @ref urg_nz_laser_readings_t structure to store the data in.
         @param min_i The minimum scan index to retrieve. Must be at least 0. Default is 0.
         @param max_i The maximum scan index to retrieve. Must be no greater than @ref MAX_READINGS. Default is @ref MAX_READINGS.
         @return The number of range readings read. */
@@ -179,7 +179,7 @@ class urg_laser
 
         /** @brief Get the laser scanner configuration (resolution, scan angles, etc.)
 
-        @param cfg Pointer to a @ref urg_laser_config_t structure to store the configuration in. */
+        @param cfg Pointer to a @ref urg_nz_laser_config_t structure to store the configuration in. */
         void GetSensorConfig (urg_nz_laser_config_t *cfg);
 
         /** @brief Get the protocol version used by the connected laser scanner.
