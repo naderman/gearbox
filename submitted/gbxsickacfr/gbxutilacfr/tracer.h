@@ -40,9 +40,9 @@ namespace gbxutilacfr {
 // 
 // @verbatim
 // Tracer* tracer = context().tracer();
-// if ( tracer->verbocity( gbxutilacfr::Tracer::ErrorTrace, gbxutilacfr::Tracer::ToAny ) ) {
+// if ( tracer.verbosity( gbxutilacfr::Tracer::ErrorTrace, gbxutilacfr::Tracer::ToAny ) > 0 ) {
 //     std::string s = expensiveOperation();
-//     tracer->error( s );
+//     tracer.error( s );
 // }
 // @endverbatim
 // 
