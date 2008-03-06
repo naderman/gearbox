@@ -70,9 +70,16 @@ Config::Config() :
 }
 
 bool
-Config::validate() const
+Config::isValid() const
 {
-    // Don't bother verifying baudRate or device, the user will find out soon enough when the Driver bitches.
+    // Don't bother verifying device, the user will find out soon enough when the Driver bitches.
+    if ( !( baudRate == 9600    ||
+            baudRate == 19200   ||
+            baudRate == 38400   ||
+            baudRate == 500000 ) )
+    {
+        return false;
+    }
     if ( minRange < 0.0 ) return false;
     if ( maxRange <= 0.0 ) return false;
     if ( fieldOfView <= 0.0 || fieldOfView > DEG2RAD(360.0) ) return false;
@@ -111,6 +118,13 @@ Driver::Driver( const Config &config, gbxutilacfr::Tracer& tracer, gbxutilacfr::
       tracer_(tracer),
       status_(status)
 {
+    if ( !config.isValid() )
+    {
+        stringstream ss;
+        ss << __func__ << "(): Invalid config: " << config.toString();
+        throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
+    }
+
     stringstream ssDebug;
     ssDebug << "Connecting to laser on serial port " << config_.device;
     tracer_.debug( ssDebug.str() );

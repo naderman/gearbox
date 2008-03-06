@@ -46,7 +46,7 @@ int main( int argc, char **argv )
         default:
             cout << "Usage: " << argv[0] << " [-p port] [-b baud]" << endl << endl
                  << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
-                 << "-b baud\tBaud rate to connect at (19200, 57600 or 115200)." << endl;
+                 << "-b baud\tBaud rate to connect at (9600, 19200, 38400, oro 500000)." << endl;
             return 1;
         }
     }
@@ -60,8 +60,9 @@ int main( int argc, char **argv )
     config.numberOfSamples = 181;
     config.baudRate = baud;
     config.device = port;
-    if ( !config.validate() ) {
+    if ( !config.isValid() ) {
         cout << "Test: Invalid laser configuration: " << config.toString() << endl;
+        exit(1);
     }
     cout << "Using configuration: " << config.toString() << endl;
 

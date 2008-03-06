@@ -23,7 +23,7 @@ class Config
 {   
 public:
     Config();
-    bool validate() const;
+    bool isValid() const;
     std::string toString() const;
     bool operator==( const Config & other );
     bool operator!=( const Config & other );
