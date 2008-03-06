@@ -408,8 +408,26 @@ Driver::initLaser()
     // Turn continuous mode off
     //
     tracer_.debug("Driver: Turning continuous mode off");
-    constructRequestMeasuredOnRequestMode( commandAndData_ );
-    sendAndExpectResponse( commandAndData_ );
+    // For some reason this isn't always reliable, not too sure why.
+    // Perhaps there's some crap left in the buffer after the thing
+    // was previously in continuous mode?
+    const int MAX_TRIES=3;
+    for ( uint i=0; i < MAX_TRIES; i++ )
+    {
+        try {
+            constructRequestMeasuredOnRequestMode( commandAndData_ );
+            sendAndExpectResponse( commandAndData_ );
+            break;
+        }
+        catch ( NoResponseException &e )
+        {
+            if ( i == MAX_TRIES-1 )
+            {
+                // Give up
+                throw;
+            }
+        }
+    }
 
     //
     // Set Desired BaudRate
