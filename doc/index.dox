@@ -45,6 +45,7 @@ Note: The documentation on this web page matches the latest release. A web page 
 
 @section gbx_doc_index_news News
 
+- 18-Mar-08 Accepted ACFR's implementation of SICK laser driver and the serial library used by it.
 - 08-Feb-08 Accepted the first library: a driver for the URG laser.
 - 01-Feb-08 Project created. @ref gbx_doc_announce "A half-page announcement".
 */
