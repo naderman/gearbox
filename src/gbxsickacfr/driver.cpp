@@ -412,7 +412,7 @@ Driver::initLaser()
     // Perhaps there's some crap left in the buffer after the thing
     // was previously in continuous mode?
     const int MAX_TRIES=3;
-    for ( uint i=0; i < MAX_TRIES; i++ )
+    for ( int i=0; i < MAX_TRIES; i++ )
     {
         try {
             constructRequestMeasuredOnRequestMode( commandAndData_ );
