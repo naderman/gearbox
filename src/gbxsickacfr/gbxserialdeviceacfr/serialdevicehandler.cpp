@@ -51,8 +51,6 @@ SerialDeviceHandler::SerialDeviceHandler( const std::string     &subsysName,
       serial_(serialPort),
       responseParser_(responseParser),
       responseBuffer_(-1,gbxiceutilacfr::BufferTypeCircular),
-      isMessageWaitingToBeSent_(false),
-      baudRateChangePending_(false),
       unparsedBytesWarnThreshold_(unparsedBytesWarnThreshold),
       tracer_(tracer),
       status_(status)
@@ -73,31 +71,19 @@ SerialDeviceHandler::~SerialDeviceHandler()
 void
 SerialDeviceHandler::setBaudRate( int baudRate )
 {
-    stringstream ss; ss << "SerialDeviceHandler: baud rate change requested: " << baudRate;
-    tracer_.debug( ss.str() );
-
-    IceUtil::Mutex::Lock lock(mutex_);
-
-    assert( !baudRateChangePending_ );
-
-    baudRateChangePending_ = true;
-    newBaudRate_ = baudRate;
+    tracer_.debug( "SerialDeviceHandler: Changing baud rate and flushing." );
+    serial_.setBaudRate( baudRate );
+    // TODO: AlexB: not entirely sure if these are
+    // necessary, they should either be removed or
+    // added to the setBaudRate function.
+    serial_.flush();
+    serial_.drain();
 }
 
 void
 SerialDeviceHandler::send( const char *commandBytes, int numCommandBytes )
 {
-    IceUtil::Mutex::Lock lock(mutex_);
-
-    if ( isMessageWaitingToBeSent_ )
-    {
-        stringstream ss;
-        ss << "SerialDeviceHandler::send(): there's a message already waiting to be sent!";
-        throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
-    }
-    isMessageWaitingToBeSent_ = true;
-    toSend_.resize(numCommandBytes);
-    memcpy( &(toSend_[0]), commandBytes, numCommandBytes*sizeof(char) );
+    serial_.write( commandBytes, numCommandBytes );
 }
 
 void
@@ -111,41 +97,6 @@ SerialDeviceHandler::walk()
             tracer_.debug( "SerialDeviceHandler::walk() start of loop.", 6 );
 
         try {
-
-            // Check for house-keeping jobs first
-            try
-            {
-                IceUtil::Mutex::Lock lock(mutex_);
-
-                if ( baudRateChangePending_ )
-                {
-                    tracer_.debug( "SerialDeviceHandler: Changing baud rate and flushing." );
-                    baudRateChangePending_ = false;
-                    serial_.setBaudRate( newBaudRate_ );
-                    // TODO: AlexB: not entirely sure if these are
-                    // necessary, they should either be removed or
-                    // added to the setBaudRate function.
-                    serial_.flush();
-                    serial_.drain();
-                }
-
-                if ( isMessageWaitingToBeSent_ )
-                {
-                    stringstream ss;
-                    ss<<"SerialDeviceHandler: sending: " << toHexString(toSend_);
-                    tracer_.debug( ss.str() );
-
-                    isMessageWaitingToBeSent_ = false;
-                    serial_.write( &(toSend_[0]), toSend_.size() );
-                }
-            }
-            catch ( std::exception &e )
-            {
-                stringstream ss;
-                ss << "SerialDeviceHandler: During house-keeping jobs: " << e.what();
-                tracer_.error( ss.str() );
-                throw;
-            }
 
             // Wait for data to arrive, put it in our buffer_
             try {

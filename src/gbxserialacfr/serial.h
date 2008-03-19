@@ -38,8 +38,6 @@ public:
 //!  - 8 data bits
 //!  - no handshaking
 //!
-//! Warning: this thing is _NOT_ thread-safe.
-//!
 //! @author Matthew Ridley, Alex Brooks
 //!
 class Serial : public Uncopyable
@@ -173,7 +171,7 @@ private:
     int portFd_;
 
     Timeout timeout_;
-    
+
     int debugLevel_;
 
     lockfile::LockFile *lockFile_;

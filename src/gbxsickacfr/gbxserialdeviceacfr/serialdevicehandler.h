@@ -125,8 +125,6 @@ private:
     // Returns: true if statusOK, false it something bad happened
     bool processBuffer( const int &timeStampSec, int &timeStampUsec );
 
-    IceUtil::Mutex   mutex_;
-
     gbxserialacfr::Serial &serial_;
 
     // Knows how to parse for responses
@@ -137,13 +135,6 @@ private:
 
     // Thread-safe store of responses from the device
     gbxiceutilacfr::Buffer<TimedResponse> responseBuffer_;
-
-    // Stuff waiting to be sent
-    bool isMessageWaitingToBeSent_;
-    std::vector<char> toSend_;
-
-    bool baudRateChangePending_;
-    int newBaudRate_;
 
     int unparsedBytesWarnThreshold_;
 

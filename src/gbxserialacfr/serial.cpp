@@ -597,7 +597,6 @@ Serial::readFull(void *buf, int count)
         {
             got += ret;
         }
-    
         else if (timeoutsEnabled() && (errno == EAGAIN) )
         {
             if ( waitForDataOrTimeout() == TIMED_OUT )
@@ -642,7 +641,7 @@ Serial::readUntil(void *buf, int count, char termchar)
     char nextChar = 0;
 
     do {        
-        //Check for buf overrun Must leave room for NULL terminator
+        // Check for buf overrun Must leave room for NULL terminator
         if ( dataPtr >= bufPtr + (count - 1) )
         {
             stringstream ss;
@@ -664,12 +663,12 @@ Serial::readUntil(void *buf, int count, char termchar)
                 {
                     continue;
                 }else{
-                    *dataPtr = 0x00; //Timed out. terminate string just incase it's used anyway
+                    *dataPtr = 0x00; // Timed out. terminate string just incase it's used anyway
                     return -1;
                 }
             }
 
-            //If we get here then it was a more serious error
+            // If we get here then it was a more serious error
             stringstream ss;
             ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
             throw SerialException( ss.str() );
@@ -682,8 +681,6 @@ Serial::readUntil(void *buf, int count, char termchar)
 
     // Return the number of chars not including the NULL
     return ( (int) (dataPtr - bufPtr) );
-
-    //TODO: Duncan! I think that this should cope with any <CR><LF> pair gracefully!
 }
 
 
