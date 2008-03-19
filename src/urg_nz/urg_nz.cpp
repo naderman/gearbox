@@ -475,9 +475,9 @@ unsigned int urg_laser::GetReadings (urg_nz_laser_readings_t *readings, unsigned
         // Shift the range readings down by min_i if necessary
         if (min_i > 0)
         {
-            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i) * sizeof (readings->Readings[0]));
+            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i + 1) * sizeof (readings->Readings[0]));
             // Don't forget to adjust the number of readings to account for this
-            num_readings_read -= (MAX_READINGS - max_i) + min_i;
+            num_readings_read -= (MAX_READINGS - max_i) + min_i - 1;    // -1 because max_i is inclusive
         }
     }
     else // SCIP_Version == 2
@@ -565,9 +565,9 @@ unsigned int urg_laser::GetReadings (urg_nz_laser_readings_t *readings, unsigned
         // Shift the range readings down by min_i if necessary
         if (min_i > 0)
         {
-            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i) * sizeof (readings->Readings[0]));
+            memmove (&readings->Readings[0], &readings->Readings[min_i], (max_i - min_i + 1) * sizeof (readings->Readings[0]));
             // Don't forget to adjust the number of readings to account for this
-            num_readings_read -= (MAX_READINGS - max_i) + min_i;
+            num_readings_read -= (MAX_READINGS - max_i) + min_i - 1;    // -1 because max_i is inclusive
         }
     }
 

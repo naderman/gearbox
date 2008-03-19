@@ -164,7 +164,10 @@ class urg_laser
         /** @brief Retrieve a set of range readings from the scanner. Ranges are returned in millimetres.
 
         The scan is a series of discrete values. They can be indexed, starting at 0 and going up to
-        @ref MAX_READINGS. A subset of these values only can be returned using min_i and max_i.
+        @ref MAX_READINGS. A subset of these values only can be returned using min_i and max_i. These
+        are inclusive, e.g. asking for readings from 5 to 10 will return 6 readings. Typically, you will
+        want to at least exclude the readings the scanner can't actually see, as given by
+        @ref GetSensorConfig.
 
         @param readings Pointer to a @ref urg_nz_laser_readings_t structure to store the data in.
         @param min_i The minimum scan index to retrieve. Must be at least 0. Default is 0.
