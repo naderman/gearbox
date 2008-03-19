@@ -6,7 +6,7 @@ MESSAGE( STATUS "Setting project version to ${GBX_PROJECT_VERSION}" )
 
 
 
-SET( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE PATH "Location of CMake scripts" )
+SET( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE INTERNAL "Location of CMake scripts" )
 
 #
 # Process version number
@@ -14,7 +14,7 @@ SET( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE PATH "Location of C
 INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupVersion.cmake )
 
 #
-# Project directories
+# Project directories, including installation
 #
 INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupDirectories.cmake )
 
