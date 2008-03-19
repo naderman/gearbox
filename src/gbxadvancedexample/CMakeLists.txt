@@ -2,7 +2,7 @@ SET ( lib_name GbxAdvancedExample )
 GBX_ADD_LICENSE( GPL )
 
 SET ( build TRUE )
-GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
+GBX_REQUIRE_OPTION( build LIB ${lib_name} OFF )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
 SET( dep_libs basicexample )

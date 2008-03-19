@@ -2,7 +2,7 @@ SET ( lib_name basicexample )
 GBX_ADD_LICENSE( LGPL )
 
 SET ( build TRUE )
-GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
+GBX_REQUIRE_OPTION( build LIB ${lib_name} OFF )
 
 IF ( build )
     
