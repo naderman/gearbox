@@ -1,7 +1,7 @@
-SET ( lib_name GbxSickAcfr )
+SET( lib_name GbxSickAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET ( build TRUE )
+SET( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
@@ -14,7 +14,7 @@ GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
 # these are built internally
 SET( int_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialDeviceAcfr )
 
-IF ( build )
+IF( build )
 
     ADD_SUBDIRECTORY( gbxutilacfr )
     ADD_SUBDIRECTORY( gbxiceutilacfr )
@@ -33,8 +33,8 @@ IF ( build )
 
     GBX_ADD_HEADERS( gbxsickacfr ${hdrs} )
 
-    IF ( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY ( test )
-    ENDIF ( GBX_BUILD_TESTS )
+    IF( GBX_BUILD_TESTS )
+        ADD_SUBDIRECTORY( test )
+    ENDIF( GBX_BUILD_TESTS )
 
-ENDIF ( build )
+ENDIF( build )

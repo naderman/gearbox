@@ -1,7 +1,7 @@
-SET ( lib_name GbxSerialDeviceAcfr )
+SET( lib_name GbxSerialDeviceAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET ( build TRUE )
+SET( build TRUE )
 # don't give user an option
 # GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
@@ -16,7 +16,7 @@ SET ( build TRUE )
 SET( proj_libs GbxSerialAcfr )
 # GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
 
-IF ( build )
+IF( build )
     
     INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     INCLUDE( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
@@ -33,8 +33,8 @@ IF ( build )
 
     GBX_ADD_HEADERS( gbxsickacfr/gbxserialdeviceacfr ${hdrs} )
 
-#     IF ( GBX_BUILD_TESTS )
-#         ADD_SUBDIRECTORY ( test )
-#     ENDIF ( GBX_BUILD_TESTS )
+#     IF( GBX_BUILD_TESTS )
+#         ADD_SUBDIRECTORY( test )
+#     ENDIF( GBX_BUILD_TESTS )
 
-ENDIF ( build )
+ENDIF( build )

@@ -21,11 +21,11 @@
 # 1. using custom defaults (effective only the very first time CMake runs, or after CMakeCache is deleted)
 IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     MESSAGE( STATUS "Setting default installation directory..." )
-    IF ( NOT GBX_OS_WIN )
+    IF( NOT GBX_OS_WIN )
         SET( CMAKE_INSTALL_PREFIX /usr/local CACHE PATH "Installation directory" FORCE )
     ELSE ( NOT GBX_OS_WIN )
         SET( CMAKE_INSTALL_PREFIX "C:\Program Files\${PROJECT_NAME}\Include" CACHE PATH "Installation directory" FORCE )
-    ENDIF ( NOT GBX_OS_WIN )
+    ENDIF( NOT GBX_OS_WIN )
 ENDIF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 
 # the name of the variable controlling install directory for this project

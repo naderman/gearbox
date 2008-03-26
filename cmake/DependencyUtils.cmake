@@ -1,20 +1,20 @@
 MACRO( GBX_MAKE_OPTION_NAME option_name module_type module_name )
 
-    STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( NOT is_exe AND NOT is_lib )
-    IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( is_exe AND is_lib )
+    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    IF( NOT is_exe AND NOT is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( NOT is_exe AND NOT is_lib )
+    IF( is_exe AND is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( is_exe AND is_lib )
 
     STRING( TOUPPER ${module_name} module_name_upper )
-    IF ( is_exe )
+    IF( is_exe )
         SET( option_name "ENABLE_${module_name_upper}" )
     ELSE ( is_exe )
         SET( option_name "ENABLE_LIB_${module_name_upper}" )
-    ENDIF ( is_exe )
+    ENDIF( is_exe )
 
 ENDMACRO( GBX_MAKE_OPTION_NAME option_name module_name )
 
@@ -31,52 +31,52 @@ ENDMACRO( GBX_MAKE_OPTION_NAME option_name module_name )
 #
 MACRO( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
 
-    STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( NOT is_exe AND NOT is_lib )
-    IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( is_exe AND is_lib )
+    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    IF( NOT is_exe AND NOT is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( NOT is_exe AND NOT is_lib )
+    IF( is_exe AND is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( is_exe AND is_lib )
 
-    IF ( ${ARGC} GREATER 5 )
+    IF( ${ARGC} GREATER 5 )
         SET( option_name ${ARGV6} )
     ELSE ( ${ARGC} GREATER 5 )
         STRING( TOUPPER ${module_name} module_name_upper )
-        IF ( is_exe )
+        IF( is_exe )
             SET( option_name "ENABLE_${module_name_upper}" )
         ELSE ( is_exe )
             SET( option_name "ENABLE_LIB_${module_name_upper}" )
-        ENDIF ( is_exe )
-    ENDIF ( ${ARGC} GREATER 5 )
+        ENDIF( is_exe )
+    ENDIF( ${ARGC} GREATER 5 )
 
-    IF ( ${ARGC} GREATER 6 )
+    IF( ${ARGC} GREATER 6 )
         SET( option_descr ${ARGV7} )
     ELSE ( ${ARGC} GREATER 6 )
         SET( option_descr "disabled by user, use ccmake to enable" )
-    ENDIF ( ${ARGC} GREATER 6 )
+    ENDIF( ${ARGC} GREATER 6 )
 
     # debug
 #     MESSAGE( STATUS
 #         "GBX_REQUIRE_OPTION (CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, default_option_value=${default_option_value}, OPT_NAME=${option_name}, OPT_DESC=${option_descr})" )
 
     # set up the option
-    IF ( is_exe )
+    IF( is_exe )
         OPTION( ${option_name} "Try to build ${module_name}" ${default_option_value} )
     ELSE ( is_exe )
         OPTION( ${option_name} "Try to build lib${module_name} library" ${default_option_value} )
-    ENDIF ( is_exe )
+    ENDIF( is_exe )
 
     # must dereference both var and option names once (!) and IF will evaluate their values
-    IF ( ${cumulative_var} AND NOT ${option_name}  )
+    IF( ${cumulative_var} AND NOT ${option_name}  )
         SET( ${cumulative_var} FALSE )
-        IF ( is_exe )
+        IF( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${option_descr} )
         ELSE ( is_exe )
             GBX_NOT_ADD_LIBRARY( ${module_name} ${option_descr} )
-        ENDIF ( is_exe )
-    ENDIF ( ${cumulative_var} AND NOT ${option_name} )
+        ENDIF( is_exe )
+    ENDIF( ${cumulative_var} AND NOT ${option_name} )
 
 ENDMACRO( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
 
@@ -94,24 +94,24 @@ MACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
     # debug
 #     MESSAGE( STATUS "GBX_REQUIRE_VAR [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, test_var=${${test_var}}, reason=${reason} ]" )
 
-    STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( NOT is_exe AND NOT is_lib )
-    IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( is_exe AND is_lib )
+    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    IF( NOT is_exe AND NOT is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( NOT is_exe AND NOT is_lib )
+    IF( is_exe AND is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( is_exe AND is_lib )
 
     # must dereference both var names once (!) and IF will evaluate their values
-    IF ( ${cumulative_var} AND NOT ${test_var}  )
+    IF( ${cumulative_var} AND NOT ${test_var}  )
         SET( ${cumulative_var} FALSE )
-        IF ( is_exe )
+        IF( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
         ELSE ( is_exe )
             GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
-        ENDIF ( is_exe )
-    ENDIF ( ${cumulative_var} AND NOT ${test_var} )
+        ENDIF( is_exe )
+    ENDIF( ${cumulative_var} AND NOT ${test_var} )
 
 ENDMACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
 
@@ -122,7 +122,7 @@ ENDMACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason
 # for the module with a name "installed_module".
 # E.g.
 # Initialize a variable first
-#   SET ( BUILD TRUE )
+#   SET( BUILD TRUE )
 # Now test the variable value
 #   REQUIRE_INSTALL ( build LIB HydroStuff GbxStuff )
 #           will check if GBXSTUFF_INSTALLED is defined.
@@ -134,14 +134,14 @@ MACRO( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_modu
     # debug
 #     MESSAGE( STATUS "REQUIRE_INSTALL [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, installed_module=${installed_module} ]" )
 
-    STRING ( TOUPPER ${installed_module} upper_installed_module )
+    STRING( TOUPPER ${installed_module} upper_installed_module )
     SET( test_var ${upper_installed_module}_INSTALLED )
 
-    IF ( ${ARGC} GREATER 5 )
+    IF( ${ARGC} GREATER 5 )
         SET( reason ${ARGV6} )
     ELSE ( ${ARGC} GREATER 5 )
         SET( reason "${installed_module} was not installed" )
-    ENDIF ( ${ARGC} GREATER 5 )
+    ENDIF( ${ARGC} GREATER 5 )
 
     # must dereference both var names once (!)
     GBX_REQUIRE_VAR( ${cumulative_var} ${module_type} ${module_name} ${test_var} ${reason} )
@@ -177,35 +177,35 @@ MACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
     # debug
 #     MESSAGE( STATUS "GBX_REQUIRE_TARGET [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_name=${target_name} ]" )
 
-    STRING ( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING ( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF ( NOT is_exe AND NOT is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( NOT is_exe AND NOT is_lib )
-    IF ( is_exe AND is_lib )
-        MESSAGE ( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF ( is_exe AND is_lib )
+    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    IF( NOT is_exe AND NOT is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( NOT is_exe AND NOT is_lib )
+    IF( is_exe AND is_lib )
+        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
+    ENDIF( is_exe AND is_lib )
 
-    IF ( ${ARGC} GREATER 5 )
+    IF( ${ARGC} GREATER 5 )
         SET( reason ${ARGV6} )
     ELSE ( ${ARGC} GREATER 5 )
         SET( reason "lib${target_name} is not being built" )
-    ENDIF ( ${ARGC} GREATER 5 )
+    ENDIF( ${ARGC} GREATER 5 )
 
     GET_TARGET_PROPERTY( target_location ${target_name} LOCATION )
 
     # must dereference both var and option names once (!) and IF will evaluate their values
-    IF ( ${cumulative_var} AND NOT target_location  )
+    IF( ${cumulative_var} AND NOT target_location  )
         SET( ${cumulative_var} FALSE )
         GBX_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
-        IF ( is_exe )
+        IF( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
             SET( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
         ELSE ( is_exe )
             GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
             SET( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
-        ENDIF ( is_exe )
-    ENDIF ( ${cumulative_var} AND NOT target_location )
+        ENDIF( is_exe )
+    ENDIF( ${cumulative_var} AND NOT target_location )
 
 ENDMACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
 

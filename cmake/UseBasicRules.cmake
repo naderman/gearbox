@@ -8,15 +8,15 @@ INCLUDE_DIRECTORIES( ${GBX_PROJECT_SOURCE_DIR}/src )
 # Do the same for the submitted directory when its compilation
 # is enabled.
 #
-IF ( GBX_BUILD_SUBMITTED )
+IF( GBX_BUILD_SUBMITTED )
     INCLUDE_DIRECTORIES( ${GBX_PROJECT_SOURCE_DIR}/submitted )
-ENDIF ( GBX_BUILD_SUBMITTED )
+ENDIF( GBX_BUILD_SUBMITTED )
 
 #
 # Platform-specific compiler and linker flags
 #
-IF ( NOT GBX_OS_WIN )
+IF( NOT GBX_OS_WIN )
     ADD_DEFINITIONS( "-Wall" )
 ELSE ( NOT GBX_OS_WIN )
     ADD_DEFINITIONS( "-Wall -D_CRT_SECURE_NO_DEPRECATE" )
-ENDIF ( NOT GBX_OS_WIN )
+ENDIF( NOT GBX_OS_WIN )

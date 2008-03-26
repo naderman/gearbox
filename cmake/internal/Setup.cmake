@@ -76,18 +76,18 @@ SET( CMAKE_INSTALL_RPATH ${GBX_LIB_INSTALL_DIR} )
 
 # Enable testing by including the Dart module
 # (must be done *before* entering source directories )
-INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
+INCLUDE(${CMAKE_ROOT}/Modules/Dart.cmake)
 ENABLE_TESTING()
 
 #
 # Enter the source tree
 #
-ADD_SUBDIRECTORY ( src )
-ADD_SUBDIRECTORY ( submitted )
-# ADD_SUBDIRECTORY ( retired )
+ADD_SUBDIRECTORY( src )
+ADD_SUBDIRECTORY( submitted )
+# ADD_SUBDIRECTORY( retired )
 
 # Some cmake and shell scripts need to be installed
-ADD_SUBDIRECTORY ( cmake )
+ADD_SUBDIRECTORY( cmake )
 
 #
 # Print results of CMake activity
@@ -97,9 +97,9 @@ GBX_WRITE_MANIFEST()
 #
 # Print license information to a file
 #
-IF ( GBX_BUILD_LICENSE )
+IF( GBX_BUILD_LICENSE )
     GBX_WRITE_LICENSE()
-ENDIF ( GBX_BUILD_LICENSE )
+ENDIF( GBX_BUILD_LICENSE )
 
 GBX_CONFIG_REPORT( "Nothing special" )
 

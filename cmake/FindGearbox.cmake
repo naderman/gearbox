@@ -19,6 +19,6 @@ FIND_PATH( GEARBOX_HOME gearbox_manifest.cmake
 # MESSAGE( STATUS "DEBUG: manifest.cmake is apparently found in : ${GEARBOX_HOME}" )
 
 # NOTE: if GEARBOX_HOME is set to *-NOTFOUND it will evaluate to FALSE
-IF ( GEARBOX_HOME )
+IF( GEARBOX_HOME )
     SET( GEARBOX_FOUND 1 CACHE BOOL "Do we have Gearbox?" FORCE )
-ENDIF ( GEARBOX_HOME )
+ENDIF( GEARBOX_HOME )

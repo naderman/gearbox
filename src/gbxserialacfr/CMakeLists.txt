@@ -1,7 +1,7 @@
-SET ( lib_name GbxSerialAcfr )
+SET( lib_name GbxSerialAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET ( build TRUE )
+SET( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
@@ -9,7 +9,7 @@ SET( dep_libs GbxLockFileAcfr )
 # this is currently internal, so we don't have to check it
 # GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
 
-IF ( build )
+IF( build )
 
     ADD_SUBDIRECTORY( lockfile )
     
@@ -27,9 +27,9 @@ IF ( build )
 
     GBX_ADD_HEADERS( gbxserialacfr ${hdrs} )
 
-    IF ( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY ( test )
-    ENDIF ( GBX_BUILD_TESTS )
+    IF( GBX_BUILD_TESTS )
+        ADD_SUBDIRECTORY( test )
+    ENDIF( GBX_BUILD_TESTS )
 
-ENDIF ( build )
+ENDIF( build )
 
