@@ -15,8 +15,10 @@ FIND_PATH( ICEUTIL_HOME_INCLUDE_ICEUTIL IceUtil.h
   #    package + source install w/out env.var -> package 
   #
   # installation selected by user
-  $ENV{ICE_HOME}/include/IceUtil
+  ${ICEUTIL_HOME}/include/IceUtil
+  ${ICE_HOME}/include/IceUtil
   $ENV{ICEUTIL_HOME}/include/IceUtil
+  $ENV{ICE_HOME}/include/IceUtil
   # debian package installs Ice here
   /usr/include/IceUtil
   # Test standard installation points: newer versions first

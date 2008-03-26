@@ -11,30 +11,30 @@ SET( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE INTERNAL "Location 
 #
 # Process version number
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupVersion.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/SetupVersion.cmake )
 
 #
 # Project directories, including installation
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupDirectories.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/SetupDirectories.cmake )
 
 #
 # Determine OS, and make os-specefic choices
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupOs.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/SetupOs.cmake )
 
 #
 # Set the build type (affects debugging symbols and optimization)
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/SetupBuildType.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/SetupBuildType.cmake )
 
 
 #
 # Include internal macro definitions
 #
 INCLUDE( ${GBX_CMAKE_DIR}/Assert.cmake )
-INCLUDE( ${GBX_CMAKE_DIR}/internal/TargetUtils.cmake )
-INCLUDE( ${GBX_CMAKE_DIR}/internal/DependencyUtils.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/TargetUtils.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/DependencyUtils.cmake )
 
 #
 # Defaults for big source code switches
@@ -45,7 +45,7 @@ OPTION( GBX_BUILD_LICENSE  "Enables writing LICENCE file. For admins only." OFF 
 #
 # check compiler type and version
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/CheckCompiler.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/CheckCompiler.cmake )
 
 #
 # Defaults for big source code switches
@@ -56,16 +56,23 @@ OPTION( GBX_BUILD_TESTS    "Enables compilation of all tests" ON  )
 #
 # Look for low-level C headers, write defines to config.h
 #
-INCLUDE( ${GBX_CMAKE_DIR}/internal/WriteConfigH.cmake )
+INCLUDE( ${GBX_CMAKE_DIR}/WriteConfigH.cmake )
 
 #
 # Installation preferences
 #
-# CMake default is FALSE
-# SET( CMAKE_SKIP_BUILD_RPATH TRUE )
-# CMake default is FALSE
-# SET( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
-SET( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib )
+# CMake defaults
+# see: \http://www.cmake.org/Wiki/CMake_RPATH_handling
+#
+# use, i.e. don't skip the full RPATH for the build tree
+# SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+# SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing
+SET( CMAKE_INSTALL_RPATH ${GBX_LIB_INSTALL_DIR} )
 
 # Enable testing by including the Dart module
 # (must be done *before* entering source directories )

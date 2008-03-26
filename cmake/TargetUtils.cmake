@@ -5,9 +5,9 @@
 #
 MACRO( GBX_ADD_EXECUTABLE name )
     ADD_EXECUTABLE( ${name} ${ARGN} )
-    SET_TARGET_PROPERTIES( ${name} PROPERTIES
-        INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/gearbox"
-        BUILD_WITH_INSTALL_RPATH TRUE )
+#     SET_TARGET_PROPERTIES( ${name} PROPERTIES
+#         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
+#         BUILD_WITH_INSTALL_RPATH TRUE )
     INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
     SET( templist ${COMPONENT_LIST} )
     LIST ( APPEND templist ${name} )
@@ -23,10 +23,10 @@ ENDMACRO( GBX_ADD_EXECUTABLE name )
 #
 MACRO( GBX_ADD_LIBRARY name )
     ADD_LIBRARY( ${name} ${ARGN} )
-    SET_TARGET_PROPERTIES( ${name} PROPERTIES
-        INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/gearbox"
-        BUILD_WITH_INSTALL_RPATH TRUE )
-    INSTALL( TARGETS ${name} LIBRARY DESTINATION lib/gearbox )
+#     SET_TARGET_PROPERTIES( ${name} PROPERTIES
+#         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
+#         BUILD_WITH_INSTALL_RPATH TRUE )
+    INSTALL( TARGETS ${name} LIBRARY DESTINATION lib/${PROJECT_NAME} )
     SET( templist ${LIBRARY_LIST} )
     LIST ( APPEND templist ${name} )
     SET( LIBRARY_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
@@ -36,25 +36,34 @@ ENDMACRO( GBX_ADD_LIBRARY name )
 #
 # GBX_ADD_HEADERS( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
-# Specialization of INSTALL(FILES ...) for GearBox project.
-# All files are installed into PREFIX/include/gearbox/${install_subdir}
+# Specialization of INSTALL(FILES ...) to install header files.
+# All files are installed into PREFIX/include/${PROJECT_NAME}/${install_subdir}
 #
 MACRO( GBX_ADD_HEADERS install_subdir )
-    INSTALL( FILES ${ARGN} DESTINATION include/gearbox/${install_subdir} )
+    INSTALL( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
 ENDMACRO( GBX_ADD_HEADERS install_subdir )
+#
+# GBX_ADD_SHARED_FILES( install_subdir FILE0 [FILE1 FILE2 ...] )
+#
+# Specialization of INSTALL(FILES ...) to install shared files.
+# All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir} directory.
+#
+MACRO( GBX_ADD_SHARED_FILES install_subdir )
+    INSTALL( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+ENDMACRO( GBX_ADD_SHARED_FILES install_subdir )
 
 #
 # GBX_ADD_EXAMPLE( install_subdir makefile.in makefile.out [FILE0 FILE1 FILE2 ...] )
 #
-# Specialisation of INSTALL(FILES ...) for GearBox project to to install examples.
-# All files are installed into PREFIX/share/gearbox/${install_subdir}.
+# Specialisation of INSTALL(FILES ...) to install examples.
+# All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir}.
 # makefile is passed through CONFIGURE_FILE to add in correct include and library
 # paths based on the install prefix.
 #
 MACRO( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
     CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/gearbox/${install_subdir} RENAME CMakeLists.txt )
-    INSTALL( FILES ${ARGN} DESTINATION share/gearbox/${install_subdir} )
+    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
+    INSTALL( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
 ENDMACRO( GBX_ADD_EXAMPLE install_subdir makefile )
 
 #
@@ -82,7 +91,7 @@ MACRO( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
     ENDIF( ${int_deps} )
 
     CONFIGURE_FILE( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/gearbox/ )
+    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/${PROJECT_NAME}/ )
 ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #
@@ -127,16 +136,16 @@ MACRO( GBX_ADD_LICENSE license )
 ENDMACRO( GBX_ADD_LICENSE license )
 
 #
-# Usage: GBX_ADD_TEST( testname Exename arg1 arg2 ... )
+# Usage: GBX_ADD_TEST( testname exename [arg1 arg2 ...] )
 # Example:  GBX_ADD_TEST( IntegerTest inttest --verbose )
 #
-MACRO( GBX_ADD_TEST name EXE )
-    ADD_TEST( ${name} ${EXE} ${ARGN} )
+MACRO( GBX_ADD_TEST name executable )
+    ADD_TEST( ${name} ${executable} ${ARGN} )
     SET( templist ${TEST_LIST} )
     LIST ( APPEND templist ${name} )
     SET( TEST_LIST ${templist} CACHE INTERNAL "Global list of (CTest) tests to build" FORCE )
 #     MESSAGE( STATUS "Planning to Build Test      : ${name}" )
-ENDMACRO( GBX_ADD_TEST name EXE )
+ENDMACRO( GBX_ADD_TEST name executable )
 
 #
 # Usage: GBX_NOT_ADD_EXECUTABLE( name reason )

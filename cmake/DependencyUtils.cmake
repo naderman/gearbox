@@ -116,6 +116,54 @@ MACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
 ENDMACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
 
 #
+# GBX_REQUIRE_INSTALL ( cumulative_var [EXE | LIB] module_name installed_module [reason] )
+#
+# A special case of REQUIRE_VAR. Checks whether a manifest variable is defined 
+# for the module with a name "installed_module".
+# E.g.
+# Initialize a variable first
+#   SET ( BUILD TRUE )
+# Now test the variable value
+#   REQUIRE_INSTALL ( build LIB HydroStuff GbxStuff )
+#           will check if GBXSTUFF_INSTALLED is defined.
+#   This example is equivalent to
+#   REQUIRE_VAR( build LIB HydroStuff GBXSTUFF_INSTALLED "GbxStuff was not installed" )
+#
+MACRO( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
+
+    # debug
+#     MESSAGE( STATUS "REQUIRE_INSTALL [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, installed_module=${installed_module} ]" )
+
+    STRING ( TOUPPER ${installed_module} upper_installed_module )
+    SET( test_var ${upper_installed_module}_INSTALLED )
+
+    IF ( ${ARGC} GREATER 5 )
+        SET( reason ${ARGV6} )
+    ELSE ( ${ARGC} GREATER 5 )
+        SET( reason "${installed_module} was not installed" )
+    ENDIF ( ${ARGC} GREATER 5 )
+
+    # must dereference both var names once (!)
+    GBX_REQUIRE_VAR( ${cumulative_var} ${module_type} ${module_name} ${test_var} ${reason} )
+
+ENDMACRO( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
+
+#
+# GBX_REQUIRE_INSTALLS( cumulative_var [EXE | LIB] module_name target0 [targe1 target2 ...] )
+#
+MACRO( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
+    
+    IF( ${ARGC} LESS 4 )
+        MESSAGE( FATAL_ERROR "GBX_REQUIRE_INSTALLS macro needs to at least one target name (${ARGC} params were given)." ) 
+    ENDIF( ${ARGC} LESS 4 )
+
+    FOREACH( TRGT ${ARGN} )
+        GBX_REQUIRE_INSTALL( ${cumulative_var} ${module_type} ${module_name} ${TRGT} )
+    ENDFOREACH( TRGT ${ARGN} )
+
+ENDMACRO( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
+
+#
 # GBX_REQUIRE_TARGET( cumulative_var [EXE | LIB] module_name target_name [reason] )
 #DEPS
 # E.g.
