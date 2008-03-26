@@ -1,0 +1,5 @@
+#
+# Install all .cmake files, so other projects can use them.
+#
+FILE( GLOB scripts *.cmake )
+GBX_ADD_SHARED_FILES( cmake ${scripts} )
