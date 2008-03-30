@@ -14,15 +14,11 @@
 
 @note Reviewed for release 0.0.1
 
-These are detailed instructions for installing GearBox on Debian Linux. They are known to work for a system using Debian \b Testing distribution. See @ref gbx_doc_getting for general guidelines.
-
-@section gbx_doc_installdebian_ubuntu Ubuntu\Kubuntu
-
-These instructions should also be applicable to Ubuntu/Kubuntu 6.10 (Edgy).
+These are detailed instructions for installing GearBox on Debian Linux. They are known to work for a system using Debian \b Testing distribution. These instructions should also be applicable to Ubuntu/Kubuntu 6.10 (Edgy). See @ref gbx_doc_getting for general guidelines.
 
 @section gbx_doc_installdebian_cmake CMake
 
-Minimum version required 2.4-patch 4 (latest tested: 2.4-patch 7).
+Minimum version required 2.4-patch 4 (latest tested: 2.4-patch 8).
 
 @verbatim
 # apt-get install cmake
@@ -70,17 +66,17 @@ The resultant installation tree is as follows:
 The default installation directory is @c /usr/local. There are two options for specifying a custom install directory:
 - Option 1. With @c cmake. This variable is stored in CMake cache so you don't have to set this variable every time: only the first time you run cmake and when you want to change it. For example:
 @verbatim
-$ cmake -DCMAKE_INSTALL_PREFIX=$HOME/gearbox .
+$ cmake -DGEARBOX_INSTALL=$HOME/gearbox .
 @endverbatim
 or
 @verbatim
-$ cmake -DCMAKE_INSTALL_PREFIX=/opt/gearbox-[VERSION] .
+$ cmake -DGEARBOX_INSTALL=/opt/gearbox-[VERSION] .
 @endverbatim
 - Option 2. If you've changed your mind about the installation directory, you can change it at any time using @c ccmake tool.
 @verbatim
 $ ccmake .
 @endverbatim
-Scroll down to @c CMAKE_INSTALL_PREFIX variable, hit ENTER to edit and type in the new installation directory. When finished, hit ENTER again, then type "c" for [c]onfigure and "g" for [g]enerate. From now on, the new installation dir will be used.
+Scroll down to @c GEARBOX_INSTALL variable, hit ENTER to edit and type in the new installation directory. When finished, hit ENTER again, then type "c" for [c]onfigure and "g" for [g]enerate. From now on, the new installation dir will be used.
 
 That's it! We are done.
 

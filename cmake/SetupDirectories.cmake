@@ -2,15 +2,15 @@
 # Installation directory is determined by looking at 3 sources of information in the following order,
 # later sources overwrite earlier ones:
 # 1. OS-dependent defaults (effective only the first time CMake runs or after CMakeCache is deleted)
-# 2. Enviroment variable whose name is held in variable project_install_var
-# 3. CMake variable whose name is held in project_install_var.
+# 2. Enviroment variable whose name is determined as <PROJECT_NAME>_INSTALL
+# 3. CMake variable whose name is determined as <PROJECT_NAME>_INSTALL (same as the environment variable)
 #
-# E.g.
-# - rm CMakeCache.txt; cmake .
-#       /opt/orca-1.2.3
-# - export HYDRO_INSTALL=/home/myname; cmake .
-#       /home/myname
-# - export HYDRO_INSTALL=/home/myname; cmake -DHYDRO_INSTALL=/home/myname/opt.
+# E.g. in Linux, for a project called 'fruitcake'
+# $ rm CMakeCache.txt; cmake .
+#       /usr/local/
+# $ export FRUITCAKE_INSTALL=/home/myname/install; cmake .
+#       /home/myname/install
+# $ export FRUITCAKE_INSTALL=/home/myname/install; cmake -DFRUITCAKE_INSTALL=/home/myname/opt .
 #       /home/myname/opt
 #
 # Afterwards, it's ok to just use "cmake .", the previously set installation dir is held in cache.

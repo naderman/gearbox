@@ -1,7 +1,7 @@
 #
-# Components should add themselves by calling 'GBX_ADD_EXECUTABLE'
+# Executables should add themselves by calling 'GBX_ADD_EXECUTABLE'
 # instead of 'ADD_EXECUTABLE' in CMakeLists.txt.
-# Usage: GBX_ADD_EXECUTABLE( name src1 src2 src3 )
+# Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
 #
 MACRO( GBX_ADD_EXECUTABLE name )
     ADD_EXECUTABLE( ${name} ${ARGN} )
@@ -9,17 +9,17 @@ MACRO( GBX_ADD_EXECUTABLE name )
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
     INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
-    SET( templist ${COMPONENT_LIST} )
+    SET( templist ${EXE_LIST} )
     LIST( APPEND templist ${name} )
 #   MESSAGE( STATUS "DEBUG: ${templist}" )
-    SET( COMPONENT_LIST ${templist} CACHE INTERNAL "Global list of components to build" FORCE )
+    SET( EXE_LIST ${templist} CACHE INTERNAL "Global list of executables to build" FORCE )
     MESSAGE( STATUS "Planning to Build Executable: ${name}" )
 ENDMACRO( GBX_ADD_EXECUTABLE name )
 
 #
-# Components should add themselves by calling 'GBX_ADD_EXECUTABLE'
+# Libraries should add themselves by calling 'GBX_ADD_LIBRARY'
 # instead of 'ADD_LIBRARY' in CMakeLists.txt.
-# Usage: GBX_ADD_LIBRARY( name src1 src2 src3 )
+# Usage is the same as ADD_LIBRARY, all parameters are passed to ADD_LIBRARY.
 #
 MACRO( GBX_ADD_LIBRARY name )
     ADD_LIBRARY( ${name} ${ARGN} )
@@ -27,9 +27,9 @@ MACRO( GBX_ADD_LIBRARY name )
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
     INSTALL( TARGETS ${name} LIBRARY DESTINATION lib/${PROJECT_NAME} )
-    SET( templist ${LIBRARY_LIST} )
+    SET( templist ${LIB_LIST} )
     LIST( APPEND templist ${name} )
-    SET( LIBRARY_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
+    SET( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
     MESSAGE( STATUS "Planning to Build Library   : ${name}" )
 ENDMACRO( GBX_ADD_LIBRARY name )
 
@@ -96,7 +96,7 @@ ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #
 # This is a mechanism to register special items which are not
-# components or libraries. This function only records the name of
+# executables or libraries. This function only records the name of
 # the item to display it at the end of the cmake run and to submit
 # to the Dashboard.
 # Usage: GBX_ADD_ITEM( name )
@@ -151,10 +151,10 @@ ENDMACRO( GBX_ADD_TEST name executable )
 # Usage: GBX_NOT_ADD_EXECUTABLE( name reason )
 #
 MACRO( GBX_NOT_ADD_EXECUTABLE name reason )
-  SET( templist ${COMPONENT_NOT_LIST} )
+  SET( templist ${EXE_NOT_LIST} )
   LIST( APPEND templist ${name} )
 #  MESSAGE( STATUS "DEBUG: ${templist}" )
-  SET( COMPONENT_NOT_LIST ${templist} CACHE INTERNAL "Global list of components NOT to build" FORCE )
+  SET( EXE_NOT_LIST ${templist} CACHE INTERNAL "Global list of executables NOT to build" FORCE )
   MESSAGE( STATUS "Not planning to Build Executable : ${name} because ${reason}" )
 ENDMACRO( GBX_NOT_ADD_EXECUTABLE name reason )
 
@@ -162,22 +162,23 @@ ENDMACRO( GBX_NOT_ADD_EXECUTABLE name reason )
 # Usage: GBX_NOT_ADD_LIBRARY( name reason )
 #
 MACRO( GBX_NOT_ADD_LIBRARY name reason )
-  SET( templist ${LIBRARY_NOT_LIST} )
+  SET( templist ${LIB_NOT_LIST} )
   LIST( APPEND templist ${name} )
 #  MESSAGE( STATUS "DEBUG: ${templist}" )
-  SET( LIBRARY_NOT_LIST ${templist} CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
+  SET( LIB_NOT_LIST ${templist} CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
   MESSAGE( STATUS "Not planning to Build Library   : ${name} because ${reason}" )
 ENDMACRO( GBX_NOT_ADD_LIBRARY name reason )
 
 #
+# This is a utility macro for internal use.
 # Prints out list information: size, and items.
 # Prints nothing if list is empty.
-# Example: LIST_REPORT( COMPONENT_LIST "component(s)" )
+# Example: LIST_REPORT( EXE_LIST "executable(s)" )
 #
 # Tricky list stuff.
 # see http://www.cmake.org/Wiki/CMakeMacroMerge for an example
 #
-MACRO( LIST_REPORT ACTION ITEM_NAME note L )
+MACRO( LIST_REPORT action item_name note L )
     SET( templist ${L} )
     LIST( LENGTH templist templist_length )
     SET( report_file ${GBX_PROJECT_BINARY_DIR}/cmake_config_report.txt )
@@ -185,15 +186,16 @@ MACRO( LIST_REPORT ACTION ITEM_NAME note L )
     IF( templist_length GREATER 0 )
         LIST( SORT templist )
 
-        MESSAGE( STATUS "${ACTION} ${templist_length} ${ITEM_NAME} ${note}:" )
+        MESSAGE( STATUS "${action} ${templist_length} ${item_name} ${note}:" )
         MESSAGE( STATUS "    ${templist}" )
 
-        WRITE_FILE( ${report_file} "${ACTION} ${templist_length} ${ITEM_NAME}:" APPEND )
+        WRITE_FILE( ${report_file} "${action} ${templist_length} ${item_name}:" APPEND )
         WRITE_FILE( ${report_file} "    ${templist}" APPEND )
     ENDIF( templist_length GREATER 0 )
-ENDMACRO( LIST_REPORT ACTION ITEM_NAME note L )
+ENDMACRO( LIST_REPORT action item_name note L )
 
 #
+# This is a utility macro for internal use.
 # Puts messages on the screen.
 # Writes to a text file.
 #
@@ -222,37 +224,40 @@ MACRO( GBX_CONFIG_REPORT )
     MESSAGE( STATUS "Install dir       ${CMAKE_INSTALL_PREFIX}")
 
     SET( note " " )
-    LIST_REPORT( "Will build" "executables" ${note} "${COMPONENT_LIST}" )
-    LIST_REPORT( "Will build" "libraries" ${note} "${LIBRARY_LIST}" )
+    LIST_REPORT( "Will build" "executables" ${note} "${EXE_LIST}" )
+    LIST_REPORT( "Will build" "libraries" ${note} "${LIB_LIST}" )
     LIST_REPORT( "Will build" "CTest tests" ${note} "${TEST_LIST}" )
     LIST_REPORT( "Will build" "special items" ${note} "${ITEM_LIST}" )
 
     SET( note "(see above for reasons)" )
-    LIST_REPORT( "Will NOT build" "executables" ${note} "${COMPONENT_NOT_LIST}" )
-    LIST_REPORT( "Will NOT build" "libraries" ${note} "${LIBRARY_NOT_LIST}" )
+    LIST_REPORT( "Will NOT build" "executables" ${note} "${EXE_NOT_LIST}" )
+    LIST_REPORT( "Will NOT build" "libraries" ${note} "${LIB_NOT_LIST}" )
 
 ENDMACRO( GBX_CONFIG_REPORT )
 
+#
+# This is a utility macro for internal use.
+#
 MACRO( GBX_WRITE_MANIFEST )
-    SET( manifest_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_manifest.cmake )
-    WRITE_FILE( ${manifest_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
+    SET( output_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_manifest.cmake )
+    WRITE_FILE( ${output_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
 
-    FOREACH( A ${LIBRARY_LIST} )
+    FOREACH( A ${LIB_LIST} )
         STRING( TOUPPER ${A} UPPERA )
-        WRITE_FILE( ${manifest_file} "SET( ${UPPERA}_INSTALLED 1)" APPEND )
-    ENDFOREACH( A ${LIBRARY_LIST} )
+        WRITE_FILE( ${output_file} "SET( ${UPPERA}_INSTALLED 1)" APPEND )
+    ENDFOREACH( A ${LIB_LIST} )
 
-    FOREACH( A ${LIBRARY_NOT_LIST} )
+    FOREACH( A ${LIB_NOT_LIST} )
         STRING( TOUPPER ${A} UPPERA )
-        WRITE_FILE( ${manifest_file} "SET( ${UPPERA}_INSTALLED 0)" APPEND )
-    ENDFOREACH( A ${LIBRARY_NOT_LIST} )
+        WRITE_FILE( ${output_file} "SET( ${UPPERA}_INSTALLED 0)" APPEND )
+    ENDFOREACH( A ${LIB_NOT_LIST} )
 
-    WRITE_FILE( ${manifest_file} " " APPEND )
+    WRITE_FILE( ${output_file} " " APPEND )
 
     STRING( TOUPPER ${PROJECT_NAME} upper_project_name )
-    WRITE_FILE( ${manifest_file} "SET( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
+    WRITE_FILE( ${output_file} "SET( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
 
-    INSTALL( FILES ${manifest_file} DESTINATION . )
+    INSTALL( FILES ${output_file} DESTINATION . )
 ENDMACRO( GBX_WRITE_MANIFEST )
 
 MACRO( GBX_WRITE_LICENSE )
@@ -269,17 +274,18 @@ MACRO( GBX_WRITE_LICENSE )
 ENDMACRO( GBX_WRITE_LICENSE )
 
 #
+# This is a utility macro for internal use.
 # Reset global lists of components, libraries, etc.
 #
-MACRO( GBX_RESET_ALL_LISTS )
-    # MESSAGE( STATUS "DEBUG: Resetting global component and library lists" )
-    SET( COMPONENT_LIST    "" CACHE INTERNAL "Global list of components to build" FORCE )
-    SET( LIBRARY_LIST      "" CACHE INTERNAL "Global list of libraries to build" FORCE )
-    SET( TEST_LIST         "" CACHE INTERNAL "Global list of CTest tests to build" FORCE )
-    SET( ITEM_LIST         "" CACHE INTERNAL "Global list of special items to build" FORCE )
+MACRO( GBX_RESET_ALL_TARGET_LISTS )
+    # MESSAGE( STATUS "DEBUG: Resetting global target lists" )
+    SET( EXE_LIST    "" CACHE INTERNAL "Global list of executables to build" FORCE )
+    SET( LIB_LIST    "" CACHE INTERNAL "Global list of libraries to build" FORCE )
+    SET( TEST_LIST   "" CACHE INTERNAL "Global list of CTest tests to build" FORCE )
+    SET( ITEM_LIST   "" CACHE INTERNAL "Global list of special items to build" FORCE )
 
-    SET( COMPONENT_NOT_LIST  "" CACHE INTERNAL "Global list of components NOT to build" FORCE )
-    SET( LIBRARY_NOT_LIST    "" CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
+    SET( EXE_NOT_LIST  "" CACHE INTERNAL "Global list of executables NOT to build" FORCE )
+    SET( LIB_NOT_LIST  "" CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
 
-    SET( LICENSE_LIST      "" CACHE INTERNAL "Global list of directories and their licenses" FORCE )
-ENDMACRO( GBX_RESET_ALL_LISTS )
+    SET( LICENSE_LIST  "" CACHE INTERNAL "Global list of directories and their licenses" FORCE )
+ENDMACRO( GBX_RESET_ALL_TARGET_LISTS )

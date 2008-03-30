@@ -90,9 +90,10 @@ ADD_SUBDIRECTORY( submitted )
 ADD_SUBDIRECTORY( cmake )
 
 #
-# Print results of CMake activity
+# Write results of CMake activity to file
 #
 GBX_WRITE_MANIFEST()
+GBX_WRITE_OPTIONS()
 
 #
 # Print license information to a file
@@ -101,9 +102,13 @@ IF( GBX_BUILD_LICENSE )
     GBX_WRITE_LICENSE()
 ENDIF( GBX_BUILD_LICENSE )
 
+#
+# Print results of CMake activity
+#
 GBX_CONFIG_REPORT( "Nothing special" )
 
 #
-# House-keeping, clear lists of targets, licenses, etc.
+# House-keeping, clear lists of targets, licenses, options, etc.
 #
-GBX_RESET_ALL_LISTS()
+GBX_RESET_ALL_TARGET_LISTS()
+GBX_RESET_ALL_DEPENDENCY_LISTS()
