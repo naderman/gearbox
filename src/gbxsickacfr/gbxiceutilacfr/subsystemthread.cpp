@@ -33,23 +33,23 @@ SubsystemThread::run()
     }
     catch ( const IceUtil::Exception &e )
     {
-        ss << "SubsystemThread::run(): Caught unexpected exception: " << e;
+        ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected exception: " << e;
     }
     catch ( const std::exception &e )
     {
-        ss << "SubsystemThread::run(): Caught unexpected exception: " << e.what();
+        ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected exception: " << e.what();
     }
     catch ( const std::string &e )
     {
-        ss << "SubsystemThread::run(): Caught unexpected string: " << e;
+        ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected string: " << e;
     }
     catch ( const char *e )
     {
-        ss << "SubsystemThread::run(): Caught unexpected char *: " << e;
+        ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected char *: " << e;
     }
     catch ( ... )
     {
-        ss << "SubsystemThread::run(): Caught unexpected unknown exception.";
+        ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected unknown exception.";
     }
 
     // only if there were exceptions
