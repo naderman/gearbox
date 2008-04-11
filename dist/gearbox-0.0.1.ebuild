@@ -10,7 +10,7 @@ KEYWORDS="~x86 ~amd64"
 DESCRIPTION="A collection of libraries for robotics, including hardware drivers and algorithms."
 SRC_URI="/${P}.tar.bz2"
 HOMEPAGE="http://gearbox.sourceforge.net"
-IUSE="doc basic gbxadvanced urg_nz"
+IUSE="doc basic gbxadvanced urg_nz gbxserialacfr gbxsickacfr"
 DEPEND=">=dev-util/cmake-2.4
 		doc? (app-doc/doxygen)"
 RDEPEND=${DEPEND}
@@ -21,7 +21,9 @@ src_compile()
 {
 	local mycmakeargs="`cmake-utils_use_enable basic LIB_BASIC`\
 						`cmake-utils_use_enable gbxadvanced LIB_GBXADVANCED`\
-						`cmake-utils_use_enable urg_nz LIB_URG_NZ`"
+						`cmake-utils_use_enable urg_nz LIB_URG_NZ`\
+						`cmake-utils_use_enable gbxserialacfr LIB_GBXSERIALACFR`\
+						`cmake-utils_use_enable gbxsickacfr LIB_GBXSICKACFR`"
 	cmake-utils_src_compile
 	if use doc;
 	then
