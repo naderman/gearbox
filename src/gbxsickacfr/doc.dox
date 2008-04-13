@@ -43,7 +43,7 @@ Drives SICK hardware, directly connected to the computer.
   
 @par Dependencies
 
-- libIceUtil (for timing/threads/mutexes)
+- libIceUtil (for timing/threads/mutexes), v.3.2 or newer (latest tested 3.3b).
 - libGbxSerialAcfr
 
 @par Limitations
