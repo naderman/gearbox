@@ -52,7 +52,7 @@ public:
         int usec;
     };
 
-    //! Opens a device @ref dev.
+    //! Opens a device @c dev.
     //! Throws SerialException's or LockFileException's (both derive from std::exception) on error.
     //! Timeouts control the various read functions below.
     //! A timeout value of (sec=0,usec=0) indicates 'timeouts disabled'.
@@ -77,12 +77,12 @@ public:
     //! but can't set the {en|dis}abled state of timeouts.
     void setTimeout( const Timeout &timeout );
 
-    //! Reads up to @ref count bytes into buffer @ref buf.
+    //! Reads up to @c count bytes into buffer @c buf.
     //! Returns the number of bytes read, or '-1' on timeout (if timeouts are enabled).
     //! If timeouts are not enabled, blocks till it gets something.
     int read(void *buf, int count);
 
-    //! Tries to read exactly @ref count bytes into @ref buf.  
+    //! Tries to read exactly @c count bytes into @c buf.  
     //! Returns the number of bytes read, or throws an exception.
     //!
     //! If timeouts are not enabled we might block forever, waiting for the number of bytes we want or an error.
@@ -94,7 +94,7 @@ public:
     //!
     int readFull(void *buf, int count);
 
-    //! Reads up to @ref count bytes-1 (including @ref termchar), terminated by @ref termchar.
+    //! Reads up to @c count bytes-1 (including @c termchar), terminated by @c termchar.
     //! Returns the number of bytes read.
     //! After reading the data, the string will be NULL terminated.
     //!
@@ -158,7 +158,7 @@ private:
     //  GOT_DATA : data available
     int waitForDataOrTimeout(void);
 
-    // Opens a device @ref dev.
+    // Opens a device @c dev.
     void open(int flags=0);
 
     // Won't throw exceptions.

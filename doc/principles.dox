@@ -166,7 +166,7 @@ C++ is given below.
 
 - variables, member variables, classes, structs, namespaces
 - functions, member functions
-- #defines, enums
+- \#defines, enums
 - filenames
 - API usage style
 

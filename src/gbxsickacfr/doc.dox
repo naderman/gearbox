@@ -9,10 +9,10 @@
  */
 
 /*!
-@ingroup gbx_drivers_laserscanner2d
+@ingroup gbx_libs
 @ingroup gbx_cpp
 @ingroup gbx_linux
-@defgroup gbx_driver_laserscanner2dsickacfr LaserScanner2dSickAcfr
+@defgroup gbx_library_gbxsickacfr GbxSickAcfr
 @brief ACFR driver for SICK laser range-finder.
 
 Drives SICK hardware, directly connected to the computer. 
@@ -43,14 +43,23 @@ Drives SICK hardware, directly connected to the computer.
   
 @par Dependencies
 
-- libIceUtil (for timing/threads/mutexes), v.3.2 or newer (latest tested 3.3b).
-- libGbxSerialAcfr
+- libIceUtil (for timing/threads/mutexes), v.3.2 or newer (latest tested 3.3).
+- @ref gbx_library_gbxserialacfr
+
+@par Installation
+
+- Finding libIceUtil 
+    - IceUtil will be found automatically if installed in one of several standard locations. 
+    - You can specify it's installation point with @c ICEUTIL_HOME CMake variable (or an environment variable with the same name). For example:
+@verbatim
+$ cmake -DICEUTIL_HOME=/home/myuser/install .
+@endverbatim
 
 @par Limitations
 
 - This is a Linux-only implementation.  
 - It works with those serial devices which @ref gbx_library_gbxserialacfr supports.
-- Currently, timestamps are generated whenever a _full_ message
+- Currently, timestamps are generated whenever a @b full message
   arrives.  This is sub-optimal, since the message may take a
   significant amount of time to be transmitted over the serial
   interface.  eg. 181 samples at 38400 baud takes about 75ms.

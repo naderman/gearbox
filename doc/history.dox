@@ -1,0 +1,44 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2008 GearBox Team
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+TEMPLATE
+@section gbx_doc_history_head Changes in SVN since Last Release
+@par Project wide
+@par New libraries
+@par Updated libraries
+@par Removed libraries
+
+/*!
+
+@page gbx_doc_history Changes since Last Release and To-Do List
+
+Developers: as you make substantial changes in the code (add features, fix bugs, etc.), add an item in the section on changes. When the next version is released, this list will be copied into the release notes.
+
+@section hydro_doc_todo_todo To-Do List for Next Release
+
+@section gbx_doc_history_100 Changes in Release 1.0.0
+
+@par Project wide
+
+- First release.
+
+@par New libraries
+
+- liburg_nz
+    - moved from the Player project
+
+- libGbxSerialAcfr
+    - moved from the Orca project
+
+- libGbxSickAcfr
+    - moved from the Orca project
+
+
+*/

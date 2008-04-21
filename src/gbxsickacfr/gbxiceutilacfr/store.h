@@ -26,11 +26,11 @@ namespace gbxiceutilacfr {
  *  This container is similar to a circular Buffer of size one but with two
  *  differences:
  *  - a copy of the data is always available, yet the user knows when new
- *    data has arrived by calling @ref isNewData
- *  - @ref getNext returns the new data arrives (not when the buffer
+ *    data has arrived by calling isNewData().
+ *  - getNext() returns the new data arrives (not when the buffer
  *    is non-empty.
  *
- *  Write to it with @ref set. Read its contents with @ref get. Trying to read from
+ *  Write to it with set(). Read its contents with get(). Trying to read from
  *  an empty Store raises an gbxsickacfr::gbxutilacfr::Exception.
  * 
  *  @note Replaces the deprecated Proxy class.
@@ -45,18 +45,18 @@ public:
     virtual ~Store();
 
     //! Returns TRUE if there's something in the Store. The Store starts its life empty
-    //! but after the object is set once, it will be non-empty again until @ref purge is
+    //! but after the object is set once, it will be non-empty again until purge() is
     //! called.
     bool isEmpty() const;
     
-    //! Returns TRUE if the data in the Store has not been accessed with @ref get yet.
+    //! Returns TRUE if the data in the Store has not been accessed with get() yet.
     bool isNewData() const;
 
     //! Sets the contents of the Store.
     void set( const Type & obj );
 
     //! Returns the contents of the Store. This operation makes the data in the Store
-    //! "not new", i.e. @ref isNewData returns FALSE. Calls to @ref get when the Store is empty
+    //! "not new", i.e. @ref isNewData returns FALSE. Calls to get() when the Store is empty
     //! raises an gbxsickacfr::gbxutilacfr::Exception exception.
     void get( Type & obj ) const;
 

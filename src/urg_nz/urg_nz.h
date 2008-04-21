@@ -126,7 +126,7 @@ class urg_laser
         Supported baud rates for RS232 connections are 19200, 57600 and 115200. Baud rate is
         not applicable to USB connections.
 
-        @param PortName Fully-qualified path to the port the scanner is connected to.
+        @param port_name Fully-qualified path to the port the scanner is connected to.
         @param use_serial Use a serial connection. The alternative is termios.
         @param baud Baud rate for serial connections. */
         void Open (const char *port_name, bool use_serial, int baud);

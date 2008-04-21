@@ -28,7 +28,7 @@ Header file:
 - Naming conventions:
   - Class methods start with a capital letter.
   - Underscores in member, variable and type names.
-  - #define'd values in all capitals.
+  - \#define'd values in all capitals.
 - Formatting:
   - 4 space indentation.
   - Function declarations on one line.
