@@ -1,0 +1,50 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2008 GearBox Team
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+
+@page gbx_doc_release Release Instructions
+
+@note Reviewed for release 1.0.0.
+
+@section gbx_doc_release_release Release
+
+-# On any machine
+  - Make sure the distributions compile cleanly and the tests don't fail.
+-# On a machine that doesn't build regularly:
+  -# Blow away old installation.
+  -# Check out clean copy.
+  -# Modify the project version in the top-level CMakeLists.txt file.
+  -# Modify the 'news' section in the 'index.dox' file.
+  -# (Possibly) delete retired directory.
+  -# Update LICENSE information by running cmake with BUILD_LICENSE=ON.
+  -# Shunt everything down in 'doc/history.dox'.
+  -# Delete any temporary files created by an editor.
+  -# Check in those changes.
+  -# Tag the distributions, eg with:
+@verbatim
+$ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/tags/RELEASE_1.7.0 -m 'Tagging release 1.7.0'
+@endverbatim
+  -# Delete all .svn directories (eg with 'find . -name .svn | xargs rm -rf')
+  -# Create tar-ball, named eg. 'gearbox-1.7.0.tar.gz'
+  -# Now the tar-ball is ready to roll. But first test that the original untars and builds cleanly.
+  -# Copy the tar-ball to a machine with external access.
+-# On a machine with external access:
+  -# ftp to upload.sf.net (anonymous login)
+  -# cd /incoming
+  -# 'put' the tarball
+-# Create a new distro through the sourceforge web interface
+  - Login a project administrator
+  - (Go through "'Admin' -> 'File Releases'" from the GearBox project page)
+-# Update the web page
+  - Use the script: <distro>/doc/rebuild_docco.sh
+-# Increment the version numbers (eg '1.7.0' -> '1.7.0+') in the top-level CMakeLists.txt files.
+
+*/

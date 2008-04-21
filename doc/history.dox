@@ -23,6 +23,17 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @section hydro_doc_todo_todo To-Do List for Next Release
 
+@section gbx_doc_history_head Changes in SVN since Last Release
+
+@par Project wide
+
+@par New libraries
+
+@par Updated libraries
+
+@par Removed libraries
+
+
 @section gbx_doc_history_100 Changes in Release 1.0.0
 
 @par Project wide
