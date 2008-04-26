@@ -18,5 +18,6 @@
 #include <gbxsickacfr/gbxiceutilacfr/subsystemthread.h>
 #include <gbxsickacfr/gbxiceutilacfr/timer.h>
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
+#include <gbxsickacfr/gbxiceutilacfr/store.h>
 
 #endif
