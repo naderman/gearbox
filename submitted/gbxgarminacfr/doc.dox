@@ -1,0 +1,70 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+@ingroup gbx_libs
+@ingroup gbx_cpp
+@ingroup gbx_linux
+@defgroup gbx_library_gbxgarminacfr GbxGarminAcfr
+@brief Garmin GPS receiver.
+
+Uses Garmin serial implementation. Written for Garmin-GPS15L. 
+Tries to establish communication at 4800 baud (non-configurable).
+
+@par Header file
+
+@verbatim
+#include <gbxgarminacfr/driver.h>
+@endverbatim
+
+@par Example
+  See test/test.cpp
+
+@par Style
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
+
+@par Units and Coordinate System
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_units.html
+
+@par Copyright
+  Duncan Mercer, Alex Brooks, Alexei Makarenko, Tobias Kaupp
+
+@par Responsible Developer
+  Alex Brooks
+  
+@par License
+  LGPL
+  
+@par Dependencies
+
+- libIceUtil (for timing), v.3.2 or newer (latest tested 3.3).
+- @ref gbx_library_gbxserialacfr
+
+@par Installation
+
+- Finding libIceUtil 
+    - IceUtil will be found automatically if installed in one of several standard locations. 
+    - You can specify it's installation point with @c ICEUTIL_HOME CMake variable (or an environment variable with the same name). For example:
+@verbatim
+$ cmake -DICEUTIL_HOME=/home/myuser/install .
+@endverbatim
+
+*/
+
+
+/*!
+@brief Garmin GPS driver
+@namespace gbxgarminacfr
+
+This namespace is part of a Garmin GPS driver.
+
+@see @ref gbx_library_gbxgarminacfr
+
+*/
