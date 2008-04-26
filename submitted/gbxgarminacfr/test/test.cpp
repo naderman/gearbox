@@ -85,9 +85,6 @@ int main( int argc, char **argv )
             device->read( data );
 
             cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
-
-            if ( data.haveWarnings )
-                cout << "got warnings: " << data.warnings << endl;
         }
         catch ( const std::exception& e )
         {
