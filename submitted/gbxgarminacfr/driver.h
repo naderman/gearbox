@@ -12,6 +12,8 @@
 #define GBXGARMINACFR_DRIVER_H
 
 #include <gbxserialacfr/serial.h>
+#include <gbxsickacfr/gbxutilacfr/tracer.h>
+#include <gbxsickacfr/gbxutilacfr/status.h>
 #include <gbxgarminacfr/gbxgpsutilacfr/nmea.h>
 #include <memory>
 
