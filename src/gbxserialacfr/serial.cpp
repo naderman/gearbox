@@ -32,6 +32,8 @@
 #  include <sys/filio.h>
 #endif
 
+//////////////////////////////
+
 // Ensure we have strnlen 
 // eg. Solaris doesn't define strnlen in string.h, so define it here.
 #if !HAVE_STRNLEN
@@ -53,6 +55,8 @@ inline size_t strnlen(const char *s, size_t maxlen)
     return ((p - s) + 1);
 }
 #endif
+
+//////////////////////////////
 
 using namespace std;
 
