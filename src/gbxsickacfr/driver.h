@@ -61,6 +61,7 @@ public:
     std::string    warnings;
 };
 
+//! SICK driver.
 class Driver
 {
 
