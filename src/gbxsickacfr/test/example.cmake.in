@@ -1,4 +1,4 @@
-PROJECT( gbxserialacfr_example )
+PROJECT( gbxsickacfr_example )
 
 INCLUDE_DIRECTORIES( @CMAKE_INSTALL_PREFIX@/include/gearbox )
 
