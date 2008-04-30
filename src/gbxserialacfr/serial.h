@@ -94,15 +94,8 @@ public:
     //!
     int readFull(void *buf, int count);
 
-    //! Reads up to @c count bytes-1 (including @c termchar), terminated by @c termchar.
-    //! Returns the number of bytes read.
-    //! After reading the data, the string will be NULL terminated.
-    //!
-    //! Example: if you expect to read the string "1234\n", you need something like:
-    //!                char buf[6];
-    //!                serial.readUntil( buf, 6, '\n' );
-    //!
-    //!          where the two extra characters are for the "\n" and the terminating "\0".
+    //! Reads a string into @str, up to and including the first instance of @termchar
+    //! Returns the number of bytes read (or '-1' on timeout).
     //!
     //! If timeouts are not enabled we might block forever, waiting for the number of bytes we want or an error.
     //!
@@ -111,12 +104,12 @@ public:
     //! NOTE: The timeout applies for each individual read() call.  We might have to make lots of them,
     //!       so the total time for which this function blocks might be longer than the specified timeout.
     //!
-    int readUntil(void *buf, int count, char termchar);
+    int readStringUntil( std::string &str, char termchar );
 
     //! Short-hand for "readUntil(buf,count,'\n');"
     //! Reads everything up to and including the '\n'.
-    int readLine(void *buf, int count)
-        { return readUntil(buf,count,'\n'); }
+    int readLine( std::string &str )
+        { return readStringUntil(str,'\n'); }
 
     //! Returns the number of bytes available for reading (non-blocking).
     int bytesAvailable();
@@ -155,9 +148,11 @@ private:
 
     // Utility function to wait up to the timeout for data to appear.
     // Returns:
-    //  TIMED_OUT: timed out
-    //  GOT_DATA : data available
-    int waitForDataOrTimeout(void);
+    enum WaitStatus {
+        TIMED_OUT,
+        DATA_AVAILABLE,
+    };
+    WaitStatus waitForDataOrTimeout(void);
 
     // Opens a device @c dev.
     void open(int flags=0);

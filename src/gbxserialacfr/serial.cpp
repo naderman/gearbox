@@ -64,10 +64,6 @@ namespace gbxserialacfr {
 
     namespace {
 
-        //Used for calls to waitForDataOrTimeout()
-        enum{TIMED_OUT=-1, GOT_DATA};
-
-
         // Converts an integer baud-rate into a c-style '#define'd baudrate
         int cBaudrate( int baudRate )
         {
@@ -623,10 +619,8 @@ Serial::readFull(void *buf, int count)
 }
 
 
-
-
-int 
-Serial::readUntil(void *buf, int count, char termchar)
+int
+Serial::readStringUntil( std::string &str, char termchar )
 {
     if ( debugLevel_ > 0 ){
         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
@@ -637,55 +631,109 @@ Serial::readUntil(void *buf, int count, char termchar)
         }
     }
 
-    // There must be at least room for a terminating char and NULL terminator!
-    assert (count >= 2);
+    // clear the string
+    str="";
 
-    char* dataPtr = static_cast<char*>(buf);
-    const char* bufPtr = static_cast<char*>(buf);
-    char nextChar = 0;
-
-    do {        
-        // Check for buf overrun Must leave room for NULL terminator
-        if ( dataPtr >= bufPtr + (count - 1) )
+    while ( true )
+    {
+        // Read at most a single character
+        char c;
+        int ret = ::read( portFd_, &c, 1 );
+        if ( ret == 1 )
         {
-            stringstream ss;
-            ss << "Serial::"<<__func__<<": Not enough room in buffer";
-            throw SerialException( ss.str() );
+            str += c;
+            if ( c == termchar )
+                return str.size();
         }
-
-        int ret = ::read( portFd_, &nextChar, 1 );
-        if (ret == 1)
+        else if ( ret == 0 )
         {
-            *(dataPtr++) = nextChar; //got data let's store it...
-        }
-        else
-        {
-            // If timeouts enabled and no data, wait and then go again
-            if( timeoutsEnabled() &&  (ret == -1) && (errno == EAGAIN) )
+            // Nothing to read yet
+            if ( ( timeoutsEnabled() && waitForDataOrTimeout() == TIMED_OUT ) ||
+                 !timeoutsEnabled() )
             {
-                if(waitForDataOrTimeout() == GOT_DATA)
-                {
-                    continue;
-                }else{
-                    *dataPtr = 0x00; // Timed out. terminate string just incase it's used anyway
-                    return -1;
-                }
+                // Timed out
+                return -1;
             }
-
-            // If we get here then it was a more serious error
-            stringstream ss;
-            ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
-            throw SerialException( ss.str() );
         }
-    
-    } while (nextChar != termchar);
-
-    // It's a string. It must be NULL terminated...
-    *dataPtr = 0x00;
-
-    // Return the number of chars not including the NULL
-    return ( (int) (dataPtr - bufPtr) );
+        else // ret==-1: error
+        {
+            if ( timeoutsEnabled() && errno == EAGAIN )
+            {
+                if ( waitForDataOrTimeout() == TIMED_OUT )
+                    return -1;
+            }
+            else
+            {
+                stringstream ss;
+                ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
+                throw SerialException( ss.str() );
+            }
+        }
+    }
+    return str.size();
 }
+
+// int 
+// Serial::readUntil(void *buf, int count, char termchar)
+// {
+//     if ( debugLevel_ > 0 ){
+//         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
+//         if(timeoutsEnabled()){ 
+//             cout << "timeouts enabled"<<endl; 
+//         }else{
+//             cout << "timeouts not enabled"<<endl;
+//         }
+//     }
+
+//     // There must be at least room for a terminating char and NULL terminator!
+//     assert (count >= 2);
+
+//     char* dataPtr = static_cast<char*>(buf);
+//     const char* bufPtr = static_cast<char*>(buf);
+//     char nextChar = 0;
+
+//     do {        
+//         // Check for buf overrun Must leave room for NULL terminator
+//         if ( dataPtr >= bufPtr + (count - 1) )
+//         {
+//             stringstream ss;
+//             ss << "Serial::"<<__func__<<": Not enough room in buffer";
+//             throw SerialException( ss.str() );
+//         }
+
+//         int ret = ::read( portFd_, &nextChar, 1 );
+//         if (ret == 1)
+//         {
+//             *(dataPtr++) = nextChar; //got data let's store it...
+//         }
+//         else
+//         {
+//             // If timeouts enabled and no data, wait and then go again
+//             if( timeoutsEnabled() &&  (ret == -1) && (errno == EAGAIN) )
+//             {
+//                 if( waitForDataOrTimeout() == DATA_AVAILABLE )
+//                 {
+//                     continue;
+//                 }else{
+//                     *dataPtr = 0x00; // Timed out. terminate string just incase it's used anyway
+//                     return -1;
+//                 }
+//             }
+
+//             // If we get here then it was a more serious error
+//             stringstream ss;
+//             ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
+//             throw SerialException( ss.str() );
+//         }
+    
+//     } while (nextChar != termchar);
+
+//     // It's a string. It must be NULL terminated...
+//     *dataPtr = 0x00;
+
+//     // Return the number of chars not including the NULL
+//     return ( (int) (dataPtr - bufPtr) );
+// }
 
 
 int
@@ -706,7 +754,8 @@ Serial::bytesAvailable()
 int
 Serial::bytesAvailableWait()
 {
-    if ( waitForDataOrTimeout() == TIMED_OUT){
+    if ( waitForDataOrTimeout() == TIMED_OUT )
+    {
         return -1;
     }
 
@@ -714,7 +763,7 @@ Serial::bytesAvailableWait()
 }
 
 
-int 
+Serial::WaitStatus
 Serial::waitForDataOrTimeout()
 {
     fd_set rfds;
@@ -736,7 +785,7 @@ Serial::waitForDataOrTimeout()
         throw SerialException( ss.str() );
     }
     
-    return GOT_DATA;
+    return DATA_AVAILABLE;
 }
 
 

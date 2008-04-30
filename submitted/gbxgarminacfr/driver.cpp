@@ -150,7 +150,7 @@ void
 Driver::readFrame(Data& GpsData)
 {
     
-    char serial_data[1024];
+    string serial_data;
     int gpsMsgNotYetGotFrameCount = 0;
 
     //How many messages are we looking for to make our frame
@@ -164,7 +164,7 @@ Driver::readFrame(Data& GpsData)
         
         // This will block up to the timeout
         tracer_.debug( "Driver::read(): calling serial_->readLine()", 10 );
-        int ret = serial_->readLine(serial_data,1024);
+        int ret = serial_->readLine(serial_data);
         tracer_.debug( serial_data, 10 );
 
 //         timeOfRead_ = IceUtil::Time::now();
@@ -193,7 +193,7 @@ Driver::readFrame(Data& GpsData)
         static int nmeaExceptionCount =0;
         try{
             //This throws if it cannot find the * to deliminate the checksum field
-            nmeaMessage_.setSentence(serial_data,gbxgpsutilacfr::TestChecksum);
+            nmeaMessage_.setSentence(serial_data.c_str(),gbxgpsutilacfr::TestChecksum);
         }
         catch (gbxgpsutilacfr::NmeaException &e){
         //Don't throw if only occasional messages are missing the checksums

@@ -46,12 +46,12 @@ int main( int argc, char **argv )
     for ( uint i=0; i < NUM_CHARS; i++ )
     {
         int stringI = i % (stringList.size());
-        std::string theString = stringList[stringI]+"\n";
+        std::string sendString = stringList[stringI]+"\n";
 
-        serial.writeString( theString );
+        serial.writeString( sendString );
 
-        char buf[ theString.size()+1 ];
-        int ret = serial.readLine( buf, theString.size()+1 );
+        std::string receiveString;
+        int ret = serial.readLine( receiveString );
         if ( ret < 0 )
         {
             cout << "ERROR(serialloopbacktest.cpp): Read timed out!" << endl;
@@ -66,15 +66,15 @@ int main( int argc, char **argv )
             exit(1);
         }
 
-        if ( !strcmp( buf, theString.c_str() ) )
+        if ( sendString == receiveString )
         {
-            cout<<"Wrote and read: " << theString << endl;
+            cout<<"Wrote and read: " << sendString << endl;
         }
         else
         {
             cout << "ERROR(serialloopbacktest.cpp): Strings didn't match!!" << endl;
-            cout << "ERROR(serialloopbacktest.cpp): Wrote: '" << theString <<"'"<< endl;
-            cout << "ERROR(serialloopbacktest.cpp): Read:  '" << buf <<"'"<< endl;
+            cout << "ERROR(serialloopbacktest.cpp): Wrote: '" << sendString <<"'"<< endl;
+            cout << "ERROR(serialloopbacktest.cpp): Read:  '" << receiveString <<"'"<< endl;
 
             cout<<"TRACE(serialloopbacktest.cpp): test FAILED" << endl;
             exit(1);
