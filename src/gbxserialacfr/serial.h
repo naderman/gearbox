@@ -114,6 +114,7 @@ public:
     int readUntil(void *buf, int count, char termchar);
 
     //! Short-hand for "readUntil(buf,count,'\n');"
+    //! Reads everything up to and including the '\n'.
     int readLine(void *buf, int count)
         { return readUntil(buf,count,'\n'); }
 
