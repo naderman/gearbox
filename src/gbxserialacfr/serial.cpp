@@ -618,7 +618,6 @@ Serial::readFull(void *buf, int count)
     return got; //The number of bytes that we read.
 }
 
-
 int
 Serial::readStringUntil( std::string &str, char termchar )
 {
@@ -672,69 +671,6 @@ Serial::readStringUntil( std::string &str, char termchar )
     }
     return str.size();
 }
-
-// int 
-// Serial::readUntil(void *buf, int count, char termchar)
-// {
-//     if ( debugLevel_ > 0 ){
-//         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
-//         if(timeoutsEnabled()){ 
-//             cout << "timeouts enabled"<<endl; 
-//         }else{
-//             cout << "timeouts not enabled"<<endl;
-//         }
-//     }
-
-//     // There must be at least room for a terminating char and NULL terminator!
-//     assert (count >= 2);
-
-//     char* dataPtr = static_cast<char*>(buf);
-//     const char* bufPtr = static_cast<char*>(buf);
-//     char nextChar = 0;
-
-//     do {        
-//         // Check for buf overrun Must leave room for NULL terminator
-//         if ( dataPtr >= bufPtr + (count - 1) )
-//         {
-//             stringstream ss;
-//             ss << "Serial::"<<__func__<<": Not enough room in buffer";
-//             throw SerialException( ss.str() );
-//         }
-
-//         int ret = ::read( portFd_, &nextChar, 1 );
-//         if (ret == 1)
-//         {
-//             *(dataPtr++) = nextChar; //got data let's store it...
-//         }
-//         else
-//         {
-//             // If timeouts enabled and no data, wait and then go again
-//             if( timeoutsEnabled() &&  (ret == -1) && (errno == EAGAIN) )
-//             {
-//                 if( waitForDataOrTimeout() == DATA_AVAILABLE )
-//                 {
-//                     continue;
-//                 }else{
-//                     *dataPtr = 0x00; // Timed out. terminate string just incase it's used anyway
-//                     return -1;
-//                 }
-//             }
-
-//             // If we get here then it was a more serious error
-//             stringstream ss;
-//             ss << "Serial::"<<__func__<<"(): "<<strerror(errno);
-//             throw SerialException( ss.str() );
-//         }
-    
-//     } while (nextChar != termchar);
-
-//     // It's a string. It must be NULL terminated...
-//     *dataPtr = 0x00;
-
-//     // Return the number of chars not including the NULL
-//     return ( (int) (dataPtr - bufPtr) );
-// }
-
 
 int
 Serial::bytesAvailable()
