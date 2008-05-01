@@ -106,7 +106,7 @@ public:
     //!
     int readStringUntil( std::string &str, char termchar );
 
-    //! Short-hand for "readStringUntil(buf,count,'\n');"
+    //! Short-hand for "readStringUntil(str,'\n');"
     //! Reads everything up to and including the '\n'.
     int readLine( std::string &str )
         { return readStringUntil(str,'\n'); }
