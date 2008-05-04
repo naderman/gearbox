@@ -33,8 +33,8 @@ IF( build )
 
     GBX_ADD_HEADERS( gbxsickacfr ${hdrs} )
 
-#    IF( GBX_BUILD_TESTS )
+    IF( GBX_BUILD_TESTS )
         ADD_SUBDIRECTORY( test )
-#    ENDIF( GBX_BUILD_TESTS )
+    ENDIF( GBX_BUILD_TESTS )
 
 ENDIF( build )

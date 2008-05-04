@@ -113,7 +113,7 @@ int main( int argc, char **argv )
                     const double angle = config.startAngle + i*config.fieldOfView/(double)(config.numberOfSamples-1);
                     cout << "  " << i << ": angle=" << angle*180.0/M_PI
                          << "deg, range=" << data.ranges[i]
-                         << ", intensity=" << data.intensities[i] << endl;
+                         << ", intensity=" << (int)(data.intensities[i]) << endl;
                 }
             }
             if ( data.haveWarnings )
