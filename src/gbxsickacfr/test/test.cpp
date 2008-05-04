@@ -31,9 +31,11 @@ int main( int argc, char **argv )
     int opt;
     int baud = 38400;
     string port = "/dev/ttyS0";
+    bool debug = false;
+    bool showScan = false;
 
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:b:")) != -1)
+    while ((opt = getopt(argc, argv, "p:b:vs")) != -1)
     {
         switch ( opt )
         {
@@ -43,10 +45,16 @@ int main( int argc, char **argv )
         case 'b':
             baud = atoi( optarg );
             break;
+        case 'v':
+            debug = true;
+            break;
+        case 's':
+            showScan = true;
+            break;
         default:
-            cout << "Usage: " << argv[0] << " [-p port] [-b baud]" << endl << endl
+            cout << "Usage: " << argv[0] << " [-p port] [-b baud] [-v(erbose)] [-s(how scan)]" << endl << endl
                  << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
-                 << "-b baud\tBaud rate to connect at (9600, 19200, 38400, oro 500000)." << endl;
+                 << "-b baud\tBaud rate to connect at (9600, 19200, 38400, or 500000)." << endl;
             return 1;
         }
     }
@@ -67,7 +75,6 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    const bool debug=false;
     gbxsickacfr::gbxutilacfr::TrivialTracer tracer( debug );
     gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
 
@@ -99,14 +106,16 @@ int main( int argc, char **argv )
             device->read( data );
 
             cout<<"Test: Got scan "<<i+1<<" of "<<numReads<<endl;
-            for ( int i=0; i < config.numberOfSamples; i++ )
+            if ( showScan )
             {
-                const double angle = config.startAngle + i*config.fieldOfView/(double)(config.numberOfSamples-1);
-                cout << "  " << i << ": angle=" << angle*180.0/M_PI
-                     << "deg, range=" << data.ranges[i]
-                     << ", intensity=" << data.intensities[i] << endl;
+                for ( int i=0; i < config.numberOfSamples; i++ )
+                {
+                    const double angle = config.startAngle + i*config.fieldOfView/(double)(config.numberOfSamples-1);
+                    cout << "  " << i << ": angle=" << angle*180.0/M_PI
+                         << "deg, range=" << data.ranges[i]
+                         << ", intensity=" << data.intensities[i] << endl;
+                }
             }
-
             if ( data.haveWarnings )
                 cout << "got warnings: " << data.warnings << endl;
         }

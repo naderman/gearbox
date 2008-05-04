@@ -129,26 +129,36 @@ Driver::Driver( const Config &config, gbxutilacfr::Tracer& tracer, gbxutilacfr::
     ssDebug << "Connecting to laser on serial port " << config_.device;
     tracer_.debug( ssDebug.str() );
 
-    serialHandler_.reset( new SerialHandler( config_.device, tracer, status ) );
-
-    try {
-
-        initLaser();
-
-    }
-    catch ( const ResponseIsErrorException &e )
+    const int MAX_TRIES=3;
+    for ( int i=0; i < MAX_TRIES; i++ )
     {
-        std::string errorLog = errorConditions();
-        stringstream ss;
-        ss << e.what() << endl << "Laser error log: " << errorLog;
-        throw ResponseIsErrorException( ss.str() );
-    }
-    catch ( const std::exception &e )
-    {
-        stringstream ss;
-        ss << "during initLaser(): " << e.what();
-        tracer_.warning( ss.str() );
-        throw;
+        stringstream tryString;
+        tryString << "Connection attempt " << i+1 << " of " << MAX_TRIES << ": ";
+        try {
+
+            serialHandler_.reset(0);
+            serialHandler_.reset( new SerialHandler( config_.device, tracer, status ) );
+            initLaser();
+            break;
+        }
+        catch ( const ResponseIsErrorException &e )
+        {
+            std::string errorLog = errorConditions();
+            stringstream ss;
+            ss << e.what() << endl << "Laser error log: " << errorLog;
+            if ( i == MAX_TRIES-1 )
+                throw ResponseIsErrorException( ss.str() );
+            else
+                tracer_.warning( tryString.str() + ss.str() );
+        }
+        catch ( const std::exception &e )
+        {
+            stringstream ss;
+            ss << "during initLaser(): " << e.what();
+            tracer_.warning( tryString.str() + ss.str() );
+            if ( i == MAX_TRIES-1 )
+                throw;
+        }
     }
 }
 
@@ -333,6 +343,7 @@ std::string
 Driver::errorConditions()
 {
     try {
+        tracer_.debug( "Driver: Checking error conditions." );
         constructRequestErrorMessage( commandAndData_ );
         const bool ignoreErrorConditions = true;
         TimedLmsResponse errorResponse = sendAndExpectResponse( commandAndData_, ignoreErrorConditions );
@@ -350,8 +361,10 @@ Driver::errorConditions()
 void
 Driver::setBaudRate( int baudRate )
 {
+    // Tell the laser to switch
     constructRequestBaudRate( commandAndData_, baudRate );
     sendAndExpectResponse( commandAndData_ );
+    // And switch myself
     serialHandler_->setBaudRate( config_.baudRate );
 }
 
@@ -372,26 +385,21 @@ Driver::guessLaserBaudRate()
         ss << "Driver: Trying to connect at " << baudRates[baudRateI] << " baud.";
         tracer_.info( ss.str() );
 
+        // Switch my local serial port
         serialHandler_->setBaudRate( baudRates[baudRateI] );
             
-        const uint MAX_TRIES = 2;
-        for ( uint tryNum=0; tryNum < MAX_TRIES; tryNum++ )
+        try {
+            stringstream ss;
+            ss <<"Driver: Trying to get laser status with baudrate " << baudRates[baudRateI];
+            tracer_.debug( ss.str() );
+            askLaserForStatusData();
+            return baudRates[baudRateI];
+        }
+        catch ( const NoResponseException &e )
         {
-            try {
-                stringstream ss;
-                ss <<"Driver: Trying to get laser status with baudrate " << baudRates[baudRateI] << " (try number "<<tryNum<<" of " << MAX_TRIES << ")" << endl;
-                tracer_.debug( ss.str() );
-                askLaserForStatusData();
-                return baudRates[baudRateI];
-            }
-            catch ( const NoResponseException &e )
-            {
-                stringstream ss;
-                ss << "Driver::guessLaserBaudRate(): try " << tryNum << " of " << MAX_TRIES << "  at baudRate " << baudRates[baudRateI] << " failed: " << e.what();
-                tracer_.debug( ss.str() );
-                if ( tryNum == MAX_TRIES-1 )
-                    break;
-            }
+            stringstream ss;
+            ss << "Driver::guessLaserBaudRate(): failed: " << e.what();
+            tracer_.debug( ss.str() );
         }
     } // end loop over baud rates
 
@@ -408,30 +416,13 @@ Driver::initLaser()
     // Turn continuous mode off
     //
     tracer_.debug("Driver: Turning continuous mode off");
-    // For some reason this isn't always reliable, not too sure why.
-    // Perhaps there's some crap left in the buffer after the thing
-    // was previously in continuous mode?
-    const int MAX_TRIES=3;
-    for ( int i=0; i < MAX_TRIES; i++ )
-    {
-        try {
-            constructRequestMeasuredOnRequestMode( commandAndData_ );
-            sendAndExpectResponse( commandAndData_ );
-            break;
-        }
-        catch ( NoResponseException &e )
-        {
-            if ( i == MAX_TRIES-1 )
-            {
-                // Give up
-                throw;
-            }
-        }
-    }
+    constructRequestMeasuredOnRequestMode( commandAndData_ );
+    sendAndExpectResponse( commandAndData_ );
 
     //
     // Set Desired BaudRate
     //
+    tracer_.debug("Driver: Telling the laser to switch to the desired baud rate");
     if ( currentBaudRate != config_.baudRate )
     {
         setBaudRate( config_.baudRate );
@@ -449,6 +440,7 @@ Driver::initLaser()
     //
     // Check operating data counters
     //
+    tracer_.debug("Driver: Checking operating data counters");
     constructRequestOperatingDataCounter( commandAndData_ );
     TimedLmsResponse counterResponse = sendAndExpectResponse( commandAndData_ );
     ssInfo << "OperatingDataCounter: " << toString(counterResponse.response) << endl;
@@ -456,6 +448,7 @@ Driver::initLaser()
     //
     // Get status
     //
+    tracer_.debug("Driver: Checking status");
     LmsResponse statusResponse = askLaserForStatusData();
     LmsStatusResponseData *statusResponseData = 
         dynamic_cast<LmsStatusResponseData*>(statusResponse.data);

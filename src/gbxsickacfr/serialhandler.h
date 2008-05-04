@@ -68,8 +68,8 @@ class SerialHandler
 public: 
 
     SerialHandler( const std::string &dev,
-                    gbxutilacfr::Tracer       &tracer,
-                    gbxutilacfr::Status       &status );
+                   gbxutilacfr::Tracer       &tracer,
+                   gbxutilacfr::Status       &status );
     ~SerialHandler();
 
     void send( const std::vector<uChar> &telegram )
@@ -99,7 +99,7 @@ public:
 
 private: 
 
-    ResponseParser                          responseParser_;
+    ResponseParser                            responseParser_;
     gbxserialacfr::Serial                     serialPort_;
     gbxserialdeviceacfr::SerialDeviceHandler *serialDeviceHandler_;
     // Keep a smart pointer to the SerialDeviceHandler as a thread, for stop/start purposes

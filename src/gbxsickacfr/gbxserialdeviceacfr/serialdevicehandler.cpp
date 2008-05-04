@@ -71,7 +71,7 @@ SerialDeviceHandler::~SerialDeviceHandler()
 void
 SerialDeviceHandler::setBaudRate( int baudRate )
 {
-    tracer_.debug( "SerialDeviceHandler: Changing baud rate and flushing." );
+    tracer_.debug( "SerialDeviceHandler: Changing baud rate of serial port." );
     serial_.setBaudRate( baudRate );
     // TODO: AlexB: not entirely sure if these are
     // necessary, they should either be removed or
@@ -161,7 +161,7 @@ SerialDeviceHandler::getDataFromSerial()
     if ( SUPER_DEBUG )
     {
         stringstream ss;
-        ss << "SerialDeviceHandler::getDataFromSerial(): nBytes: " << nBytes;
+        ss << "SerialDeviceHandler::getDataFromSerial(): nBytes available: " << nBytes;
         tracer_.debug( ss.str(), 9 );
     }
 
