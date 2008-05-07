@@ -4,6 +4,10 @@
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
 #
 MACRO( GBX_ADD_EXECUTABLE name )
+    if(COMMAND cmake_policy)
+      cmake_policy(SET CMP0003 NEW)
+    endif(COMMAND cmake_policy)
+
     ADD_EXECUTABLE( ${name} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
@@ -22,6 +26,10 @@ ENDMACRO( GBX_ADD_EXECUTABLE name )
 # Usage is the same as ADD_LIBRARY, all parameters are passed to ADD_LIBRARY.
 #
 MACRO( GBX_ADD_LIBRARY name )
+    if(COMMAND cmake_policy)
+      cmake_policy(SET CMP0003 NEW)
+    endif(COMMAND cmake_policy)
+
     ADD_LIBRARY( ${name} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
