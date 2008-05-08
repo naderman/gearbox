@@ -12,9 +12,40 @@
 #define GBXUTILACFR_STATUS_H
 
 #include <string>
+#include <vector>
 
 namespace gbxsickacfr {
 namespace gbxutilacfr {
+
+//! Possible subsystem status values
+enum SubsystemStatusType
+{
+    //! Subsystem is initialising -- it's not exactly OK yet, but there's also no fault yet.
+    SubsystemStatusInitialising,
+    //! Subsystem is OK
+    SubsystemStatusOk,
+    //! Subsystem has encountered an abnormal but non-fault condition
+    SubsystemStatusWarning,
+    //! Subsystem has declared a fault
+    SubsystemStatusFault,
+    //! Subsystem has not been heard from for an abnormally long time
+    SubsystemStatusStalled
+};
+
+//! Status for a single subsystem
+struct SubsystemStatus
+{
+    //! Machine-readable status description
+    SubsystemStatusType type;
+
+    //! Human-readable status description
+    std::string message;
+
+    //! Ratio of time since last heartbeat to maximum expected time between heartbeats.
+    //! For example, sinceHeartbeat=0.5 means that half of normally expected interval between heartbeats
+    //! has elapsed.
+    float sinceHeartbeat;
+};
 
 /*
 @brief Local interface to component status.
@@ -56,16 +87,6 @@ class Status
 
 public:
 
-    // this is for internal implementation only
-    enum SubsystemStatusType
-    {
-        Initialising,
-        Ok,
-        Warning,
-        Fault,
-        Stalled
-    };
-    
     virtual ~Status() {};
 
     /*
@@ -86,6 +107,13 @@ public:
     // the thread is shutting down or restarting. 
     // Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void removeSubsystem( const std::string& subsystem )=0;
+
+    // Returns a list of subsystem names.
+    virtual std::vector<std::string> subsystems()=0;
+
+    // Returns status of subsystem with the given name.
+    // Throws gbxutilacfr::Exception when the specified subsystem does not exist.
+    virtual SubsystemStatus subsystemStatus( const std::string& subsystem )=0;
 
     // Modifies maximum expected interval between heartbeats (in seconds).
     // When time since last heartbeat exceeds this, alarm is raised. 

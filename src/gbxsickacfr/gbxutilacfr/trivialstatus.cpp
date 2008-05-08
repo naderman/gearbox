@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include "trivialstatus.h"
+#include "exceptions.h"
 
 using namespace std;
 
@@ -42,6 +43,18 @@ TrivialStatus::removeSubsystem( const std::string& subsystem )
     stringstream ss;
     ss << "TrivialStatus::removeSubsystem(): Removing existing subsystem: '"<<subsystem<<"'";
     tracer_.debug( ss.str() );
+}
+
+std::vector<std::string> 
+TrivialStatus::subsystems()
+{
+    return std::vector<std::string> ();
+}
+
+SubsystemStatus 
+TrivialStatus::subsystemStatus( const std::string& subsystem )
+{
+    throw Exception( ERROR_INFO, "This implementation of Status does not store status of the subsystems" );
 }
 
 void 
