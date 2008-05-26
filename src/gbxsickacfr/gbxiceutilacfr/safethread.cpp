@@ -46,9 +46,12 @@ SafeThread::run()
         ss << "SafeThread::run(): Caught unexpected unknown exception.";
     }
 
-    // only if there were exceptions
-    if ( !ss.str().empty() )  {
-        tracer_.error( ss.str() );
+    // report error if there was an exception and we are not stopping
+    if ( !ss.str().empty() ) {
+        if ( !isStopping() ) 
+            tracer_.error( ss.str() );
+        else
+            tracer_.debug( ss.str(), 4 );
     }
     else {
         tracer_.debug( "dropping out from run()", 4 );

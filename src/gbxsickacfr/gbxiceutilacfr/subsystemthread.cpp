@@ -52,8 +52,8 @@ SubsystemThread::run()
         ss << "SubsystemThread::run() "<<subsysName()<<": Caught unexpected unknown exception.";
     }
 
-    // only if there were exceptions
-    if ( !ss.str().empty() ) 
+    // report status fault if there was an exception and we are not stopping
+    if ( !ss.str().empty() && !isStopping() ) 
     {
         tracer_.error( ss.str() );
         subStatus().fault( ss.str() );
@@ -62,6 +62,6 @@ SubsystemThread::run()
         tracer_.debug( subsysName()+": dropping out from run() ", 4 );
     }
 
-    // wait for the component to realize that we are quitting and tell us to stop.
+    // wait for somebody to realize that we are quitting and tell us to stop.
     waitForStop();
 }

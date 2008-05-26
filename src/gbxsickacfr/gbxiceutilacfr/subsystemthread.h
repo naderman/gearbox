@@ -22,8 +22,8 @@ namespace gbxiceutilacfr {
 /*!
 @brief A version of the Thread class which catches all possible exceptions and integrates some Status operations.
 
-If a stray exception is caught, an error message will be printed
-(using cout), then we will wait for someone to call stop().
+If an exception is caught when the thread is not stopping, a status fault is issued.
+Then the thread will wait for someone to call stop().
 
 To use this class, simply implement the pure virtual walk() function.
 @verbatim
