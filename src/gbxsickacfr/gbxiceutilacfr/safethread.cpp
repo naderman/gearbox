@@ -54,7 +54,7 @@ SafeThread::run()
             tracer_.debug( ss.str(), 4 );
     }
     else {
-        tracer_.debug( "dropping out from run()", 4 );
+        tracer_.debug( "SafeThread: dropping out from run()", 4 );
     }
 
     // wait for the component to realize that we are quitting and tell us to stop.
