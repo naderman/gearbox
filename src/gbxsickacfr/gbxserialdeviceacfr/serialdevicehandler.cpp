@@ -47,16 +47,15 @@ SerialDeviceHandler::SerialDeviceHandler( const std::string     &subsysName,
                                           gbxutilacfr::Tracer   &tracer,
                                           gbxutilacfr::Status   &status,
                                           int                    unparsedBytesWarnThreshold )
-    : gbxiceutilacfr::SubsystemThread( tracer, status, subsysName ),
+    : gbxiceutilacfr::SafeThread( tracer ),
       serial_(serialPort),
       responseParser_(responseParser),
       responseBuffer_(-1,gbxiceutilacfr::BufferTypeCircular),
       unparsedBytesWarnThreshold_(unparsedBytesWarnThreshold),
       tracer_(tracer),
-      status_(status)
+      subStatus_( status, subsysName )
 {
-    status_.setMaxHeartbeatInterval( subsysName, 60 );
-    status_.initialising( subsysName );
+    subStatus_.setMaxHeartbeatInterval( 60 );
 }
 
 SerialDeviceHandler::~SerialDeviceHandler()
@@ -65,7 +64,7 @@ SerialDeviceHandler::~SerialDeviceHandler()
     // The component may outlive this subsystem.
     // So tell status that it might not hear from us for a while.
     //
-    status_.setMaxHeartbeatInterval( subsysName(), 1e9 );
+    subStatus_.setMaxHeartbeatInterval( 1e9 );
 }
 
 void
@@ -89,7 +88,8 @@ SerialDeviceHandler::send( const char *commandBytes, int numCommandBytes )
 void
 SerialDeviceHandler::walk()
 {
-    status_.setMaxHeartbeatInterval( subsysName(), 2 );
+    // TODO: this max heartbeat interval should reflect the actual timeout of the serial device.
+    subStatus_.setMaxHeartbeatInterval( 2 );
 
     while ( !isStopping() )
     {
@@ -109,7 +109,7 @@ SerialDeviceHandler::walk()
                     try {
                         bool statusOK = processBuffer( timeStampSec, timeStampUsec );
                         if ( statusOK )
-                            status_.ok( subsysName() );
+                            subStatus_.ok();
                     }
                     catch ( std::exception &e )
                     {
@@ -121,7 +121,7 @@ SerialDeviceHandler::walk()
                 }
                 else
                 {
-                    status_.ok( subsysName() );
+                    subStatus_.ok();
                 }
             }
             catch ( std::exception &e )
@@ -136,19 +136,19 @@ SerialDeviceHandler::walk()
         {
             stringstream ss;
             ss << "SerialDeviceHandler: Caught Ice exception: " << e;
-            status_.fault( subsysName(), ss.str() );
+            subStatus_.fault( ss.str() );
         }
         catch ( std::exception &e )
         {
             stringstream ss;
             ss << "SerialDeviceHandler: Caught exception: " << e.what();
-            status_.fault( subsysName(), ss.str() );
+            subStatus_.fault( ss.str() );
         }
         catch ( ... )
         {
             stringstream ss;
             ss << "SerialDeviceHandler: Caught unknown exception.";
-            status_.fault( subsysName(), ss.str() );
+            subStatus_.fault( ss.str() );
         }
     }
 }
@@ -241,7 +241,7 @@ SerialDeviceHandler::processBuffer( const int &timeStampSec, int &timeStampUsec 
             {
                 stringstream ss;
                 ss << "SerialDeviceHandler: Received abnormal response: " << response->toString();
-                status_.warning( subsysName(), ss.str() );
+                subStatus_.warning( ss.str() );
                 statusOK = false;
             }
             else

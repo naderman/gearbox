@@ -11,7 +11,8 @@
 #define GBXSERIALDEVICEACFR_SERIALDEVICEHANDLER_H
 
 #include <gbxserialacfr/serial.h>
-#include <gbxsickacfr/gbxiceutilacfr/subsystemthread.h>
+#include <gbxsickacfr/gbxutilacfr/substatus.h>
+#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
 #include <IceUtil/IceUtil.h>
 
@@ -85,7 +86,7 @@ public:
 //!
 //! @author Alex Brooks
 //!
-class SerialDeviceHandler : public gbxiceutilacfr::SubsystemThread
+class SerialDeviceHandler : public gbxiceutilacfr::SafeThread
 {
 
 public: 
@@ -95,8 +96,6 @@ public:
     //   - unparsedBytesWarnThreshold: if we get more than this many un-parsed bytes packed into the
     //                                 receive buffer, flag a warning.
     //   - serialPort_: must have timeouts enabled
-    //   - serialTimeout: the timout to use when reading fromt he serial port
-    //                    (controls the frequency of the loop)
     SerialDeviceHandler( const std::string     &subsysName,
                          gbxserialacfr::Serial &serialPort,
                          IResponseParser       &responseParser,
@@ -139,7 +138,7 @@ private:
     int unparsedBytesWarnThreshold_;
 
     gbxutilacfr::Tracer& tracer_;
-    gbxutilacfr::Status& status_;
+    gbxutilacfr::SubStatus subStatus_;
 };
 
 //////////////////////////////////////////////////////////////////////
