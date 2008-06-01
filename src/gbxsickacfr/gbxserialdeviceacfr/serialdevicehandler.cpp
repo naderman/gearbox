@@ -88,8 +88,8 @@ SerialDeviceHandler::send( const char *commandBytes, int numCommandBytes )
 void
 SerialDeviceHandler::walk()
 {
-    // TODO: this max heartbeat interval should reflect the actual timeout of the serial device.
-    subStatus_.setMaxHeartbeatInterval( 2 );
+    double maxIntervalSec = serial_.timeout().sec + 1e6*serial_.timeout().usec;
+    subStatus_.setMaxHeartbeatInterval( maxIntervalSec * 5.0 );
 
     while ( !isStopping() )
     {
