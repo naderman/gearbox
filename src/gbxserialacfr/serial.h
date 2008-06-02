@@ -77,6 +77,10 @@ public:
     //! but can't set the {en|dis}abled state of timeouts.
     void setTimeout( const Timeout &timeout );
 
+    //! Gets the current timeout.
+    //! A timeout value of (sec=0,usec=0) indicates 'timeouts disabled'.
+    const Timeout &timeout() const { return timeout_; }
+
     //! Reads up to @c count bytes into buffer @c buf.
     //! Returns the number of bytes read, or '-1' on timeout (if timeouts are enabled).
     //! If timeouts are not enabled, blocks till it gets something.
