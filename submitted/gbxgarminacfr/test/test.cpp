@@ -91,19 +91,28 @@ int main( int argc, char **argv )
             switch ( data->type() )
             {
                 case gbxgarminacfr::GpGga :
-                    cout<<"GPGGA"<<endl;
+                {
+                    gbxgarminacfr::GgaData* d = (gbxgarminacfr::GgaData*)data.get();
+                    cout<<"GPGGA: fix type="<<d->fixType<<endl;
                     break;
+                }
                 case gbxgarminacfr::GpVtg :
-                    cout<<"GPVTG"<<endl;
+                {
+                    gbxgarminacfr::VtgData* d = (gbxgarminacfr::VtgData*)data.get();
+                    cout<<"GPVTG: speed="<<d->speed<<endl;
                     break;
+                }
                 case gbxgarminacfr::PgRme :
-                    cout<<"PGRME"<<endl;
+                {
+                    gbxgarminacfr::RmeData* d = (gbxgarminacfr::RmeData*)data.get();
+                    cout<<"PGRME: herror="<<d->horizontalPositionError<<endl;
                     break;
+                }
                 default :
                     cout<<"?????"<<endl;
             }
 
-            // no need to delete the message, the auto pointer will delete it automatically
+            // no need to delete the data object, the auto pointer will delete it automatically
 
             cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
         }
