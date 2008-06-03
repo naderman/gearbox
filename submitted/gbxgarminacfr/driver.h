@@ -26,8 +26,12 @@ public:
         readGga(true),
         readVtg(true),
         readRme(true) {};
-    //! Returns true if the configuration is sane.
+
+    //! Returns true if the configuration is sane. Checks include:
+    //! - a non-empty device name
+    //! - at least one read-sentence flag set to TRUE
     bool isValid() const;
+
     //! Returns human-readable configuration description.
     std::string toString() const;
 

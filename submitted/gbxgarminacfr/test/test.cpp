@@ -51,8 +51,8 @@ int main( int argc, char **argv )
     gbxgarminacfr::Config config;
     config.device = port;
     config.readGga = true;
-    config.readVtg = true;
-    config.readRme = true;
+    config.readVtg = false;
+    config.readRme = false;
     if ( !config.isValid() ) {
         cout << "Test: Invalid device configuration structure: " << config.toString() << endl;
         exit(1);
@@ -80,12 +80,30 @@ int main( int argc, char **argv )
     std::auto_ptr<gbxgarminacfr::GenericData> data;
 
     // Read a few times
-    const int numReads = 3;
+    const int numReads = 30;
     for ( int i=0; i < numReads; i++ )
     {
         try 
         {
             data = device->read();
+            
+            // find out which data type it is
+            switch ( data->type() )
+            {
+                case gbxgarminacfr::GpGga :
+                    cout<<"GPGGA"<<endl;
+                    break;
+                case gbxgarminacfr::GpVtg :
+                    cout<<"GPVTG"<<endl;
+                    break;
+                case gbxgarminacfr::PgRme :
+                    cout<<"PGRME"<<endl;
+                    break;
+                default :
+                    cout<<"?????"<<endl;
+            }
+
+            // no need to delete the message, the auto pointer will delete it automatically
 
             cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
         }

@@ -152,7 +152,11 @@ GenericData* extractRmeData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
 bool
 Config::isValid() const
 {
-    if ( device.empty() ) return false;
+    if ( device.empty() ) 
+        return false;
+
+    if ( !( readGga || readVtg || readRme ) )
+        return false;
 
     return true;
 }
