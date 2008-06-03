@@ -51,8 +51,8 @@ int main( int argc, char **argv )
     gbxgarminacfr::Config config;
     config.device = port;
     config.readGga = true;
-    config.readVtg = false;
-    config.readRme = false;
+    config.readVtg = true;
+    config.readRme = true;
     if ( !config.isValid() ) {
         cout << "Test: Invalid device configuration structure: " << config.toString() << endl;
         exit(1);

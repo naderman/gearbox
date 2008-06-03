@@ -57,30 +57,13 @@ enum DataType
     PgRme
 };
 
-//! Possible Status Messages GenericData can contain
-enum StatusMessageType 
-{
-    //! Nothing new, no message
-    NoMsg,
-    //! All good, but something to say
-    Ok,
-    //! Problem, likely to go away
-    Warning,
-    //! Problem, probably fatal
-    Fault
-};
-
 //! Generic data type returned by a read
 class GenericData
 {
 public:
-    virtual ~GenericData(){};
+    virtual ~GenericData() {};
     //! Returns data type.
     virtual DataType type() const=0;
-    //! Status message type.
-    StatusMessageType statusMessageType;
-    //! Status message
-    std::string statusMessage;
 
 private:
 };
@@ -188,48 +171,20 @@ public:
 
 Garmin GPS driver
 
+All Garmin receivers understand the latest NMEA standard which is called: 0183 version 2.0. 
+
+This standard dictates a transfer rate of 4800 baud.
+
+This driver can read only the following messages (sentences):
+- GPGGA fix data 
+- PGRME (estimated error) - not sent if set to 0183 1.5 
+- GPVTG vector track and speed over ground 
+
+Processing of individual messages can be disabled in the Config structure.
 
 Referennces:
 - http://en.wikipedia.org/wiki/NMEA
 - http://www.gpsinformation.org/dale/interface.htm
-
-All Garmin receivers understand the latest standard which is called: 0183 version 2.0. 
-
-This standard dictates a transfer rate of 4800 baud.
-
-Out of all the messages below, this driver can read only the following messages (sentences):
-- GPGGA
-- GPVTG
-- PGRME
-
-The sentences sent by Garmin receivers include:
-NMEA 2.0 
-- GPBOD bearing, origin to destination - earlier G-12's do not transmit this 
-- GPGGA fix data 
-- GPGLL Lat/Lon data - earlier G-12's do not transmit this 
-- GPGSA overall satellite reception data 
-- GPGSV detailed satellite data 
-- GPRMB minimum recommended data when following a route 
-- GPRMC minimum recommended data 
-- GPRTE route data 
-- GPWPL waypoint data (this is bidirectional)
-
-NMEA 1.5 - some units do not support version 1.5 
-- GPBOD bearing origin to destination - earlier G-12's do not send this 
-- GPBWC bearing to waypoint using great circle route. 
-- GPGLL lat/lon - earlier G-12's do not send this 
-- GPRMC minimum recommend data 
-- GPRMB minimum recommended data when following a route 
-- GPVTG vector track and speed over ground 
-- GPWPL waypoint data (only when active goto) 
-- GPXTE cross track error
-
-In addition Garmin receivers send the following Proprietary Sentences: 
-- PGRME (estimated error) - not sent if set to 0183 1.5 
-- PGRMM (map datum) 
-- PGRMZ (altitude) 
-- PSLIB (beacon receiver control)
-
 */
 class Driver
 {
@@ -247,7 +202,22 @@ public:
 
     ~Driver();
 
-    //! Blocks till new data is available
+/*! 
+Blocks till new data is available.
+
+Throws gbxsickacfr::gbxutilacfr::Exception when a problem is encountered.
+
+@verbatim
+std::auto_ptr<gbxgarminacfr::GenericData> data;
+
+try {
+    data = device->read();
+}
+catch ( const std::exception& e ) {
+    cout <<"Test: Failed to read data: "<<e.what()<<endl;
+} 
+@endverbatim
+*/
     std::auto_ptr<GenericData> read();
 
 private:
