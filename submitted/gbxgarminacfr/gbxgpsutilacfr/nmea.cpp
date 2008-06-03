@@ -103,7 +103,6 @@ void NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
     default:
         assert(true);
     }
-
 }
 
 
@@ -145,7 +144,6 @@ bool NmeaMessage::testChecksumOk()
    
     //failed the checksum!
     return false;
-        
 }
 
 
@@ -188,7 +186,6 @@ void NmeaMessage::addCheckSum(){
         
     //Put the byte values as upper case HEX back into the message
     sprintf(sentence_ + loopCount + 1,"%02X",chkRunning);
-
 }
 
 
@@ -208,5 +205,4 @@ void NmeaMessage::parseTokens(){
 
     //keep track of what we have done.
     haveTokens_ = true;
-
 }

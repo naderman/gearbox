@@ -24,7 +24,7 @@
 using namespace std;
 
 //
-// Instantiates the laser driver, reads a few scans
+// Instantiates the driver, reads a messages
 //
 int main( int argc, char **argv )
 {
@@ -33,7 +33,7 @@ int main( int argc, char **argv )
     string port = "/dev/ttyS0";
 
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:b:")) != -1)
+    while ((opt = getopt(argc, argv, "p:")) != -1)
     {
         switch ( opt )
         {
@@ -42,14 +42,17 @@ int main( int argc, char **argv )
             break;
         default:
             cout << "Usage: " << argv[0] << " [-p port]" << endl << endl
-                 << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl;
+                 << "-p port\tPort the device is connected to. E.g. /dev/ttyS0" << endl;
             return 1;
         }
     }
 
-    // Set up the laser's configuration
+    // Set up the device configuration
     gbxgarminacfr::Config config;
     config.device = port;
+    config.readGga = true;
+    config.readVtg = true;
+    config.readRme = true;
     if ( !config.isValid() ) {
         cout << "Test: Invalid device configuration structure: " << config.toString() << endl;
         exit(1);
@@ -57,7 +60,7 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    const bool debug=false;
+    const bool debug = false;
     gbxsickacfr::gbxutilacfr::TrivialTracer tracer( debug );
     gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
 
@@ -74,7 +77,7 @@ int main( int argc, char **argv )
     }
 
     // Create data structure to store sensor data
-    gbxgarminacfr::Data data;
+    std::auto_ptr<gbxgarminacfr::GenericData> data;
 
     // Read a few times
     const int numReads = 3;
@@ -82,7 +85,7 @@ int main( int argc, char **argv )
     {
         try 
         {
-            device->read( data );
+            data = device->read();
 
             cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
         }

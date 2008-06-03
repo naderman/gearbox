@@ -68,53 +68,54 @@ protected:
 
 // When using class to send data, need to add checksum, when reciving data need to test checksum
 // Checksums are usually optional 
-    enum{TestChecksum, AddChecksum, DontTestOrAddChecksum};
+enum{TestChecksum, AddChecksum, DontTestOrAddChecksum};
 
 //     class SOEXPORT NmeaMessage{
-    class NmeaMessage{
-    public:
-        NmeaMessage();
-        NmeaMessage(const char *sentence, int testCheckSum = DontTestOrAddChecksum);
+class NmeaMessage
+{
+public:
+    NmeaMessage();
+    NmeaMessage(const char *sentence, int testCheckSum = DontTestOrAddChecksum);
 
-        // Do we only have the raw string ?
-        bool haveSentence(){return haveSentence_;};
-        // Set up the internal data for a sentence
-        void setSentence(const char *data, int testCheckSum = DontTestOrAddChecksum);
-         // Have we parsed fields ?
-        bool haveTokens(){return haveTokens_;};
-        // have we a valid checksum ?
-        bool haveValidChecksum(){return checkSumOK_;};    
-        // have we checked the checksum?
-        bool haveTestedChecksum(){return haveCheckSum_;};    
-        // calculate the checksum from sentence
-        // Note that this function may throw NMEA_Exception...
-        bool testChecksumOk();
-        // Return the raw sentence string
-        const char * sentence(){return sentence_;};
-        // Return a single data token as a string
-        std::string& getDataToken(int i){return dataTokens_[i];};
+    // Set up the internal data for a sentence
+    void setSentence(const char *data, int testCheckSum = DontTestOrAddChecksum);
 
-        // Return the number of fields
-        int numDataTokens(){return dataTokens_.size();};
-        //Tokenise the string that we received
-        void parseTokens();
+    // Do we only have the raw string ?
+    bool haveSentence() const { return haveSentence_; };
+    // Have we parsed fields ?
+    bool haveTokens() const { return haveTokens_; };
+    // have we a valid checksum ?
+    bool haveValidChecksum() const { return checkSumOK_; };    
+    // have we checked the checksum?
+    bool haveTestedChecksum()const { return haveCheckSum_; };    
+    // calculate the checksum from sentence
+    // Note that this function may throw NMEA_Exception...
+    bool testChecksumOk();
+    // Return the raw sentence string
+    const char * sentence() { return sentence_; };
+    // Return a single data token as a string
+    std::string& getDataToken(int i) { return dataTokens_[i]; };
 
-    private:
-        void init();
-        void addCheckSum();
-        // Do we only have the raw string ?
-        bool haveSentence_;
-        // Have we parsed data into tokens ?
-        bool haveTokens_;
-        // Have we a checksum and is it valid?
-        bool haveCheckSum_;
-        bool checkSumOK_;
-        // The raw sentence, allow for terminator
-        char sentence_[MAX_SENTENCE_LEN+1];
-        // The tokenised data
-        std::vector<std::string> dataTokens_;
-        
-    };
+    // Return the number of fields
+    int numDataTokens() const { return dataTokens_.size(); };
+    //Tokenise the string that we received
+    void parseTokens();
+
+private:
+    void init();
+    void addCheckSum();
+    // Do we only have the raw string ?
+    bool haveSentence_;
+    // Have we parsed data into tokens ?
+    bool haveTokens_;
+    // Have we a checksum and is it valid?
+    bool haveCheckSum_;
+    bool checkSumOK_;
+    // The raw sentence, allow for terminator
+    char sentence_[MAX_SENTENCE_LEN+1];
+    // The tokenised data
+    std::vector<std::string> dataTokens_;
+};
 
 }
 
