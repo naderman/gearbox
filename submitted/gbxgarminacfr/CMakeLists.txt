@@ -9,17 +9,13 @@ SET( int_libs GbxUtilAcfr GbxSerialAcfr )
 # SET( int_libs GbxUtilAcfr GbxSerialAcfr GbxGpsUtilAcfr ) 
 GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
 
-SET( private_libs GbxGpsUtilAcfr )
-
 IF( build )
-
-    ADD_SUBDIRECTORY( gbxgpsutilacfr )
 
     INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )
-    SET( dep_libs ${int_libs} ${private_libs} )
+    SET( dep_libs ${int_libs} )
     
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )

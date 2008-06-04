@@ -11,7 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <gbxsickacfr/gbxutilacfr/gbxutilacfr.h>
-#include <gbxgarminacfr/gbxgpsutilacfr/nmea.h>
+#include "nmea.h"
 #include <cstdlib>
 #include <sys/time.h>
 #include <time.h>
