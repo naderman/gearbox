@@ -39,7 +39,7 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
                    NSatsUsed,HDOP,Hgt,M1,GeoidHgt,M2,DiffAge,DiffId};
 
     // fix type
-    switch (msg.getDataToken(FixType)[0])
+    switch ( msg.getDataToken(FixType)[0] )
     {
     case '0': 
         data->fixType = Invalid;
@@ -96,7 +96,7 @@ GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
 
     //Check for an empty string. Means that we are not moving
     //When the message has empty fields tokeniser skips so we get the next field inline.
-    if(msg.getDataToken(HeadingTrue)[0] == 'T' ) {
+    if( msg.getDataToken(HeadingTrue)[0] == 'T' ) {
         data->headingTrue=0.0;
         data->headingMagnetic=0.0;
         data->speed=0.0;
@@ -171,7 +171,7 @@ Config::toString() const
     return ss.str();
 }
 
-/////////////////////
+///////////////////////////////////////
 
 Driver::Driver( const Config &config, 
             gbxsickacfr::gbxutilacfr::Tracer &tracer,
@@ -224,32 +224,42 @@ Driver::init()
 void
 Driver::enableDevice()
 {
-    //Create the messages that we are going to send and add the checksums
-    //Note that the checksum field is filled with 'x's before we start
-    gbxgpsutilacfr::NmeaMessage DisableAllMsg("$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum);
-    gbxgpsutilacfr::NmeaMessage Start_GGA_Msg("$PGRMO,GPGGA,1*xx\r\n",gbxgpsutilacfr::AddChecksum);
-    gbxgpsutilacfr::NmeaMessage Start_VTG_Msg("$PGRMO,GPVTG,1*xx\r\n",gbxgpsutilacfr::AddChecksum);
-    gbxgpsutilacfr::NmeaMessage Start_RME_Msg("$PGRMO,PGRME,1*xx\r\n",gbxgpsutilacfr::AddChecksum);
-
     tracer_.info("Configure Garmin GPS device");
 
+    //Create the messages that we are going to send and add the checksums
+    //Note that the checksum field is filled with 'x's before we start
 
     //First disables all output messages then enable selected ones only.
-    serial_->writeString(DisableAllMsg.sentence());
+    gbxgpsutilacfr::NmeaMessage disableAllMsg( "$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum );
+    serial_->writeString( disableAllMsg.sentence() );
+
     sleep(1);
     
-    serial_->writeString(Start_GGA_Msg.sentence());
-    serial_->writeString(Start_VTG_Msg.sentence());
-    serial_->writeString(Start_RME_Msg.sentence());
+    if ( config_.readGga ) {
+        gbxgpsutilacfr::NmeaMessage enableGgaMsg( "$PGRMO,GPGGA,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
+        serial_->writeString( enableGgaMsg.sentence() );
+    }
+
+
+    if ( config_.readVtg ) {
+        gbxgpsutilacfr::NmeaMessage enableVtgMsg( "$PGRMO,GPVTG,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
+        serial_->writeString( enableVtgMsg.sentence() );
+    }
+
+    if ( config_.readRme ) {
+        gbxgpsutilacfr::NmeaMessage enableRmeMsg( "$PGRMO,PGRME,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
+        serial_->writeString( enableRmeMsg.sentence() );
+    }
+
     sleep(1);
 }
 
 void
 Driver::disableDevice()
 {
-    //Simply send the no messages command!
-    gbxgpsutilacfr::NmeaMessage DisableAllMsg("$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum);
-    serial_->writeString(DisableAllMsg.sentence());
+    // Simply send the no messages command!
+    gbxgpsutilacfr::NmeaMessage disableAllMsg( "$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum );
+    serial_->writeString( disableAllMsg.sentence() );
 }
 
 std::auto_ptr<GenericData>  
@@ -327,12 +337,12 @@ Driver::read()
         //First split up the data fields in the string we have read.
         nmeaMessage.parseTokens();
         
-        //We should not get any messages with failed checksums, but just in case
+        // We should not get any messages with failed checksums, but just in case
         if( nmeaMessage.haveTestedChecksum() && (!nmeaMessage.haveValidChecksum()) ) {
             throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,"Driver: Message fails checksum");
         }
         
-        //And then find out which type of messge we have recieved...
+        // And then find out which type of messge we have recieved...
         string MsgType = nmeaMessage.getDataToken(0);
         
         if ( MsgType == "$GPGGA" ) {
