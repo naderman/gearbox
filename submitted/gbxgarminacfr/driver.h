@@ -38,11 +38,11 @@ public:
     //! Serial device. e.g. "/dev/ttyS0"
     std::string device;
 
-    //! Read PGGGA sentence
+    //! Read GPGGA sentence
     bool readGga;
-    //! Read PGVTG sentence
+    //! Read GPVTG sentence
     bool readVtg;
-    //! Read GPRME sentence
+    //! Read PGRME sentence
     bool readRme;
 };
 
@@ -80,7 +80,8 @@ enum FixType
     Differential
 };
 
-//! Fix data structure
+//! Fix data structure. Note that when fixType is Invalid, all other data except the time stamps
+//! are meaningless.
 struct GgaData : public GenericData
 {
 public:
@@ -110,7 +111,8 @@ public:
     //! Altitude [metres above ellipsoid]
     double altitude;
     
-    //! Fix type.
+    //! Fix type. When fixType is Invalid, all other data except the time stamps
+    //! are meaningless.
     FixType fixType;
 
     //! Number of satellites
@@ -168,8 +170,7 @@ public:
 };
 
 /*! 
-
-Garmin GPS driver
+Garmin GPS driver.
 
 All Garmin receivers understand the latest NMEA standard which is called: 0183 version 2.0. 
 
@@ -181,6 +182,9 @@ This driver can read only the following messages (sentences):
 - GPVTG vector track and speed over ground 
 
 Processing of individual messages can be disabled in the Config structure.
+
+Note that when fixType contained in the GPGGA is Invalid, all other data in all messages
+except the time stamps are meaningless.
 
 Referennces:
 - http://en.wikipedia.org/wiki/NMEA

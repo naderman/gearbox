@@ -37,24 +37,14 @@ Tries to establish communication at 4800 baud (non-configurable).
   Duncan Mercer, Alex Brooks, Alexei Makarenko, Tobias Kaupp
 
 @par Responsible Developer
-  Alex Brooks
+  Alex Makarenko
   
 @par License
   LGPL
   
 @par Dependencies
 
-- libIceUtil (for timing), v.3.2 or newer (latest tested 3.3).
 - @ref gbx_library_gbxserialacfr
-
-@par Installation
-
-- Finding libIceUtil 
-    - IceUtil will be found automatically if installed in one of several standard locations. 
-    - You can specify it's installation point with @c ICEUTIL_HOME CMake variable (or an environment variable with the same name). For example:
-@verbatim
-$ cmake -DICEUTIL_HOME=/home/myuser/install .
-@endverbatim
 
 @section gbx_library_gbxgarminacfr What is EPE?
 

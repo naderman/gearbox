@@ -38,12 +38,22 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     enum GgaTokens{MsgType=0,UTC,Lat,LatDir,Lon,LonDir,FixType,
                    NSatsUsed,HDOP,Hgt,M1,GeoidHgt,M2,DiffAge,DiffId};
 
+    //UTC time 
+    sscanf(msg.getDataToken(UTC).c_str(),"%02d%02d%lf",
+           &data->utcTimeHrs, &data->utcTimeMin, &data->utcTimeSec );
+
     // fix type
     switch ( msg.getDataToken(FixType)[0] )
     {
     case '0': 
         data->fixType = Invalid;
         // NOTE: not processing the rest!
+        data->latitude = 0.0;
+        data->longitude = 0.0;
+        data->altitude = 0.0;
+        data->satellites = 0;
+        data->geoidalSeparation = 0.0;
+cout<<"DEBUG: invalid fix, lat="<<data->latitude<<endl;
         return data;
     case '1': 
         data->fixType = Autonomous;
@@ -53,9 +63,6 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
         break;
     }
         
-    //UTC time 
-    sscanf(msg.getDataToken(UTC).c_str(),"%02d%02d%lf",
-           &data->utcTimeHrs, &data->utcTimeMin, &data->utcTimeSec );
     //position
     int deg;
     double min;
@@ -346,36 +353,39 @@ Driver::read()
         string MsgType = nmeaMessage.getDataToken(0);
         
         if ( MsgType == "$GPGGA" ) {
-            tracer_.debug("got GGA message",4);
-            if ( !config_.readGga )
-                continue;
+            if ( config_.readGga )
+                tracer_.debug("got GPGGA message",4);
+            else
+                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPGGA message" );
             genericData.reset( extractGgaData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
         else if ( MsgType == "$GPVTG" ) {
-            tracer_.debug("got VTG message",4);
-            if ( !config_.readVtg )
-                continue;
+            if ( config_.readVtg )
+                tracer_.debug("got GPVTG message",4);
+            else
+                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPVTG message" );
             genericData.reset( extractVtgData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
         else if ( MsgType == "$PGRME" ) {
-            tracer_.debug("got RME message",4);
-            if ( !config_.readRme )
-                continue;
+            if ( config_.readRme )
+                tracer_.debug("got PGRME message",4);
+            else
+                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRME message" );
             genericData.reset( extractRmeData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
         else if ( MsgType == "$PGRMO" ) {
             //This message is sent by us to control msg transmission and then echoed by GPS
-            //So we can just ignore it
+            //So we can just ignore it and wait for the next one.
             continue;
         }
         else {
             // if we get here the msg is unknown
             stringstream  ErrMsg; 
             ErrMsg << "Message type unknown " << MsgType <<endl; 
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,ErrMsg.str());
+            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, ErrMsg.str() );
         } 
 
     }
