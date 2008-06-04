@@ -53,7 +53,6 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
         data->altitude = 0.0;
         data->satellites = 0;
         data->geoidalSeparation = 0.0;
-cout<<"DEBUG: invalid fix, lat="<<data->latitude<<endl;
         return data;
     case '1': 
         data->fixType = Autonomous;

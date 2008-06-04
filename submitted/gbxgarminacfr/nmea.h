@@ -8,15 +8,11 @@
  *
  */
 
-#include <vector>
-#include <string>
-
-// #include <hydroportability/sharedlib.h>
-
 #ifndef GBXGPSUTILACFR_NMEA_H
 #define GBXGPSUTILACFR_NMEA_H
 
-
+#include <vector>
+#include <string>
 
 /*
 
@@ -51,12 +47,14 @@ namespace gbxgpsutilacfr {
 class NmeaException : public std::exception
 {
 public:
-
     NmeaException(const char *message)
         : message_(message) {}
+
     NmeaException(const std::string &message)
         : message_(message) {}
+
     virtual ~NmeaException() throw() {}
+
     virtual const char* what() const throw() { return message_.c_str(); }
 
 protected:
@@ -68,36 +66,48 @@ protected:
 
 // When using class to send data, need to add checksum, when reciving data need to test checksum
 // Checksums are usually optional 
-enum{TestChecksum, AddChecksum, DontTestOrAddChecksum};
+enum NmeaMessageOptions
+{
+    TestChecksum, 
+    AddChecksum, 
+    DontTestOrAddChecksum
+};
 
 //     class SOEXPORT NmeaMessage{
 class NmeaMessage
 {
 public:
     NmeaMessage();
-    NmeaMessage(const char *sentence, int testCheckSum = DontTestOrAddChecksum);
+    NmeaMessage(const char *sentence, int testCheckSum=DontTestOrAddChecksum );
 
     // Set up the internal data for a sentence
-    void setSentence(const char *data, int testCheckSum = DontTestOrAddChecksum);
+    void setSentence(const char *data, int testCheckSum=DontTestOrAddChecksum );
 
     // Do we only have the raw string ?
     bool haveSentence() const { return haveSentence_; };
+
     // Have we parsed fields ?
     bool haveTokens() const { return haveTokens_; };
+
     // have we a valid checksum ?
-    bool haveValidChecksum() const { return checkSumOK_; };    
+    bool haveValidChecksum() const { return checkSumOK_; };  
+  
     // have we checked the checksum?
-    bool haveTestedChecksum()const { return haveCheckSum_; };    
+    bool haveTestedChecksum()const { return haveCheckSum_; };  
+  
     // calculate the checksum from sentence
     // Note that this function may throw NMEA_Exception...
     bool testChecksumOk();
+
     // Return the raw sentence string
     const char * sentence() { return sentence_; };
+
     // Return a single data token as a string
     std::string& getDataToken(int i) { return dataTokens_[i]; };
 
     // Return the number of fields
     int numDataTokens() const { return dataTokens_.size(); };
+
     //Tokenise the string that we received
     void parseTokens();
 
