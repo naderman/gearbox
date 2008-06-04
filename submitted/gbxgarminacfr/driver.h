@@ -144,11 +144,7 @@ public:
     double headingMagnetic; 
     //! Horizontal velocity [metres/second]
     double speed;
-    //! Vertical velocity [metres/second]
-    double climbRate; 
 };
-
-    enum VTGTokens{MsgType=0,HError,M1,VError,M2,EPE,M3};
 
 //! Gps data structure
 class RmeData : public GenericData
@@ -167,6 +163,9 @@ public:
     double horizontalPositionError;
     //! Vertical position error: one standard deviation [metres]
     double verticalPositionError;
+
+    //! Estimated position error.
+    double estimatedPositionError;
 };
 
 /*! 

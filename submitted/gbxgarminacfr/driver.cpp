@@ -107,7 +107,6 @@ GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
         data->headingTrue=0.0;
         data->headingMagnetic=0.0;
         data->speed=0.0;
-        data->climbRate=0.0;
         // NOTE: not processing the rest!
         return data;
     }
@@ -125,9 +124,6 @@ GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     //speed - converted to m/s
     data->speed=atof(msg.getDataToken(SpeedKPH).c_str());
     data->speed*=(1000/3600.0);
-
-    //set to zero
-    data->climbRate=0.0;
 
     return data;
 }
@@ -149,6 +145,7 @@ GenericData* extractRmeData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     data->horizontalPositionError = atof(msg.getDataToken(HError).c_str());
     data->verticalPositionError = atof(msg.getDataToken(VError).c_str());
 
+    data->estimatedPositionError = atof(msg.getDataToken(EPE).c_str());
     return data;
 }
 

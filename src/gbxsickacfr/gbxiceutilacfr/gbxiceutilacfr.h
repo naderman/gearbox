@@ -15,7 +15,7 @@
 #ifndef GBXICEUTILACFR_GBXICEUTILACFRL_H
 #define GBXICEUTILACFR_GBXICEUTILACFRL_H
 
-#include <gbxsickacfr/gbxiceutilacfr/subsystemthread.h>
+#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <gbxsickacfr/gbxiceutilacfr/timer.h>
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
 #include <gbxsickacfr/gbxiceutilacfr/store.h>

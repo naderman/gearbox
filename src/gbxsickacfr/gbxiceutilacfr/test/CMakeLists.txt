@@ -16,6 +16,3 @@ GBX_ADD_TEST( GbxIceUtilAcfrThreadTest threadtest )
 
 ADD_EXECUTABLE( safethreadtest safethreadtest.cpp )
 GBX_ADD_TEST( GbxIceUtilAcfrSafeThreadTest safethreadtest )
-
-ADD_EXECUTABLE( subsystemthreadtest subsystemthreadtest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrSubsystemThreadTest subsystemthreadtest )
