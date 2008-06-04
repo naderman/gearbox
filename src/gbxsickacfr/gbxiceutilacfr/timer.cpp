@@ -10,7 +10,6 @@
 
 #include <gbxsickacfr/gbxiceutilacfr/timer.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 Timer::Timer()   
@@ -38,5 +37,4 @@ double Timer::elapsedSec() const
     return ( (IceUtil::Time::now() - time_).toSecondsDouble() );
 }
 
-}
 } // namespace

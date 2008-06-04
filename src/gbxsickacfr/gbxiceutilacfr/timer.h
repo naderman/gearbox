@@ -13,7 +13,6 @@
 
 #include <IceUtil/Time.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -53,7 +52,6 @@ private:
 
 };
 
-}
 } // end namespace
 
 #endif

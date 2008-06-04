@@ -12,8 +12,8 @@
 #define GBX_SICK_ACFR_H
 
 #include <gbxsickacfr/serialhandler.h>
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
-#include <gbxsickacfr/gbxutilacfr/status.h>
+#include <gbxutilacfr/tracer.h>
+#include <gbxutilacfr/status.h>
 #include <memory>
 
 namespace gbxsickacfr {

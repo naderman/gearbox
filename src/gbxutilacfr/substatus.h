@@ -11,9 +11,8 @@
 #ifndef GBXUTILACFR_SUBSYSTEM_STATUS_H
 #define GBXUTILACFR_SUBSYSTEM_STATUS_H
 
-#include <gbxsickacfr/gbxutilacfr/status.h>
+#include <gbxutilacfr/status.h>
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 //!
@@ -75,7 +74,6 @@ private:
     std::string subsysName_;
 };
 
-}
 } // namespace
 
 #endif

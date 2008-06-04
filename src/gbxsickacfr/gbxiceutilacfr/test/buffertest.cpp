@@ -16,13 +16,13 @@ using namespace std;
 
 int main(int argc, char * argv[])
 {
-    gbxsickacfr::gbxiceutilacfr::Buffer<double> buffer(-1, gbxsickacfr::gbxiceutilacfr::BufferTypeCircular);
+    gbxiceutilacfr::Buffer<double> buffer(-1, gbxiceutilacfr::BufferTypeCircular);
     double data = 20.0;
     double copy = -1.0;
 
     cout<<"testing default constructor and depth() and type() ... ";
-    if ( buffer.depth()!=-1 || buffer.type()!=gbxsickacfr::gbxiceutilacfr::BufferTypeCircular ) {
-        cout<<"failed. depth: exp=-1 got="<<buffer.depth()<<" type: exp="<<(int)gbxsickacfr::gbxiceutilacfr::BufferTypeCircular<<" got="<<(int)buffer.type()<<endl;
+    if ( buffer.depth()!=-1 || buffer.type()!=gbxiceutilacfr::BufferTypeCircular ) {
+        cout<<"failed. depth: exp=-1 got="<<buffer.depth()<<" type: exp="<<(int)gbxiceutilacfr::BufferTypeCircular<<" got="<<(int)buffer.type()<<endl;
         return EXIT_FAILURE;
     }
     cout<<"ok"<<endl;
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
         cout<<"failed. empty buffer, should've caught exception"<<endl;
         return EXIT_FAILURE;
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         ; // ok
     }
@@ -48,7 +48,7 @@ int main(int argc, char * argv[])
         cout<<"failed. empty buffer, should've caught exception"<<endl;
         return EXIT_FAILURE;
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         ; // ok
     }
@@ -95,7 +95,7 @@ int main(int argc, char * argv[])
     {
         buffer.get( copy );
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         cout<<"failed. should be a non-empty buffer."<<endl;
         return EXIT_FAILURE;
@@ -119,7 +119,7 @@ int main(int argc, char * argv[])
         for ( int i=0; i < size; i++ )
             buffer.getAndPop( data );
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         cout<<"failed. should be a non-empty buffer."<<endl;
         return EXIT_FAILURE;
@@ -131,7 +131,7 @@ int main(int argc, char * argv[])
     cout<<"ok"<<endl;
     
     cout<<"testing circular buffer behavior ...";
-    buffer.configure( 1, gbxsickacfr::gbxiceutilacfr::BufferTypeCircular );
+    buffer.configure( 1, gbxiceutilacfr::BufferTypeCircular );
     //this fills the buffer
     buffer.push( 0 );
     // this should over-write
@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
     cout<<"ok"<<endl;
 
     cout<<"testing queue buffer behavior ...";
-    buffer.configure( 1, gbxsickacfr::gbxiceutilacfr::BufferTypeQueue );
+    buffer.configure( 1, gbxiceutilacfr::BufferTypeQueue );
     //this fills the buffer
     buffer.push( 0 );
     // this should be ignored
@@ -156,8 +156,8 @@ int main(int argc, char * argv[])
     }
     cout<<"ok"<<endl;
 
-    cout<<"testing configure() with gbxsickacfr::gbxiceutilacfr::BufferTypeCircular ... ";
-    buffer.configure( 300, gbxsickacfr::gbxiceutilacfr::BufferTypeCircular );
+    cout<<"testing configure() with gbxiceutilacfr::BufferTypeCircular ... ";
+    buffer.configure( 300, gbxiceutilacfr::BufferTypeCircular );
     for ( int i=0; i<400; ++i ) {
         buffer.push( data );
     }
@@ -176,8 +176,8 @@ int main(int argc, char * argv[])
     }
     cout<<"ok"<<endl;
 
-    cout<<"testing configure() with gbxsickacfr::gbxiceutilacfr::BufferTypeQueue ... ";
-    buffer.configure( 300, gbxsickacfr::gbxiceutilacfr::BufferTypeQueue );
+    cout<<"testing configure() with gbxiceutilacfr::BufferTypeQueue ... ";
+    buffer.configure( 300, gbxiceutilacfr::BufferTypeQueue );
     for ( int i=0; i<400; ++i ) {
         buffer.push( data );
     }

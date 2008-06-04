@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <sstream>
-#include <gbxsickacfr/gbxutilacfr/gbxutilacfr.h>
+#include <gbxutilacfr/gbxutilacfr.h>
 #include "nmea.h"
 #include <cstdlib>
 #include <sys/time.h>
@@ -181,8 +181,8 @@ Config::toString() const
 ///////////////////////////////////////
 
 Driver::Driver( const Config &config, 
-            gbxsickacfr::gbxutilacfr::Tracer &tracer,
-            gbxsickacfr::gbxutilacfr::Status &status ) :
+            gbxutilacfr::Tracer &tracer,
+            gbxutilacfr::Status &status ) :
     config_(config),
     tracer_(tracer),
     status_(status)
@@ -191,7 +191,7 @@ Driver::Driver( const Config &config,
     {
         stringstream ss;
         ss << "Invalid config: " << config_.toString();
-        throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, ss.str() );
+        throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
     }
 
     stringstream ssDebug;
@@ -224,7 +224,7 @@ Driver::init()
         stringstream ss;
         ss << "Driver: Caught SerialException: " << e.what();
         tracer_.error( ss.str() );
-        throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, ss.str() );
+        throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
     }
 }
 
@@ -297,14 +297,14 @@ Driver::read()
         if ( gettimeofday( &now, 0 ) != 0 ) {
             stringstream ss;
             ss << "Pproblem getting timeofday: " << strerror(errno) << endl;
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,ss.str() );
+            throw gbxutilacfr::Exception( ERROR_INFO,ss.str() );
         }
     
         // zero tolerance to serial errors
         if ( ret<0 )
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "Driver: Timeout reading from serial port" );
+            throw gbxutilacfr::Exception( ERROR_INFO, "Driver: Timeout reading from serial port" );
         if ( ret==0 )
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,"Driver: Read 0 bytes from serial port");
+            throw gbxutilacfr::Exception( ERROR_INFO,"Driver: Read 0 bytes from serial port");
     
         // 
         // We successfully read something from the serial port
@@ -324,7 +324,7 @@ Driver::read()
             stringstream ss;
             ss << "Problem reading from GPS: " << e.what();
             tracer_.error( ss.str() );
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,ss.str());
+            throw gbxutilacfr::Exception( ERROR_INFO,ss.str());
         }
         nmeaExceptionCount = 0;
     
@@ -336,7 +336,7 @@ Driver::read()
                 continue;
             }
             else {
-                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,"More than 3 sequential messages failed the checksum");
+                throw gbxutilacfr::Exception( ERROR_INFO,"More than 3 sequential messages failed the checksum");
             }
         }
         nmeaFailChecksumCount = 0;
@@ -346,7 +346,7 @@ Driver::read()
         
         // We should not get any messages with failed checksums, but just in case
         if( nmeaMessage.haveTestedChecksum() && (!nmeaMessage.haveValidChecksum()) ) {
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO,"Driver: Message fails checksum");
+            throw gbxutilacfr::Exception( ERROR_INFO,"Driver: Message fails checksum");
         }
         
         // And then find out which type of messge we have recieved...
@@ -356,7 +356,7 @@ Driver::read()
             if ( config_.readGga )
                 tracer_.debug("got GPGGA message",4);
             else
-                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPGGA message" );
+                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPGGA message" );
             genericData.reset( extractGgaData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
@@ -364,7 +364,7 @@ Driver::read()
             if ( config_.readVtg )
                 tracer_.debug("got GPVTG message",4);
             else
-                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPVTG message" );
+                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPVTG message" );
             genericData.reset( extractVtgData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
@@ -372,7 +372,7 @@ Driver::read()
             if ( config_.readRme )
                 tracer_.debug("got PGRME message",4);
             else
-                throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRME message" );
+                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRME message" );
             genericData.reset( extractRmeData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             break;
         }
@@ -385,7 +385,7 @@ Driver::read()
             // if we get here the msg is unknown
             stringstream  ErrMsg; 
             ErrMsg << "Message type unknown " << MsgType <<endl; 
-            throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, ErrMsg.str() );
+            throw gbxutilacfr::Exception( ERROR_INFO, ErrMsg.str() );
         } 
 
     }

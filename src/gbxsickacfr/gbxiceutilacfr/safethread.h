@@ -12,9 +12,8 @@
 #define GBXICEUTILACFR_SAFE_THREAD_H
 
 #include <gbxsickacfr/gbxiceutilacfr/thread.h>
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
+#include <gbxutilacfr/tracer.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -45,7 +44,7 @@ class SafeThread : public Thread
 {
 public:
     //! Needs an implementation of Tracer to report possible exceptions.
-    SafeThread( gbxsickacfr::gbxutilacfr::Tracer& tracer );
+    SafeThread( gbxutilacfr::Tracer& tracer );
 
     // from IceUtil::Thread (from which HydroUtil::Thread is derived)
     //! This implementation calls walk(), catches all possible exceptions, prints out 
@@ -57,12 +56,11 @@ public:
     virtual void walk()=0;
 
 private:
-    gbxsickacfr::gbxutilacfr::Tracer& tracer_;
+    gbxutilacfr::Tracer& tracer_;
 };
 //! A smart pointer to the SafeThread class.
 typedef IceUtil::Handle<SafeThread> SafeThreadPtr;
 
-}
 } // end namespace
 
 #endif

@@ -12,11 +12,10 @@
 #define GBXICEUTILACFR_SUBSYSTEM_THREAD_H
 
 #include <gbxsickacfr/gbxiceutilacfr/thread.h>
-#include <gbxsickacfr/gbxutilacfr/substatus.h>
-#include <gbxsickacfr/gbxutilacfr/status.h>
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
+#include <gbxutilacfr/substatus.h>
+#include <gbxutilacfr/status.h>
+#include <gbxutilacfr/tracer.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -72,7 +71,6 @@ private:
 //! A smart pointer to the SubsystemThread class.
 typedef IceUtil::Handle<SubsystemThread> SubsystemThreadPtr;
 
-}
 } // end namespace
 
 #endif

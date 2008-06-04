@@ -11,7 +11,7 @@
 #define GBXSERIALDEVICEACFR_SERIALDEVICEHANDLER_H
 
 #include <gbxserialacfr/serial.h>
-#include <gbxsickacfr/gbxutilacfr/substatus.h>
+#include <gbxutilacfr/substatus.h>
 #include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
 #include <IceUtil/IceUtil.h>

@@ -13,7 +13,6 @@
 
 using namespace std;
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 TrivialTracer::TrivialTracer( bool debug, bool info, bool warn, bool error ) :
@@ -65,5 +64,3 @@ TrivialTracer::verbosity( TraceType traceType, DestinationType destType ) const
 }
 
 }
-}
-

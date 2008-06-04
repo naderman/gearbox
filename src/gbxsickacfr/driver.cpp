@@ -11,7 +11,7 @@
 #include <iostream>
 #include <cstring>
 
-#include <gbxsickacfr/gbxutilacfr/gbxutilacfr.h>
+#include <gbxutilacfr/gbxutilacfr.h>
 #include <gbxsickacfr/gbxiceutilacfr/gbxiceutilacfr.h>
 #include "driver.h"
 

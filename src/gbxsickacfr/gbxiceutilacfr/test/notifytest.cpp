@@ -14,7 +14,7 @@
 
 using namespace std;
 
-class TestNotifyHandler : public gbxsickacfr::gbxiceutilacfr::NotifyHandler<double>
+class TestNotifyHandler : public gbxiceutilacfr::NotifyHandler<double>
 {
 public:
     virtual void handleData( const double& obj )
@@ -27,10 +27,10 @@ public:
 
 int main(int argc, char * argv[])
 {
-    gbxsickacfr::gbxiceutilacfr::Notify<double> notify;
+    gbxiceutilacfr::Notify<double> notify;
     double data = 2.0;
     
-    gbxsickacfr::gbxiceutilacfr::NotifyHandler<double>* emptyHandler = 0;
+    gbxiceutilacfr::NotifyHandler<double>* emptyHandler = 0;
     TestNotifyHandler testHandler;
 
     cout<<"testing set() ... ";
@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
         cout<<"failed. empty notify handler, should've caught exception"<<endl;
         return EXIT_FAILURE;
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         ; // ok
     }
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
     {
         notify.set( data );
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         cout<<"failed. shouldn't have caught exception"<<endl;
         return EXIT_FAILURE;

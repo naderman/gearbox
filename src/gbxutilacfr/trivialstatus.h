@@ -11,10 +11,9 @@
 #ifndef GBXUTILACFR_TRIVIAL_STATUS_H
 #define GBXUTILACFR_TRIVIAL_STATUS_H
 
-#include <gbxsickacfr/gbxutilacfr/status.h>
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
+#include <gbxutilacfr/status.h>
+#include <gbxutilacfr/tracer.h>
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 
@@ -32,9 +31,9 @@ public:
     
     virtual void addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 );
     virtual void removeSubsystem( const std::string& subsystem );
-    // does not keep track of subsystems, returns empty vector.
+    //! does not keep track of subsystems, returns empty vector.
     virtual std::vector<std::string> subsystems();
-    // does not keep track of status, throws Exception on any query
+    //! does not keep track of status, throws Exception on any query
     virtual SubsystemStatus subsystemStatus( const std::string& subsystem );
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double interval );
     virtual void initialising( const std::string& subsystem, const std::string& message="" );
@@ -55,7 +54,6 @@ private:
     bool fault_;
 };
 
-}
 } // namespace
 
 #endif

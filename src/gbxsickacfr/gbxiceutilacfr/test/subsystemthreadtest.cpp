@@ -13,16 +13,16 @@
 #include <IceUtil/Time.h>
 
 #include <gbxsickacfr/gbxiceutilacfr/subsystemthread.h>
-#include <gbxsickacfr/gbxutilacfr/trivialtracer.h>
-#include <gbxsickacfr/gbxutilacfr/trivialstatus.h>
+#include <gbxutilacfr/trivialtracer.h>
+#include <gbxutilacfr/trivialstatus.h>
 
 using namespace std;
 
-class TestThread : public gbxsickacfr::gbxiceutilacfr::SubsystemThread
+class TestThread : public gbxiceutilacfr::SubsystemThread
 {
 public:    
     // it's safe to pass zero pointers
-    TestThread( gbxsickacfr::gbxutilacfr::Tracer& tracer, gbxsickacfr::gbxutilacfr::Status& status ) : 
+    TestThread( gbxutilacfr::Tracer& tracer, gbxutilacfr::Status& status ) : 
         SubsystemThread( tracer, status ) {};
     virtual void walk()
     {
@@ -32,11 +32,11 @@ public:
     };
 };
 
-class TestThreadWithThrow : public gbxsickacfr::gbxiceutilacfr::SubsystemThread
+class TestThreadWithThrow : public gbxiceutilacfr::SubsystemThread
 {
 public:
     // it's safe to pass zero pointers
-    TestThreadWithThrow( gbxsickacfr::gbxutilacfr::Tracer& tracer, gbxsickacfr::gbxutilacfr::Status& status ) : 
+    TestThreadWithThrow( gbxutilacfr::Tracer& tracer, gbxutilacfr::Status& status ) : 
         SubsystemThread( tracer, status ) {};
     virtual void walk()
     {
@@ -44,10 +44,10 @@ public:
     };
 };
 
-class TestThreadWithTools : public gbxsickacfr::gbxiceutilacfr::SubsystemThread
+class TestThreadWithTools : public gbxiceutilacfr::SubsystemThread
 {
 public:
-    TestThreadWithTools( gbxsickacfr::gbxutilacfr::Tracer& tracer, gbxsickacfr::gbxutilacfr::Status& status ) :
+    TestThreadWithTools( gbxutilacfr::Tracer& tracer, gbxutilacfr::Status& status ) :
         SubsystemThread( tracer, status, "MyName" )
     {
     };
@@ -59,12 +59,12 @@ public:
 
 int main(int argc, char * argv[])
 {
-    gbxsickacfr::gbxutilacfr::TrivialTracer tracer;
-    gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
+    gbxutilacfr::TrivialTracer tracer;
+    gbxutilacfr::TrivialStatus status( tracer );
 
     cout<<"testing start() and stop()... ";
     {
-        gbxsickacfr::gbxiceutilacfr::Thread* t=0;
+        gbxiceutilacfr::Thread* t=0;
         try
         {
             t = new TestThread( tracer, status );
@@ -84,7 +84,7 @@ int main(int argc, char * argv[])
 
     cout<<"testing SubsystemThread() with exceptions... ";
     {
-        gbxsickacfr::gbxiceutilacfr::Thread* t=0;
+        gbxiceutilacfr::Thread* t=0;
         try
         {
             t = new TestThreadWithThrow( tracer, status );

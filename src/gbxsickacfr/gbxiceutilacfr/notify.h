@@ -11,14 +11,13 @@
 #ifndef GBXICEUTILACFR_NOTIFY_H
 #define GBXICEUTILACFR_NOTIFY_H
 
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 #include <iostream>
 
 //
 // note: this class can be libGbxUtilAcfr but we keep it with the other "data pattern"
 // classes: Store and Buffer.
 //
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -64,7 +63,7 @@ public:
     bool hasNotifyHandler() { return hasNotifyHandler_; };
 
     //! Forwards the @p obj to the data handler.
-    //! Raises gbxsickacfr::gbxutilacfr::Exception if the function is called when a notify handler has
+    //! Raises gbxutilacfr::Exception if the function is called when a notify handler has
     //! not been set.
     void set( const Type & obj );
 
@@ -96,7 +95,7 @@ template<class Type>
 void Notify<Type>::set( const Type & obj )
 {
     if ( !hasNotifyHandler_ ) {
-        throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "setting data when data handler has not been set" );
+        throw gbxutilacfr::Exception( ERROR_INFO, "setting data when data handler has not been set" );
     }
 
     internalSet( obj );
@@ -108,7 +107,6 @@ void Notify<Type>::internalSet( const Type & obj )
     handler_->handleData( obj );
 }
 
-}
 } // end namespace
 
 #endif

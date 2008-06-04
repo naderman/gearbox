@@ -13,15 +13,15 @@
 #include <IceUtil/Time.h>
 
 #include <gbxsickacfr/gbxiceutilacfr/safethread.h>
-#include <gbxsickacfr/gbxutilacfr/trivialtracer.h>
+#include <gbxutilacfr/trivialtracer.h>
 
 using namespace std;
 
-class TestThread : public gbxsickacfr::gbxiceutilacfr::SafeThread
+class TestThread : public gbxiceutilacfr::SafeThread
 {
 public:    
     // it's safe to pass zero pointers
-    TestThread( gbxsickacfr::gbxutilacfr::Tracer& tracer ) : 
+    TestThread( gbxutilacfr::Tracer& tracer ) : 
         SafeThread( tracer ) {};
     virtual void walk()
     {
@@ -31,11 +31,11 @@ public:
     };
 };
 
-class TestThreadWithThrow : public gbxsickacfr::gbxiceutilacfr::SafeThread
+class TestThreadWithThrow : public gbxiceutilacfr::SafeThread
 {
 public:
     // it's safe to pass zero pointers
-    TestThreadWithThrow( gbxsickacfr::gbxutilacfr::Tracer& tracer ) : 
+    TestThreadWithThrow( gbxutilacfr::Tracer& tracer ) : 
         SafeThread( tracer ) {};
     virtual void walk()
     {
@@ -45,11 +45,11 @@ public:
 
 int main(int argc, char * argv[])
 {
-    gbxsickacfr::gbxutilacfr::TrivialTracer tracer;
+    gbxutilacfr::TrivialTracer tracer;
 
     cout<<"testing start() and stop()... ";
     {
-        gbxsickacfr::gbxiceutilacfr::Thread* t=0;
+        gbxiceutilacfr::Thread* t=0;
         try
         {
             t = new TestThread( tracer );
@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
 
     cout<<"testing SafeThread() with exceptions... ";
     {
-        gbxsickacfr::gbxiceutilacfr::Thread* t=0;
+        gbxiceutilacfr::Thread* t=0;
         try
         {
             t = new TestThreadWithThrow( tracer );

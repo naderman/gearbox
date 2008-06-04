@@ -2,8 +2,7 @@ SET( lib_name GbxUtilAcfr )
 GBX_ADD_LICENSE( LGPL )
 
 SET( build TRUE )
-# don't give user an option
-# GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
+GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
 IF( build )
     
@@ -17,7 +16,7 @@ IF( build )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
 
-    GBX_ADD_HEADERS( gbxsickacfr/gbxutilacfr ${hdrs} )
+    GBX_ADD_HEADERS( gbxutilacfr ${hdrs} )
 
     IF( GBX_BUILD_TESTS )
         ADD_SUBDIRECTORY( test )

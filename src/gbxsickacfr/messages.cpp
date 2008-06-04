@@ -14,7 +14,7 @@
 #include <sstream>
 #include <iomanip>
 #include <IceUtil/Time.h>
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 #include <assert.h>
 
 using namespace std;

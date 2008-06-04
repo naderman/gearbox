@@ -13,7 +13,6 @@
 
 #include <IceUtil/Thread.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -115,7 +114,6 @@ void stopAndJoin( const gbxiceutilacfr::ThreadPtr& thread );
 //! this function will sleep for @ref checkIntervalMs.
 void checkedSleep( const gbxiceutilacfr::ThreadPtr& thread, IceUtil::Time duration, int checkIntervalMs=250 );
 
-}
 } // end namespace
 
 #endif

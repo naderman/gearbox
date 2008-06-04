@@ -8,15 +8,14 @@ GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported"
 INCLUDE( ${GBX_CMAKE_DIR}/FindIceUtil.cmake )
 GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
 
-SET( proj_libs GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
+SET( int_libs GbxUtilAcfr GbxSerialAcfr )
+GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
 
 # these are built internally
-SET( int_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialDeviceAcfr )
+SET( private_libs GbxIceUtilAcfr GbxSerialDeviceAcfr )
 
 IF( build )
 
-    ADD_SUBDIRECTORY( gbxutilacfr )
     ADD_SUBDIRECTORY( gbxiceutilacfr )
     ADD_SUBDIRECTORY( gbxserialdeviceacfr )
     
@@ -25,7 +24,7 @@ IF( build )
 
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )
-    SET( dep_libs ${proj_libs} ${int_libs} )
+    SET( dep_libs ${int_libs} ${private_libs} )
 
     GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )

@@ -12,7 +12,7 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
-#include <gbxsickacfr/gbxutilacfr/tokenise.h>
+#include <gbxutilacfr/tokenise.h>
 
 //////////////////////////////
 
@@ -198,7 +198,7 @@ void NmeaMessage::parseTokens(){
 
     //Split the message at the commas
     //TODO cope with missing fields
-    dataTokens_ = gbxsickacfr::gbxutilacfr::tokenise(sentence_, ",");
+    dataTokens_ = gbxutilacfr::tokenise(sentence_, ",");
     
     //Now discard the $ and the * from the first and last tokens...
     //TODO : - dataTokens_[0] = 

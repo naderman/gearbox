@@ -35,7 +35,6 @@
 #include <exception>
 #include <string>
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 /*!
@@ -80,7 +79,6 @@ public:
             : Exception( file, line, message ) {};
 };
 
-}
 } // namespace
 
 

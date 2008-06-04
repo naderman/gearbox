@@ -13,7 +13,7 @@
 
 #include "subsystemthread.h"
 
-using namespace gbxsickacfr::gbxiceutilacfr;
+using namespace gbxiceutilacfr;
 using namespace std;
 
 

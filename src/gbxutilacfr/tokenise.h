@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 //! Takes a string containing tokens separated by a delimiter
@@ -22,7 +21,6 @@ namespace gbxutilacfr {
 std::vector<std::string> tokenise( const std::string &str, 
                                    const std::string &delimiter );
 
-}
 }
 
 #endif

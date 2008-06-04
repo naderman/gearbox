@@ -15,7 +15,6 @@
 
 using namespace std;
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 TrivialStatus::TrivialStatus( Tracer& tracer,
@@ -102,5 +101,4 @@ TrivialStatus::process()
 {
 }
 
-}
 }

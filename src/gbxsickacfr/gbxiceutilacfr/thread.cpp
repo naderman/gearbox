@@ -9,11 +9,10 @@
  */
 
 #include <IceUtil/Time.h>
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 
 #include "thread.h"
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 Thread::Thread() : 
@@ -92,5 +91,4 @@ void checkedSleep( const gbxiceutilacfr::ThreadPtr& thread, IceUtil::Time durati
     }
 }
 
-}
 } // namespace

@@ -17,9 +17,9 @@
 #include <iostream>
 #include <sstream>
 #include <gbxsickacfr/driver.h>
-#include <gbxsickacfr/gbxutilacfr/trivialtracer.h>
-#include <gbxsickacfr/gbxutilacfr/trivialstatus.h>
-#include <gbxsickacfr/gbxutilacfr/mathdefs.h>
+#include <gbxutilacfr/trivialtracer.h>
+#include <gbxutilacfr/trivialstatus.h>
+#include <gbxutilacfr/mathdefs.h>
 
 using namespace std;
 
@@ -75,8 +75,8 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    gbxsickacfr::gbxutilacfr::TrivialTracer tracer( debug );
-    gbxsickacfr::gbxutilacfr::TrivialStatus status( tracer );
+    gbxutilacfr::TrivialTracer tracer( debug );
+    gbxutilacfr::TrivialStatus status( tracer );
 
     // Instantiate the driver itself
     gbxsickacfr::Driver* device;

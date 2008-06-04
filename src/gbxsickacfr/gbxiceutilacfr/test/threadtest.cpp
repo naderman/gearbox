@@ -13,11 +13,11 @@
 #include <IceUtil/Time.h>
 
 #include <gbxsickacfr/gbxiceutilacfr/thread.h>
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 
 using namespace std;
 
-class TestThread : public gbxsickacfr::gbxiceutilacfr::Thread
+class TestThread : public gbxiceutilacfr::Thread
 {
 public:    
     virtual void run()
@@ -28,7 +28,7 @@ public:
     };
 };
 
-class TestThreadWithThrow : public gbxsickacfr::gbxiceutilacfr::Thread
+class TestThreadWithThrow : public gbxiceutilacfr::Thread
 {
 public:
     TestThreadWithThrow( bool shouldIThrow )
@@ -46,7 +46,7 @@ public:
     };
 };
 
-class TestThreadWithExit : public gbxsickacfr::gbxiceutilacfr::Thread
+class TestThreadWithExit : public gbxiceutilacfr::Thread
 {
 public:  
     TestThreadWithExit() : 
@@ -82,7 +82,7 @@ private:
     IceUtil::Mutex exitMutex_;
 };
 
-class TestThreadWithWait : public gbxsickacfr::gbxiceutilacfr::Thread
+class TestThreadWithWait : public gbxiceutilacfr::Thread
 {
 public:
     virtual void run()
@@ -91,12 +91,12 @@ public:
     };
 };
 
-class TestThreadWithNap : public gbxsickacfr::gbxiceutilacfr::Thread
+class TestThreadWithNap : public gbxiceutilacfr::Thread
 {
 public:
     virtual void run()
     {
-        gbxsickacfr::gbxiceutilacfr::checkedSleep( this, IceUtil::Time::seconds(5), 100 );
+        gbxiceutilacfr::checkedSleep( this, IceUtil::Time::seconds(5), 100 );
     };
 };
 
@@ -104,7 +104,7 @@ int main(int argc, char * argv[])
 {
     cout<<"testing start() and stop()... ";
     {
-        gbxsickacfr::gbxiceutilacfr::Thread* t=0;
+        gbxiceutilacfr::Thread* t=0;
         try
         {
             t = new TestThread;
@@ -124,7 +124,7 @@ int main(int argc, char * argv[])
 
     cout<<"testing start() and stop() with smart pointer ... ";
     {
-        gbxsickacfr::gbxiceutilacfr::ThreadPtr t;
+        gbxiceutilacfr::ThreadPtr t;
         try
         {
             t = new TestThread;
@@ -162,7 +162,7 @@ int main(int argc, char * argv[])
     {
         // works only with smart pointers because with dumb ones the threads self-destruct
         // and we can't examine their final state.
-        gbxsickacfr::gbxiceutilacfr::ThreadPtr t = new TestThreadWithExit;
+        gbxiceutilacfr::ThreadPtr t = new TestThreadWithExit;
 
         if ( t->isStopping()!=false || t->isAlive()!=false || t->isStarted()!=false ) {
             cout<<"failed"<<endl
@@ -205,7 +205,7 @@ int main(int argc, char * argv[])
     
     cout<<"testing waitForStop() ... ";
     {
-        gbxsickacfr::gbxiceutilacfr::ThreadPtr t = new TestThreadWithWait;
+        gbxiceutilacfr::ThreadPtr t = new TestThreadWithWait;
         t->start();
         if ( t->isAlive()!=true ) {
             cout<<"failed"<<endl
@@ -235,7 +235,7 @@ int main(int argc, char * argv[])
 
     cout<<"testing stopAndJoin() with smart pointer ... ";
     {
-        gbxsickacfr::gbxiceutilacfr::ThreadPtr t = new TestThread;
+        gbxiceutilacfr::ThreadPtr t = new TestThread;
         t->start();
         if ( t->isAlive()!=true ) {
             cout<<"failed"<<endl
@@ -244,7 +244,7 @@ int main(int argc, char * argv[])
             exit(EXIT_FAILURE);
         }
 
-        gbxsickacfr::gbxiceutilacfr::stopAndJoin( t );
+        gbxiceutilacfr::stopAndJoin( t );
         IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(150));
         if ( t->isAlive()!=false ) {
             cout<<"failed"<<endl
@@ -257,11 +257,11 @@ int main(int argc, char * argv[])
 
     cout<<"testing checkedSleep() ... ";
     {
-        gbxsickacfr::gbxiceutilacfr::ThreadPtr t = new TestThreadWithNap;
+        gbxiceutilacfr::ThreadPtr t = new TestThreadWithNap;
         t->start();
 
         IceUtil::Time stopTime = IceUtil::Time::now();
-        gbxsickacfr::gbxiceutilacfr::stopAndJoin( t );
+        gbxiceutilacfr::stopAndJoin( t );
         IceUtil::Time joinTime = IceUtil::Time::now();
         cout<<"time to stop = "<<(joinTime-stopTime).toDuration()<<endl;
 

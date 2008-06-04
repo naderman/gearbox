@@ -13,11 +13,11 @@
 
 #include "safethread.h"
 
-using namespace gbxsickacfr::gbxiceutilacfr;
+using namespace gbxiceutilacfr;
 using namespace std;
 
 
-SafeThread::SafeThread( gbxsickacfr::gbxutilacfr::Tracer& tracer ) :
+SafeThread::SafeThread( gbxutilacfr::Tracer& tracer ) :
     tracer_(tracer)
 {
 }

@@ -11,9 +11,8 @@
 #ifndef GBXUTILACFR_TRIVIAL_TRACER_H
 #define GBXUTILACFR_TRIVIAL_TRACER_H
 
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
+#include <gbxutilacfr/tracer.h>
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 //!
@@ -40,7 +39,6 @@ private:
     bool error_;
 };
 
-}
 } // namespace
 
 #endif

@@ -12,8 +12,8 @@
 #define GBXGARMINACFR_DRIVER_H
 
 #include <gbxserialacfr/serial.h>
-#include <gbxsickacfr/gbxutilacfr/tracer.h>
-#include <gbxsickacfr/gbxutilacfr/status.h>
+#include <gbxutilacfr/tracer.h>
+#include <gbxutilacfr/status.h>
 #include <memory>
 
 namespace gbxgarminacfr {
@@ -201,15 +201,15 @@ public:
     //! (human-readable and machine-readable respectively) external
     //! monitorining of the driver's internal state.
     Driver( const Config& config, 
-            gbxsickacfr::gbxutilacfr::Tracer& tracer,
-            gbxsickacfr::gbxutilacfr::Status& status );
+            gbxutilacfr::Tracer& tracer,
+            gbxutilacfr::Status& status );
 
     ~Driver();
 
 /*! 
 Blocks till new data is available.
 
-Throws gbxsickacfr::gbxutilacfr::Exception when a problem is encountered.
+Throws gbxutilacfr::Exception when a problem is encountered.
 
 @verbatim
 std::auto_ptr<gbxgarminacfr::GenericData> data;
@@ -233,8 +233,8 @@ private:
     std::auto_ptr<gbxserialacfr::Serial> serial_;
 
     Config config_;
-    gbxsickacfr::gbxutilacfr::Tracer& tracer_;
-    gbxsickacfr::gbxutilacfr::Status& status_;
+    gbxutilacfr::Tracer& tracer_;
+    gbxutilacfr::Status& status_;
 };
 
 } // namespace

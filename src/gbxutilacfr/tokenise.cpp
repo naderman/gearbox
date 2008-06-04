@@ -13,7 +13,6 @@
 
 using namespace std;
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
     
 std::vector<string> tokenise( const string &str, const string &delimiter )
@@ -65,5 +64,4 @@ std::vector<string> tokenise( const string &str, const string &delimiter )
 #endif
 }
 
-}
 }

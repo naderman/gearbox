@@ -11,13 +11,12 @@
 #ifndef GBXICEUTILACFR_STORE_H
 #define GBXICEUTILACFR_STORE_H
 
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 
 #include <IceUtil/Monitor.h>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Time.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 /*!
@@ -31,7 +30,7 @@ namespace gbxiceutilacfr {
  *    is non-empty.
  *
  *  Write to it with set(). Read its contents with get(). Trying to read from
- *  an empty Store raises an gbxsickacfr::gbxutilacfr::Exception.
+ *  an empty Store raises an gbxutilacfr::Exception.
  * 
  *  @note Replaces the deprecated Proxy class.
  *  @see Buffer, Notify
@@ -57,7 +56,7 @@ public:
 
     //! Returns the contents of the Store. This operation makes the data in the Store
     //! "not new", i.e. @ref isNewData returns FALSE. Calls to get() when the Store is empty
-    //! raises an gbxsickacfr::gbxutilacfr::Exception exception.
+    //! raises an gbxutilacfr::Exception exception.
     void get( Type & obj ) const;
 
     /*!
@@ -140,7 +139,7 @@ void Store<Type>::get( Type & obj ) const
     }
     else
     {
-        throw gbxsickacfr::gbxutilacfr::Exception( ERROR_INFO, "trying to read from an empty Store." );
+        throw gbxutilacfr::Exception( ERROR_INFO, "trying to read from an empty Store." );
     }
 }
 
@@ -240,7 +239,6 @@ void Store<Type>::internalSet( const Type & obj )
     obj_ = obj;
 }
 
-}
 } // end namespace
 
 #endif

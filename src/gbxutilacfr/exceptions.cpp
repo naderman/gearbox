@@ -14,7 +14,6 @@
 
 using namespace std;
 
-namespace gbxsickacfr {
 namespace gbxutilacfr {
 
 Exception::Exception( const char *file, const char *line, const char *message )
@@ -53,5 +52,4 @@ Exception::setMsg( const char *file, const char *line, const char *message )
     message_ += +"): " + msgString + "\n";
 }
 
-}
 } // namespace

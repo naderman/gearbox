@@ -12,13 +12,12 @@
 #define GBXICEUTILACFR_BUFFER_H
 
 #include <queue>
-#include <gbxsickacfr/gbxutilacfr/exceptions.h>
+#include <gbxutilacfr/exceptions.h>
 
 #include <IceUtil/Monitor.h>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/Time.h>
 
-namespace gbxsickacfr {
 namespace gbxiceutilacfr {
 
 //! %Buffer type defines behavior when the buffer is full
@@ -409,7 +408,6 @@ void Buffer<Type>::internalPush( const Type & obj )
     queue_.push_back( obj );
 }
 
-}
 } // end namespace
 
 #endif

@@ -16,7 +16,7 @@ using namespace std;
 
 int main(int argc, char * argv[])
 {
-    gbxsickacfr::gbxiceutilacfr::Store<double> store;
+    gbxiceutilacfr::Store<double> store;
     double data = 20.0;
     double copy = -1.0;
 
@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
         cout<<"failed. empty store, should've caught exception"<<endl;
         return EXIT_FAILURE;
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         ; // ok
     }
@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
     {
         store.get( copy );
     }
-    catch ( const gbxsickacfr::gbxutilacfr::Exception & )
+    catch ( const gbxutilacfr::Exception & )
     {
         cout<<"failed. should be a non-empty store."<<endl;
         return EXIT_FAILURE;
