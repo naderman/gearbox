@@ -10,3 +10,5 @@ $ cd ~
 $ mkdir gbxgarminacfr_example
 $ cd gbxgarminacfr_example
 $ ccmake /usr/local/share/gearbox/gbxgarminacfr
+
+For more information, see driver documentation.

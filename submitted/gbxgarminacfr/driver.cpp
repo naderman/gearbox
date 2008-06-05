@@ -42,6 +42,9 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     sscanf(msg.getDataToken(UTC).c_str(),"%02d%02d%lf",
            &data->utcTimeHrs, &data->utcTimeMin, &data->utcTimeSec );
 
+    //number of satellites in use
+    data->satellites = atoi(msg.getDataToken(NSatsUsed).c_str());
+
     // fix type
     switch ( msg.getDataToken(FixType)[0] )
     {
@@ -51,7 +54,6 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
         data->latitude = 0.0;
         data->longitude = 0.0;
         data->altitude = 0.0;
-        data->satellites = 0;
         data->geoidalSeparation = 0.0;
         return data;
     case '1': 
@@ -75,9 +77,6 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     sscanf(msg.getDataToken(Lon).c_str(),"%03d%lf",&deg,&min);
     dir = (*msg.getDataToken(LonDir).c_str()=='E') ? 1.0 : -1.0;
     data->longitude=dir*(deg+(min/60.0));
-    
-    //number of satellites in use
-    data->satellites = atoi(msg.getDataToken(NSatsUsed).c_str());
     
     //altitude
     data->altitude=atof(msg.getDataToken(Hgt).c_str());

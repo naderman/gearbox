@@ -24,9 +24,6 @@ Tries to establish communication at 4800 baud (non-configurable).
 #include <gbxgarminacfr/driver.h>
 @endverbatim
 
-@par Example
-  See test/test.cpp
-
 @par Style
   See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
 
@@ -45,6 +42,17 @@ Tries to establish communication at 4800 baud (non-configurable).
 @par Dependencies
 
 - @ref gbx_library_gbxserialacfr
+
+@par Example
+
+See test/test.cpp and test/example.readme on how to compile the test program.
+
+To run the test program (assuming the GPS device is connected to /dev/ttyS0) :
+@verbatim
+$ gbxgarminacfrtest -p /dev/ttyS0
+@endverbatim
+
+The test program reports back all messages received from the driver and prints out a few data fields for each message. When the fix type is reported as 0 ("Invalid"), only the number of satellites and the time stamp are meaningful.
 
 @section gbx_library_gbxgarminacfr What is EPE?
 

@@ -93,23 +93,29 @@ int main( int argc, char **argv )
                 case gbxgarminacfr::GpGga :
                 {
                     gbxgarminacfr::GgaData* d = (gbxgarminacfr::GgaData*)data.get();
-                    cout<<"GPGGA: fix type="<<d->fixType<<endl;
+                    cout<<"GPGGA:"<<endl
+                        <<"  satellites     = "<<d->satellites<<endl
+                        <<"  fix type       = "<<d->fixType<<endl
+                        <<"  longitude      = "<<d->longitude<<endl
+                        <<"  latitude       = "<<d->latitude<<endl;
                     break;
                 }
                 case gbxgarminacfr::GpVtg :
                 {
                     gbxgarminacfr::VtgData* d = (gbxgarminacfr::VtgData*)data.get();
-                    cout<<"GPVTG: speed="<<d->speed<<endl;
+                    cout<<"GPVTG:"<<endl
+                        <<"   speed         = "<<d->speed<<endl;
                     break;
                 }
                 case gbxgarminacfr::PgRme :
                 {
                     gbxgarminacfr::RmeData* d = (gbxgarminacfr::RmeData*)data.get();
-                    cout<<"PGRME: herror="<<d->horizontalPositionError<<endl;
+                    cout<<"PGRME:"<<endl
+                        <<"   horiz error   = "<<d->horizontalPositionError<<endl;
                     break;
                 }
                 default :
-                    cout<<"?????"<<endl;
+                    cout<<"Unknown message"<<endl;
             }
 
             // no need to delete the data object, the auto pointer will delete it automatically
