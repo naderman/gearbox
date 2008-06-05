@@ -53,6 +53,7 @@ int main( int argc, char **argv )
     config.readGga = true;
     config.readVtg = true;
     config.readRme = true;
+    config.ignoreUnknown = false;
     if ( !config.isValid() ) {
         cout << "Test: Invalid device configuration structure: " << config.toString() << endl;
         exit(1);
@@ -60,7 +61,7 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    const bool debug = false;
+    const bool debug = true;
     gbxutilacfr::TrivialTracer tracer( debug );
     gbxutilacfr::TrivialStatus status( tracer );
 

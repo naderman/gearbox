@@ -377,10 +377,12 @@ Driver::read()
             continue;
         }
         else {
+            stringstream ss; ss << "Message type unknown " << MsgType <<endl; 
             // if we get here the msg is unknown
-            stringstream  ErrMsg; 
-            ErrMsg << "Message type unknown " << MsgType <<endl; 
-            throw gbxutilacfr::Exception( ERROR_INFO, ErrMsg.str() );
+            if ( config_.ignoreUnknown )
+                tracer_.debug( ss.str() );
+            else
+                throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
         } 
 
     }

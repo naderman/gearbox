@@ -25,7 +25,8 @@ public:
     Config() :
         readGga(true),
         readVtg(true),
-        readRme(true) {};
+        readRme(true),
+        ignoreUnknown(false) {};
 
     //! Returns true if the configuration is sane. Checks include:
     //! - a non-empty device name
@@ -44,6 +45,11 @@ public:
     bool readVtg;
     //! Read PGRME sentence
     bool readRme;
+
+    //! Ignore unknown messages. This driver tries to turn off all messages and then explicitely enables
+    //! the ones it understands. But with some devices this does not work and many messages types are received. 
+    //! When ignoreUnknown is set to TRUE the driver quietly ignores the messages it does not understand.
+    bool ignoreUnknown;
 };
 
 //! Possible types GenericData can contain
