@@ -608,7 +608,7 @@ parseLmsErrorResponseData( const uChar *buf, int len )
 
     e->errorTypes.resize( len/2 );
     e->errorCodes.resize( len/2 );
-    for ( uint i=0; i < e->errorTypes.size(); i++ )
+    for ( size_t i=0; i < e->errorTypes.size(); i++ )
     {
         e->errorTypes[i] = buf[pos++];
         e->errorCodes[i] = buf[pos++];
@@ -624,7 +624,7 @@ LmsErrorResponseData::toString() const
     stringstream ss;
     ss << "num errors: " << errorTypes.size() << endl;
 
-    for ( uint i=0; i < errorTypes.size(); i++ )
+    for ( size_t i=0; i < errorTypes.size(); i++ )
     {
         ss << "    " << i << ": " << errorTypeToString(errorTypes[i]) << ": " << errorCodeToString(errorCodes[i]) << endl;
     }
@@ -636,7 +636,7 @@ LmsErrorResponseData::isWarn() const
 {
     assert( errorTypes.size() == errorCodes.size() );
 
-    for ( uint i=0; i < errorTypes.size(); i++ )
+    for ( size_t i=0; i < errorTypes.size(); i++ )
     {
         // Check for still-relevant errors
         if ( ! (errorTypes[i] & ERROR_TYPE_NO_LONGER_RELEVANT_MASK) )
@@ -654,7 +654,7 @@ LmsErrorResponseData::isError() const
 {
     assert( errorTypes.size() == errorCodes.size() );
 
-    for ( uint i=0; i < errorTypes.size(); i++ )
+    for ( size_t i=0; i < errorTypes.size(); i++ )
     {
         // Check for still-relevant errors
         if ( ! (errorTypes[i] & ERROR_TYPE_NO_LONGER_RELEVANT_MASK) )

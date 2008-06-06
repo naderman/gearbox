@@ -379,7 +379,7 @@ Driver::guessLaserBaudRate()
     if ( config_.baudRate != 38400 ) baudRates.push_back( 38400 );
     if ( config_.baudRate != 500000 ) baudRates.push_back( 500000 );
     
-    for ( uint baudRateI=0; baudRateI < baudRates.size(); baudRateI++ )
+    for ( size_t baudRateI=0; baudRateI < baudRates.size(); baudRateI++ )
     {
         stringstream ss;
         ss << "Driver: Trying to connect at " << baudRates[baudRateI] << " baud.";
