@@ -33,6 +33,9 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par Updated libraries
 
+- libGbxSickAcfr
+  - using 'size_t' instead of 'uint' to improve compatibility.
+
 @par Removed libraries
 
 @section gbx_doc_history_001 Changes in Release 0.0.1
