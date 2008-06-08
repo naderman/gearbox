@@ -324,10 +324,13 @@ Driver::read()
         nmeaExceptionCount = 0;
     
         // Only populate the data structures if our message passes the checksum!
+        const int nmeaFailChecksumMaxCount = 10;
         if ( !nmeaMessage.haveValidChecksum() ) {            
             // Dont throw an exception on the first failed checksum.
-            if ( nmeaFailChecksumCount++ < 3 ) {
-                tracer_.warning("Gps driver: Single message failed checksum. Not throwing an exception yet!" );
+            if ( nmeaFailChecksumCount++ < nmeaFailChecksumMaxCount ) {
+//                 tracer_.warning("Gps driver: Single message failed checksum. Not throwing an exception yet!" );
+                // debug
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<endl;
                 continue;
             }
             else {
