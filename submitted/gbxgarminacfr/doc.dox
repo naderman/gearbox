@@ -54,6 +54,12 @@ $ gbxgarminacfrtest -p /dev/ttyS0
 
 The test program reports back all messages received from the driver and prints out a few data fields for each message. When the fix type is reported as 0 ("Invalid"), only the number of satellites and the time stamp are meaningful.
 
+@par References
+- 
+- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf>
+- http://en.wikipedia.org/wiki/NMEA
+- http://www.gpsinformation.org/dale/interface.htm
+
 @section gbx_library_gbxgarminacfr What is EPE?
 
 Bits of information assembled by Duncan Mercer.
