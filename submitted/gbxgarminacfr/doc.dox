@@ -60,7 +60,7 @@ The test program reports back all messages received from the driver and prints o
 - http://en.wikipedia.org/wiki/NMEA
 - http://www.gpsinformation.org/dale/interface.htm
 
-@section gbx_library_gbxgarminacfr What is EPE?
+@section gbx_library_gbxgarminacfr_epe What is EPE?
 
 Bits of information assembled by Duncan Mercer.
 
@@ -204,6 +204,15 @@ from  3D NAV with a PDOP of 2.3 to 2D NAV and a HDOP  of  30
 back  to  3D  NAV and PDOP of  2.4!   Quite  impressive  and 
 educational to observe.
 @endverbatim
+
+@section gbx_library_gbxgarminacfr_checksum On message checksum
+
+from Garmin: 
+http://www8.garmin.com/support/faqs/faq.jsp?faq=40
+
+Q. How is the checksum calculated in NMEA 0183?
+A.  The checksum is the 8-bit exclusive OR (no start or stop bits) of all characters in the sentence, including the "," delimiters, between -- but not including -- the "$" and "*" delimiters. 
+The hexadecimal value of the most significant and least significant 4 bits of the result are converted to two ASCII characters (0-9, A-F) for transmission. The most significant character is transmitted first.
 
 */
 
