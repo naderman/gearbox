@@ -211,8 +211,10 @@ from Garmin:
 http://www8.garmin.com/support/faqs/faq.jsp?faq=40
 
 Q. How is the checksum calculated in NMEA 0183?
-A.  The checksum is the 8-bit exclusive OR (no start or stop bits) of all characters in the sentence, including the "," delimiters, between -- but not including -- the "$" and "*" delimiters. 
-The hexadecimal value of the most significant and least significant 4 bits of the result are converted to two ASCII characters (0-9, A-F) for transmission. The most significant character is transmitted first.
+A.  The checksum is the 8-bit exclusive OR (no start or stop bits) of all characters in the sentence, 
+including the "," delimiters, between -- but not including -- the "$" and "*" delimiters. 
+The hexadecimal value of the most significant and least significant 4 bits of the result are converted 
+to two ASCII characters (0-9, A-F) for transmission. The most significant character is transmitted first.
 
 */
 

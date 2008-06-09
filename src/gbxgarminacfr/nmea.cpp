@@ -49,14 +49,12 @@ const char NMEAStartOfSentence  = '$';
 const char NMEAChecksumDelim    = '*';
 
 
-//*************************************************************
 //The blank constructor
 NmeaMessage::NmeaMessage()
 {
     init();
 }
 
-//**************************************************************
 void NmeaMessage::init()
 {
     haveSentence_ = false;
@@ -70,7 +68,6 @@ void NmeaMessage::init()
 }
 
 
-//****************************************************************
 NmeaMessage::NmeaMessage(const char *sentence, int testCheckSum)
 {
     init();
@@ -78,9 +75,9 @@ NmeaMessage::NmeaMessage(const char *sentence, int testCheckSum)
 }
 
 
-//**********************************************************************
 //Load the data as requested and test the checksum if we are asked to.
-void NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
+void 
+NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
 {
     init();
     
@@ -105,9 +102,8 @@ void NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
     }
 }
 
-
-//*****************************************************************
-bool NmeaMessage::testChecksumOk()
+bool 
+NmeaMessage::testChecksumOk()
 {
     haveCheckSum_ = true;
     checkSumOK_   = false;
@@ -136,65 +132,66 @@ bool NmeaMessage::testChecksumOk()
     addCheckSum();
 
     //Now compare our saved version with our new ones
-    if((chksum_HIB == *ptr) && (chksum_LOB == *(ptr+1))){
+    if( (chksum_HIB == *ptr) && (chksum_LOB == *(ptr+1)) ) {
         //all looked good!
         checkSumOK_ = true;
         return true;
     }
    
     //failed the checksum!
+    cout<<"device: "<<chksum_HIB<<chksum_LOB<<" driver: "<<*ptr<<*(ptr+1)<<endl;
     return false;
 }
 
-
-//*****************************************************
 // Add the checksum chars to an existing message
 // NOTE: this assumes that there is allready space in the message for
 // the checksum, and that the checksum delimiter is there
- 
-void NmeaMessage::addCheckSum(){   
-      
+void 
+NmeaMessage::addCheckSum()
+{         
     assert( haveSentence_ );
     
     haveCheckSum_ = true;
 
     //check that we have the '$' at the start
-    if(sentence_[0]!= NMEAStartOfSentence)
-       {return;}
+    if(sentence_[0]!= NMEAStartOfSentence) {
+        return;
+    }
 
     unsigned char chkRunning = 0;
     
     int loopCount;
     unsigned char nextChar;
-    for( loopCount =1; loopCount < MAX_SENTENCE_LEN; loopCount++){
-    
+    // we start from 1 to skip the leading '$'
+    for( loopCount=1; loopCount<MAX_SENTENCE_LEN; ++loopCount ) 
+    {
         nextChar = static_cast<unsigned char>(sentence_[loopCount]);
     
         // no delimiter uh oh
-        if((nextChar=='\r')||(nextChar=='\n')||(nextChar=='\0')){
-            throw NmeaException("nmea: cannot calculate checksum, missing '*'\n");
+        if( (nextChar=='\r') || (nextChar=='\n') || (nextChar=='\0') ) {
+            throw NmeaException("nmea: cannot calculate checksum, missing final '*'\n");
             return;
         }
 		
-            // goodie we found it
-        if(nextChar==NMEAChecksumDelim)
-          {break;}
+        // goodie we found it (the '*' is not included into the checksum)
+        if ( nextChar==NMEAChecksumDelim ) {
+            break;
+        }
     
-        //Keep the running total going
+        // Keep the running XOR total
         chkRunning ^= nextChar;
     }
         
     //Put the byte values as upper case HEX back into the message
-    sprintf(sentence_ + loopCount + 1,"%02X",chkRunning);
+    sprintf( sentence_ + loopCount + 1,"%02X", chkRunning );
 }
 
-
-//**********************************************************************
 // Parse the data fields of our message...
-void NmeaMessage::parseTokens(){
-
+void 
+NmeaMessage::parseTokens()
+{
     //We should not attempt to be parsing a message twice...
-    assert (numDataTokens() == 0);
+    assert( numDataTokens()==0 );
 
     //Split the message at the commas
     //TODO cope with missing fields
