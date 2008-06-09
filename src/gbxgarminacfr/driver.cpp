@@ -334,6 +334,10 @@ Driver::read()
             throw gbxutilacfr::Exception( ERROR_INFO,ss.str());
         }
         nmeaExceptionCount = 0;
+
+        // debug
+        if ( nmeaFailChecksumCount>0 )
+            cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<" the sentence AFTER, raw='"<<serialData<<"'"<<endl<<endl;
     
         // Only populate the data structures if our message passes the checksum!
         const int nmeaFailChecksumMaxCount = 10;
