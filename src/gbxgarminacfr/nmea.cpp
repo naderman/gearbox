@@ -89,16 +89,23 @@ NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
     sentence_[MAX_SENTENCE_LEN] = '\0';
     haveSentence_             = true;
 
-    switch(AddOrTestCheckSum)
+    switch ( AddOrTestCheckSum )
     {
-    case TestChecksum:  //This is for Rx'd data that we need to test for correct reception
-        testChecksumOk(); break;
-    case AddChecksum:   //This is for Tx data that needs to checksummed before sending
-        addCheckSum(); checkSumOK_ = true; break;
-    case DontTestOrAddChecksum: 
-        break;
-    default:
-        assert(true);
+        case TestChecksum:  { 
+            //This is for Rx'd data that we need to test for correct reception
+            testChecksumOk(); 
+            break;
+        }
+        case AddChecksum: {  
+            //This is for Tx data that needs to checksummed before sending
+            addCheckSum(); 
+            checkSumOK_ = true; 
+            break;
+        }
+        case DontTestOrAddChecksum: 
+            break;
+        default:
+            assert( true && "unrecognized message option" );
     }
 }
 
@@ -115,7 +122,10 @@ NmeaMessage::testChecksumOk()
     //First save the existing two checksum chars from the message
     //These are straight after the '*' character
     ptr = strchr(sentence_, NMEAChecksumDelim);
-    if(!ptr){return false;}
+    if ( !ptr ) {
+        cout<<"device: no checksum delimiter"<<endl;
+        return false;
+    }
    
     //save the high and low bytes of the checksum
     //Make sure they are in upper case!
@@ -149,13 +159,13 @@ NmeaMessage::testChecksumOk()
 void 
 NmeaMessage::addCheckSum()
 {         
-    assert( haveSentence_ );
+    assert( haveSentence_ && "calling addCheckSum() without a sentence" );
     
     haveCheckSum_ = true;
 
     //check that we have the '$' at the start
     if(sentence_[0]!= NMEAStartOfSentence) {
-        return;
+        throw NmeaException("cannot calculate checksum, missing leading '$'");
     }
 
     unsigned char chkRunning = 0;
@@ -169,8 +179,7 @@ NmeaMessage::addCheckSum()
     
         // no delimiter uh oh
         if( (nextChar=='\r') || (nextChar=='\n') || (nextChar=='\0') ) {
-            throw NmeaException("nmea: cannot calculate checksum, missing final '*'\n");
-            return;
+            throw NmeaException("cannot calculate checksum, missing final '*'");
         }
 		
         // goodie we found it (the '*' is not included into the checksum)
@@ -191,7 +200,7 @@ void
 NmeaMessage::parseTokens()
 {
     //We should not attempt to be parsing a message twice...
-    assert( numDataTokens()==0 );
+    assert( numDataTokens()==0 && "calling parseTokens() with tokens" );
 
     //Split the message at the commas
     //TODO cope with missing fields
