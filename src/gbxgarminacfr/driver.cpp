@@ -285,7 +285,7 @@ Driver::read()
         // This will block up to the timeout
         //
         tracer_.debug( "Driver::read(): calling serial_->readLine()", 10 );
-        int ret = serial_->readLine(serialData);
+        int ret = serial_->readLine( serialData );
     
         // get time stamp right away (Linux only!)
         timeval now;
@@ -330,7 +330,7 @@ Driver::read()
             if ( nmeaFailChecksumCount++ < nmeaFailChecksumMaxCount ) {
 //                 tracer_.warning("Gps driver: Single message failed checksum. Not throwing an exception yet!" );
                 // debug
-                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<" '"<<nmeaMessage.sentence()<<"'"<<endl;
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<" sentence='"<<nmeaMessage.sentence()<<"' raw='"<<serialData<<"'"<<endl;
                 continue;
             }
             else {

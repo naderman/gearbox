@@ -92,12 +92,13 @@ NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
     switch ( AddOrTestCheckSum )
     {
         case TestChecksum:  { 
-            //This is for Rx'd data that we need to test for correct reception
+            // This is for Rx'd data that we need to test for correct reception
+            // (internally it will also call addCheckSum())
             testChecksumOk(); 
             break;
         }
         case AddChecksum: {  
-            //This is for Tx data that needs to checksummed before sending
+            // This is for Tx data that needs to checksummed before sending
             addCheckSum(); 
             checkSumOK_ = true; 
             break;
