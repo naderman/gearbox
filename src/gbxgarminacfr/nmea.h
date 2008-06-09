@@ -80,27 +80,28 @@ public:
     NmeaMessage();
     NmeaMessage(const char *sentence, int testCheckSum=DontTestOrAddChecksum );
 
-    // Set up the internal data for a sentence
+    // Set up the internal data for a sentence.
+    // May throw NmeaException if TestChecksum is specified.
     void setSentence(const char *data, int testCheckSum=DontTestOrAddChecksum );
 
-    // Do we only have the raw string ?
+    // Do we only have the raw string?
     bool haveSentence() const { return haveSentence_; };
 
-    // Have we parsed fields ?
+    // Do we have parsed fields?
     bool haveTokens() const { return haveTokens_; };
 
-    // have we a valid checksum ?
+    // Do we have a valid checksum?
     bool haveValidChecksum() const { return checkSumOK_; };  
   
-    // have we checked the checksum?
+    // Have we checked the checksum?
     bool haveTestedChecksum()const { return haveCheckSum_; };  
   
     // calculate the checksum from sentence
-    // Note that this function may throw NMEA_Exception...
+    // May throw NmeaException.
     bool testChecksumOk();
 
     // Return the raw sentence string
-    const char * sentence() { return sentence_; };
+    const char* sentence() { return sentence_; };
 
     // Return a single data token as a string
     std::string& getDataToken(int i) { return dataTokens_[i]; };
@@ -113,6 +114,7 @@ public:
 
 private:
     void init();
+    // May throw NmeaException.
     void addCheckSum();
     // Do we only have the raw string ?
     bool haveSentence_;
