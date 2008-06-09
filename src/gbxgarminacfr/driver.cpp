@@ -305,10 +305,13 @@ Driver::read()
         // We successfully read something from the serial port
         //
         tracer_.debug( serialData, 10 );
+
+        // remove the trailing new line character
+        assert( *serialData.end() == '\n' && "Driver: Serial data did not end in '\n'" );
+        serialData.erase( serialData.end() );
     
         // dealing with unexplained cntrl characters in the message
-        // don't check the last 2 characters: they're \0 and \n
-        for ( string::iterator it=serialData.begin(); it!=serialData.end()-2; ++it ) {
+        for ( string::iterator it=serialData.begin(); it!=serialData.end(); ++it ) {
             if ( iscntrl( *it ) ) {
                 // debug
                 cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<" before='"<<serialData<<"'"<<endl;

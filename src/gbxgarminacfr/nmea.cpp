@@ -166,7 +166,7 @@ NmeaMessage::addCheckSum()
     haveCheckSum_ = true;
 
     //check that we have the '$' at the start
-    if(sentence_[0]!= NMEAStartOfSentence) {
+    if ( sentence_[0]!= NMEAStartOfSentence ) {
         throw NmeaException("cannot calculate checksum, missing leading '$'");
     }
 
@@ -176,7 +176,7 @@ NmeaMessage::addCheckSum()
     unsigned char nextChar;
     // we start from 1 to skip the leading '$'
     for( loopCount=1; loopCount<MAX_SENTENCE_LEN; ++loopCount ) 
-    {
+    { 
         nextChar = static_cast<unsigned char>(sentence_[loopCount]);
     
         // no delimiter uh oh
