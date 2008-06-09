@@ -330,7 +330,7 @@ Driver::read()
             if ( nmeaFailChecksumCount++ < nmeaFailChecksumMaxCount ) {
 //                 tracer_.warning("Gps driver: Single message failed checksum. Not throwing an exception yet!" );
                 // debug
-                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<endl;
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<nmeaFailChecksumCount<<<<" '"<<nmeaMessage.sentence()<<"'"<<endl;
                 continue;
             }
             else {
