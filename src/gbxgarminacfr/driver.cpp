@@ -311,8 +311,10 @@ Driver::read()
         for ( string::iterator it=serialData.begin(); it!=serialData.end()-2; ++it ) {
             if ( iscntrl( *it ) ) {
                 // debug
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<" before='"<<serialData<<"'"<<endl;
                 cout<<now.tv_sec<<" "<<now.tv_usec<<" removing control char="<<std::hex<<(unsigned int)*it<<std::dec<<endl;
                 it = serialData.erase( it );
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<" after='"<<serialData<<"'"<<endl;
             }
         }
 
