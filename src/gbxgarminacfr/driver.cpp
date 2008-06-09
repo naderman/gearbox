@@ -306,6 +306,16 @@ Driver::read()
         //
         tracer_.debug( serialData, 10 );
     
+        // dealing with unexplained cntrl characters in the message
+        // don't check the last 2 characters: they're \0 and \n
+        for ( string::iterator it=serialData.begin(); it!=serialData.end()-2; ++it ) {
+            if ( iscntrl( *it ) ) {
+                // debug
+                cout<<now.tv_sec<<" "<<now.tv_usec<<" removing control char="<<std::hex<<(unsigned int)*it<<endl;
+                it = serialData.erase( it );
+            }
+        }
+
         //Put it into the message object and checksum the data
         try {
             // This throws if it cannot find the * to deliminate the checksum field
