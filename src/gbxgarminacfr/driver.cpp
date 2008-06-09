@@ -307,8 +307,8 @@ Driver::read()
         tracer_.debug( serialData, 10 );
 
         // remove the trailing new line character
-        assert( *serialData.end() == '\n' && "Driver: Serial data did not end in '\n'" );
-        serialData.erase( serialData.end() );
+        assert( *(serialData.end()-1) == '\n' && "Driver: Serial data did not end in '\n'" );
+        serialData.erase( serialData.end()-1 );
     
         // dealing with unexplained cntrl characters in the message
         for ( string::iterator it=serialData.begin(); it!=serialData.end(); ++it ) {
