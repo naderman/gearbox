@@ -150,8 +150,8 @@ NmeaMessage::testChecksumOk()
     }
    
     //failed the checksum!
-    cout<<"device: '"<<chksum_HIB<<chksum_LOB   <<"' ("<<std::hex<<(unsigned int)chksum_HIB<<","<<(unsigned int)chksum_LOB<<") "
-        <<"driver: '"<<*ptr<<*(ptr+1)<<"'"      <<"' ("<<std::hex<<(unsigned int)*ptr<<","<<(unsigned int)*(ptr+1)<<") "<<endl;
+    cout<<"device: '"<<chksum_HIB<<chksum_LOB   <<"' ("<<std::hex<<(unsigned int)chksum_HIB<<","<<(unsigned int)chksum_LOB<<std::dec<<") "
+        <<"driver: '"<<*ptr<<*(ptr+1)<<"'"      <<"' ("<<std::hex<<(unsigned int)*ptr<<","<<(unsigned int)*(ptr+1)<<std::dec<<") "<<endl;
     return false;
 }
 
