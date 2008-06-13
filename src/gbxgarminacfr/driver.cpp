@@ -62,6 +62,8 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     case '2': 
         data->fixType = Differential;
         break;
+    default :
+        throw gbxutilacfr::Exception( ERROR_INFO, "GGA sentence contains unknown GPS fix type: '"+msg.getDataToken(FixType)+"'" );
     }
         
     //position
