@@ -122,7 +122,7 @@ private:
     // Returns: true if got data, false if timed out
     bool getDataFromSerial();
     // Returns: true if statusOK, false it something bad happened
-    bool processBuffer( const int &timeStampSec, int &timeStampUsec );
+    bool processBuffer();
 
     gbxserialacfr::Serial &serial_;
 

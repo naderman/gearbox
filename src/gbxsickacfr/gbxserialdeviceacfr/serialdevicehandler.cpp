@@ -102,12 +102,9 @@ SerialDeviceHandler::walk()
             try {
                 if ( getDataFromSerial() )
                 {
-                    IceUtil::Time t = IceUtil::Time::now();
-                    int timeStampSec = (int)t.toSeconds();
-                    int timeStampUsec = (int)t.toMicroSeconds() - timeStampSec*1000000;
                     // Process it
                     try {
-                        bool statusOK = processBuffer( timeStampSec, timeStampUsec );
+                        bool statusOK = processBuffer();
                         if ( statusOK )
                             subStatus_.ok();
                     }
@@ -186,7 +183,7 @@ SerialDeviceHandler::getDataFromSerial()
 }
 
 bool
-SerialDeviceHandler::processBuffer( const int &timeStampSec, int &timeStampUsec )
+SerialDeviceHandler::processBuffer()
 {
     if ( SUPER_DEBUG )
     {
@@ -200,6 +197,10 @@ SerialDeviceHandler::processBuffer( const int &timeStampSec, int &timeStampUsec 
     // This loop is in case multiple messages arrived.
     while ( true )
     {
+        IceUtil::Time t = IceUtil::Time::now();
+        int timeStampSec = (int)t.toSeconds();
+        int timeStampUsec = (int)t.toMicroSeconds() - timeStampSec*1000000;        
+
         IResponsePtr response;
         int numBytesParsed = 0;
         bool gotMessage = false;
