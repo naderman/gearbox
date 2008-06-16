@@ -313,6 +313,7 @@ Driver::read()
         serialData.erase( serialData.end()-1 );
     
         // dealing with unexplained cntrl characters in the message
+/*
         for ( string::iterator it=serialData.begin(); it!=serialData.end(); ++it ) {
             if ( iscntrl( *it ) ) {
                 // debug
@@ -322,7 +323,7 @@ Driver::read()
                 cout<<now.tv_sec<<" "<<now.tv_usec<<" "<<" after='"<<serialData<<"'"<<endl;
             }
         }
-
+*/
         //Put it into the message object and checksum the data
         try {
             // This throws if it cannot find the * to deliminate the checksum field
