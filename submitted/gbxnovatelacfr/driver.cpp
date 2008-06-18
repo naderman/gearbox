@@ -470,8 +470,35 @@ Config::isValid() const {
 
 std::string
 Config::toString(){
-    cout << __func__ << "implement me\n";
-    return "";
+    std::stringstream ss;
+    ss << "serialDevice_: " << serialDevice_ << " ";
+    ss << "baudRate_: " << baudRate_ << " ";
+    ss << "enableImu_: " << enableImu_ << " ";
+    ss << "imuType_: " << imuType_ << " ";
+    ss << "enableInsPva_: " << enableInsPva_ << " ";
+    ss << "enableGpsPos_: " << enableGpsPos_ << " ";
+    ss << "enableGpsVel_: " << enableGpsVel_ << " ";
+    ss << "enableRawImu_: " << enableRawImu_ << " ";
+    ss << "ignoreUnknownMessages_: " << ignoreUnknownMessages_ << " ";
+    ss << "dtInsPva_: " << dtInsPva_ << " ";
+    ss << "dtGpsPos_: " << dtGpsPos_ << " ";
+    ss << "dtGpsVel_: " << dtGpsVel_ << " ";
+    ss << "fixInvalidRateSettings_: " << fixInvalidRateSettings_ << " ";
+    //ss << "imuToGpsOffset_: " << imuToGpsOffset_ << " ";
+    //ss << "imuToGpsOffsetUncertainty_: " << imuToGpsOffsetUncertainty_ << " ";
+    ss << "enableInsOffset_: " << enableInsOffset_ << " ";
+    //ss << "insOffset_: " << insOffset_ << " ";
+    ss << "enableInsPhaseUpdate_: " << enableInsPhaseUpdate_ << " ";
+    ss << "enableCDGPS_: " << enableCDGPS_ << " ";
+    ss << "enableSBAS_: " << enableSBAS_ << " ";
+    ss << "enableRTK_: " << enableRTK_ << " ";
+    ss << "enableUseOfOmniStarCarrier_: " << enableUseOfOmniStarCarrier_ << " ";
+    ss << "enableSetImuOrientation_: " << enableSetImuOrientation_ << " ";
+    ss << "setImuOrientation_: " << setImuOrientation_ << " ";
+    ss << "enableVehicleBodyRotation_: " << enableVehicleBodyRotation_ << " ";
+    //ss << "vehicleBodyRotation_: " << vehicleBodyRotation_ << " ";
+    //ss << "vehicleBodyRotationUncertainty_: " << vehicleBodyRotationUncertainty_;
+    return ss.str();
 }
 
 bool
@@ -482,8 +509,12 @@ SimpleConfig::isValid() const {
 
 std::string
 SimpleConfig::toString(){
-    cout << __func__ << "implement me\n";
-    return "";
+    std::stringstream ss;
+    ss << "serialDevice_: " << serialDevice_ << " ";
+    ss << "baudRate_: " << baudRate_ << " ";
+    ss << "imuType_: " << imuType_ << " ";
+    //ss << "imuToGpsOffset_: " << imuToGpsOffset_;
+    return ss.str();
 }
 
 bool
@@ -494,8 +525,10 @@ GpsOnlyConfig::isValid() const {
 
 std::string
 GpsOnlyConfig::toString(){
-    cout << __func__ << "implement me\n";
-    return "";
+    std::stringstream ss;
+    ss << "serialDevice_: " << serialDevice_ << " ";
+    ss << "baudRate_: " << baudRate_;
+    return ss.str();
 }
 
 } //namespace
