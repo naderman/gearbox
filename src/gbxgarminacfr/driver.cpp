@@ -8,11 +8,13 @@
  *
  */
 
+#include <bitset>
 #include <iostream>
 #include <sstream>
 #include <gbxutilacfr/gbxutilacfr.h>
 #include "nmea.h"
 #include <cstdlib>
+#include <cstring>
 #include <sys/time.h>
 #include <time.h>
 #include <errno.h>
