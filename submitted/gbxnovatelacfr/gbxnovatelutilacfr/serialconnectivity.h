@@ -1,3 +1,12 @@
+/*
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
+ * Copyright (c) 2004-2008 Michael Moser
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
 class gbxserialacfr::Serial;
 
 // test connectivity to a [serial] device at a [baudrate];

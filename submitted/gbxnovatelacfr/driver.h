@@ -1,9 +1,9 @@
 /*
- * Orca-Robotics Project: Components for robotics 
- *               http://orca-robotics.sf.net/
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
+ *               http://gearbox.sf.net/
  * Copyright (c) 2004-2008 Matthew Ridley, Ben Upcroft, Michael Moser
  *
- * This copy of Orca is licensed to you under the terms described in
+ * This distribution is licensed to you under the terms described in
  * the LICENSE file included in this distribution.
  *
  */
