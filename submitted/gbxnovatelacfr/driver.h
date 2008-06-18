@@ -88,7 +88,7 @@ public:
     //! - imuType refers to a known type
     //! - offset has size 3
     //! - message rates are consistent and don't exceed serial-data-rate
-    bool isValid() const;
+    bool isValid(); //!< not const, since it has limited self-fixing capabilities
     //! Dumps the config in human readable form
     std::string toString();
 

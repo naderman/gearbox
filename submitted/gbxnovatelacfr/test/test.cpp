@@ -71,6 +71,9 @@ int main(int argc, char *argv[]){
             case 'd':
                 showDebug = true;
                 break;
+            case 'v':
+                verbose = true;
+                break;
             case 'h':
                 usage(argv[0], optString);
                 return EXIT_SUCCESS;
@@ -94,6 +97,7 @@ int main(int argc, char *argv[]){
     cout << "|\tport:\t\t" << port << "\n";
     cout << "|\tbaud:\t\t" << baud << "\n";
     cout << "|\tImu:\t\t" << imuType << "\n";
+    cout << "|\tverbose:\t" << verbose << "\n";
     cout << "|\tshow debug:\t" << showDebug << "\n";
     cout << "-------------------------------------------------\n";
 

@@ -408,6 +408,7 @@ Config::Config(const SimpleConfig &simpleCfg) :
     dtGpsVel_(0.2),
     fixInvalidRateSettings_(false),
     imuToGpsOffset_(simpleCfg.imuToGpsOffset_),
+    imuToGpsOffsetUncertainty_(0,0.0),
     enableInsOffset_(false),
     enableInsPhaseUpdate_(true),
     enableCDGPS_(true),
@@ -448,10 +449,10 @@ Config::Config() :
     dtGpsPos_(1.0),
     dtGpsVel_(1.0),
     fixInvalidRateSettings_(false),
-    imuToGpsOffset_(1,0.0),
-    imuToGpsOffsetUncertainty_(1,0.0),
+    imuToGpsOffset_(0,0.0),
+    imuToGpsOffsetUncertainty_(0,0.0),
     enableInsOffset_(false),
-    insOffset_(1,0.0),
+    insOffset_(0,0.0),
     enableInsPhaseUpdate_(false),
     enableCDGPS_(false),
     enableSBAS_(false),
@@ -460,14 +461,86 @@ Config::Config() :
     enableSetImuOrientation_(false),
     setImuOrientation_(0),
     enableVehicleBodyRotation_(false),
-    vehicleBodyRotation_(1,0.0),
-    vehicleBodyRotationUncertainty_(1,0.0) {
+    vehicleBodyRotation_(0,0.0),
+    vehicleBodyRotationUncertainty_(0,0.0) {
 }
 
 bool
-Config::isValid() const {
-    cout << __func__ << "implement me\n";
-    return true;
+Config::isValid() {
+    bool valid = true;
+    //check serial setup
+    if( 0 == serialDevice_.compare("")
+        || (9600 != baudRate_
+                && 19200 != baudRate_
+                && 38400 != baudRate_
+                && 57600 != baudRate_
+                && 115200 != baudRate_
+                && 230400 != baudRate_)){
+        std::cout << "serial settings invalid\n";
+        valid = false;
+    }
+    //imu gear
+    if(enableImu_
+            && ( 0 == imuType_.compare("")
+                || 3 != imuToGpsOffset_.size()
+                || ( 3 != imuToGpsOffsetUncertainty_.size()
+                    && 0  != imuToGpsOffsetUncertainty_.size()))){
+        std::cout << "imuType/imuToGpsOffset invalid\n";
+        valid = false;
+    }
+    if(enableImu_ && enableSetImuOrientation_
+            && ( 0 > setImuOrientation_
+                || 6 < setImuOrientation_)){
+        std::cout << "setImuOrientation invalid\n";
+        valid = false;
+    }
+    if(enableImu_ && enableVehicleBodyRotation_
+            && ( 3 != vehicleBodyRotation_.size()
+                || ( 3 != vehicleBodyRotationUncertainty_.size()
+                    && 0 != vehicleBodyRotationUncertainty_.size()))){
+        std::cout << "vehicleBodyRotation invalid\n";
+        valid = false;
+    }
+    //ins gear
+    if(enableImu_ && enableInsOffset_
+            && 3 != insOffset_.size()){
+        std::cout << "insOffset invalid\n";
+        valid = false;
+    }
+    //data
+    if(false == (enableInsPva_ || enableGpsPos_ || enableGpsVel_ || enableRawImu_)){
+        std::cout << "data settings invalid, you need to enable at least one message\n";
+        valid = false;
+    }
+    if(enableRawImu_ && 0.02 > dtInsPva_){
+        if(fixInvalidRateSettings_){
+            std::cout << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled. FIXED!\n";
+            dtInsPva_ = 0.02;
+        }else{
+            std::cout << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled\n";
+            valid = false;
+        }
+    }
+    if( (enableRawImu_ || enableInsPva_) && 0.2 > dtGpsPos_ ){
+        if(fixInvalidRateSettings_){
+            std::cout << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
+            dtGpsPos_ = 0.2;
+        }else{
+            std::cout << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
+            valid = false;
+        }
+    }
+    if( (enableRawImu_ || enableInsPva_) && 0.2 > dtGpsVel_ ){
+        if(fixInvalidRateSettings_){
+            std::cout << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
+            dtGpsVel_ = 0.2;
+        }else{
+            std::cout << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
+            valid = false;
+        }
+    }
+
+    return valid;
 }
 
 std::string
@@ -505,8 +578,15 @@ Config::toString(){
 
 bool
 SimpleConfig::isValid() const {
-    cout << __func__ << "implement me\n";
-    return true;
+    return 0 != serialDevice_.compare("")
+        && imuType_.compare("")
+        && 3 == imuToGpsOffset_.size()
+        && (9600 == baudRate_
+                || 19200 == baudRate_
+                || 38400 == baudRate_
+                || 57600 != baudRate_
+                || 115200 == baudRate_
+                || 230400 == baudRate_) ;
 }
 
 std::string
@@ -521,8 +601,13 @@ SimpleConfig::toString(){
 
 bool
 GpsOnlyConfig::isValid() const {
-    cout << __func__ << "implement me\n";
-    return true;
+    return 0 != serialDevice_.compare("")
+        && (9600 == baudRate_
+                || 19200 == baudRate_
+                || 38400 == baudRate_
+                || 57600 != baudRate_
+                || 115200 == baudRate_
+                || 230400 == baudRate_) ;
 }
 
 std::string
