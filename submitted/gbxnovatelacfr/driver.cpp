@@ -64,6 +64,8 @@ namespace {
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsPosLogB &bestGpsPos, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder);
+
+    std::string doubleVectorToString(vector<double > &vec, std::string seperator = std::string(" "));
 }
 
 namespace gbxnovatelacfr
@@ -484,10 +486,10 @@ Config::toString(){
     ss << "dtGpsPos_: " << dtGpsPos_ << " ";
     ss << "dtGpsVel_: " << dtGpsVel_ << " ";
     ss << "fixInvalidRateSettings_: " << fixInvalidRateSettings_ << " ";
-    //ss << "imuToGpsOffset_: " << imuToGpsOffset_ << " ";
-    //ss << "imuToGpsOffsetUncertainty_: " << imuToGpsOffsetUncertainty_ << " ";
+    ss << "imuToGpsOffset_: " << doubleVectorToString(imuToGpsOffset_) << " ";
+    ss << "imuToGpsOffsetUncertainty_: " << doubleVectorToString(imuToGpsOffsetUncertainty_) << " ";
     ss << "enableInsOffset_: " << enableInsOffset_ << " ";
-    //ss << "insOffset_: " << insOffset_ << " ";
+    ss << "insOffset_: " << doubleVectorToString(insOffset_) << " ";
     ss << "enableInsPhaseUpdate_: " << enableInsPhaseUpdate_ << " ";
     ss << "enableCDGPS_: " << enableCDGPS_ << " ";
     ss << "enableSBAS_: " << enableSBAS_ << " ";
@@ -496,8 +498,8 @@ Config::toString(){
     ss << "enableSetImuOrientation_: " << enableSetImuOrientation_ << " ";
     ss << "setImuOrientation_: " << setImuOrientation_ << " ";
     ss << "enableVehicleBodyRotation_: " << enableVehicleBodyRotation_ << " ";
-    //ss << "vehicleBodyRotation_: " << vehicleBodyRotation_ << " ";
-    //ss << "vehicleBodyRotationUncertainty_: " << vehicleBodyRotationUncertainty_;
+    ss << "vehicleBodyRotation_: " << doubleVectorToString(vehicleBodyRotation_) << " ";
+    ss << "vehicleBodyRotationUncertainty_: " << doubleVectorToString(vehicleBodyRotationUncertainty_);
     return ss.str();
 }
 
@@ -513,7 +515,7 @@ SimpleConfig::toString(){
     ss << "serialDevice_: " << serialDevice_ << " ";
     ss << "baudRate_: " << baudRate_ << " ";
     ss << "imuType_: " << imuType_ << " ";
-    //ss << "imuToGpsOffset_: " << imuToGpsOffset_;
+    ss << "imuToGpsOffset_: " << doubleVectorToString(imuToGpsOffset_);
     return ss.str();
 }
 
@@ -842,5 +844,14 @@ namespace{
             lastStatusWasGood = false;
         }
         return genericData;
+    }
+
+    std::string doubleVectorToString(vector<double > &vec, std::string seperator){
+        std::stringstream ss;
+        int max = vec.size();
+        for (int i=0; i<max; i++){
+            ss << vec[i] << seperator;
+        }
+        return ss.str();
     }
 }//namespace
