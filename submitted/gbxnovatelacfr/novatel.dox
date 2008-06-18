@@ -1,0 +1,30 @@
+/*
+ * Orca-Robotics Project: Components for robotics 
+ *               http://orca-robotics.sf.net/
+ * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
+ *
+ * This distribution is licensed to you under the terms described in
+ * the LICENSE file included in this distribution.
+ *
+ */
+
+/*!
+@ingroup gbx_libs
+@ingroup gbx_cpp
+@ingroup gbx_linux
+@ingroup gbx_hardware
+@defgroup gbx_library_novatel_acfr gbxnovatelacfr
+@author Michael Moser
+@brief A implementation for a NovatelSpan system
+a proprietray integrated novatel navigation system comsisting out of a gps receiver and a imu
+
+
+@par Dependencies.
+
+- libIceUtil (for timing)
+- libHydroSerial (serial comms)
+- libHydroNovatelUtil (Novatel binary message format/parsing)
+
+@see @ref gbx_library_novatel_acfr
+@namespace gbxnovatelacfr
+*/
