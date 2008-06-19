@@ -28,6 +28,8 @@ namespace gbxnovatelutilacfr{
     class ImuDecoder;
 }
 
+/** @ingroup gbx_library_novatel_acfr
+@{ */
 namespace gbxnovatelacfr{
 
 //! Minimum information to configure the receiver in INS mode
@@ -74,17 +76,19 @@ public:
     int baudRate_;
 };
 
-//! All the information needed to configure the driver. The device itself has even more options, consult your manual.
+//! @brief All the information needed to configure the driver.
+//! The device itself has even more options, consult your manual.
 //! If all these possibilities don't seem to be sufficient, consult your friendly developer for extension (better yet, send a patch)
+//! The easiest way to get a valid (and useful) Config, is to initialise it with a SimpleConfig (for INS operation) or GpsOnlyConfig (for GPS operation)
 class Config{
 public:
-    Config(const SimpleConfig &simpleCfg);   //!< yields a valid config, with reasonable defaults
-    Config(const GpsOnlyConfig &gpsOnlyCfg); //!< yields a valid config, for gps only operation
-    Config();                                //!< disables everything, so you can set just the options you need
+    Config(const SimpleConfig &simpleCfg);   //!< yields a valid config, with reasonable defaults (RawImu 100Hz, InsPva 50Hz, BestGpsPos/Vel 5Hz)
+    Config(const GpsOnlyConfig &gpsOnlyCfg); //!< yields a valid config, for gps only operation (BestGpsPos/Vel 20Hz)
+    Config();                                //!< disables everything, so you can (and must) set just the options you need
 
     //! Returns true if the configuration is sane. Checks include:
     //! - a non-empty device name
-    //! - baud rate is supported by device (9600, 19200, 38400, 115200, 230400)
+    //! - baud rate is supported by device (9600, 19200, 38400, 57600, 115200, 230400)
     //! - imuType refers to a known type
     //! - offset has size 3
     //! - message rates are consistent and don't exceed serial-data-rate
@@ -107,26 +111,28 @@ public:
     //!@}
 
     //!@name Data settings
+    //! First we disable all output in the ctor. Then all the messages set to true here are  enabled.
     //
-    //!we disable all output in the ctor, and then enable the messages set to true here.
     //!@{
     bool enableInsPva_;
     bool enableGpsPos_;
     bool enableGpsVel_;
     bool enableRawImu_;
     bool ignoreUnknownMessages_; //!< normally we throw an exception, set this to "true" if you want to enable some other message permanently.
+
     //!@}
 
     //!@name Data rate settings
-    //
     //!Time between messages in seconds (i.e. 0.01 == 100Hz). RawImu can only be reported at
     //!the "natural" rate of the IMU (100Hz or 200Hz, depending on model).
     //!We check in isValid() if any of these don't make sense
+    //
     //!@{
     double dtInsPva_; //!< 100Hz max, if RawImu is enabled 50Hz max
     double dtGpsPos_; //!< 20Hz max, 5Hz max if RawImu or InsPva is enabled
     double dtGpsVel_; //!< 20Hz max, 5Hz max if RawImu or InsPva is enabled
-    bool fixInvalidRateSettings_; //!< don't bitch about wrong rates, but change them to something sensible
+    bool fixInvalidRateSettings_; //!< Don't bitch about wrong rates, change them to something sensible
+
     //!@}
 
     //!@name INS settings
@@ -137,6 +143,7 @@ public:
     bool enableInsOffset_;
     std::vector<double > insOffset_;         //!< report INS position/velocity offset (xyz [m] in IMU coordinates) from the IMU center; useful e.g. to get data w.r. to robot's center of rotation
     bool enableInsPhaseUpdate_;         //!< tightly coupled (phase based vs position based) filter; Chance of better performance in adverse conditions
+
     //!@}
 
     //!@name GPS settings
@@ -146,6 +153,7 @@ public:
     bool enableSBAS_;  //!< code-differential corrections over satellite on GPS frequencies (WAAS/EGNOS)
     bool enableRTK_;   //!< carrier-differential corrections (you need to set up your own base-station and wireless link), assumes RTCA corrections on COM2, 9600bps, 8N1 (hardcoded)
     bool enableUseOfOmniStarCarrier_; //!< carrier-differential corrections OMNIStarXP/HP (you need to get a subscription with them)
+
     //!@}
 
     //!@name INS settings for fast (dynamic) alignment
@@ -160,23 +168,21 @@ public:
     bool enableVehicleBodyRotation_;
     std::vector<double > vehicleBodyRotation_;
     std::vector<double > vehicleBodyRotationUncertainty_; //!< optional (size 3 or 0)
+
     //!@}
 private:
 };
 
 //! possible Status Messages GenericData can contain
 enum StatusMessagetype {
-    //! Nothing new, no message
-    NoMsg,
-    //! All good, but something to say
-    Ok,
-    //! Problem, likely to go away
-    Warning,
-    //! Problem, probably fatal
-    Fault
+    NoMsg,       //!< Nothing new, no message
+    Initialising,//!< Nothing wrong, just not quite ready
+    Ok,          //!< All good, but something to say
+    Warning,     //!< Problem, likely to go away
+    Fault        //!< Problem, probably fatal
 };
 
-//! Novatel's different solution status types
+//! Novatel's different solution status types; explanations from the manual
 enum GpsSolutionStatusType{
     SolComputed,       //!< Solution computed
     InsufficientObs,   //!< Insufficient observations
@@ -200,7 +206,7 @@ enum GpsSolutionStatusType{
     UnknownGpsSolutionStatusType
 };
 
-//! Novatel's different fix types; sadly mixed for position/velocity with some INS gear thrown in
+//! Novatel's different fix types; sadly mixed for position/velocity with some INS gear thrown in; explanations from the manual
 enum GpsPosVelType{
     None,             //!< No solution
     FixedPos,         //!< Position has been fixed by the FIX POSITION command or by position averaging
@@ -266,19 +272,29 @@ class InsPvaData : public GenericData {
         }
         int      gpsWeekNr;         //
         double   secIntoWeek;       //
-        double   latitude;          //[deg] north positive WGS84
-        double   longitude;         //[deg] east positive WGS84
-        double   height;            //[m] above ellipsoid WGS84 (heigth_ellipsoid - undulation == height_geoid/AMSL)
-        double   northVelocity;     //[m/s] south is negative; true north?
-        double   eastVelocity;      //[m/s] west is negative; true east?
-        double   upVelocity;        //[m/s] down is negative; geoid/ellipsoid vertical?
-        //The default IMU axis definitions are:
-        //  Y - forward
-        //  Z - up
-        //  X - right hand side
-        double   roll;              //[degree] right handed rotation from local level around y-axes
-        double   pitch;             //[degree] right handed rotation from local level around x-axes
-        double   azimuth;           //[degree] left handed around z-axes rotation from (true?) north clockwise
+        double   latitude;          //!< [deg] north positive WGS84
+        double   longitude;         //!< [deg] east positive WGS84
+        double   height;            //!< [m] above ellipsoid WGS84 (heigth_ellipsoid - undulation == height_geoid (aka AMSL)
+
+        //!@name Orientation
+        //!Relativ to true North/East and geoid vertical (I think)
+        //
+        //@{
+        double   northVelocity;     //!< [m/s] south is negative
+        double   eastVelocity;      //!< [m/s] west is negative
+        double   upVelocity;        //!< [m/s] down is negative
+
+        //@}
+
+        //!@name Orientation
+        //!The default IMU axis definitions are: Y - forward Z - up X - right hand side
+        //
+        //@{
+        double   roll;              //!< [degree] right handed rotation from local level around y-axes
+        double   pitch;             //!< [degree] right handed rotation from local level around x-axes
+        double   azimuth;           //!< [degree] left handed around z-axes rotation from (true?) north clockwise
+
+        //@}
 
         StatusMessagetype statusMessageType;
         std::string statusMessage;
@@ -297,24 +313,24 @@ class BestGpsPosData : public GenericData {
             return "implement me!";
         }
         int gpsWeekNr;                          //
-        unsigned int msIntoWeek;                //milliseconds from beginning of week
+        unsigned int msIntoWeek;                //!< milliseconds from beginning of week
         GpsSolutionStatusType  solutionStatus;  //
         GpsPosVelType          positionType;    //
-        double       latitude;                  //[deg] north positive
-        double       longitude;                 //[deg] east positive
-        double       heightAMSL;                //[m] AMSL == above mean sea level (geoid)
-        float        undulation;                //[m] aka geoidal seperation: undulation == heigth_ellipsoid - height_geoid/AMSL
+        double       latitude;                  //!< [deg] north positive
+        double       longitude;                 //!< [deg] east positive
+        double       heightAMSL;                //!< [m] AMSL == above mean sea level (geoid)
+        float        undulation;                //!< [m] aka geoidal seperation: undulation == heigth_ellipsoid - height_geoid/AMSL
         unsigned int datumId;                   //
-        float        sigmaLatitude;             //[m? deg?] 1 standard deviation error estimate
-        float        sigmaLongitude;            //[m? deg?] 1 standard deviation error estimate
-        float        sigmaHeight;               //[m? deg?] 1 standard deviation error estimate
+        float        sigmaLatitude;             //!< [m? deg?] 1 standard deviation error estimate
+        float        sigmaLongitude;            //!< [m? deg?] 1 standard deviation error estimate
+        float        sigmaHeight;               //!< [m? deg?] 1 standard deviation error estimate
         char         baseStationId[4];          //
-        float        diffAge;                   //[s]
-        float        solutionAge;               //[s]
-        int          numObservations;           //number of observations tracked (?) L1 code/carrier/doppler + L2 code/carrier/doppler?
-        int          numL1Ranges;               //number of L1 ranges used in computation (?)
-        int          numL1RangesRTK;            //number of L1 ranges above the RTK mask angle (??) number of L1 carrier ranges used?
-        int          numL2RangesRTK;            //number of L2 ranges above the RTK mask angle (??) number of L2 carrier ranges used?
+        float        diffAge;                   //!< [s] how old the correction info from the basestation is
+        float        solutionAge;               //!< [s] 
+        int          numObservations;           //!< number of observations tracked (?) L1 code/carrier/doppler + L2 code/carrier/doppler?
+        int          numL1Ranges;               //!< number of L1 ranges used in computation (?)
+        int          numL1RangesRTK;            //!< number of L1 ranges above the RTK mask angle (??) number of L1 carrier ranges used?
+        int          numL2RangesRTK;            //!< number of L2 ranges above the RTK mask angle (??) number of L2 carrier ranges used?
 
         StatusMessagetype statusMessageType;
         std::string statusMessage;
@@ -333,14 +349,14 @@ class BestGpsVelData : public GenericData {
             return "implement me!";
         }
         int          gpsWeekNr;                 //
-        unsigned int msIntoWeek;                //milliseconds from beginning of week
+        unsigned int msIntoWeek;                //!< milliseconds from beginning of week
         GpsSolutionStatusType  solutionStatus;  //
         GpsPosVelType          positionType;    //
-        float        latency;                   //[s]
-        float        diffAge;                   //[s]
-        double       horizontalSpeed;           //[m/s]
-        double       trackOverGround;           //[deg] w respect to true North
-        double       verticalSpeed;             //[m/s]
+        float        latency;                   //!< [s] gps speed can be calculated from instantanious or integrated doppler. The latter refers to the average speed over the last interval -> is delayed by half an interval
+        float        diffAge;                   //!< [s]
+        double       horizontalSpeed;           //!< [m/s]
+        double       trackOverGround;           //!< [deg] "heading" of the speed vector w. respect to true North
+        double       verticalSpeed;             //!< [m/s]
 
         StatusMessagetype statusMessageType;
         std::string statusMessage;
@@ -360,12 +376,25 @@ class RawImuData : public GenericData {
         }
         int    gpsWeekNr;
         double secIntoWeek;
-        double zDeltaV;   //!< [m/s] change in speed, up positive
-        double yDeltaV;   //!< [m/s] change in speed, forward positive
-        double xDeltaV;   //!< [m/s] change in speed, right positive
-        double zDeltaAng; //!< [rad] change in angle, right handed around z
-        double yDeltaAng; //!< [rad] change in angle, right handed around y
-        double xDeltaAng; //!< [rad] change in angle, right handed around x
+        //!@name Change in speed
+        //!The default IMU axis definitions are: Y - forward Z - up X - right hand side
+        //
+        //@{
+        double zDeltaV;   //!< [m/s] up positive
+        double yDeltaV;   //!< [m/s] forward positive
+        double xDeltaV;   //!< [m/s] right positive
+
+        //@}
+
+        //!@name Change in orientation
+        //!The default IMU axis definitions are: Y - forward Z - up X - right hand side
+        //
+        //@{
+        double zDeltaAng; //!< [rad] right handed around z
+        double yDeltaAng; //!< [rad] right handed around y
+        double xDeltaAng; //!< [rad] right handed around x
+
+        //@}
 
         StatusMessagetype statusMessageType;
         std::string statusMessage;
@@ -374,43 +403,71 @@ class RawImuData : public GenericData {
         int timeStampUSec; //!< in Computer time, beginning of message at serial port
 };
 
+//! The actual Driver
+//! @brief the idea is to create one of these guys (with a valid Config), and then treat it as a data-source, i.e. call read() on it in some kind of loop
 class Driver {
 public:
 
-    Driver( const Config &cfg, gbxutilacfr::Tracer& tracer);
+    //! @name Ctor:
+    //! @brief Trys to establish serial communication to the GPS receiver, then configures it
+    //
+    //!@{
+
+    //! @brief dumps tracing messages to the console
+    //
+    //! implements tracing internally as a gbxutilacfr::TrivialTracer
+    Driver( const Config &cfg);
+    //!@brief full control over tracing (e.g. to syslog)
+    //!@param tracer you need to provide this guy (via new), do NOT delete it, it will be deleted when your Driver object goes out of scope
+    Driver( const Config &cfg, gbxutilacfr::Tracer* tracer);
+    //!@}
     ~Driver();
 
-    //! Blocking read, returns one message
-    //! Throws gbxutilacfr::Exception when a problem is encountered.
-    //!
-    //
-    //! @verbatim
-    //! std::auto_ptr<gbxnovatelacfr::GenericData> data;
-    //!
-    //! try {
-    //!     data = device->read();
-    //! }
-    //! catch ( const std::exception& e ) {
-    //!     cout <<"Test: Failed to read data: "<<e.what()<<endl;
-    //! }
-    //! if(InsData == data.type()){
-    //!     InsData *insData = dynamic_cast<InsData *>(data.get());
-    //!     assert(insData);
-    //!     //process insData
-    //! }
-    //! @endverbatim
-    //
+    /*! @brief Blocking read, returns one message
+
+        Throws gbxutilacfr::Exception when a problem is encountered (derives from std::exception).
+        Throws gbxutilacfr::HardwareException when a (fatal) problem with the hardware is encountered
+        @verbatim
+        std::auto_ptr<gbxnovatelacfr::GenericData> data;
+
+        while(1) {       // read forever
+            try {
+                data = device->read();
+            }
+            catch ( const gbxutilacfr::HardwareException& e ) {
+                cout <<"Something wrong with the hardware: "<<e.what()<<endl;
+                cout <<"Giving up!\n";
+                throw e;
+            }
+            catch ( const std::exception& e ) {
+                cout <<"Failed to read data: "<<e.what()<<endl;
+                continue;
+            }
+            switch( data.type() ){
+                case InsPvaData:
+                    InsData *insData = dynamic_cast<InsData *>(data.get());
+                    assert(insData);
+                    // process insData
+                    break;
+                default:
+                    // don't handle the other guys
+                    break;
+            }
+        }
+        @endverbatim */
     std::auto_ptr<GenericData> read();
 
 private:
 
+    //! does the leg-work for the constructor (via the following guys)
+    void configure();
     //! establish a serial connection to the receiver
     int connectToHardware();
-    //! transfer configuration parameters related to the IMU
+    //! set parameters related to the IMU
     void configureImu();
-    //! transfer configuration parameters related to the INS
+    //! set parameters related to the INS
     void configureIns();
-    //! transfer configuration parameters related to GPS
+    //! set parameters related to GPS
     void configureGps();
     //! turn on data messages we are interested in
     void requestData();
@@ -421,9 +478,10 @@ private:
     int baud_;
 
     Config config_;
-    gbxutilacfr::Tracer& tracer_;
+    std::auto_ptr<gbxutilacfr::Tracer > tracer_;
 };
 
 
 } // namespace
+/** @} */
 #endif

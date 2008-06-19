@@ -17,6 +17,7 @@
 
 #include <gbxserialacfr/gbxserialacfr.h>
 #include <gbxutilacfr/gbxutilacfr.h>
+#include <gbxutilacfr/trivialtracer.h>
 
 #include <iostream>
 #include <sstream>
@@ -70,13 +71,31 @@ namespace {
 
 namespace gbxnovatelacfr
 {
+Driver::Driver( const Config& cfg) :
+    serial_(0),
+    baud_(115200),
+    config_(cfg),
+    tracer_(new gbxutilacfr::TrivialTracer())
+{
+    assert(0 != tracer_.get());
+    configure();
+    return;
+}
+
 Driver::Driver( const Config& cfg,
-        gbxutilacfr::Tracer &tracer) :
+        gbxutilacfr::Tracer* tracer) :
     serial_(0),
     baud_(115200),
     config_(cfg),
     tracer_(tracer)
 {
+    assert(0 != tracer_.get());
+    configure();
+    return;
+}
+
+void
+Driver::configure( ) {
     if(false == config_.isValid()){
         throw (std::string("Invalid Configuration!"));
     }
@@ -98,17 +117,18 @@ Driver::Driver( const Config& cfg,
     configureGps();
     requestData();
     serial_->flush();
-    tracer_.info("Setup done, starting normal operation!");
+    tracer_->info("Setup done, starting normal operation!");
+    return;
 }
 
 Driver::~Driver() {
     // just in case something is running... stops the novatel logging any messages
     try{
-        tracer_.info("Stopping NovatelSpan driver!");
+        tracer_->info("Stopping NovatelSpan driver!");
         serial_->flush();
         serial_->writeString( "unlogall\r\n" );
         serial_->drain();
-        tracer_.info("NovatelSpan driver stopped!");
+        tracer_->info("NovatelSpan driver stopped!");
     }
     catch(...){
         //no throwing from destructors
@@ -181,7 +201,7 @@ Driver::configureImu() {
         put = serial_->writeString( ss.str().c_str() );
         //force the IMU to re-align at every startup
         //put = serial_->writeString( "inscommand reset\r\n" );
-        //tracer_.info("Reset IMU; Waiting 5 seconds before continuing!");
+        //tracer_->info("Reset IMU; Waiting 5 seconds before continuing!");
         //sleep(5);
     }else{
         // no IMU --> disable INS
@@ -256,25 +276,25 @@ Driver::configureGps() {
 
     // CDGPS
     if(config_.enableCDGPS_){
-        tracer_.info("Turning on CDGPS!");
+        tracer_->info("Turning on CDGPS!");
         put = serial_->writeString( "ASSIGNLBAND CDGPS 1547547 4800\r\n" );
     }
 
     // turn SBAS on/off (essentially global DGPS)
     if(config_.enableSBAS_){
-        tracer_.info("Turning on SBAS!");
+        tracer_->info("Turning on SBAS!");
         put = serial_->writeString( "SBASCONTROL ENABLE Auto 0 ZEROTOTWO\r\n");
         //we try to use WAAS satellites even below the horizon
         put = serial_->writeString( "WAASECUTOFF -5.0\r\n");
     }
     else{
-        tracer_.info("Turning off SBAS!");
+        tracer_->info("Turning off SBAS!");
         put = serial_->writeString( "SBASCONTROL DISABLE Auto 0 NONE\r\n");
     }
 
     // rtk
     if(config_.enableRTK_){
-        tracer_.info("Turning on RTK!");
+        tracer_->info("Turning on RTK!");
         put = serial_->writeString( "com com2,9600,n,8,1,n,off,on\r\n" );
         put = serial_->writeString( "interfacemode com2 rtca none\r\n" );
     }
@@ -304,7 +324,7 @@ Driver::requestData() {
         put = serial_->writeString(ss.str().c_str());
         ss.str("");
         ss << "Turning on GPS position at " << 1.0/config_.dtGpsPos_ << "Hz!";
-        tracer_.info(ss.str().c_str());
+        tracer_->info(ss.str().c_str());
     }
 
     // gps velocity without ins
@@ -314,7 +334,7 @@ Driver::requestData() {
         put = serial_->writeString(ss.str().c_str());
         ss.str("");
         ss << "Turning on GPS velocity at " << 1.0/config_.dtGpsVel_ << "Hz!";
-        tracer_.info(ss.str().c_str());
+        tracer_->info(ss.str().c_str());
     }
 
 
@@ -327,7 +347,7 @@ Driver::requestData() {
         put = serial_->writeString(ss.str().c_str());
         ss.str("");
         ss << "Turning on INS position/velocity/orientation at " << 1.0/config_.dtInsPva_ << "Hz!";
-        tracer_.info(ss.str().c_str());
+        tracer_->info(ss.str().c_str());
     }
 
 
@@ -336,7 +356,7 @@ Driver::requestData() {
     // raw accelerometer and gyro data
     if(config_.enableRawImu_){
         put = serial_->writeString( "log rawimusb onnew\r\n" );
-        tracer_.info("Turning on raw imu data!");
+        tracer_->info("Turning on raw imu data!");
     }
 
     return;
@@ -374,7 +394,7 @@ Driver::read(){
                         ss << "Warning("<<__FILE__<<":"<< __LINE__
                             <<" : got unexpected message from receiver; id: " << msg.header.msgId << std::endl;
                         if(config_.ignoreUnknownMessages_){
-                            tracer_.warning(ss.str());
+                            tracer_->warning(ss.str());
                         }else{
                             throw( ss.str() );
                         }
