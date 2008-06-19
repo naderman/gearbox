@@ -499,6 +499,7 @@ Config::isValid() {
         std::cout << "serial settings invalid\n";
         valid = false;
     }
+
     //imu gear
     if(enableImu_
             && ( 0 == imuType_.compare("")
@@ -521,12 +522,14 @@ Config::isValid() {
         std::cout << "vehicleBodyRotation invalid\n";
         valid = false;
     }
+
     //ins gear
     if(enableImu_ && enableInsOffset_
             && 3 != insOffset_.size()){
         std::cout << "insOffset invalid\n";
         valid = false;
     }
+
     //data
     if(false == (enableInsPva_ || enableGpsPos_ || enableGpsVel_ || enableRawImu_)){
         std::cout << "data settings invalid, you need to enable at least one message\n";
@@ -558,6 +561,28 @@ Config::isValid() {
             std::cout << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
             valid = false;
         }
+    }
+
+    //datarate
+    double dataRate = 0.0;
+    if(enableRawImu_){
+        dataRate += 1.0/0.01 * 8 * sizeof (gnua::RawImuLogSB); // TODO: there is one IMU running at 200Hz, no idea how to check for it
+    }
+    if(enableInsPva_){
+        dataRate += 1.0/dtInsPva_ * 8 * sizeof (gnua::InsPvaLogSB);
+    }
+    if(enableGpsPos_){
+        dataRate += 1.0/dtGpsPos_ * 8 * sizeof (gnua::BestGpsPosLogB);
+    }
+    if(enableGpsVel_){
+        dataRate += 1.0/dtGpsVel_ * 8 * sizeof (gnua::BestGpsVelLogB);
+    }
+    if(dataRate > (double)baudRate_){
+        std::cout << "The combined data-rate of the messages/message rates you configured excceeds the configured baud rate " << dataRate << " / " << baudRate_ << "\n";
+        valid = false;
+    }else if(dataRate > 0.95 * baudRate_){
+        std::cout << "The combined data-rate of the messages/message rates you configured is more than 95\% of the configured baud rate! " << dataRate << " / " << baudRate_ << "\n";
+        std::cout << "Consider using a higher baud rate (maximum 230400) or less messages or lower message-rates.";
     }
 
     return valid;
@@ -604,7 +629,7 @@ SimpleConfig::isValid() const {
         && (9600 == baudRate_
                 || 19200 == baudRate_
                 || 38400 == baudRate_
-                || 57600 != baudRate_
+                || 57600 == baudRate_
                 || 115200 == baudRate_
                 || 230400 == baudRate_) ;
 }
@@ -625,7 +650,7 @@ GpsOnlyConfig::isValid() const {
         && (9600 == baudRate_
                 || 19200 == baudRate_
                 || 38400 == baudRate_
-                || 57600 != baudRate_
+                || 57600 == baudRate_
                 || 115200 == baudRate_
                 || 230400 == baudRate_) ;
 }
@@ -760,11 +785,11 @@ namespace{
         switch( insPva.data.insStatus ) {
             case 0:
                 data->statusMessage = "Ins is inactive";
-                data->statusMessageType = gna::Fault;
+                data->statusMessageType = gna::Fault; // TODO: check if this happens during startup
                 break;
             case 1:
                 data->statusMessage = "Ins is aligning";
-                data->statusMessageType = gna::Warning;
+                data->statusMessageType = gna::Initialising;
                 break;
             case 2:
                 data->statusMessage = "Ins solution is bad";
@@ -789,7 +814,7 @@ namespace{
                 break;
             case 7:
                 data->statusMessage = "Ins alignment is complete but vehicle must perform maneuvers so that the attitude can converge";
-                data->statusMessageType = gna::Ok;
+                data->statusMessageType = gna::Ok; // TODO: this is not quite Ok, check if it is usable (no sudden jumps, etc.)
                 break;
             default:
                 {
