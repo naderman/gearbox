@@ -13,18 +13,134 @@
 @ingroup gbx_cpp
 @ingroup gbx_linux
 @ingroup gbx_hardware
-@defgroup gbx_library_novatel_acfr gbxnovatelacfr
-@author Michael Moser
-@brief A implementation for a NovatelSpan system
+@defgroup gbx_library_gbxnovatelacfr GbxNovatelAcfr
+@brief ACFR driver for a Novatel(Span) system
 a proprietray integrated novatel navigation system comsisting out of a gps receiver and a imu
 
+for a full list of functions see @ref gbxnovatelacfr
 
+
+@par Header file
+
+@verbatim
+#include <gbxnovatelacfr/driver.h>
+@endverbatim
+
+@par Style
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
+
+@par Units and Coordinate System
+  See http://orca-robotics.sourceforge.net/orca/orca_doc_units.html
+
+@par Copyright
+  Mathew Ridley, Ben Upcroft, Michael Moser
+
+@par Responsible Developer
+  Michael Moser
+  
+@par License
+  LGPL
+  
 @par Dependencies.
+-  @ref gbx_library_gbxserialacfr
 
-- libIceUtil (for timing)
-- libHydroSerial (serial comms)
-- libHydroNovatelUtil (Novatel binary message format/parsing)
+@par Example
 
-@see @ref gbx_library_novatel_acfr
+See test/test.cpp for a full blown usage-example and test/example.readme on how to compile the test program.
+
+To run the test program (assuming the device is connected to /dev/ttyS1) :
+@verbatim
+$ gbxnovatelacfrtest -p /dev/ttyS1
+@endverbatim
+
+To get a short usage description:
+@verbatim
+$ gbxnovatelacfrtest -h
+@endverbatim
+
+The test program reports back all messages received from the driver and prints out the data fields for each message (in verbose mode).
+
+This minimal example (no error checking for clarity, but compileabel/functional) shows the driver livecycle:
+- create configuration
+- create driver
+- read from driver and wait for external termination
+
+@verbatim
+#include <gearbox/gbxnovatelacfr/driver.h>
+#include <stdlib.h>
+#include <iostream>
+#include <memory>
+#include <vector>
+
+namespace gna = gbxnovatelacfr;
+
+int main(void){
+
+    // create a valid configuration
+    std::vector<double> offSet(3,0.0);
+    gna::SimpleConfig sCfg(std::string("/dev/ttyS0"), 115200, std::string("IMU_HG1700_AG11"), offSet);
+    gna::Config cfg(sCfg);
+
+    // create the driver
+    gna::Driver driver(cfg);
+
+    while(0){
+        // read from the driver
+        std::auto_ptr<gna::GenericData > generic = driver.read();
+
+        // figure out what type of data we got
+        switch(generic->type()){
+            case gna::InsPva:
+                {
+                    // process data
+                    gna::InsPvaData *data = dynamic_cast<gna::InsPvaData *>(generic.get());
+                    std::cout << data->toString() << "\n";
+                }
+                break;
+            case gna::BestGpsPos:
+                {
+                    // process data
+                    gna::BestGpsPosData *data = dynamic_cast<gna::BestGpsPosData *>(generic.get());
+                    std::cout << data->toString() << "\n";
+                }
+                break;
+            case gna::BestGpsVel:
+                {
+                    // process data
+                    gna::BestGpsVelData *data = dynamic_cast<gna::BestGpsVelData *>(generic.get());
+                    std::cout << data->toString() << "\n";
+                }
+                break;
+            case gna::RawImu:
+                {
+                    // process data
+                    gna::RawImuData *data = dynamic_cast<gna::RawImuData *>(generic.get());
+                    std::cout << data->toString() << "\n";
+                }
+                break;
+            default:
+                std::cout << "Got unknown message!\n";
+                break;
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+@endverbatim
+
+@par References
+- 
+- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf
+
+@par Limitations
+
+- This is a Linux-only implementation (because of the serial library and the system-calls for timestamps)
+*/
+
+/*!
 @namespace gbxnovatelacfr
+@brief Novatel GPS/INS driver
+
+This namespace contains the public interface of a library to access and run a NovatelSpan system.
+@see @ref gbx_library_gbxnovatelacfr
 */
