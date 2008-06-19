@@ -36,6 +36,7 @@ using namespace gbxserialacfr;
 
 namespace gnua = gbxnovatelutilacfr;
 namespace gna = gbxnovatelacfr;
+namespace gua = gbxutilacfr;
 
 namespace {
 // binary messages defined by novatel
@@ -54,7 +55,7 @@ namespace {
         // these guys are used to directly decode messages;
         // obviously fails on endian mismatch, any sort of size mismatch and is rather nasty in general;
         // feel free to implement something better
-        // TODO: at least at runtime checking
+        // TODO: at least add runtime checking
         gnua::BestGpsPosLogB bestGpsPos;
         gnua::BestGpsVelLogB bestGpsVel;
         gnua::InsPvaLogSB   insPva;
@@ -100,7 +101,7 @@ Driver::Driver( const Config& cfg,
 void
 Driver::configure( ) {
     if(false == config_.isValid()){
-        throw (std::string("Invalid Configuration!"));
+        throw (gua::Exception(ERROR_INFO, "Invalid Configuration!"));
     }
 
     // configure serial port
@@ -109,7 +110,7 @@ Driver::configure( ) {
     serial_.reset(new Serial( serialDevice, baud_, Serial::Timeout(1,0) ));
     serial_->setDebugLevel(0);
     if(0 != connectToHardware() ){
-        throw (std::string("failed to connect to receiver!"));
+        throw (gua::Exception(ERROR_INFO, "failed to connect to receiver!"));
     }
 
     // just in case something is running... stops the novatel logging any messages
@@ -399,7 +400,7 @@ Driver::read(){
                         if(config_.ignoreUnknownMessages_){
                             tracer_->warning(ss.str());
                         }else{
-                            throw( ss.str() );
+                            gua::Exception(ERROR_INFO, ss.str() );
                         }
                     }
                     break;
@@ -409,7 +410,7 @@ Driver::read(){
             std::stringstream ss;
             ss << "Warning("<<__FILE__<<":"<< __LINE__
              << "Timed out while waiting for data";
-            throw (ss.str());
+            gua::Exception(ERROR_INFO, ss.str());
         }
     }while(NULL == data.get()); // repeat till we get valid data
 
@@ -835,7 +836,7 @@ namespace{
 
         if(in_crc != crc) {
             fprintf( stderr,"CRC Error: 0x%lx, 0x%lx\n",in_crc,crc );
-            throw std::string( "CRC Error" );
+            gua::Exception(ERROR_INFO, "CRC Error" );
             return -1;
         }
 
