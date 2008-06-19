@@ -274,7 +274,7 @@ class GenericData {
     public:
         virtual ~GenericData(){};
         virtual DataType type() const=0;
-        virtual std::string toString() const=0;
+        virtual std::string toString()=0;
     private:
 };
 
@@ -284,9 +284,7 @@ class InsPvaData : public GenericData {
         DataType type() const {
             return InsPva;
         }
-        std::string toString() const{
-            return "implement me!";
-        }
+        std::string toString();
         int      gpsWeekNr;         //
         double   secIntoWeek;       //
         double   latitude;          //!< [deg] north positive WGS84
@@ -326,9 +324,7 @@ class BestGpsPosData : public GenericData {
         DataType type() const {
             return BestGpsPos;
         }
-        std::string toString() const{
-            return "implement me!";
-        }
+        std::string toString();
         int gpsWeekNr;                          //
         unsigned int msIntoWeek;                //!< milliseconds from beginning of week
         GpsSolutionStatusType  solutionStatus;  //
@@ -362,9 +358,7 @@ class BestGpsVelData : public GenericData {
         DataType type() const {
             return BestGpsVel;
         }
-        std::string toString() const{
-            return "implement me!";
-        }
+        std::string toString();
         int          gpsWeekNr;                 //
         unsigned int msIntoWeek;                //!< milliseconds from beginning of week
         GpsSolutionStatusType  solutionStatus;  //
@@ -388,9 +382,7 @@ class RawImuData : public GenericData {
         DataType type() const {
             return RawImu;
         }
-        std::string toString() const{
-            return "implement me!";
-        }
+        std::string toString();
         int    gpsWeekNr;
         double secIntoWeek;
         //!@name Change in speed

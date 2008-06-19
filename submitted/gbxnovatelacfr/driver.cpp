@@ -54,6 +54,7 @@ namespace {
         // these guys are used to directly decode messages;
         // obviously fails on endian mismatch, any sort of size mismatch and is rather nasty in general;
         // feel free to implement something better
+        // TODO: at least at runtime checking
         gnua::BestGpsPosLogB bestGpsPos;
         gnua::BestGpsVelLogB bestGpsVel;
         gnua::InsPvaLogSB   insPva;
@@ -66,6 +67,8 @@ namespace {
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder);
 
+    //helper functions for the toString() gear
+    std::string statusToString(gna::StatusMessagetype statusMessageType, std::string statusMessage);
     std::string doubleVectorToString(vector<double > &vec, std::string seperator = std::string(" "));
 }
 
@@ -663,6 +666,89 @@ GpsOnlyConfig::toString(){
     return ss.str();
 }
 
+std::string
+InsPvaData::toString(){
+    std::stringstream ss;
+    ss << "timeStampSec " << timeStampSec << " ";
+    ss << "timeStampUSec " << timeStampUSec << " ";
+    ss << "gpsWeekNr " << gpsWeekNr << " ";
+    ss << "secIntoWeek " << secIntoWeek << " ";
+    ss << "latitude " << latitude << " ";
+    ss << "longitude " << longitude << " ";
+    ss << "height " << height << " ";
+    ss << "northVelocity " << northVelocity << " ";
+    ss << "eastVelocity " << eastVelocity << " ";
+    ss << "upVelocity " << upVelocity << " ";
+    ss << "roll " << roll << " ";
+    ss << "pitch " << pitch << " ";
+    ss << "azimuth " << azimuth << " ";
+    ss << statusToString(statusMessageType, statusMessage);
+    return ss.str();
+};
+
+std::string
+BestGpsPosData::toString(){
+    std::stringstream ss;
+    ss << "timeStampSec " << timeStampSec << " ";
+    ss << "timeStampUSec " << timeStampUSec << " ";
+    ss << "gpsWeekNr " << gpsWeekNr << " ";
+    ss << "msIntoWeek " << msIntoWeek << " ";
+    ss << "solutionStatus " << solutionStatus << " ";
+    ss << "positionType " << positionType << " ";
+    ss << "latitude " << latitude << " ";
+    ss << "longitude " << longitude << " ";
+    ss << "heightAMSL " << heightAMSL << " ";
+    ss << "undulation " << undulation << " ";
+    ss << "datumId " << datumId << " ";
+    ss << "sigmaLatitude " << sigmaLatitude << " ";
+    ss << "sigmaLongitude " << sigmaLongitude << " ";
+    ss << "sigmaHeight " << sigmaHeight << " ";
+    ss << "baseStationId[4] " << baseStationId[4] << " ";
+    ss << "diffAge " << diffAge << " ";
+    ss << "solutionAge " << solutionAge << " ";
+    ss << "numObservations " << numObservations << " ";
+    ss << "numL1Ranges " << numL1Ranges << " ";
+    ss << "numL1RangesRTK " << numL1RangesRTK << " ";
+    ss << "numL2RangesRTK " << numL2RangesRTK << " ";
+    ss << statusToString(statusMessageType, statusMessage);
+    return ss.str();
+};
+
+std::string
+ BestGpsVelData::toString(){
+    std::stringstream ss;
+    ss << "timeStampSec " << timeStampSec << " ";
+    ss << "timeStampUSec " << timeStampUSec << " ";
+    ss << "gpsWeekNr " << gpsWeekNr << " ";
+    ss << "msIntoWeek " << msIntoWeek << " ";
+    ss << "solutionStatus " << solutionStatus << " ";
+    ss << "positionType " << positionType << " ";
+    ss << "latency " << latency << " ";
+    ss << "diffAge " << diffAge << " ";
+    ss << "horizontalSpeed " << horizontalSpeed << " ";
+    ss << "trackOverGround " << trackOverGround << " ";
+    ss << "verticalSpeed " << verticalSpeed << " ";
+    ss << statusToString(statusMessageType, statusMessage);
+    return ss.str();
+};
+
+std::string
+RawImuData::toString(){
+    std::stringstream ss;
+    ss << "timeStampSec " << timeStampSec << " ";
+    ss << "timeStampUSec " << timeStampUSec << " ";
+    ss << "gpsWeekNr " << gpsWeekNr << " ";
+    ss << "secIntoWeek " << secIntoWeek << " ";
+    ss << "zDeltaV " << zDeltaV << " ";
+    ss << "yDeltaV " << yDeltaV << " ";
+    ss << "xDeltaV " << xDeltaV << " ";
+    ss << "zDeltaAng " << zDeltaAng << " ";
+    ss << "yDeltaAng " << yDeltaAng << " ";
+    ss << "xDeltaAng " << xDeltaAng << " ";
+    ss << statusToString(statusMessageType, statusMessage);
+    return ss.str();
+};
+
 } //namespace
 
 namespace{
@@ -982,6 +1068,31 @@ namespace{
         for (int i=0; i<max; i++){
             ss << vec[i] << seperator;
         }
+        return ss.str();
+    }
+
+    std::string statusToString(gna::StatusMessagetype statusMessageType, std::string statusMessage){
+        std::stringstream ss;
+        switch(statusMessageType){
+            case gna::NoMsg:
+                   ss << "NoMsg" << " ";
+                   break;
+            case  gna::Initialising:
+                   ss << "Initialising" << " ";
+                   break;
+            case  gna::Ok:
+                   ss << "Ok" << " ";
+                   break;
+            case  gna::Warning:
+                   ss << "Warning" << " ";
+                   break;
+            case gna::Fault:
+                   ss << "Fault" << " ";
+                   break;
+            default:
+                   ss << "UnknownStatus" << " ";
+        }
+        ss << statusMessage;
         return ss.str();
     }
 }//namespace
