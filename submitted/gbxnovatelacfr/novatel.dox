@@ -14,8 +14,10 @@
 @ingroup gbx_linux
 @ingroup gbx_hardware
 @defgroup gbx_library_gbxnovatelacfr GbxNovatelAcfr
-@brief ACFR driver for a Novatel(Span) system
-a proprietray integrated novatel navigation system comsisting out of a gps receiver and a imu
+@brief ACFR driver for a Novatel(Span) system.
+This is a proprietary Novatel navigation system. It minimally consists out of a Novatel OEMV GPS receiver (OEM4 receivers should be compatible).
+If combined with an IMU, a SPAN system can provide a INS navigation solution at high rate (up to 100Hz).
+The driver initialises the hardware and reports navigation data continously.
 
 for a full list of functions see @ref gbxnovatelacfr
 
@@ -60,14 +62,14 @@ $ gbxnovatelacfrtest -h
 
 The test program reports back all messages received from the driver and prints out the data fields for each message (in verbose mode).
 
-This minimal example (no error checking for clarity, but compileabel/functional) shows the driver livecycle:
+This minimal example (no error checking for clarity, but fully functional) shows the driver's intended usage:
 - create configuration
 - create driver
 - read from driver and wait for external termination
 
 @verbatim
 #include <gearbox/gbxnovatelacfr/driver.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -129,12 +131,21 @@ int main(void){
 @endverbatim
 
 @par References
-- 
-- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf
+
+This driver was programmed based on the protocoll/message descriptions in Novatel manuals, it does not contain any code from Novatel. The main source for information was:
+- http://www.novatel.com/Documents/Manuals/om-20000094.pdf (Novatel OEMV reference)
+- http://www.novatel.com/Documents/Manuals/om-20000104.pdf (SPAN-system manual)
+
+The following sources have also been helpful:
+- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf (a good overview about GPS: correct, complete, terse)
+- http://www.novatel.com/support/faqs.htm
+- http://www.novatel.com/support/applicationnotes.htm (more details on specific subjects than the manuals)
 
 @par Limitations
 
 - This is a Linux-only implementation (because of the serial library and the system-calls for timestamps)
+- Only supports a subset of the messages a NovatelSPAN system can provide.
+- Driver currently treats the hardware as data-source only, communication _to_ the hardware is possible only during initialization.
 */
 
 /*!

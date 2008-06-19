@@ -35,16 +35,17 @@ namespace gbxnovatelacfr{
 //! Minimum information to configure the receiver in INS mode
 class SimpleConfig{
 public:
-    //! @parameter imuToGpsOffset: vector (xyz [m]) from IMU center to Antenna Phase Center
-    //! in IMU coordinates, vital for INS performance, make sure you get this right!
-    //! @parameter imuType: as expected by the "SETIMUTYPE" command (SPAN Technology for OEMV User Manual Rev 3, Table 15, page 64)
+    //! @param imuType see Config::imuType_ for details
+    //! @param imuToGpsOffset see Config::imuToGpsOffset_ for details
     SimpleConfig(std::string serialDevice, int baudRate, std::string imuType, std::vector<double > &imuToGpsOffset):
         serialDevice_(serialDevice),
         baudRate_(baudRate),
         imuType_(imuType),
         imuToGpsOffset_(imuToGpsOffset) {};
 
-    //! Returns true if the configuration is sane. Checks include:
+    //!@brief Returns true if the configuration is sane.
+    //
+    //! Checks include:
     //! - a non-empty device name
     //! - baud rate is supported by device (9600, 19200, 38400, 115200, 230400)
     //! - imuType refers to a known type
@@ -66,7 +67,9 @@ public:
         serialDevice_(serialDevice),
         baudRate_(baudRate) {};
 
-    //! Returns true if the configuration is sane. Checks include:
+    //!@brief Returns true if the configuration is sane.
+    //
+    //! Checks include:
     //! - a non-empty device name
     //! - baud rate is supported by device (9600, 19200, 38400, 115200, 230400)
     bool isValid() const;
@@ -82,17 +85,27 @@ public:
 //! The easiest way to get a valid (and useful) Config, is to initialise it with a SimpleConfig (for INS operation) or GpsOnlyConfig (for GPS operation)
 class Config{
 public:
-    Config(const SimpleConfig &simpleCfg);   //!< yields a valid config, with reasonable defaults (RawImu 100Hz, InsPva 50Hz, BestGpsPos/Vel 5Hz)
-    Config(const GpsOnlyConfig &gpsOnlyCfg); //!< yields a valid config, for gps only operation (BestGpsPos/Vel 20Hz)
-    Config();                                //!< disables everything, so you can (and must) set just the options you need
+    //! @brief Shortcut to set up a Configuration for INS operation
+    //
+    //! yields a valid config, with reasonable defaults (RawImu 100Hz, InsPva 50Hz, BestGpsPos/Vel 5Hz)
+    Config(const SimpleConfig &simpleCfg);
+    //! @brief Shortcut to set up a Configuration for GPS operation
+    //
+    //! yields a valid config, for gps only operation (BestGpsPos/Vel 20Hz)
+    Config(const GpsOnlyConfig &gpsOnlyCfg); 
+    //! disables everything, so you can (and must) set just the options you need.
+    Config();
 
-    //! Returns true if the configuration is sane. Checks include:
+    //! @brief Returns true if the configuration is sane.
+    //
+    //! Checks include:
     //! - a non-empty device name
     //! - baud rate is supported by device (9600, 19200, 38400, 57600, 115200, 230400)
     //! - imuType refers to a known type
     //! - offset has size 3
     //! - message rates are consistent and don't exceed serial-data-rate
-    bool isValid(); //!< not const, since it has limited self-fixing capabilities
+    //! - not const, since it has limited self-fixing capabilities (for incorrect message-rates)
+    bool isValid();
     //! Dumps the config in human readable form
     std::string toString();
 
@@ -107,7 +120,7 @@ public:
     //
     //!@{
     bool enableImu_;
-    std::string imuType_;
+    std::string imuType_; //!< as expected by the "SETIMUTYPE" command (SPAN Technology for OEMV User Manual Rev 3, Table 15, page 64)
     //!@}
 
     //!@name Data settings
@@ -138,11 +151,11 @@ public:
     //!@name INS settings
     //
     //!@{
-    std::vector<double > imuToGpsOffset_;
+    std::vector<double > imuToGpsOffset_;            //!< vector (xyz [m]) from IMU center to Antenna Phase Center, in IMU coordinates, vital for INS performance, make sure you get this right!
     std::vector<double > imuToGpsOffsetUncertainty_; //!< optional (size 3 or 0)
     bool enableInsOffset_;
-    std::vector<double > insOffset_;         //!< report INS position/velocity offset (xyz [m] in IMU coordinates) from the IMU center; useful e.g. to get data w.r. to robot's center of rotation
-    bool enableInsPhaseUpdate_;         //!< tightly coupled (phase based vs position based) filter; Chance of better performance in adverse conditions
+    std::vector<double > insOffset_;                 //!< report INS position/velocity offset (xyz [m] in IMU coordinates) from the IMU center; useful e.g. to get data w.r. to robot's center of rotation
+    bool enableInsPhaseUpdate_;                      //!< tightly coupled (phase based vs position based) filter; Chance of better performance in adverse conditions
 
     //!@}
 
@@ -252,8 +265,7 @@ enum DataType {
 };
 
 //! Generic (base) type returned by a read
-class GenericData
-{
+class GenericData {
     public:
         virtual ~GenericData(){};
         virtual DataType type() const=0;
