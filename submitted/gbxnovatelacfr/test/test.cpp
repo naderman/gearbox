@@ -101,25 +101,32 @@ int main(int argc, char *argv[]){
     cout << "|\tshow debug:\t" << showDebug << "\n";
     cout << "-------------------------------------------------\n";
 
+    //create a config (the easy way)
     auto_ptr<gna::Config > cfg;
     auto_ptr<gna::SimpleConfig > simpleCfg;
     auto_ptr<gna::GpsOnlyConfig > gpsOnlyCfg;
-
-    //create a config (the easy way)
     if(0 == mode.compare("ins")){
-        //made up offset
-        vector<double > offset(3,0.0);
+        vector<double > offset(3,0.0);  //made up offset
         simpleCfg.reset( new gna::SimpleConfig(port, baud, imuType, offset) );
         cfg.reset( new gna::Config(*simpleCfg.get()) );
+        assert(0 != cfg.get());
+        // set up a couple of extra parameters
+        cfg->enableInsPhaseUpdate_ = true;
+        cfg->enableRTK_ = true;
     }
     else if(0 == mode.compare("gps")){
         gpsOnlyCfg.reset( new gna::GpsOnlyConfig(port, baud) );
         cfg.reset( new gna::Config(*gpsOnlyCfg.get()) );
+        assert(0 != cfg.get());
+        // set up a couple of extra parameters
+        cfg->enableSBAS_ = true;
+        cfg->enableCDGPS_ = true;
     }
     else{
         cout << "invalid mode: " <<  mode << "\n";
         return EXIT_FAILURE;
     }
+    //check that it makes sense
     if(!cfg->isValid()){
         cout << "Invalid configuration!\n";
         cout << cfg->toString();
@@ -128,11 +135,10 @@ int main(int argc, char *argv[]){
 
     //create the driver; this gets things rolling (opens the serial port, sets up the device)
     auto_ptr<gna::Driver > driver;
-    gbxutilacfr::TrivialTracer tracer(showDebug);
     int errorCnt = 0;
     do{
         try{
-            driver.reset( new gna::Driver(*(cfg.get()), tracer) );
+            driver.reset( new gna::Driver( *(cfg.get()) ) );
         }
         catch(std::exception &e){
             cout << e.what() << "\n";
@@ -141,6 +147,7 @@ int main(int argc, char *argv[]){
             cout << "caught unknown exception!\n";
         }
     }while(0 == driver.get() && errorCnt++<5); // try up to 5 times 
+    //check that we succeeded
     if(0 == driver.get()){
         cout << "failed to set up driver!\n";
         return EXIT_FAILURE;
