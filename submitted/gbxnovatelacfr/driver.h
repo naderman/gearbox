@@ -80,6 +80,7 @@ public:
 };
 
 //! @brief All the information needed to configure the driver.
+//
 //! The device itself has even more options, consult your manual.
 //! If all these possibilities don't seem to be sufficient, consult your friendly developer for extension (better yet, send a patch)
 //! The easiest way to get a valid (and useful) Config, is to initialise it with a SimpleConfig (for INS operation) or GpsOnlyConfig (for GPS operation)
@@ -195,7 +196,9 @@ enum StatusMessagetype {
     Fault        //!< Problem, probably fatal
 };
 
-//! Novatel's different solution status types; explanations from the manual
+//! Novatel's different solution status types.
+//
+//! Explanations from the manual.
 enum GpsSolutionStatusType{
     SolComputed,       //!< Solution computed
     InsufficientObs,   //!< Insufficient observations
@@ -219,7 +222,9 @@ enum GpsSolutionStatusType{
     UnknownGpsSolutionStatusType
 };
 
-//! Novatel's different fix types; sadly mixed for position/velocity with some INS gear thrown in; explanations from the manual
+//! Novatel's different fix types.
+//
+//! Sadly mixed for position/velocity with some INS gear thrown in; explanations from the manual.
 enum GpsPosVelType{
     None,             //!< No solution
     FixedPos,         //!< Position has been fixed by the FIX POSITION command or by position averaging
@@ -389,7 +394,8 @@ class RawImuData : public GenericData {
         int    gpsWeekNr;
         double secIntoWeek;
         //!@name Change in speed
-        //!The default IMU axis definitions are: Y - forward Z - up X - right hand side
+        //!Divide by dt to get accelerations.
+        //!The default IMU axis definitions are: Y - forward, Z - up, X - right hand side
         //
         //@{
         double zDeltaV;   //!< [m/s] up positive
@@ -399,7 +405,8 @@ class RawImuData : public GenericData {
         //@}
 
         //!@name Change in orientation
-        //!The default IMU axis definitions are: Y - forward Z - up X - right hand side
+        //!Divide by dt to get turn-rates.
+        //!The default IMU axis definitions are: Y - forward, Z - up, X - right hand side
         //
         //@{
         double zDeltaAng; //!< [rad] right handed around z

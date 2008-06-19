@@ -106,8 +106,8 @@ int main(int argc, char *argv[]){
     auto_ptr<gna::SimpleConfig > simpleCfg;
     auto_ptr<gna::GpsOnlyConfig > gpsOnlyCfg;
     if(0 == mode.compare("ins")){
-        vector<double > offset(3,0.0);  //made up offset
-        simpleCfg.reset( new gna::SimpleConfig(port, baud, imuType, offset) );
+        vector<double > imuToGpsOffset(3,0.0);  // made up; this MUST be correct for real work (see gbxnovatelacfr::Config::imuToGpsOffset_)
+        simpleCfg.reset( new gna::SimpleConfig(port, baud, imuType, imuToGpsOffset) );
         cfg.reset( new gna::Config(*simpleCfg.get()) );
         assert(0 != cfg.get());
         // set up a couple of extra parameters

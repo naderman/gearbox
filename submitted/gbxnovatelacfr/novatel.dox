@@ -14,10 +14,12 @@
 @ingroup gbx_linux
 @ingroup gbx_hardware
 @defgroup gbx_library_gbxnovatelacfr GbxNovatelAcfr
-@brief ACFR driver for a Novatel(Span) system.
+@brief ACFR driver for a Novatel(SPAN) system.
+
 This is a proprietary Novatel navigation system. It minimally consists out of a Novatel OEMV GPS receiver (OEM4 receivers should be compatible).
-If combined with an IMU, a SPAN system can provide a INS navigation solution at high rate (up to 100Hz).
+If combined with an IMU, a SPAN system can provide an INS navigation solution at high rate (up to 100Hz).
 The driver initialises the hardware and reports navigation data continously.
+
 
 for a full list of functions see @ref gbxnovatelacfr
 
@@ -31,18 +33,15 @@ for a full list of functions see @ref gbxnovatelacfr
 @par Style
   See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html
 
-@par Units and Coordinate System
-  See http://orca-robotics.sourceforge.net/orca/orca_doc_units.html
-
 @par Copyright
   Mathew Ridley, Ben Upcroft, Michael Moser
 
 @par Responsible Developer
   Michael Moser
-  
+
 @par License
   LGPL
-  
+
 @par Dependencies.
 -  @ref gbx_library_gbxserialacfr
 
@@ -50,25 +49,27 @@ for a full list of functions see @ref gbxnovatelacfr
 
 See test/test.cpp for a full blown usage-example and test/example.readme on how to compile the test program.
 
-To run the test program (assuming the device is connected to /dev/ttyS1) :
+To run the test program (defaults: /dev/ttyS0, 115200 bps, ...) call it without parameters.
 @verbatim
-$ gbxnovatelacfrtest -p /dev/ttyS1
+$ gbxnovatelacfrtest
 @endverbatim
 
-To get a short usage description:
+If you want to change things, get a short usage description:
 @verbatim
 $ gbxnovatelacfrtest -h
 @endverbatim
 
 The test program reports back all messages received from the driver and prints out the data fields for each message (in verbose mode).
 
-This minimal example (no error checking for clarity, but fully functional) shows the driver's intended usage:
+@par Minimal Example
+
+This example (no error checking for clarity, but fully functional) shows the driver's intended usage:
 - create configuration
 - create driver
 - read from driver and wait for external termination
 
 @verbatim
-#include <gearbox/gbxnovatelacfr/driver.h>
+#include <gbxnovatelacfr/driver.h>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -79,8 +80,8 @@ namespace gna = gbxnovatelacfr;
 int main(void){
 
     // create a valid configuration
-    std::vector<double> offSet(3,0.0);
-    gna::SimpleConfig sCfg(std::string("/dev/ttyS0"), 115200, std::string("IMU_HG1700_AG11"), offSet);
+    std::vector<double> imuToGpsOffset(3,0.0); // made up; this MUST be correct for real work (see gbxnovatelacfr::Config::imuToGpsOffset_)
+    gna::SimpleConfig sCfg(std::string("/dev/ttyS0"), 115200, std::string("IMU_HG1700_AG11"), imuToGpsOffset);
     gna::Config cfg(sCfg);
 
     // create the driver
@@ -137,7 +138,7 @@ This driver was programmed based on the protocoll/message descriptions in Novate
 - http://www.novatel.com/Documents/Manuals/om-20000104.pdf (SPAN-system manual)
 
 The following sources have also been helpful:
-- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf (a good overview about GPS: correct, complete, terse)
+- http://www.novatel.com/Documents/Manuals/GPS+Reference.pdf (a good overview about GPS: correct, complete, concise)
 - http://www.novatel.com/support/faqs.htm
 - http://www.novatel.com/support/applicationnotes.htm (more details on specific subjects than the manuals)
 
