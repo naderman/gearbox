@@ -17,7 +17,7 @@ enum BinaryLogType{
     InsPvaSBLogType = 508
 };
 
-//#pragma pack(push,1)
+#pragma pack(push,1)
 // binary packet header; long version, mostly used for GPS gear
 // according to:
 // OEM4 Family Firmware Version 2.300 Command and Log Reference Rev 16; Table 4; Page 17
@@ -50,7 +50,7 @@ typedef struct Oem4ShortBinaryHeader{   //offs, size,   comment
     uint8_t  msgLength;                 //3     1       _without_ header or CRC
     uint16_t msgId;                     //4     2       which log we have
     uint16_t GpsWeekNr;                 //6     2
-    uint32_t msIntoWeek;                  //8     4       milliseconds from beginning of week
+    uint32_t msIntoWeek;                //8     4       milliseconds from beginning of week
 }Oem4ShortBinaryHeader;
 
 
@@ -161,6 +161,6 @@ typedef struct{
     Oem4ShortBinaryHeader header;
     RawImuData   data;
 }RawImuLogSB;
-//#pragma pack(pop,1)
+#pragma pack(pop)
 } //namespace
 #endif
