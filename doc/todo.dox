@@ -31,6 +31,8 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par New libraries
 
+- libGbxGarminAcfr
+
 @par Updated libraries
 
 - libGbxSickAcfr
