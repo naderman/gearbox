@@ -1,0 +1,58 @@
+/*!
+
+@ingroup gbx_libs
+@ingroup gbx_hardware
+@ingroup gbx_cpp
+@defgroup gbx_library_urg_nz liburg_nz
+@brief Hokuyo URG laser scanner driver.
+
+This library provides a driver for Hokuyo laser scanner devices using the SCIP protocol version 1 or
+2. It has been tested with the Hokuyo URG-04LX, but it should work with any scanner that conforms to
+these protocol versions. For a full list of functions and classes see @ref urg_nz.
+
+Header file:
+@verbatim
+#include <urg_nz/urg_nz.h>
+@endverbatim
+
+@par Example
+  See test/example.cpp
+
+@par Style guidelines
+
+- Naming conventions:
+  - Class methods start with a capital letter.
+  - VariableNamesLikeThis.
+  - Private member variables start with an underscore _like _this.
+  - Avoid using \#defines. \#define'd values in all capitals when necessary.
+- Formatting:
+  - 1 tab indentation at start of lines, spaces only for inside lines (e.g. before commands).
+  - Function declarations on one line.
+  - Space between function name and arguments.
+- C++ API.
+  - Functionality provided through classes.
+- Units:
+  - All internal units are in millimetres and radians.
+
+@par Copyright
+  Geoffrey Biggs
+
+@par Responsible Developer
+  Geoffrey Biggs
+
+@par License
+  LGPL
+
+@par Dependencies
+  @ref FlexiPort
+
+*/
+
+/*!
+@namespace urg_nz
+@brief URG laser scanner driver name space.
+
+This namespace is part of a library which provides a driver for the URG laser scanner driver.
+
+@see @ref gbx_library_urg_nz
+*/
