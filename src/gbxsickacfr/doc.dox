@@ -66,7 +66,7 @@ $ cmake -DICEUTIL_HOME=/home/myuser/install .
   An improvement would be to timestamp the start of each message,
   remembering that timestamp for subsequent reads from the serial port
   until the end of the message finally arrives.
-- Has only been tested with the LMS-291.
+- Has been tested with: LMS-291, LMS-211.
 
 */
 
