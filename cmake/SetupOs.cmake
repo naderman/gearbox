@@ -39,3 +39,7 @@ IF( GBX_OS_WIN )
     SET( GBX_EXE_EXTENSION ".exe" )
     MESSAGE( STATUS "Running on Windows" )
 ENDIF( GBX_OS_WIN )
+
+IF( GBX_OS_MAC )
+    MESSAGE( STATUS "Running on OS-X" )
+ENDIF( GBX_OS_MAC )
