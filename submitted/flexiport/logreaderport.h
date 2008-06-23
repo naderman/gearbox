@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -43,7 +43,7 @@ namespace flexiport
 class LogFile;
 
 /** @brief Simulated port using a log file.
- 
+
 Uses a log file created by the @ref LogWriterPort port type to simulate the data transfer over a
 @ref Port object.
 
@@ -51,7 +51,7 @@ See the @ref Port class documentation for how to use the common API.
 
 @par Options
  - file <string>
-   - File name to save the log to. Two files will be created using this name and a suffix.
+   - File name to read the log from. Two files will be created using this name and a suffix.
    - Default: port.log
  - ignoretimes
    - Ignore time stamps in the log files. This means that all readable data is available instantly.

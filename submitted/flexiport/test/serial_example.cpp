@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -58,11 +58,10 @@ int main (int argc, char **argv)
 	string portOptions = "type=serial,device=/dev/ttyS0,timeout=1";
 
 #if defined (WIN32)
-	device = "COM1";
-	portOptions = "timeout=1";
+	portOptions = "type=serial,device=COM1,timeout=1";
 #else
 	// Get some options from the command line
-	while ((opt = getopt (argc, argv, "d:o:")) != -1)
+	while ((opt = getopt (argc, argv, "o:")) != -1)
 	{
 		switch (opt)
 		{
@@ -92,7 +91,7 @@ int main (int argc, char **argv)
 		port->Open ();
 		port->Flush ();
 		cout << port->GetStatus ();
-		
+
 		cout << "Writing data to port, should read same data back." << endl;
 		string stringMessage = "Message #1";
 		cout << "Writing 'Message #1' using WriteString()" << endl;
@@ -217,7 +216,7 @@ int main (int argc, char **argv)
 
 		cout << "Writing 'Finally, message #6\\n'" << endl;
 		char charMessage4[] = "Finally, message #6\n";
-		if (port->Write (charMessage4, strlen (charMessage4)) != static_cast<int> (strlen (charMessage4))) 
+		if (port->Write (charMessage4, strlen (charMessage4)) != static_cast<int> (strlen (charMessage4)))
 		{
 			cout << "Test failed: did not write enough bytes." << endl;
 			return 1;

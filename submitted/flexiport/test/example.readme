@@ -45,3 +45,11 @@ You may specify additional options for the TCPPort objects using -o, such as
 a timeout. e.g.:
 
 tcp_example -o timeout=1,debug=3
+
+Note for Windows users
+----------------------
+
+Because Windows lacks a readily-available implementation of getopt, command line
+options are not available for the examples on this platform. Hard-coded options
+will be used instead; change them in the source file and recompile if you need
+to change the port options.

@@ -38,3 +38,11 @@ log file pair like this:
 See the LogReaderPort object documentation for more options that can be used
 with log file pairs. See the LogWriterPort object documentation for details
 on how to make your own log file pair for testing your programs.
+
+Note for Windows users
+----------------------
+
+Because Windows lacks a readily-available implementation of getopt, command line
+options are not available for the example on this platform. Hard-coded options
+will be used instead; change them in the source file and recompile if you need
+to change the port options.
