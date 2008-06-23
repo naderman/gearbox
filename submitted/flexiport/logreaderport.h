@@ -54,7 +54,7 @@ See the @ref Port class documentation for how to use the common API.
    - File name to save the log to. Two files will be created using this name and a suffix.
    - Default: port.log
  - ignoretimes
-   - Ignore time stamps in the log files. This means that all readable data is avalable instantly.
+   - Ignore time stamps in the log files. This means that all readable data is available instantly.
      It also overrides strictness level 2, if set, essentially turning it into strictness level 1.
    - Default: false
  - strictness <integer>
