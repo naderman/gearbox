@@ -712,15 +712,23 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 	// One final thing to do: it's possible that the write file has reached its end and so been
 	// closed. This means that any attempts to read the response to the write will now fail. To
 	// prevent this, reopen the files and re-position the read file's offset to where it was. Any
-	// writes after this would have choked anyway since the file is at an end so having the write
-	// file at the beginning is unlikely to cause any problems.
+	// writes after this would have choked anyway since the file is at an end so moving the write
+	// file to 1 byte before the end is unlikely to cause any problems, while still registering as
+	// an open file.
 	if (!IsOpen ())
 	{
 		Open (_fileName, _read, _ignoreTimes);
 		if (fseek (_readFile, readFileOffset, SEEK_SET) < 0)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
+			ss << "LogFile::" << __func__ << "() fseek(_readFile) error: (" << ErrNo () << ") " <<
+				StrError (ErrNo ());
+			throw PortException (ss.str ());
+		}
+		if (fseek (_writeFile, -1, SEEK_END) < 0)
+		{
+			stringstream ss;
+			ss << "LogFile::" << __func__ << "() fseek(_writeFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
