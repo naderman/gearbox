@@ -1079,7 +1079,12 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 		info->measureState = &buffer[5];
 		// Baud rate
 		ReadLineWithCheck (buffer, -1, true);
-		if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
+		if (strncmp (&buffer[5], "USB only", 8) == 0)
+		{
+			// No baud rate for USB-only devices such as the UHG-08LX
+			info->baud = 0;
+		}
+		else if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
 			throw URGError (URG_ERR_PROTOCOL, "Baud rate line parse failed.");
 		// Time stamp
 		ReadLineWithCheck (buffer, -1, true);
