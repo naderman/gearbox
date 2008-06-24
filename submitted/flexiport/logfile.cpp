@@ -1099,8 +1099,16 @@ size_t LogFile::GetSingleChunk (FILE * const file, void *data, size_t count,
 {
 	if (_debug >= 3)
 	{
+		long pos;
+		if ((pos = ftell (file)) < 0)
+		{
+			stringstream ss;
+			ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
+				StrError (ErrNo ());
+			throw PortException (ss.str ());
+		}
 		cerr << "LogFile::" << __func__ << "() Reading a single chunk from " <<
-			((file == _readFile) ? "read file." : "write file.") << endl;
+			((file == _readFile) ? "read file" : "write file") << " at position " << pos << endl;
 	}
 
 	// Read the chunk info
@@ -1112,7 +1120,10 @@ size_t LogFile::GetSingleChunk (FILE * const file, void *data, size_t count,
 	ReadFromFile (file, &tempSize, sizeof (tempSize));
 	size = ntohl (tempSize);
 	if (_debug >= 3)
-		cerr << "LogFile::" << __func__ << "() Chunk is " << size << " bytes." << endl;
+	{
+		cerr << "LogFile::" << __func__ << "() Chunk has time " << timeStamp.tv_sec << "s " <<
+			timeStamp.tv_usec << "us and is " << size << " bytes." << endl;
+	}
 
 	// Check if this chunk will fit in data
 	if (size > count)
