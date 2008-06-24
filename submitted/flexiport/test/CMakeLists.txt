@@ -7,4 +7,4 @@ GBX_ADD_EXECUTABLE (serial_example serial_example.cpp)
 TARGET_LINK_LIBRARIES (serial_example flexiport)
 
 GBX_ADD_EXAMPLE (flexiport/example example.cmake.in example.cmake
-	tcp_example.cpp serial_example.cpp example.readme)
+	tcp_example.cpp serial_example.cpp example.readme example.logr example.logw)

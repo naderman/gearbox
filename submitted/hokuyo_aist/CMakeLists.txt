@@ -1,5 +1,5 @@
-SET (libName urg_nz)
-set (libDesc "Hokuyo URG laser scanner driver")
+SET (libName hokuyo_aist)
+set (libDesc "Hokuyo laser scanner driver")
 GBX_ADD_LICENSE (GPL)
 
 SET (build TRUE)
@@ -11,8 +11,8 @@ GBX_REQUIRE_TARGETS (build LIB ${libName} ${reqLibs})
 IF (build)
 	INCLUDE (${GBX_CMAKE_DIR}/UseBasicRules.cmake)
 
-	SET (hdrs urg_nz.h)
-    SET (srcs urg_nz.cpp)
+	SET (hdrs hokuyo_aist.h)
+    SET (srcs hokuyo_aist.cpp)
 
 	IF (WIN32)
 		ADD_DEFINITIONS (-DURG_NZ_EXPORTS)

@@ -3,7 +3,7 @@
  *               http://gearbox.sf.net/
  * Copyright (c) 2008 Geoffrey Biggs
  *
- * urg_nz Hokuyo URG laser scanner driver.
+ * hokuyo_aist Hokuyo laser scanner driver.
  *
  * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
@@ -11,22 +11,22 @@
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
  *
- * This file is part of urg_nz.
+ * This file is part of hokuyo_aist.
  *
- * urg_nz is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * hokuyo_aist is free software: you can redistribute it and/or modify it under the terms of the GNU
  * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * urg_nz is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
- * General Public License for more details.
+ * hokuyo_aist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with urg_nz.  If
- * not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public License along with hokuyo_aist.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "urg_nz.h"
-using namespace urg_nz;
+#include "hokuyo_aist.h"
+using namespace hokuyo_aist;
 
 #include <flexiport/flexiport.h>
 #include <flexiport/port.h>
@@ -44,7 +44,7 @@ using namespace flexiport;
 	#define __func__    __FUNCTION__
 #endif
 
-namespace urg_nz
+namespace hokuyo_aist
 {
 
 #ifndef M_PI
@@ -412,50 +412,50 @@ void NumberToString (unsigned int num, char *dest, int length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// URGError class
+// HokuyoError class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string URGError::AsString (void) const throw ()
+string HokuyoError::AsString (void) const throw ()
 {
 	switch (_errorCode)
 	{
-		case URG_ERR_READ:
-			return "URG_ERR_READ";
-		case URG_ERR_WRITE:
-			return "URG_ERR_WRITE";
-		case URG_ERR_PROTOCOL:
-			return "URG_ERR_PROTOCOL";
-		case URG_ERR_CHANGEBAUD:
-			return "URG_ERR_CHANGEBAUD";
-		case URG_ERR_CONNECT_FAILED:
-			return "URG_ERR_CONNECT_FAILED";
-		case URG_ERR_CLOSE_FAILED:
-			return "URG_ERR_CLOSE_FAILED";
-		case URG_ERR_NODESTINATION:
-			return "URG_ERR_NODESTINATION";
-		case URG_ERR_BADFIRMWARE:
-			return "URG_ERR_BADFIRMWARE";
-		case URG_ERR_SCIPVERSION:
-			return "URG_ERR_SCIPVERSION";
-		case URG_ERR_MEMORY:
-			return "URG_ERR_MEMORY";
-		case URG_ERR_UNSUPPORTED:
-			return "URG_ERR_UNSUPPORTED";
-		case URG_ERR_BADARG:
-			return "URG_ERR_BADARG";
-		case URG_ERR_NODATA:
-			return "URG_ERR_NODATA";
-		case URG_ERR_NOTSERIAL:
-			return "URG_ERR_NOTSERIAL";
+		case HOKUYO_ERR_READ:
+			return "HOKUYO_ERR_READ";
+		case HOKUYO_ERR_WRITE:
+			return "HOKUYO_ERR_WRITE";
+		case HOKUYO_ERR_PROTOCOL:
+			return "HOKUYO_ERR_PROTOCOL";
+		case HOKUYO_ERR_CHANGEBAUD:
+			return "HOKUYO_ERR_CHANGEBAUD";
+		case HOKUYO_ERR_CONNECT_FAILED:
+			return "HOKUYO_ERR_CONNECT_FAILED";
+		case HOKUYO_ERR_CLOSE_FAILED:
+			return "HOKUYO_ERR_CLOSE_FAILED";
+		case HOKUYO_ERR_NODESTINATION:
+			return "HOKUYO_ERR_NODESTINATION";
+		case HOKUYO_ERR_BADFIRMWARE:
+			return "HOKUYO_ERR_BADFIRMWARE";
+		case HOKUYO_ERR_SCIPVERSION:
+			return "HOKUYO_ERR_SCIPVERSION";
+		case HOKUYO_ERR_MEMORY:
+			return "HOKUYO_ERR_MEMORY";
+		case HOKUYO_ERR_UNSUPPORTED:
+			return "HOKUYO_ERR_UNSUPPORTED";
+		case HOKUYO_ERR_BADARG:
+			return "HOKUYO_ERR_BADARG";
+		case HOKUYO_ERR_NODATA:
+			return "HOKUYO_ERR_NODATA";
+		case HOKUYO_ERR_NOTSERIAL:
+			return "HOKUYO_ERR_NOTSERIAL";
 	}
 	return "UNKNOWN_ERROR";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// URGSensorInfo class
+// HokuyoSensorInfo class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-URGSensorInfo::URGSensorInfo (void)
+HokuyoSensorInfo::HokuyoSensorInfo (void)
 	: minRange (0), maxRange (0), steps (0), firstStep (0), lastStep (0), frontStep (0),
 	standardSpeed (0), power (false), speed (0), baud (0), time (0), minAngle (0.0), maxAngle (0.0),
 	resolution (0.0), scanableSteps (0)
@@ -463,7 +463,7 @@ URGSensorInfo::URGSensorInfo (void)
 }
 
 // Set various known values based on what the manual says
-void URGSensorInfo::SetDefaults (void)
+void HokuyoSensorInfo::SetDefaults (void)
 {
 	minRange = 20;
 	maxRange = 4095;
@@ -473,7 +473,7 @@ void URGSensorInfo::SetDefaults (void)
 	frontStep = 384;
 }
 
-void URGSensorInfo::CalculateValues (void)
+void HokuyoSensorInfo::CalculateValues (void)
 {
 	resolution = DTOR (360.0) / steps;
 	// If any of the steps are beyond INT_MAX, we have problems.
@@ -483,7 +483,7 @@ void URGSensorInfo::CalculateValues (void)
 	scanableSteps = lastStep - firstStep + 1;
 }
 
-string URGSensorInfo::AsString (void)
+string HokuyoSensorInfo::AsString (void)
 {
 	stringstream ss;
 
@@ -513,15 +513,15 @@ string URGSensorInfo::AsString (void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// URGData class
+// HokuyoData class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-URGData::URGData (void)
+HokuyoData::HokuyoData (void)
 	: _data (NULL), _length (0), _error (-1), _time (0)
 {
 }
 
-URGData::URGData (unsigned short *data, unsigned int length, short error, unsigned int time)
+HokuyoData::HokuyoData (unsigned short *data, unsigned int length, short error, unsigned int time)
 	: _error (error), _time (time)
 {
 	_length = length;
@@ -532,13 +532,13 @@ URGData::URGData (unsigned short *data, unsigned int length, short error, unsign
 		if ((_data = new unsigned short[_length]) == NULL)
 		{
 			_length = 0;
-			throw URGError (URG_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 		}
 		memcpy (_data, data, sizeof (unsigned short) * _length);
 	}
 }
 
-URGData::URGData (const URGData &rhs)
+HokuyoData::HokuyoData (const HokuyoData &rhs)
 {
 	_length = rhs.Length ();
 	if (_length == 0)
@@ -548,7 +548,7 @@ URGData::URGData (const URGData &rhs)
 		if ((_data = new unsigned short[_length]) == NULL)
 		{
 			_length = 0;
-			throw URGError (URG_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 		}
 		memcpy (_data, rhs.Ranges (), sizeof (unsigned short) * _length);
 	}
@@ -556,13 +556,13 @@ URGData::URGData (const URGData &rhs)
 	_time = rhs.TimeStamp ();
 }
 
-URGData::~URGData (void)
+HokuyoData::~HokuyoData (void)
 {
 	if (_data != NULL)
 		delete[] _data;
 }
 
-string URGData::ErrorCodeToString (void)
+string HokuyoData::ErrorCodeToString (void)
 {
 	switch (_error)
 	{
@@ -615,7 +615,7 @@ string URGData::ErrorCodeToString (void)
 	}
 }
 
-URGData& URGData::operator= (const URGData &rhs)
+HokuyoData& HokuyoData::operator= (const HokuyoData &rhs)
 {
 	if (rhs.Length () == 0)
 	{
@@ -635,7 +635,7 @@ URGData& URGData::operator= (const URGData &rhs)
 			// Copy the data into a temporary variable pointing to new space (prevents dangling
 			// pointers on allocation error and prevents self-assignment making a mess).
 			if ((newData = new unsigned short[rhsLength]) == NULL)
-				throw URGError (URG_ERR_MEMORY, "Failed to allocate space to copy data.");
+				throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 			memcpy (newData, rhs.Ranges (), sizeof (unsigned short) * rhsLength);
 			if (_data != NULL)
 				delete[] _data;
@@ -655,14 +655,14 @@ URGData& URGData::operator= (const URGData &rhs)
 	return *this;
 }
 
-unsigned short URGData::operator[] (unsigned int index)
+unsigned short HokuyoData::operator[] (unsigned int index)
 {
 	if (index >= _length)
-		throw URGError (URG_ERR_BADARG, "Invalid data index.");
+		throw HokuyoError (HOKUYO_ERR_BADARG, "Invalid data index.");
 	return _data[index];
 }
 
-string URGData::AsString (void)
+string HokuyoData::AsString (void)
 {
 	stringstream ss;
 
@@ -675,7 +675,7 @@ string URGData::AsString (void)
 	return ss.str ();
 }
 
-void URGData::CleanUp (void)
+void HokuyoData::CleanUp (void)
 {
 	if (_data != NULL)
 		delete[] _data;
@@ -685,7 +685,7 @@ void URGData::CleanUp (void)
 	_time = 0;
 }
 
-void URGData::AllocateData (unsigned int length)
+void HokuyoData::AllocateData (unsigned int length)
 {
 	// If no data yet, allocate new
 	if (_data == NULL)
@@ -693,7 +693,7 @@ void URGData::AllocateData (unsigned int length)
 		if ((_data = new unsigned short[length]) == NULL)
 		{
 			_length = 0;
-			throw URGError (URG_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 		}
 		_length = length;
 	}
@@ -704,7 +704,7 @@ void URGData::AllocateData (unsigned int length)
 		if ((_data = new unsigned short[length]) == NULL)
 		{
 			_length = 0;
-			throw URGError (URG_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 		}
 		_length = length;
 	}
@@ -712,29 +712,29 @@ void URGData::AllocateData (unsigned int length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// URGLaser class
+// HokuyoLaser class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-URGLaser::URGLaser (void)
+HokuyoLaser::HokuyoLaser (void)
 	: _port (NULL), _scipVersion (1), _verbose (false), _minAngle (0.0), _maxAngle (0.0),
 	_resolution (0.0), _firstStep (0), _lastStep (0), _frontStep (0)
 {
 }
 
-URGLaser::~URGLaser (void)
+HokuyoLaser::~HokuyoLaser (void)
 {
 	if (_port != NULL)
 		delete _port;
 }
 
-void URGLaser::Open (string portOptions)
+void HokuyoLaser::Open (string portOptions)
 {
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Creating and opening port using options: " <<
+		cerr << "HokuyoLaser::" << __func__ << "() Creating and opening port using options: " <<
 			portOptions << endl;
 	}
 	_port = flexiport::CreatePort (portOptions);
@@ -742,7 +742,7 @@ void URGLaser::Open (string portOptions)
 
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Connected using " << _port->GetPortType () <<
+		cerr << "HokuyoLaser::" << __func__ << "() Connected using " << _port->GetPortType () <<
 			" connection." << endl;
 		cerr << _port->GetStatus ();
 	}
@@ -754,37 +754,37 @@ void URGLaser::Open (string portOptions)
 	GetDefaults ();
 }
 
-void URGLaser::Close (void)
+void HokuyoLaser::Close (void)
 {
 	if (!_port)
-		throw URGError (URG_ERR_CLOSE_FAILED, "Port is not open.");
+		throw HokuyoError (HOKUYO_ERR_CLOSE_FAILED, "Port is not open.");
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Closing connection." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Closing connection." << endl;
 	delete _port;
 	_port = NULL;
 }
 
-bool URGLaser::IsOpen (void) const
+bool HokuyoLaser::IsOpen (void) const
 {
 	if (_port != NULL)
 		return _port->IsOpen ();
 	return false;
 }
 
-void URGLaser::SetPower (bool on)
+void HokuyoLaser::SetPower (bool on)
 {
 	if (_scipVersion == 1)
 	{
 		if (on)
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Turning laser on." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Turning laser on." << endl;
 			SendCommand ("L", "1", 1, NULL);
 		}
 		else
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Turning laser off." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Turning laser off." << endl;
 			SendCommand ("L", "0", 1, NULL);
 		}
 		SkipLines (1);
@@ -794,26 +794,29 @@ void URGLaser::SetPower (bool on)
 		if (on)
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Turning laser on." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Turning laser on." << endl;
 			SendCommand ("BM", NULL, 0, "02");
 		}
 		else
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Turning laser off." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Turning laser off." << endl;
 			SendCommand ("QT", NULL, 0, "02");
 		}
 		SkipLines (1);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
 // This function assumes that both the port and the laser scanner are already set to the same baud.
-void URGLaser::SetBaud (unsigned int baud)
+void HokuyoLaser::SetBaud (unsigned int baud)
 {
 	if (_port->GetPortType () != "serial")
-		throw URGError (URG_ERR_NOTSERIAL, "Cannot change baud rate of non-serial connection.");
+	{
+		throw HokuyoError (HOKUYO_ERR_NOTSERIAL,
+			"Cannot change baud rate of non-serial connection.");
+	}
 
 	char newBaud[13];
 	memset (newBaud, 0, sizeof (char) * 13);
@@ -823,7 +826,7 @@ void URGLaser::SetBaud (unsigned int baud)
 	{
 		stringstream ss;
 		ss << "Bad baud rate: " << baud << endl;
-		throw URGError (URG_ERR_BADARG, ss.str ());
+		throw HokuyoError (HOKUYO_ERR_BADARG, ss.str ());
 	}
 	NumberToString (baud, newBaud, 6);
 
@@ -844,42 +847,48 @@ void URGLaser::SetBaud (unsigned int baud)
 		reinterpret_cast<SerialPort*> (_port)->SetBaudRate (baud);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void URGLaser::Reset (void)
+void HokuyoLaser::Reset (void)
 {
 	if (_scipVersion == 1)
-		throw URGError (URG_ERR_UNSUPPORTED, "SCIP version 1 does not support the reset command.");
+	{
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
+			"SCIP version 1 does not support the reset command.");
+	}
 	else if (_scipVersion == 2)
 	{
 		if (_verbose)
-			cerr << "URGLaser::" << __func__ << "() Resetting laser." << endl;
+			cerr << "HokuyoLaser::" << __func__ << "() Resetting laser." << endl;
 		SendCommand ("RS", NULL, 0, NULL);
 		SkipLines (1);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void URGLaser::SetMotorSpeed (unsigned int speed)
+void HokuyoLaser::SetMotorSpeed (unsigned int speed)
 {
 	if (_scipVersion == 1)
 	{
-		throw URGError (URG_ERR_UNSUPPORTED,
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
 				"SCIP version 1 does not support the set motor speed command.");
 	}
 	else if (_scipVersion == 2)
 	{
 		// Sanity check the value
 		if ((speed > 600 || speed < 540 || (speed % 6) != 0) && speed != 0)
-			throw URGError (URG_ERR_BADARG, "Invalid motor speed.");
+			throw HokuyoError (HOKUYO_ERR_BADARG, "Invalid motor speed.");
 		char buffer[3];
 		buffer[2] = '\0';
 		if (speed == 0)
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Reseting motor speed to default." << endl;
+			{
+				cerr << "HokuyoLaser::" << __func__ << "() Reseting motor speed to default." <<
+					endl;
+			}
 			buffer[0] = '9';
 			buffer[1] = '9';
 		}
@@ -887,7 +896,7 @@ void URGLaser::SetMotorSpeed (unsigned int speed)
 		{
 			if (_verbose)
 			{
-				cerr << "URGLaser::" << __func__ << "() Setting motor speed to " <<
+				cerr << "HokuyoLaser::" << __func__ << "() Setting motor speed to " <<
 					speed << "rpm." << endl;
 			}
 			if (speed == 540)
@@ -905,19 +914,19 @@ void URGLaser::SetMotorSpeed (unsigned int speed)
 		SkipLines (1);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void URGLaser::GetSensorInfo (URGSensorInfo *info)
+void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 {
 	if (info == NULL)
-		throw URGError (URG_ERR_NODESTINATION, "No info object provided.");
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No info object provided.");
 
 	if (_scipVersion == 1)
 	{
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ <<
+			cerr << "HokuyoLaser::" << __func__ <<
 				"() Getting sensor information using SCIP version 1." << endl;
 		}
 
@@ -1009,7 +1018,7 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 	{
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ <<
+			cerr << "HokuyoLaser::" << __func__ <<
 				"() Getting sensor information using SCIP version 2." << endl;
 		}
 
@@ -1073,7 +1082,7 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 		ReadLineWithCheck (buffer, -1, true);
 		// TODO: check if the format of this line changes if the motor speed is changed
 		if (sscanf (buffer, "SCSP:%*7s(%d[rpm]", &info->speed) != 1)
-			throw URGError (URG_ERR_PROTOCOL, "Motor speed line parse failed.");
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Motor speed line parse failed.");
 		// Measuring state
 		ReadLineWithCheck (buffer, -1, true);
 		info->measureState = &buffer[5];
@@ -1085,11 +1094,11 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 			info->baud = 0;
 		}
 		else if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
-			throw URGError (URG_ERR_PROTOCOL, "Baud rate line parse failed.");
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Baud rate line parse failed.");
 		// Time stamp
 		ReadLineWithCheck (buffer, -1, true);
 		if (sscanf (buffer, "TIME:%x", &info->time) != 1)
-			throw URGError (URG_ERR_PROTOCOL, "Timestamp line parse failed.");
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Timestamp line parse failed.");
 		// Diagnostic
 		ReadLineWithCheck (buffer, -1, true);
 		info->sensorDiagnostic = &buffer[5];
@@ -1104,20 +1113,20 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 		}
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-unsigned int URGLaser::GetTime (void)
+unsigned int HokuyoLaser::GetTime (void)
 {
 	if (_scipVersion == 1)
 	{
-		throw URGError (URG_ERR_UNSUPPORTED,
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
 				"SCIP version 1 does not support the get time command.");
 	}
 	else if (_scipVersion == 2)
 	{
 		if (_verbose)
-			cerr << "URGLaser::" << __func__ << "() Retrieving time from laser." << endl;
+			cerr << "HokuyoLaser::" << __func__ << "() Retrieving time from laser." << endl;
 		SendCommand ("TM", "0", 1, NULL);
 		SendCommand ("TM", "1", 1, NULL);
 		char buffer[7];
@@ -1128,16 +1137,16 @@ unsigned int URGLaser::GetTime (void)
 		return Decode4ByteValue (buffer);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 
 	return 0;
 }
 
-unsigned int URGLaser::GetRanges (URGData *data, int startStep, int endStep,
+unsigned int HokuyoLaser::GetRanges (HokuyoData *data, int startStep, int endStep,
 		 							unsigned int clusterCount)
 {
 	if (data == NULL)
-		throw URGError (URG_ERR_NODESTINATION, "No data destination provided.");
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
 
 	char buffer[11];
 	memset (buffer, 0, sizeof (char) * 11);
@@ -1150,7 +1159,7 @@ unsigned int URGLaser::GetRanges (URGData *data, int startStep, int endStep,
 	unsigned int numSteps = (endStep - startStep + 1) / clusterCount;
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Reading " << numSteps << " ranges between " <<
+		cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps << " ranges between " <<
 			startStep << " and " << endStep << " with a cluster count of " << clusterCount << endl;
 	}
 
@@ -1175,22 +1184,22 @@ unsigned int URGLaser::GetRanges (URGData *data, int startStep, int endStep,
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
 		if (ReadLineWithCheck (buffer) == 0)
-			throw URGError (URG_ERR_NODATA, "No data received. Check data error code.");
+			throw HokuyoError (HOKUYO_ERR_NODATA, "No data received. Check data error code.");
 		data->_time = Decode4ByteValue (buffer);
 		// In SCIP2 mode we're going to get back 3-byte data because we're sending the GD command
 		Read3ByteRangeData (data, numSteps);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 
 	return data->_length;
 }
 
-unsigned int URGLaser::GetRanges (URGData *data, double startAngle,
+unsigned int HokuyoLaser::GetRanges (HokuyoData *data, double startAngle,
 									double endAngle, unsigned int clusterCount)
 {
 	if (data == NULL)
-		throw URGError (URG_ERR_NODESTINATION, "No data destination provided.");
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
 
 	// Calculate the given angles in steps, rounding towards _frontStep
 	int startStep, endStep;
@@ -1199,13 +1208,13 @@ unsigned int URGLaser::GetRanges (URGData *data, double startAngle,
 
 	// Check the steps are within the allowable range
 	if (startStep < _firstStep || startStep > _lastStep)
-		throw URGError (URG_ERR_BADARG, "Start step is out of range.");
+		throw HokuyoError (HOKUYO_ERR_BADARG, "Start step is out of range.");
 	if (endStep < _firstStep || endStep > _lastStep)
-		throw URGError (URG_ERR_BADARG, "End step is out of range.");
+		throw HokuyoError (HOKUYO_ERR_BADARG, "End step is out of range.");
 
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Start angle " << startAngle << " is step " <<
+		cerr << "HokuyoLaser::" << __func__ << "() Start angle " << startAngle << " is step " <<
 			startStep << ", end angle " << endAngle << " is step " << endStep << endl;
 	}
 
@@ -1213,15 +1222,15 @@ unsigned int URGLaser::GetRanges (URGData *data, double startAngle,
 	return GetRanges (data, startStep, endStep, clusterCount);
 }
 
-unsigned int URGLaser::GetNewRanges (URGData *data, int startStep, int endStep,
+unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, int startStep, int endStep,
 									unsigned int clusterCount)
 {
 	if (data == NULL)
-		throw URGError (URG_ERR_NODESTINATION, "No data destination provided.");
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
 
 	if (_scipVersion == 1)
 	{
-		throw URGError (URG_ERR_UNSUPPORTED,
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
 				"SCIP version 1 does not support the get new ranges command.");
 	}
 	else if (_scipVersion == 2)
@@ -1237,7 +1246,7 @@ unsigned int URGLaser::GetNewRanges (URGData *data, int startStep, int endStep,
 		unsigned int numSteps = (endStep - startStep + 1) / clusterCount;
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Reading " << numSteps <<
+			cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps <<
 				" new ranges between " << startStep << " and " << endStep <<
 				" with a cluster count of " << clusterCount << endl;
 		}
@@ -1253,25 +1262,25 @@ unsigned int URGLaser::GetNewRanges (URGData *data, int startStep, int endStep,
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
 		if (ReadLineWithCheck (buffer) == 0)
-			throw URGError (URG_ERR_NODATA, "No data received. Check data error code.");
+			throw HokuyoError (HOKUYO_ERR_NODATA, "No data received. Check data error code.");
 		data->_time = Decode4ByteValue (buffer);
 		// In SCIP2 mode we're going to get back 3-byte data because we're sending the MD command
 		Read3ByteRangeData (data, numSteps);
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 
 	return data->_length;
 }
 
-unsigned int URGLaser::GetNewRanges (URGData *data, double startAngle, double endAngle,
+unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, double startAngle, double endAngle,
 									unsigned int clusterCount)
 {
 	if (data == NULL)
-		throw URGError (URG_ERR_NODESTINATION, "No data destination provided.");
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
 	if (_scipVersion == 1)
 	{
-		throw URGError (URG_ERR_UNSUPPORTED,
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
 				"SCIP version 1 does not support the get new ranges command.");
 	}
 
@@ -1282,13 +1291,13 @@ unsigned int URGLaser::GetNewRanges (URGData *data, double startAngle, double en
 
 	// Check the steps are within the allowable range
 	if (startStep < _firstStep || startStep > _lastStep)
-		throw URGError (URG_ERR_BADARG, "Start step is out of range.");
+		throw HokuyoError (HOKUYO_ERR_BADARG, "Start step is out of range.");
 	if (endStep < _firstStep || endStep > _lastStep)
-		throw URGError (URG_ERR_BADARG, "End step is out of range.");
+		throw HokuyoError (HOKUYO_ERR_BADARG, "End step is out of range.");
 
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Start angle " << startAngle << " is step " <<
+		cerr << "HokuyoLaser::" << __func__ << "() Start angle " << startAngle << " is step " <<
 			startStep << ", end angle " << endAngle << " is step " << endStep << endl;
 	}
 
@@ -1296,12 +1305,12 @@ unsigned int URGLaser::GetNewRanges (URGData *data, double startAngle, double en
 	return GetNewRanges (data, startStep, endStep, clusterCount);
 }
 
-double URGLaser::StepToAngle (unsigned int step)
+double HokuyoLaser::StepToAngle (unsigned int step)
 {
 	return (static_cast<int> (step) - static_cast<int> (_frontStep)) * _resolution;
 }
 
-unsigned int URGLaser::AngleToStep (double angle)
+unsigned int HokuyoLaser::AngleToStep (double angle)
 {
 	unsigned int result;
 	double resultF;
@@ -1325,7 +1334,7 @@ unsigned int URGLaser::AngleToStep (double angle)
 // maximum line length to be read. See SCIP1_LINE_LENGTH and SCIP2_LINE_LENGTH.
 // The line feed that terminates a line will be replaced with a NULL.
 // The return value is the number of bytes received, not including the NULL byte or the line feed.
-int URGLaser::ReadLine (char *buffer, int expectedLength)
+int HokuyoLaser::ReadLine (char *buffer, int expectedLength)
 {
 	int lineLength = 0;
 
@@ -1334,14 +1343,14 @@ int URGLaser::ReadLine (char *buffer, int expectedLength)
 		int maxLength = (_scipVersion == 1) ? SCIP1_LINE_LENGTH : SCIP2_LINE_LENGTH;
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Reading up to " << maxLength << " bytes." <<
+			cerr << "HokuyoLaser::" << __func__ << "() Reading up to " << maxLength << " bytes." <<
 				endl;
 		}
 		// We need to get at least 1 byte in a line: the line feed.
 		if ((lineLength = _port->ReadLine (buffer, maxLength)) < 0)
-			throw URGError (URG_ERR_READ, "Timed out trying to read a line.");
+			throw HokuyoError (HOKUYO_ERR_READ, "Timed out trying to read a line.");
 		else if (lineLength == 0)
-			throw URGError (URG_ERR_READ, "No data received when trying to read a line.");
+			throw HokuyoError (HOKUYO_ERR_READ, "No data received when trying to read a line.");
 		// Replace the line feed with a NULL
 		buffer[lineLength - 1] = '\0';
 	}
@@ -1349,19 +1358,19 @@ int URGLaser::ReadLine (char *buffer, int expectedLength)
 	{
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Reading exactly " << expectedLength <<
+			cerr << "HokuyoLaser::" << __func__ << "() Reading exactly " << expectedLength <<
 				" bytes." << endl;
 		}
 		if ((lineLength = _port->ReadLine (buffer, expectedLength + 1)) < 0) // +1 for the NULL
-			throw URGError (URG_ERR_READ, "Timed out trying to read a line.");
+			throw HokuyoError (HOKUYO_ERR_READ, "Timed out trying to read a line.");
 		else if (lineLength == 0)
-			throw URGError (URG_ERR_READ, "No data received when trying to read a line.");
+			throw HokuyoError (HOKUYO_ERR_READ, "No data received when trying to read a line.");
 		else if (lineLength < expectedLength)
 		{
 			stringstream ss;
-			ss << "URGLaser::" << __func__ << "() Got an incorrect line length: " << lineLength <<
-				" != " << expectedLength;
-			throw URGError (URG_ERR_PROTOCOL, ss.str ());
+			ss << "HokuyoLaser::" << __func__ << "() Got an incorrect line length: " <<
+				lineLength << " != " << expectedLength;
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 		}
 		// Replace the line feed with a NULL
 		buffer[lineLength - 1] = '\0';
@@ -1369,8 +1378,8 @@ int URGLaser::ReadLine (char *buffer, int expectedLength)
 
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Read " << lineLength << " bytes." << endl;
-		cerr << "URGLaser::" << __func__ << "() Line is " << buffer << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Read " << lineLength << " bytes." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Line is " << buffer << endl;
 	}
 	return lineLength - 1; // Line feed not included
 }
@@ -1383,7 +1392,7 @@ int URGLaser::ReadLine (char *buffer, int expectedLength)
 // Empty lines (i.e. a line that is just the line feed, as at the end of the message) will result in
 // a return value of zero and no checksum check will be performed. Otherwise the number of actual
 // data bytes (i.e. excluding the checksum and semicolon) will be returned.
-int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemicolon)
+int HokuyoLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemicolon)
 {
 	int lineLength = ReadLine (buffer, expectedLength);
 	if (_scipVersion == 1)
@@ -1403,7 +1412,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 	int checksumIndex = bytesToConsider + (hasSemicolon ? 1 : 0);
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Considering " << bytesToConsider <<
+		cerr << "HokuyoLaser::" << __func__ << "() Considering " << bytesToConsider <<
 			" bytes for checksum from a line length of " << lineLength << " bytes." << endl;
 	}
 	if (bytesToConsider < 1)
@@ -1411,7 +1420,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 		stringstream ss;
 		ss << "Not enough bytes to calculate checksum with: " << bytesToConsider <<
 			" bytes (line length is " << lineLength << " bytes).";
-		throw URGError (URG_ERR_PROTOCOL, ss.str ());
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 	}
 
 	int checkSum = 0;
@@ -1425,7 +1434,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ << "() Calculated checksum = " << checkSum << " (" <<
+		cerr << "HokuyoLaser::" << __func__ << "() Calculated checksum = " << checkSum << " (" <<
 			static_cast<char> (checkSum) << "), given checksum = " <<
 			static_cast<int> (buffer[checksumIndex]) << " (" << buffer[checksumIndex] <<
 			")" << endl;
@@ -1435,7 +1444,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 		stringstream ss;
 		ss << "Invalid checksum -  given: " << static_cast<int> (buffer[checksumIndex]) <<
 			", calculated: " << checkSum;
-		throw URGError (URG_ERR_PROTOCOL, ss.str ());
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 	}
 
 	// Null out the semi-colon (if there) and checksum
@@ -1445,12 +1454,12 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 }
 
 // Reads lines until the number specified has passed.
-void URGLaser::SkipLines (int count)
+void HokuyoLaser::SkipLines (int count)
 {
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Skipping " << count << " lines." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Skipping " << count << " lines." << endl;
 	if (_port->SkipUntil (0x0A, count) < 0)
-		throw URGError (URG_ERR_READ, "Timed out while skipping.");
+		throw HokuyoError (HOKUYO_ERR_READ, "Timed out while skipping.");
 }
 
 // Sends a command with optional parameters and checks that the echo of the command and parameters
@@ -1460,7 +1469,7 @@ void URGLaser::SkipLines (int count)
 // If paramLength is 0, no parameters will be sent or expected in the reply.
 // extraOK must be a 1-byte string for SCIP1 and a 2-byte string for SCIP2.
 // Return value is the status code returned for the command.
-int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraOK)
+int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraOK)
 {
 	int statusCode = -1;
 	char response[16];
@@ -1468,19 +1477,19 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 	{
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Writing in SCIP1 mode. Command is " <<
+			cerr << "HokuyoLaser::" << __func__ << "() Writing in SCIP1 mode. Command is " <<
 				cmd[0] << ", parameters length is " << paramLength << endl;
 		}
 		// Write the command
 		if (_port->Write (cmd, 1) < 1)
-			throw URGError (URG_ERR_WRITE, "Failed to write command byte.");
+			throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write command byte.");
 		if (paramLength > 0)
 		{
 			if (_port->Write (param, paramLength) < paramLength)
-				throw URGError (URG_ERR_WRITE, "Failed to write command parameters.");
+				throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write command parameters.");
 		}
 		if (_port->Write ("\n", 1) < 1)
-			throw URGError (URG_ERR_WRITE, "Failed to write termination character.");
+			throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write termination character.");
 
 		// Read back the response (should get at least 4 bytes , possibly up to 16 including \n's
 		// depending on the parameters): cmd[0] params \n status \n
@@ -1490,20 +1499,22 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 		// First make sure that the echoed command matches
 		if (response[0] != cmd[0])
 		{
-			throw URGError (URG_ERR_PROTOCOL, string ("Incorrect command echo: ") + cmd[0] +
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, string ("Incorrect command echo: ") + cmd[0] +
 					string (" != ") + response[0]);
 		}
 		// Then compare the parameters
 		if (paramLength > 0)
 		{
 			if (memcmp (&response[1], param, paramLength) != 0)
-				throw URGError (URG_ERR_PROTOCOL, string ("Incorrect paramaters echo for command ")
-						+ cmd[0]);
+			{
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL,
+						string ("Incorrect paramaters echo for command ") + cmd[0]);
+			}
 		}
 		// Next up, check the status byte
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Command response status: " <<
+			cerr << "HokuyoLaser::" << __func__ << "() Command response status: " <<
 				response[statusIndex] << endl;
 		}
 		if (response[statusIndex] != '0')
@@ -1515,7 +1526,7 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 					stringstream ss;
 					ss << "Bad response to " << cmd[0] << " command: " << " " <<
 						SCIP1ErrorToString (response[statusIndex], cmd[0]);
-					throw URGError (URG_ERR_PROTOCOL, ss.str ());
+					throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 				}
 			}
 			else
@@ -1523,7 +1534,7 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 				stringstream ss;
 				ss << "Bad response to " << cmd[0] << " command: " << response[statusIndex] <<
 					" " << SCIP1ErrorToString (response[statusIndex], cmd[0]);
-				throw URGError (URG_ERR_PROTOCOL, ss.str ());
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 			}
 		}
 		statusCode = atoi (&response[statusIndex]);
@@ -1533,19 +1544,19 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 	{
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Writing in SCIP2 mode. Command is " <<
+			cerr << "HokuyoLaser::" << __func__ << "() Writing in SCIP2 mode. Command is " <<
 				cmd << ", parameters length is " << paramLength << endl;
 		}
 		// Write the command
 		if (_port->Write (cmd, 2) < 2)
-			throw URGError (URG_ERR_WRITE, "Failed to write command byte.");
+			throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write command byte.");
 		if (paramLength > 0)
 		{
 			if (_port->Write (param, paramLength) < paramLength)
-				throw URGError (URG_ERR_WRITE, "Failed to write command parameters.");
+				throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write command parameters.");
 		}
 		if (_port->Write ("\n", 1) < 1)
-			throw URGError (URG_ERR_WRITE, "Failed to write termination character.");
+			throw HokuyoError (HOKUYO_ERR_WRITE, "Failed to write termination character.");
 
 		// Read back the command echo (minimum of 3 bytes, maximum of 16 bytes)
 		ReadLine (response, 3 + paramLength);
@@ -1554,21 +1565,23 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 		{
 			stringstream ss;
 			ss << "Incorrect command echo: " << cmd << " != " << response[0] << response[1];
-			throw URGError (URG_ERR_PROTOCOL, ss.str ());
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 		}
 		// Then compare the parameters
 		if (paramLength > 0)
 		{
 			if (memcmp (&response[2], param, paramLength) != 0)
-				throw URGError (URG_ERR_PROTOCOL, string ("Incorrect paramaters echo for command ")
-						+ cmd);
+			{
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL,
+						string ("Incorrect paramaters echo for command ") + cmd);
+			}
 		}
 
 		// The next line should be the status line
 		ReadLineWithCheck (response, 4);
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Command response status: " << response[0] <<
+			cerr << "HokuyoLaser::" << __func__ << "() Command response status: " << response[0] <<
 				response[1] << endl;
 		}
 		// Check the status code is OK
@@ -1583,7 +1596,7 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 					stringstream ss;
 					ss << "Bad response to " << cmd << " command: " << response[0] << response[1] <<
 						" " << SCIP2ErrorToString (response, cmd);
-					throw URGError (URG_ERR_PROTOCOL, ss.str ());
+					throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 				}
 			}
 			else
@@ -1591,34 +1604,34 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 				stringstream ss;
 				ss << "Bad response to " << cmd << " command: " << response[0] << response[1] <<
 					" " << SCIP2ErrorToString (response, cmd);
-				throw URGError (URG_ERR_PROTOCOL, ss.str ());
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 			}
 		}
 		statusCode = atoi (response);
 		// All OK, data starts at beginning of port's buffer
 	}
 	else
-		throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 
 	return statusCode;
 }
 
-void URGLaser::GetAndSetSCIPVersion (void)
+void HokuyoLaser::GetAndSetSCIPVersion (void)
 {
 	bool scip1Failed = false;
 
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Testing SCIP protocol version." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Testing SCIP protocol version." << endl;
 	// Try SCIP version 1 first by sending an info command
 	try
 	{
 		SendCommand ("V", NULL, 0, NULL);
 	}
-	catch (URGError &e)
+	catch (HokuyoError &e)
 	{
 		// That didn't work too well...
 		if (_verbose)
-			cerr << "URGLaser::" << __func__ << "() Initial SCIP version 1 test failed." << endl;
+			cerr << "HokuyoLaser::" << __func__ << "() Initial SCIP version 1 test failed." << endl;
 		scip1Failed = true;
 	}
 
@@ -1633,15 +1646,15 @@ void URGLaser::GetAndSetSCIPVersion (void)
 		{
 			SendCommand ("VV", NULL, 0, NULL);
 		}
-		catch (URGError &e)
+		catch (HokuyoError &e)
 		{
-			throw URGError (URG_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
+			throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
 		}
 
 		// Otherwise all OK, dump the rest of the result
 		SkipLines (6);
 		if (_verbose)
-			cerr << "URGLaser::" << __func__ << "() Using SCIP version 2." << endl;
+			cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
 		return;
 	}
 	else
@@ -1662,13 +1675,13 @@ void URGLaser::GetAndSetSCIPVersion (void)
 			// that we sent to get the info).
 			ReadLine (buffer);
 		}
-		catch (URGError e)
+		catch (HokuyoError e)
 		{
-			if (e.Code () != URG_ERR_READ) // We're only interested in timeouts
+			if (e.Code () != HOKUYO_ERR_READ) // We're only interested in timeouts
 				throw;
 			if (_verbose)
 			{
-				cerr << "URGLaser::" << __func__ <<
+				cerr << "HokuyoLaser::" << __func__ <<
 					"() Timed out trying SCIP version 1, trying SCIP version 2." << endl;
 			}
 			// Already in SCIP version 2 mode.
@@ -1679,29 +1692,32 @@ void URGLaser::GetAndSetSCIPVersion (void)
 			{
 				SendCommand ("VV", NULL, 0, NULL);
 			}
-			catch (URGError &e)
+			catch (HokuyoError &e)
 			{
 				cout << "error: " << e.Code() << " " << e.what() << endl;
-				throw URGError (URG_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
+				throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
 			}
 			// Otherwise all OK, dump the rest of the result
 			SkipLines (6);
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Using SCIP version 2." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
 			return;
 		}
 
 		if (strncmp (buffer, "FIRM:", 5) != 0)
 		{
-			throw URGError (URG_ERR_PROTOCOL,
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL,
 				"'FIRM:' was not found when checking firmware version.");
 		}
 		// Pull out the major version number
 		int majorVer = strtol (&buffer[5], NULL, 10);
 		if (errno == ERANGE)
-			throw URGError (URG_ERR_BADFIRMWARE, "Out-of-range firmware version.");
+			throw HokuyoError (HOKUYO_ERR_BADFIRMWARE, "Out-of-range firmware version.");
 		if (_verbose)
-			cerr << "URGLaser::" << __func__ << "() Firmware major version is " << majorVer << endl;
+		{
+			cerr << "HokuyoLaser::" << __func__ << "() Firmware major version is " <<
+				majorVer << endl;
+		}
 		// Dump the rest of the V command result (one of these will be the empty last line)
 		SkipLines (3);
 
@@ -1709,7 +1725,7 @@ void URGLaser::GetAndSetSCIPVersion (void)
 		if (majorVer < 3)
 		{
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ <<
+				cerr << "HokuyoLaser::" << __func__ <<
 					"() Firmware does not support SCIP version 2; using SCIP version 1." << endl;
 			return;
 		}
@@ -1725,10 +1741,10 @@ void URGLaser::GetAndSetSCIPVersion (void)
 			{
 				SendCommand ("S", "CIP2.0", 6, NULL);
 			}
-			catch (URGError &e)
+			catch (HokuyoError &e)
 			{
 				if (_verbose)
-					cerr << "URGLaser::" << __func__ <<
+					cerr << "HokuyoLaser::" << __func__ <<
 						"() Could not change to SCIP version 2; using SCIP version 1." << endl;
 				return;
 			}
@@ -1737,23 +1753,23 @@ void URGLaser::GetAndSetSCIPVersion (void)
 
 			// Changed to SCIP version 2
 			if (_verbose)
-				cerr << "URGLaser::" << __func__ << "() Using SCIP version 2." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
 			_scipVersion = 2;
 			return;
 		}
 	}
 
 	// Fallback case if didn't find a good SCIP version and return above
-	throw URGError (URG_ERR_SCIPVERSION, "Unknown SCIP version.");
+	throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void URGLaser::GetDefaults (void)
+void HokuyoLaser::GetDefaults (void)
 {
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Getting default values." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Getting default values." << endl;
 
 	// Get the laser's info
-	URGSensorInfo info;
+	HokuyoSensorInfo info;
 	GetSensorInfo (&info);
 
 	_minAngle = info.minAngle;
@@ -1765,16 +1781,16 @@ void URGLaser::GetDefaults (void)
 	_maxRange = info.maxRange;
 	if (_verbose)
 	{
-		cerr << "URGLaser::" << __func__ <<
+		cerr << "HokuyoLaser::" << __func__ <<
 			"() Got default values: " << _minAngle << " " << _maxAngle << " " << _resolution <<
 			" " << _firstStep << " " << _lastStep << " " << _frontStep << " " << _maxRange << endl;
 	}
 }
 
-void URGLaser::Read2ByteRangeData (URGData *data, unsigned int numSteps)
+void HokuyoLaser::Read2ByteRangeData (HokuyoData *data, unsigned int numSteps)
 {
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Reading " << numSteps << " ranges." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps << " ranges." << endl;
 
 	// This will automatically take care of whether it actually needs to (re)allocate or not.
 	data->AllocateData (numSteps);
@@ -1796,7 +1812,7 @@ void URGLaser::Read2ByteRangeData (URGData *data, unsigned int numSteps)
 			if (buffer[ii] == '\n' || buffer[ii + 1] == '\n')
 			{
 				// Line feed in the middle of a line? Why?
-				throw URGError (URG_ERR_PROTOCOL, "Found line feed in a data block.");
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Found line feed in a data block.");
 			}
 			data->_data[currentStep] = Decode2ByteValue (&buffer[ii]);
 		}
@@ -1804,15 +1820,15 @@ void URGLaser::Read2ByteRangeData (URGData *data, unsigned int numSteps)
 	}
 
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Read " << currentStep << " ranges." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Read " << currentStep << " ranges." << endl;
 	if (currentStep != numSteps)
-		throw URGError (URG_ERR_PROTOCOL, "Read less range readings than were asked for.");
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Read less range readings than were asked for.");
 }
 
-void URGLaser::Read3ByteRangeData (URGData *data, unsigned int numSteps)
+void HokuyoLaser::Read3ByteRangeData (HokuyoData *data, unsigned int numSteps)
 {
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Reading " << numSteps << " ranges." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps << " ranges." << endl;
 
 	// This will automatically take care of whether it actually needs to (re)allocate or not.
 	data->AllocateData (numSteps);
@@ -1835,7 +1851,7 @@ void URGLaser::Read3ByteRangeData (URGData *data, unsigned int numSteps)
 			if (buffer[ii] == '\n' || buffer[ii + 1] == '\n')
 			{
 				// Line feed in the middle of a line? Why?
-				throw URGError (URG_ERR_PROTOCOL, "Found line feed in a data block.");
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Found line feed in a data block.");
 			}
 			if (ii == numBytesInLine - 2)       // Short 1 byte
 			{
@@ -1870,7 +1886,7 @@ void URGLaser::Read3ByteRangeData (URGData *data, unsigned int numSteps)
 				}
 				if (data->_data[currentStep] > _maxRange)
 				{
-					cerr << "WARNING: URGLaser::" << __func__ <<
+					cerr << "WARNING: HokuyoLaser::" << __func__ <<
 						"() Value at step " << currentStep << " beyond maximum range: " <<
 						data->_data[currentStep] << " (raw bytes: ";
 					if (splitCount != 0)
@@ -1886,12 +1902,12 @@ void URGLaser::Read3ByteRangeData (URGData *data, unsigned int numSteps)
 	}
 
 	if (_verbose)
-		cerr << "URGLaser::" << __func__ << "() Read " << currentStep << " ranges." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Read " << currentStep << " ranges." << endl;
 	if (currentStep != numSteps)
 	{
-		throw URGError (URG_ERR_PROTOCOL,
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
 			"Read a  different number of range readings than were asked for.");
 	}
 }
 
-} // namespace urg_nz
+} // namespace hokuyo_aist

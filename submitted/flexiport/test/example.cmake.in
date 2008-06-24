@@ -1,3 +1,5 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.4)
+
 PROJECT (FlexiPortExample)
 
 INCLUDE_DIRECTORIES (@CMAKE_INSTALL_PREFIX@)
@@ -15,4 +17,3 @@ SET_TARGET_PROPERTIES (flexiport_serial_example PROPERTIES
                        LINK_FLAGS "-L@CMAKE_INSTALL_PREFIX@/lib/gearbox"
                        INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
                        BUILD_WITH_INSTALL_RPATH TRUE)
-                       

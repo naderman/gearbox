@@ -3,7 +3,7 @@
  *               http://gearbox.sf.net/
  * Copyright (c) 2008 Geoffrey Biggs
  *
- * urg_nz Hokuyo URG laser scanner driver.
+ * hokuyo_aist Hokuyo URG laser scanner driver.
  *
  * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
@@ -11,25 +11,25 @@
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
  *
- * This file is part of urg_nz.
+ * This file is part of hokuyo_aist.
  *
- * urg_nz is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * hokuyo_aist is free software: you can redistribute it and/or modify it under the terms of the GNU
  * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
- * urg_nz is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
- * General Public License for more details.
+ * hokuyo_aist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with urg_nz.  If
- * not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public License along with hokuyo_aist.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <math.h>
 #include <iostream>
 using namespace std;
 
-#include <urg_nz/urg_nz.h>
+#include <hokuyo_aist/hokuyo_aist.h>
 
 int main(int argc, char **argv)
 {
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 
 	try
 	{
-		urg_nz::URGLaser laser; // Laser scanner object
+		hokuyo_aist::HokuyoLaser laser; // Laser scanner object
 		// Set the laser to verbose mode (so we see more information in the console)
 		if (verbose)
 			laser.SetVerbose (true);
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 		{
 			laser.SetBaud (baud);
 		}
-		catch (urg_nz::URGError e)
+		catch (hokuyo_aist::HokuyoError e)
 		{
 			cerr << "Failed to change baud rate: (" << e.Code () << ") " << e.what () << endl;
 		}
@@ -120,12 +120,12 @@ int main(int argc, char **argv)
 
 		// Get some laser info
 		cout << "Laser sensor information:" << endl;
-		urg_nz::URGSensorInfo info;
+		hokuyo_aist::HokuyoSensorInfo info;
 		laser.GetSensorInfo (&info);
 		cout << info.AsString ();
 
 		// Get range data
-		urg_nz::URGData data;
+		hokuyo_aist::HokuyoData data;
 		if ((firstStep == -1 && lastStep == -1) &&
 			(startAngle == 0.0 && endAngle == 0.0))
 		{
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 		// Close the laser
 		laser.Close ();
 	}
-	catch (urg_nz::URGError e)
+	catch (hokuyo_aist::HokuyoError e)
 	{
 		cerr << "Caught exception: (" << e.Code () << ") " << e.what () << endl;
 		return 1;
