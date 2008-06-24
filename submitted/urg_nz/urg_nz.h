@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * urg_nz Hokuyo URG laser scanner driver.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of urg_nz.
  *
  * urg_nz is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * urg_nz is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
@@ -222,7 +222,7 @@ class URG_NZ_EXPORT URGSensorInfo
 		void CalculateValues (void);
 };
 
-/** @brief Structure to store data returned from the laser scanner. */ 
+/** @brief Structure to store data returned from the laser scanner. */
 class URG_NZ_EXPORT URGData
 {
 	public:
@@ -244,12 +244,13 @@ class URG_NZ_EXPORT URGData
 		/// @brief Get the number of samples in the data.
 		unsigned int Length (void) const                    { return _length; }
 		/** @brief Error code for the data (if any).
-		
+
 		@return -1 indicates no error. */
 		short GetErrorCode (void) const                     { return _error; }
 		/// @brief Return a string representing the error code for the data.
 		std::string ErrorCodeToString (void);
-		/// @brief Get the time stamp of the data (only available using SCIP version 2).
+		/** @brief Get the time stamp of the data in milliseconds (only available using SCIP
+		version 2). */
 		unsigned int TimeStamp (void) const                 { return _time; }
 
 		/// @brief Assignment operator.
@@ -312,7 +313,7 @@ class URG_NZ_EXPORT URGLaser
 		Not available with the SCIP v1 protocol. */
 		void Reset (void);
 
-		/** @brief Set the speed at which the scanner's sensor spins.
+		/** @brief Set the speed at which the scanner's sensor spins in revolutions per minute.
 
 		Valid speeds are: 540, 546, 552, 558, 564, 570, 576, 582, 588, 594, 600. Set the speed to 0
 		to have it reset to the default value.
@@ -325,7 +326,7 @@ class URG_NZ_EXPORT URGLaser
 		Much of the information is not available with the SCIP v1 protocol. */
 		void GetSensorInfo (URGSensorInfo *info);
 
-		/** @brief Get the current value of the scanner's clock.
+		/** @brief Get the current value of the scanner's clock in milliseconds.
 
 		Not available with the SCIP v1 protocol. */
 		unsigned int GetTime (void);
@@ -339,7 +340,7 @@ class URG_NZ_EXPORT URGLaser
 		will be re-allocated. This means you can repeatedly send the same @ref URGData object
 		without having to worry about allocating its data, whether it will change or not, while also
 		avoiding excessive allocations.
-		
+
 		Not available with the SCIP v1 protocol.
 
 		@param data Pointer to a @ref URGData object to store the range readings in.
@@ -371,7 +372,7 @@ class URG_NZ_EXPORT URGLaser
 		Unlike @ref GetRanges, which returns the most recent scan the scanner took, this function
 		will request a new scan. This means it will wait while the scanner performs the scan.
 		Otherwise behaves identicallty to @ref GetRanges.
-		
+
 		Not available with the SCIP v1 protocol.
 
 		@param data Pointer to a @ref URGData object to store the range readings in.

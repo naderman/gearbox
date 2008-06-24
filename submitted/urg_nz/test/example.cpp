@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * urg_nz Hokuyo URG laser scanner driver.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of urg_nz.
  *
  * urg_nz is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * urg_nz is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	portOptions = "type=serial,device=COM3,timeout=1";
 #else
 	// Get some options from the command line
-	while ((opt = getopt(argc, argv, "b:c:e:f:l:m:no:s:v?h")) != -1)
+	while ((opt = getopt(argc, argv, "b:c:e:f:l:m:no:s:vh")) != -1)
 	{
 		switch (opt)
 		{
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 			if (getNew)
 				laser.GetNewRanges (&data, firstStep, lastStep, clusterCount);
 			else
-				laser.GetRanges (&data, firstStep, lastStep, clusterCount); 
+				laser.GetRanges (&data, firstStep, lastStep, clusterCount);
 		}
 		else
 		{

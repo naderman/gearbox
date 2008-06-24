@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * urg_nz Hokuyo URG laser scanner driver.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of urg_nz.
  *
  * urg_nz is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * urg_nz is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
@@ -54,7 +54,7 @@ namespace urg_nz
 #ifndef RTOD
     inline double RTOD (double rad)
     {
-    	return rad * 180.0 / M_PI; 
+    	return rad * 180.0 / M_PI;
     }
 #endif
 // Convert degrees to radians
@@ -74,12 +74,12 @@ const unsigned int SCIP2_LINE_LENGTH        = 67;
 // SCIP protocol version 1 notes
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* | = byte boundary, ... indicates variable byte block (max 64 bytes), (x) = x byte block 
+/* | = byte boundary, ... indicates variable byte block (max 64 bytes), (x) = x byte block
  - No checksum
  - Host to sensor: Command | Parameters... | LF
  - Sensor to host: Command | Parameters... | LF | Status | LF | Data... | LF | LF
  - Where a block of data would take more than 64 bytes, a line feed is inserted every 64 bytes.
- - Status 0 is OK, anything else is an error. 
+ - Status 0 is OK, anything else is an error.
 
 L  Power
    L|Control code|LF
@@ -210,6 +210,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 				return "Laser is already on";
 		}
 	}
+// No info in the manual for this.
 //	else if (cmd[0] == 'Q' && cmd[1] == 'T')
 //	{
 //		switch (errorCode)
@@ -314,6 +315,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 				return "Motor is already running at that speed";
 		}
 	}
+// No info in the manual for this.
 //	else if (cmd[0] == 'R' && cmd[1] == 'S')
 //	{
 //		switch (errorCode)
@@ -326,6 +328,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 //				return ss.str ();
 //		}
 //	}
+// No info in the manual for this.
 //	else if (cmd[0] == 'V' && cmd[1] == 'V')
 //	{
 //		switch (errorCode)
@@ -334,6 +337,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 //				return "";
 //		}
 //	}
+// No info in the manual for this.
 //	else if (cmd[0] == 'P' && cmd[1] == 'P')
 //	{
 //		switch (errorCode)
@@ -342,6 +346,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 //				return "";
 //		}
 //	}
+// No info in the manual for this.
 //	else if (cmd[0] == 'I' && cmd[1] == 'I')
 //	{
 //		switch (errorCode)
@@ -364,7 +369,7 @@ string SCIP2ErrorToString (char *error, char *cmd)
 unsigned int Decode2ByteValue (char *data)
 {
 	unsigned int byte1, byte2;
-	
+
 	byte1 = data[0] - 0x30;
 	byte2 = data[1] - 0x30;
 
@@ -374,7 +379,7 @@ unsigned int Decode2ByteValue (char *data)
 unsigned int Decode3ByteValue (char *data)
 {
 	unsigned int byte1, byte2, byte3;
-	
+
 	byte1 = data[0] - 0x30;
 	byte2 = data[1] - 0x30;
 	byte3 = data[2] - 0x30;
@@ -385,7 +390,7 @@ unsigned int Decode3ByteValue (char *data)
 unsigned int Decode4ByteValue (char *data)
 {
 	unsigned int byte1, byte2, byte3, byte4;
-	
+
 	byte1 = data[0] - 0x30;
 	byte2 = data[1] - 0x30;
 	byte3 = data[2] - 0x30;
@@ -457,36 +462,6 @@ URGSensorInfo::URGSensorInfo (void)
 {
 }
 
-URGSensorInfo::URGSensorInfo (const URGSensorInfo &rhs)
-{
-	vendor = rhs.vendor;
-	product = rhs.product;
-	firmware = rhs.firmware;
-	protocol = rhs.protocol;
-	serial = rhs.serial;
-
-	model = rhs.model;
-	minRange = rhs.minRange;
-	maxRange = rhs.maxRange;
-	steps = rhs.steps;
-	firstStep = rhs.firstStep;
-	lastStep = rhs.lastStep;
-	frontStep = rhs.frontStep;
-	standardSpeed = rhs.standardSpeed;
-
-	power = rhs.power;
-	speed = rhs.speed;
-	measureState = rhs.measureState;
-	baud = rhs.baud;
-	time = rhs.time;
-	sensorDiagnostic = rhs.sensorDiagnostic;
-
-	minAngle = rhs.minAngle;
-	maxAngle = rhs.maxAngle;
-	resolution = rhs.resolution;
-	scanableSteps = rhs.scanableSteps;
-}
-
 // Set various known values based on what the manual says
 void URGSensorInfo::SetDefaults (void)
 {
@@ -505,42 +480,7 @@ void URGSensorInfo::CalculateValues (void)
 	// We also have an incredibly high-resolution sensor.
 	minAngle = (static_cast<int> (firstStep) - static_cast<int> (frontStep)) * resolution;
 	maxAngle = (static_cast<int> (lastStep) - static_cast<int> (frontStep)) * resolution;
-	scanableSteps = lastStep - firstStep;
-}
-
-URGSensorInfo& URGSensorInfo::operator= (const URGSensorInfo &rhs)
-{
-	if (this == &rhs)
-		return *this;
-
-	vendor = rhs.vendor;
-	product = rhs.product;
-	firmware = rhs.firmware;
-	protocol = rhs.protocol;
-	serial = rhs.serial;
-
-	model = rhs.model;
-	minRange = rhs.minRange;
-	maxRange = rhs.maxRange;
-	steps = rhs.steps;
-	firstStep = rhs.firstStep;
-	lastStep = rhs.lastStep;
-	frontStep = rhs.frontStep;
-	standardSpeed = rhs.standardSpeed;
-
-	power = rhs.power;
-	speed = rhs.speed;
-	measureState = rhs.measureState;
-	baud = rhs.baud;
-	time = rhs.time;
-	sensorDiagnostic = rhs.sensorDiagnostic;
-
-	minAngle = rhs.minAngle;
-	maxAngle = rhs.maxAngle;
-	resolution = rhs.resolution;
-	scanableSteps = rhs.scanableSteps;
-
-	return *this;
+	scanableSteps = lastStep - firstStep + 1;
 }
 
 string URGSensorInfo::AsString (void)
@@ -800,58 +740,6 @@ void URGLaser::Open (string portOptions)
 	_port = flexiport::CreatePort (portOptions);
 	_port->Open ();
 
-//	if (_port->GetPortType () == "serial")
-//	{
-//		if (_verbose)
-//		{
-//			cerr << "URGLaser::" << __func__ << "() Connected using serial connection." << endl;
-//			cerr << _port->GetStatus ();
-//		}
-//		// Need to work our way down the baud rates until we get the one that the scanner is
-//		// actually using. Start with the one the port is set to (hopefully the user set
-//		// the port's baud option to the same as the scanner).
-//		if (_verbose)
-//		{
-//			cerr << "URGLaser::" << __func__ << "() Trying to connect at " <<
-//				reinterpret_cast<SerialPort*> (_port)->GetBaudRate () << "bps." << endl;
-//		}
-//		if (SetBaud (reinterpret_cast<SerialPort*> (_port)->GetBaudRate ()))
-//		{
-//			if (_verbose)
-//			{
-//				cerr << "URGLaser::" << __func__ << "() Successfully connected at " <<
-//					reinterpret_cast<SerialPort*> (_port)->GetBaudRate () << "bps." << endl;
-//			}
-//		}
-//		else
-//		{
-//			unsigned int bauds[] = {19200, 57600, 115200, 250000, 500000, 750000};
-//			int ii;
-//			for (ii = 0; ii < 6; ii++)
-//			{
-//				if (SetBaud (bauds[ii]))
-//				{
-//					if (_verbose)
-//					{
-//						cerr << "URGLaser::" << __func__ << "() Successfully connected at " <<
-//							bauds[ii] << "bps." << endl;
-//					}
-//					break;
-//				}
-//			}
-//			if (ii == 6)
-//			{
-//				// Did not connect at any speed
-//				throw URGError (URG_ERR_CONNECT_FAILED, "Failed to connect at any baud.");
-//			}
-//		}
-//	}
-//	else if (_verbose)
-//	{
-//		cerr << "URGLaser::" << __func__ << "() Connected using " << _port->GetPortType () <<
-//			" connection." << endl;
-//		cerr << _port->GetStatus ();
-//	}
 	if (_verbose)
 	{
 		cerr << "URGLaser::" << __func__ << "() Connected using " << _port->GetPortType () <<
@@ -1013,7 +901,7 @@ void URGLaser::SetMotorSpeed (unsigned int speed)
 				buffer[1] = 100 - (speed / 6) + 0x30;
 			}
 		}
-		SendCommand ("CR", buffer, 2, "03"); 
+		SendCommand ("CR", buffer, 2, "03");
 		SkipLines (1);
 	}
 	else
@@ -1082,7 +970,7 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 			}
 			// Now put it through sscanf and hope...
 			int aperture;
-			int numFound = sscanf (valueStart, "%d-%d[mm],%d[deg],%d-%d[step],%d[rpm]", 
+			int numFound = sscanf (valueStart, "%d-%d[mm],%d[deg],%d-%d[step],%d[rpm]",
 									&info->minRange, &info->maxRange, &aperture,
 									&info->firstStep, &info->lastStep, &info->speed);
 			if (numFound != 6)
@@ -1098,10 +986,10 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 			}
 
 			// Need to calculate stuff differently since it gave us an aperture value
-			info->resolution = static_cast<double> (aperture) / 
+			info->resolution = static_cast<double> (aperture) /
 									static_cast<double> (info->lastStep - info->firstStep);
 			// Assume that the range is evenly spread
-			info->scanableSteps = info->lastStep - info->firstStep;
+			info->scanableSteps = info->lastStep - info->firstStep + 1;
 			info->frontStep = info->scanableSteps / 2;
 			info->minAngle = (info->firstStep - info->frontStep) * info->resolution;
 			info->maxAngle = (info->lastStep - info->frontStep) * info->resolution;
@@ -1127,7 +1015,7 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 
 		char buffer[SCIP2_LINE_LENGTH];
 		memset (buffer, 0, sizeof (char) * SCIP2_LINE_LENGTH);
-		
+
 		// We need to send three commands to get all the info we want: VV, PP and II
 		SendCommand ("VV", NULL, 0, NULL);
 		// Get the vendor info line
@@ -1155,17 +1043,17 @@ void URGLaser::GetSensorInfo (URGSensorInfo *info)
 		info->model = &buffer[5];
 		// On to the fun ones that require parsing
 		ReadLineWithCheck (buffer, -1, true);
-		info->minRange = atoi (&buffer[5]);		
+		info->minRange = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
-		info->maxRange = atoi (&buffer[5]);		
+		info->maxRange = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
-		info->steps = atoi (&buffer[5]);		
+		info->steps = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
-		info->firstStep = atoi (&buffer[5]);		
+		info->firstStep = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
-		info->lastStep = atoi (&buffer[5]);		
+		info->lastStep = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
-		info->frontStep = atoi (&buffer[5]);		
+		info->frontStep = atoi (&buffer[5]);
 		ReadLineWithCheck (buffer, -1, true);
 		info->standardSpeed = atoi (&buffer[5]);
 		// Skip the end-of-message
@@ -1303,19 +1191,6 @@ unsigned int URGLaser::GetRanges (URGData *data, double startAngle,
 	int startStep, endStep;
 	startStep = AngleToStep (startAngle);
 	endStep = AngleToStep (endAngle);
-//	double startStepF, endStepF;
-//	startStepF = _frontStep +
-//		(static_cast<double> (startAngle) / static_cast<double> (_resolution));
-//	// Round towards _frontStep so that the step values are always inside the angles given
-//	if (startStepF < _frontStep)
-//		startStep = static_cast<int> (ceil (startStepF));
-//	else
-//		startStep = static_cast<int> (floor (startStepF));
-//	endStepF = _frontStep + (static_cast<double> (endAngle) / static_cast<double> (_resolution));
-//	if (endStepF < _frontStep)
-//		endStep = static_cast<int> (ceil (endStepF));
-//	else
-//		endStep = static_cast<int> (floor (endStepF));
 
 	// Check the steps are within the allowable range
 	if (startStep < _firstStep || startStep > _lastStep)
@@ -1330,7 +1205,7 @@ unsigned int URGLaser::GetRanges (URGData *data, double startAngle,
 	}
 
 	// Get the data
-	return GetRanges (data, startStep, endStep, clusterCount); 
+	return GetRanges (data, startStep, endStep, clusterCount);
 }
 
 unsigned int URGLaser::GetNewRanges (URGData *data, int startStep, int endStep,
@@ -1357,8 +1232,8 @@ unsigned int URGLaser::GetNewRanges (URGData *data, int startStep, int endStep,
 		unsigned int numSteps = (endStep - startStep + 1) / clusterCount;
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Reading " << numSteps << 
-				" new ranges between " << startStep << " and " << endStep << 
+			cerr << "URGLaser::" << __func__ << "() Reading " << numSteps <<
+				" new ranges between " << startStep << " and " << endStep <<
 				" with a cluster count of " << clusterCount << endl;
 		}
 
@@ -1399,19 +1274,6 @@ unsigned int URGLaser::GetNewRanges (URGData *data, double startAngle, double en
 	int startStep, endStep;
 	startStep = AngleToStep (startAngle);
 	endStep = AngleToStep (endAngle);
-//	double startStepF, endStepF;
-//	startStepF = _frontStep +
-//		(static_cast<double> (startAngle) / static_cast<double> (_resolution));
-//	// Round towards _frontStep so that the step values are always inside the angles given
-//	if (startStepF < _frontStep)
-//		startStep = static_cast<int> (ceil (startStepF));
-//	else
-//		startStep = static_cast<int> (floor (startStepF));
-//	endStepF = _frontStep + (static_cast<double> (endAngle) / static_cast<double> (_resolution));
-//	if (endStepF < _frontStep)
-//		endStep = static_cast<int> (ceil (endStepF));
-//	else
-//		endStep = static_cast<int> (floor (endStepF));
 
 	// Check the steps are within the allowable range
 	if (startStep < _firstStep || startStep > _lastStep)
@@ -1426,7 +1288,7 @@ unsigned int URGLaser::GetNewRanges (URGData *data, double startAngle, double en
 	}
 
 	// Get the data
-	return GetNewRanges (data, startStep, endStep, clusterCount); 
+	return GetNewRanges (data, startStep, endStep, clusterCount);
 }
 
 double URGLaser::StepToAngle (unsigned int step)
@@ -1493,7 +1355,7 @@ int URGLaser::ReadLine (char *buffer, int expectedLength)
 		{
 			stringstream ss;
 			ss << "URGLaser::" << __func__ << "() Got an incorrect line length: " << lineLength <<
-				" != " << expectedLength; 
+				" != " << expectedLength;
 			throw URGError (URG_ERR_PROTOCOL, ss.str ());
 		}
 		// Replace the line feed with a NULL
@@ -1533,7 +1395,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 	// Ignore the checksum itself, and possibly a semicolon (ReadLine has already chopped off the
 	// line feed for us).
 	int bytesToConsider = lineLength - 1 - (hasSemicolon ? 1 : 0);
-	int checksumIndex = bytesToConsider + (hasSemicolon ? 1 : 0);  
+	int checksumIndex = bytesToConsider + (hasSemicolon ? 1 : 0);
 	if (_verbose)
 	{
 		cerr << "URGLaser::" << __func__ << "() Considering " << bytesToConsider <<
@@ -1543,7 +1405,7 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 	{
 		stringstream ss;
 		ss << "Not enough bytes to calculate checksum with: " << bytesToConsider <<
-			" bytes (line length is " << lineLength << " bytes)."; 
+			" bytes (line length is " << lineLength << " bytes).";
 		throw URGError (URG_ERR_PROTOCOL, ss.str ());
 	}
 
@@ -1566,8 +1428,8 @@ int URGLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemic
 	if (checkSum != static_cast<int> (buffer[checksumIndex]))
 	{
 		stringstream ss;
-		ss << "Invalid checksum -  given: " << static_cast<int> (buffer[checksumIndex]) << 
-			", calculated: " << checkSum; 
+		ss << "Invalid checksum -  given: " << static_cast<int> (buffer[checksumIndex]) <<
+			", calculated: " << checkSum;
 		throw URGError (URG_ERR_PROTOCOL, ss.str ());
 	}
 
@@ -1615,7 +1477,7 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 		if (_port->Write ("\n", 1) < 1)
 			throw URGError (URG_ERR_WRITE, "Failed to write termination character.");
 
-		// Read back the response (should get at least 4 bytes , possibly up to 16 including \n's 
+		// Read back the response (should get at least 4 bytes , possibly up to 16 including \n's
 		// depending on the parameters): cmd[0] params \n status \n
 		int statusIndex = 2 + paramLength;
 		ReadLine (response, 2 + paramLength);
@@ -1636,7 +1498,7 @@ int URGLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraO
 		// Next up, check the status byte
 		if (_verbose)
 		{
-			cerr << "URGLaser::" << __func__ << "() Command response status: " << 
+			cerr << "URGLaser::" << __func__ << "() Command response status: " <<
 				response[statusIndex] << endl;
 		}
 		if (response[statusIndex] != '0')
