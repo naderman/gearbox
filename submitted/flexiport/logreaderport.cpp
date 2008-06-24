@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -47,7 +47,6 @@ namespace flexiport
 LogReaderPort::LogReaderPort (map<string, string> options)
 	: Port (), _logFileName ("port.log"), _strictness (0),
 	_jitter (100), _ignoreTimes (false), _open (false)
-//	_bufferSize (0), 
 {
 	_type = "logreader";
 	ProcessOptions (options);
@@ -58,7 +57,6 @@ LogReaderPort::LogReaderPort (map<string, string> options)
 		throw PortException (string ("LogReaderPort::") + __func__ +
 				string ("() Failed to allocate LogFile object."));
 	}
-//	_logFile->SetBufferSize (_bufferSize);
 	_logFile->Open (_logFileName, true, _ignoreTimes);
 
 	if (_alwaysOpen)
@@ -129,7 +127,7 @@ ssize_t LogReaderPort::ReadFull (void * const buffer, size_t count)
 
 	if (_debug >= 2)
 	{
-		cerr << "LogReaderPort::" << __func__ << "() Going to read until have " << count << 
+		cerr << "LogReaderPort::" << __func__ << "() Going to read until have " << count <<
 			" bytes" << endl;
 	}
 
@@ -158,7 +156,7 @@ ssize_t LogReaderPort::ReadFull (void * const buffer, size_t count)
 				SetTimeout (oldTimeout);
 
 				stringstream ss;
-				ss << "LogReaderPort::" << __func__ << "() EOF while trying to read " << 
+				ss << "LogReaderPort::" << __func__ << "() EOF while trying to read " <<
 					count << " bytes";
 				throw PortException (ss.str ());
 			}
@@ -271,8 +269,7 @@ std::string LogReaderPort::GetStatus (void) const
 	status << "LogReader-specific status:" << endl;
 	status << "Reading from " << _logFileName << endl;
 	status << ((_open && _logFile->IsOpen ()) ? "Port is open" : "Port is closed") << endl;
-//	status << "Buffer size: " << _bufferSize << endl;
-//	status << (_ignoreTimes ? "Ignoring file time stamps." : "Using file time stamps.") << endl;
+	status << (_ignoreTimes ? "Ignoring file time stamps." : "Using file time stamps.") << endl;
 	status << "Strictness is " << _strictness << ", with a jitter of " << _jitter << "ms" << endl;
 
 	return Port::GetStatus () + status.str ();
@@ -315,13 +312,6 @@ bool LogReaderPort::ProcessOption (const std::string &option, const std::string 
 		_logFileName = value;
 		return true;
 	}
-//	else if (option == "buffersize")
-//	{
-//		istringstream is (value);
-//		if (!(is >> _bufferSize) || is.get (c))
-//			throw PortException ("Bad buffer size: " + value);
-//		return true;
-//	}
 	else if (option == "ignoretimes")
 	{
 		_ignoreTimes = true;

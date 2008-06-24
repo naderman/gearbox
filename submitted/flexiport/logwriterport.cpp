@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -67,7 +67,7 @@ LogWriterPort::LogWriterPort (map<string, string> options)
 	}
 	// The rest of the options go on to the underlying Port object
 
-	// Create the underlying port object 
+	// Create the underlying port object
 	_port = CreatePort (options);
 
 	// Initialise the log file
@@ -83,6 +83,7 @@ LogWriterPort::~LogWriterPort (void)
 {
 	// _logFile should never be NULL because it's allocated in the constructor and never deleted.
 	_logFile->Close ();
+	delete _logFile;
 
 	if (_port)
 		_port->Close ();
@@ -198,7 +199,7 @@ ssize_t LogWriterPort::SkipUntil (uint8_t terminator, unsigned int count)
 
 	if (_debug >= 2)
 	{
-		cerr << "LogWriterPort::" << __func__ << "() Skipping until '" << terminator << 
+		cerr << "LogWriterPort::" << __func__ << "() Skipping until '" << terminator <<
 			"' is seen " << count << " times." << endl;
 	}
 	// Read bytes one at a time until either a timeout occurs or we hit the terminator byte

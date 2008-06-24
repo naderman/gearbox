@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: ___
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -28,6 +28,7 @@
 #include "flexiport.h"
 #include "logfile.h"
 
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -76,7 +77,7 @@ const size_t CHUNK_HEADER_SIZE = sizeof (size_t) + sizeof (struct timeval);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LogFile::LogFile (unsigned int debug)
-	: _read (false), _readFile (NULL), _writeFile (NULL), _readFileSize (0), _writeFileSize (0), 
+	: _read (false), _readFile (NULL), _writeFile (NULL), _readFileSize (0), _writeFileSize (0),
 	_debug (debug), _readUsage (0), _writeUsage (0), _readSize (0), _writeSize (0),
 	_readBuffer (NULL), _writeBuffer (NULL), _ignoreTimes (false)
 //	_bufferSize (0),
@@ -112,14 +113,14 @@ void LogFile::Open (string fileName, bool read, bool ignoreTimes)
 		if ((_readFile = fopen ((fileName + "r").c_str (), "r")) == NULL)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		if ((_writeFile = fopen ((fileName + "w").c_str (), "r")) == NULL)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -132,14 +133,14 @@ void LogFile::Open (string fileName, bool read, bool ignoreTimes)
 		if ((_readFile = fopen ((fileName + "r").c_str (), "w")) == NULL)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		if ((_writeFile = fopen ((fileName + "w").c_str (), "w")) == NULL)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -160,7 +161,7 @@ void LogFile::Close (void)
 		{
 			_readFile = NULL;
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fclose(_readFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fclose(_readFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -171,7 +172,7 @@ void LogFile::Close (void)
 		{
 			_writeFile = NULL;
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fclose(_writeFile) error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fclose(_writeFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -201,7 +202,7 @@ bool LogFile::IsOpen (void) const
 	if ((pos = ftell (_readFile)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -211,7 +212,7 @@ bool LogFile::IsOpen (void) const
 	if ((pos = ftell (_writeFile)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -234,14 +235,14 @@ void LogFile::ResetFile (void)
 	if (fseek (_readFile, 0, SEEK_SET) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek(_readFile) error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek(_readFile) error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
 	if (fseek (_writeFile, 0, SEEK_SET) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek(_writeFile) error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek(_writeFile) error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -254,7 +255,7 @@ void LogFile::ResetFile (void)
 	if (gettimeofday (&_openTime, NULL) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -338,24 +339,24 @@ ssize_t LogFile::Read (void *data, size_t count, Timeout &timeout)
 		{
 			if (_debug >= 2)
 				cerr << "LogFile::" << __func__ << "() Data available in file now." << endl;
-	
+
 			// Get all the data that is immediatly available and return it
 			totalRead += GetChunksToTimeLimit (_readFile, data, count, now);
 			return totalRead;
 		}
-	
+
 		// There was no data instantly, so now the timeout gets involved
 		if (timeout._sec == -1)
 		{
 			// Infinite timeout
 			if (_debug >= 2)
 				cerr << "LogFile::" << __func__ << "() Getting next chunk, no timeout." << endl;
-	
+
 			// Get the next available chunk from the file
 			struct timeval timestamp;
 			size_t size;
 			totalRead += GetSingleChunk (_readFile, data, count, timestamp, size);
-	
+
 			// Calculate the time difference between now and this chunk's timestamp
 			struct timeval diff;
 			GetCurrentFileTime (now);
@@ -380,7 +381,7 @@ ssize_t LogFile::Read (void *data, size_t count, Timeout &timeout)
 			// Limited timeout
 			if (_debug >= 2)
 				cerr << "LogFile::" << __func__ << "() Getting next chunk with timeout." << endl;
-	
+
 			// Check if there is actually data available within this time limit
 			struct timeval timeoutVal, limit;
 			timeout.AsTimeval (timeoutVal);
@@ -392,7 +393,7 @@ ssize_t LogFile::Read (void *data, size_t count, Timeout &timeout)
 				struct timeval timestamp;
 				size_t size;
 				totalRead += GetSingleChunk (_readFile, data, count, timestamp, size);
-	
+
 				// Calculate the time difference between now and this chunk's timestamp
 				struct timeval diff;
 				GetCurrentFileTime (now);
@@ -442,7 +443,7 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 		// Get the current file time
 		struct timeval now;
 		GetCurrentFileTime (now);
-	
+
 		// Now count data from the file
 		if (DataAvailableWithinLimit (_readFile, now))
 		{
@@ -465,12 +466,12 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 			// Infinite timeout
 			if (_debug >= 2)
 				cerr << "LogFile::" << __func__ << "() Getting next chunk, no timeout." << endl;
-	
+
 			// Get the next available chunk from the file
 			struct timeval timeStamp;
 			size_t size;
 			GetNextChunkInfo (_readFile, timeStamp, size);
-	
+
 			// Calculate the time difference between now and this chunk's timestamp
 			struct timeval diff;
 			GetCurrentFileTime (now);
@@ -495,7 +496,7 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 			// Limited timeout
 			if (_debug >= 2)
 				cerr << "LogFile::" << __func__ << "() Getting next chunk with timeout." << endl;
-	
+
 			// Check if there is actually data available within this time limit
 			struct timeval timeoutVal, limit;
 			timeout.AsTimeval (timeoutVal);
@@ -507,7 +508,7 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 				struct timeval timeStamp;
 				size_t size;
 				GetNextChunkInfo (_readFile, timeStamp, size);
-	
+
 				// Calculate the time difference between now and this chunk's timestamp
 				struct timeval diff;
 				GetCurrentFileTime (now);
@@ -554,7 +555,7 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 	if ((readFileOffset = ftell (_readFile)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -719,7 +720,7 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 		if (fseek (_readFile, readFileOffset, SEEK_SET) < 0)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -752,7 +753,7 @@ void LogFile::Flush (void)
 			if (fseek (_readFile, CHUNK_HEADER_SIZE + size, SEEK_CUR) < 0)
 			{
 				stringstream ss;
-				ss << "LogFile::" << __func__ << "() fseek(_readFile) error: (" << ErrNo () << 
+				ss << "LogFile::" << __func__ << "() fseek(_readFile) error: (" << ErrNo () <<
 					") " << StrError (ErrNo ());
 				throw PortException (ss.str ());
 			}
@@ -787,7 +788,7 @@ void LogFile::Drain (void)
 			if (fseek (_writeFile, CHUNK_HEADER_SIZE + size, SEEK_CUR) < 0)
 			{
 				stringstream ss;
-				ss << "LogFile::" << __func__ << "() fseek(_writeFile) error: (" << ErrNo () << 
+				ss << "LogFile::" << __func__ << "() fseek(_writeFile) error: (" << ErrNo () <<
 					") " << StrError (ErrNo ());
 				throw PortException (ss.str ());
 			}
@@ -809,7 +810,8 @@ void LogFile::WriteRead (const void * const data, size_t count)
 			" bytes." << endl;
 	}
 	WriteTimeStamp (_readFile);
-	WriteToFile (_readFile, &count, sizeof (count));
+	uint32_t temp = htonl (static_cast<uint32_t> (count));
+	WriteToFile (_readFile, &temp, sizeof (temp));
 	WriteToFile (_readFile, data, count);
 }
 
@@ -821,7 +823,8 @@ void LogFile::WriteWrite (const void * const data, size_t count)
 			" bytes." << endl;
 	}
 	WriteTimeStamp (_writeFile);
-	WriteToFile (_writeFile, &count, sizeof (count));
+	uint32_t temp = htonl (static_cast<uint32_t> (count));
+	WriteToFile (_writeFile, &temp, sizeof (temp));
 	WriteToFile (_writeFile, data, count);
 }
 
@@ -956,7 +959,7 @@ void LogFile::GetCurrentFileTime (struct timeval &dest)
 	if (gettimeofday (&now, NULL) < 0)
 	{
 		stringstream ss;
-		ss << "LogReaderPort::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " << 
+		ss << "LogReaderPort::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -989,7 +992,7 @@ void LogFile::GetNextChunkInfo (FILE * const file, struct timeval &timeStamp, si
 	if (fseek (file, -1 * CHUNK_HEADER_SIZE, SEEK_CUR) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1048,7 +1051,7 @@ size_t LogFile::GetChunkSizesToTimeLimit (FILE * const file, const struct timeva
 	if ((currentPos = ftell (file)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1071,7 +1074,7 @@ size_t LogFile::GetChunkSizesToTimeLimit (FILE * const file, const struct timeva
 	if (fseek (file, currentPos, SEEK_SET) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1093,8 +1096,13 @@ size_t LogFile::GetSingleChunk (FILE * const file, void *data, size_t count,
 	}
 
 	// Read the chunk info
-	ReadFromFile (file, &timeStamp, sizeof (timeStamp));
-	ReadFromFile (file, &size, sizeof (size));
+	uint32_t secs, usecs, tempSize;
+	ReadFromFile (file, &secs, sizeof (secs));
+	ReadFromFile (file, &usecs, sizeof (usecs));
+	timeStamp.tv_sec = ntohl (secs);
+	timeStamp.tv_usec = ntohl (usecs);
+	ReadFromFile (file, &tempSize, sizeof (tempSize));
+	size = ntohl (tempSize);
 	if (_debug >= 3)
 		cerr << "LogFile::" << __func__ << "() Chunk is " << size << " bytes." << endl;
 
@@ -1158,7 +1166,7 @@ size_t LogFile::GetFileSize (FILE * const file)
 	if ((currentPos = ftell (file)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1167,7 +1175,7 @@ size_t LogFile::GetFileSize (FILE * const file)
 	if (fseek (file, 0, SEEK_END) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1175,7 +1183,7 @@ size_t LogFile::GetFileSize (FILE * const file)
 	if ((fileSize = ftell (file)) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() ftell() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1184,7 +1192,7 @@ size_t LogFile::GetFileSize (FILE * const file)
 	if (fseek (file, currentPos, SEEK_SET) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1218,7 +1226,7 @@ void LogFile::ReadFromFile (FILE * const file, void * const dest, size_t count)
 		else if (ferror (file))
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fread() error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fread() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -1251,7 +1259,7 @@ void LogFile::WriteToFile (FILE * const file, const void * const data, size_t co
 								sizeof (uint8_t), count - totalWritten, file)) < 0)
 		{
 			stringstream ss;
-			ss << "LogFile::" << __func__ << "() fwrite() error: (" << ErrNo () << ") " << 
+			ss << "LogFile::" << __func__ << "() fwrite() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -1268,16 +1276,20 @@ void LogFile::WriteTimeStamp (FILE * const file)
 	if (gettimeofday (&now, NULL) < 0)
 	{
 		stringstream ss;
-		ss << "LogFile::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " << 
+		ss << "LogFile::" << __func__ << "() gettimeofday() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
 	timersub (&now, &_openTime, &diff);
+	uint32_t secs, usecs;
+	secs = htonl (static_cast<uint32_t> (diff.tv_sec));
+	usecs = htonl (static_cast<uint32_t> (diff.tv_usec));
 	// Write the time stamp to the file
-	WriteToFile (file, &diff, sizeof (diff));
+	WriteToFile (file, &secs, sizeof (secs));
+	WriteToFile (file, &usecs, sizeof (usecs));
 	if (_debug >= 3)
 	{
-		cerr << "LogFile::" << __func__ << "() Wrote time stamp: " << diff.tv_sec << "s " << 
+		cerr << "LogFile::" << __func__ << "() Wrote time stamp: " << diff.tv_sec << "s " <<
 			diff.tv_usec << "us (time of write is " << now.tv_sec << "s " << now.tv_usec << "us)."
 			<< endl;
 	}

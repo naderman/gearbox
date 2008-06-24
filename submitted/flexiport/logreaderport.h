@@ -105,7 +105,6 @@ class FLEXIPORT_EXPORT LogReaderPort : public Port
 	private:
 		LogFile *_logFile;
 		std::string _logFileName;
-//		unsigned int _bufferSize;
 		unsigned int _strictness;
 		int _jitter;
 		bool _ignoreTimes;
