@@ -12,6 +12,6 @@ IF( GBX_BUILD_SUBMITTED )
     # E.g. ADD_SUBDIRECTORY( mydir )
     ADD_SUBDIRECTORY( flexiport )
     ADD_SUBDIRECTORY( gbxnovatelacfr )
-    ADD_SUBDIRECTORY( urg_nz )
+    ADD_SUBDIRECTORY( hokuyo_aist )
 
 ENDIF( GBX_BUILD_SUBMITTED )
