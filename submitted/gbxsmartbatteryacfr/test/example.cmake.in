@@ -1,0 +1,26 @@
+PROJECT( gbxsmartbatteryacfr_example )
+
+INCLUDE_DIRECTORIES( @CMAKE_INSTALL_PREFIX@/include/gearbox )
+
+ADD_EXECUTABLE( gbxsmartbatteryacfrchecksum checksumtest.cpp )
+TARGET_LINK_LIBRARIES( gbxsmartbatteryacfrchecksum GbxSmartBatteryAcfr )
+SET_TARGET_PROPERTIES( gbxsmartbatteryacfrchecksum PROPERTIES
+                       LINK_FLAGS "-L@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       BUILD_WITH_INSTALL_RPATH TRUE )
+                       
+ADD_EXECUTABLE( gbxsmartbatteryacfrsimple simpletest.cpp )
+TARGET_LINK_LIBRARIES( gbxsmartbatteryacfrsimple GbxSmartBatteryAcfr )
+SET_TARGET_PROPERTIES( gbxsmartbatteryacfrsimple PROPERTIES
+                       LINK_FLAGS "-L@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       BUILD_WITH_INSTALL_RPATH TRUE )
+                       
+                       
+ADD_EXECUTABLE( gbxsmartbatteryacfrfancy fancytest.cpp )
+TARGET_LINK_LIBRARIES( gbxsmartbatteryacfrfancy GbxSmartBatteryAcfr )
+SET_TARGET_PROPERTIES( gbxsmartbatteryacfrfancy PROPERTIES
+                       LINK_FLAGS "-L@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       INSTALL_RPATH "${INSTALL_RPATH};@CMAKE_INSTALL_PREFIX@/lib/gearbox"
+                       BUILD_WITH_INSTALL_RPATH TRUE )
+

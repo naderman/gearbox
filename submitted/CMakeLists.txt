@@ -11,6 +11,7 @@ IF( GBX_BUILD_SUBMITTED )
     # Otherwise, maintain alphabetical order.
     # E.g. ADD_SUBDIRECTORY( mydir )
     ADD_SUBDIRECTORY( flexiport )
+    ADD_SUBDIRECTORY( gbxsmartbatteryacfr )
     ADD_SUBDIRECTORY( gbxnovatelacfr )
     ADD_SUBDIRECTORY( hokuyo_aist )
 
