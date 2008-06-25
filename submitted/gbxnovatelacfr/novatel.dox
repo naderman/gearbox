@@ -122,7 +122,13 @@ int main(void){
                 }
                 break;
             default:
-                std::cout << "Got unknown message!\n";
+                if(0 == generic.get()){
+                    std::cout << "Got NULL message!\n";
+                }
+                else{
+                    std::cout << "Got unknown message!\n";
+                    std::cout << generic->toString() << "\n"; // yes this works, since toString() is a member of the base class
+                }
                 break;
         }
     }
@@ -147,6 +153,7 @@ The following sources have also been helpful:
 - This is a Linux-only implementation (because of the serial library and the system-calls for timestamps)
 - Only supports a subset of the messages a NovatelSPAN system can provide.
 - Driver currently treats the hardware as data-source only, communication _to_ the hardware is possible only during initialization.
+- Driver doesn't check if configuring the receiver was successful/as-intended
 */
 
 /*!

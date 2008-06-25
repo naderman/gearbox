@@ -188,7 +188,7 @@ private:
 };
 
 //! possible Status Messages GenericData can contain
-enum StatusMessagetype {
+enum StatusMessageType {
     NoMsg,       //!< Nothing new, no message
     Initialising,//!< Nothing wrong, just not quite ready
     Ok,          //!< All good, but something to say
@@ -285,8 +285,8 @@ class InsPvaData : public GenericData {
             return InsPva;
         }
         std::string toString();
-        int      gpsWeekNr;         //
-        double   secIntoWeek;       //
+        int      gpsWeekNr;         //!< number of full weeks since midnight 05/Jan/1980 (UTC)
+        double   secIntoWeek;       //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         double   latitude;          //!< [deg] north positive WGS84
         double   longitude;         //!< [deg] east positive WGS84
         double   height;            //!< [m] above ellipsoid WGS84 (heigth_ellipsoid - undulation == height_geoid (aka AMSL)
@@ -311,7 +311,7 @@ class InsPvaData : public GenericData {
 
         //@}
 
-        StatusMessagetype statusMessageType;
+        StatusMessageType statusMessageType;
         std::string statusMessage;
 
         int timeStampSec;  //!< in Computer time, beginning of message at serial port
@@ -325,8 +325,8 @@ class BestGpsPosData : public GenericData {
             return BestGpsPos;
         }
         std::string toString();
-        int gpsWeekNr;                          //
-        unsigned int msIntoWeek;                //!< milliseconds from beginning of week
+        int gpsWeekNr;                          //!< number of full weeks since midnight 05/Jan/1980 (UTC)
+        unsigned int msIntoWeek;                //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         GpsSolutionStatusType  solutionStatus;  //
         GpsPosVelType          positionType;    //
         double       latitude;                  //!< [deg] north positive
@@ -345,7 +345,7 @@ class BestGpsPosData : public GenericData {
         int          numL1RangesRTK;            //!< number of L1 ranges above the RTK mask angle (??) number of L1 carrier ranges used?
         int          numL2RangesRTK;            //!< number of L2 ranges above the RTK mask angle (??) number of L2 carrier ranges used?
 
-        StatusMessagetype statusMessageType;
+        StatusMessageType statusMessageType;
         std::string statusMessage;
 
         int timeStampSec;  //!< in Computer time, beginning of message at serial port
@@ -359,8 +359,8 @@ class BestGpsVelData : public GenericData {
             return BestGpsVel;
         }
         std::string toString();
-        int          gpsWeekNr;                 //
-        unsigned int msIntoWeek;                //!< milliseconds from beginning of week
+        int          gpsWeekNr;                 //!< number of full weeks since midnight 05/Jan/1980 (UTC)
+        unsigned int msIntoWeek;                //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         GpsSolutionStatusType  solutionStatus;  //
         GpsPosVelType          positionType;    //
         float        latency;                   //!< [s] gps speed can be calculated from instantanious or integrated doppler. The latter refers to the average speed over the last interval -> is delayed by half an interval
@@ -369,7 +369,7 @@ class BestGpsVelData : public GenericData {
         double       trackOverGround;           //!< [deg] "heading" of the speed vector w. respect to true North
         double       verticalSpeed;             //!< [m/s]
 
-        StatusMessagetype statusMessageType;
+        StatusMessageType statusMessageType;
         std::string statusMessage;
 
         int timeStampSec;  //!< in Computer time, beginning of message at serial port
@@ -383,8 +383,8 @@ class RawImuData : public GenericData {
             return RawImu;
         }
         std::string toString();
-        int    gpsWeekNr;
-        double secIntoWeek;
+        int    gpsWeekNr;   //!< number of full weeks since midnight 05/Jan/1980 (UTC)
+        double secIntoWeek; //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         //!@name Change in speed
         //!Divide by dt to get accelerations.
         //!The default IMU axis definitions are: Y - forward, Z - up, X - right hand side
@@ -407,7 +407,7 @@ class RawImuData : public GenericData {
 
         //@}
 
-        StatusMessagetype statusMessageType;
+        StatusMessageType statusMessageType;
         std::string statusMessage;
 
         int timeStampSec;  //!< in Computer time, beginning of message at serial port
@@ -438,49 +438,22 @@ public:
 
         Throws gbxutilacfr::Exception when a problem is encountered (derives from std::exception).
         Throws gbxutilacfr::HardwareException when a (fatal) problem with the hardware is encountered
-        @verbatim
-        std::auto_ptr<gbxnovatelacfr::GenericData> data;
-
-        while(1) {       // read forever
-            try {
-                data = device->read();
-            }
-            catch ( const gbxutilacfr::HardwareException& e ) {
-                cout <<"Something wrong with the hardware: "<<e.what()<<endl;
-                cout <<"Giving up!\n";
-                throw e;
-            }
-            catch ( const std::exception& e ) {
-                cout <<"Failed to read data: "<<e.what()<<endl;
-                continue;
-            }
-            switch( data.type() ){
-                case InsPvaData:
-                    InsData *insData = dynamic_cast<InsData *>(data.get());
-                    assert(insData);
-                    // process insData
-                    break;
-                default:
-                    // don't handle the other guys
-                    break;
-            }
-        }
-        @endverbatim */
+        */
     std::auto_ptr<GenericData> read();
 
 private:
 
-    //! does the leg-work for the constructor (via the following guys)
+    // does the leg-work for the constructor (via the following guys)
     void configure();
-    //! establish a serial connection to the receiver
-    int connectToHardware();
-    //! set parameters related to the IMU
+    // establish a serial connection to the receiver
+    void connectToHardware();
+    // set parameters related to the IMU
     void configureImu();
-    //! set parameters related to the INS
+    // set parameters related to the INS
     void configureIns();
-    //! set parameters related to GPS
+    // set parameters related to GPS
     void configureGps();
-    //! turn on data messages we are interested in
+    // turn on data messages we are interested in
     void requestData();
 
     std::auto_ptr<gbxnovatelutilacfr::ImuDecoder> imuDecoder_;

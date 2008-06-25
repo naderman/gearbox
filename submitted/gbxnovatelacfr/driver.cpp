@@ -69,14 +69,13 @@ namespace {
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder);
 
     //helper functions for the toString() gear
-    std::string statusToString(gna::StatusMessagetype statusMessageType, std::string statusMessage);
+    std::string statusToString(gna::StatusMessageType statusMessageType, std::string statusMessage);
     std::string doubleVectorToString(vector<double > &vec, std::string seperator = std::string(" "));
 }
 
 namespace gbxnovatelacfr
 {
 Driver::Driver( const Config& cfg) :
-    serial_(0),
     baud_(115200),
     config_(cfg),
     tracer_(new gbxutilacfr::TrivialTracer())
@@ -88,7 +87,6 @@ Driver::Driver( const Config& cfg) :
 
 Driver::Driver( const Config& cfg,
         gbxutilacfr::Tracer* tracer) :
-    serial_(0),
     baud_(115200),
     config_(cfg),
     tracer_(tracer)
@@ -109,9 +107,7 @@ Driver::configure( ) {
     std::string serialDevice = config_.serialDevice_;
     serial_.reset(new Serial( serialDevice, baud_, Serial::Timeout(1,0) ));
     serial_->setDebugLevel(0);
-    if(0 != connectToHardware() ){
-        throw (gua::Exception(ERROR_INFO, "failed to connect to receiver!"));
-    }
+    connectToHardware();
 
     // just in case something is running... stops the novatel logging any messages
     serial_->writeString( "unlogall\r\n" );
@@ -139,7 +135,7 @@ Driver::~Driver() {
     }
 }
 
-int
+void
 Driver::connectToHardware() {
     // baudrates we test for; this is
     // _not_ all the baudrates the receiver
@@ -155,7 +151,7 @@ Driver::connectToHardware() {
     int currentBaudrate = 0;
     bool correctBaudrate = false;
 
-    std::cout << "Trying to hook up to receiver at different Baudrates\n";
+    tracer_->info( "Trying to hook up to receiver at different Baudrates" );
     int maxTry = 4;
     int successThresh = 4;
     int timeOutMsec = 150;
@@ -168,25 +164,26 @@ Driver::connectToHardware() {
         i++;
     }
     if(false == correctBaudrate){
-        std::cout << "\n!Failed to establish a connection to the receiver!\n";
-        std::cout << "Check physical connections; Check manually (minicom) for Baudrates < 9600kb/s.\n\n";
-        return -1;
+        std::stringstream ss;
+        ss  << "!Failed to establish a connection to the receiver! Check physical connections; Check manually (minicom) for Baudrates < 9600kb/s.";
+        throw ( gua::Exception(ERROR_INFO, ss.str()) );
     }
+    // ok, we've got a working link
+    std::stringstream ss;
+    ss << "Established connection at "
+        << currentBaudrate << "bps; "
+        << "Resetting to configured speed: "
+        << baud_ << "bps";
+    tracer_->info(ss.str());
     char str[256];
     sprintf( str,"com com1 %d n 8 1 n off on\r\n", baud_ );
     serial_->writeString( str );
-    std::cout << "*******************************\n"
-        << "** Current Speed " << currentBaudrate << "\n"
-        << "** Resetting to " << baud_ << "\n"
-        << "*******************************\n";
-    std::cout << "** Testing new setting\n** ";
-    if(true == gnua::testConnectivity( challenge, ack, *(serial_.get()), timeOutMsec, maxTry, successThresh, baud_)){
-        std::cout << "*******************************\n";
-        return 0;
-    }else{
-        std::cout << "*******************************\n";
-        return -1;
+    if(false == gnua::testConnectivity( challenge, ack, *(serial_.get()), timeOutMsec, maxTry, successThresh, baud_)){
+        std::stringstream ss;
+        ss  << "!Failed to reset connection to configured baudrate!";
+        throw ( gua::Exception(ERROR_INFO, ss.str()) );
     }
+    return;
 }
 
 void
@@ -400,7 +397,7 @@ Driver::read(){
                         if(config_.ignoreUnknownMessages_){
                             tracer_->warning(ss.str());
                         }else{
-                            gua::Exception(ERROR_INFO, ss.str() );
+                            throw ( gua::Exception(ERROR_INFO, ss.str()) );
                         }
                     }
                     break;
@@ -410,7 +407,7 @@ Driver::read(){
             std::stringstream ss;
             ss << "Warning("<<__FILE__<<":"<< __LINE__
              << "Timed out while waiting for data";
-            gua::Exception(ERROR_INFO, ss.str());
+            throw ( gua::Exception(ERROR_INFO, ss.str()) );
         }
     }while(NULL == data.get()); // repeat till we get valid data
 
@@ -836,7 +833,7 @@ namespace{
 
         if(in_crc != crc) {
             fprintf( stderr,"CRC Error: 0x%lx, 0x%lx\n",in_crc,crc );
-            gua::Exception(ERROR_INFO, "CRC Error" );
+            throw ( gua::Exception(ERROR_INFO, "CRC Error" ) );
             return -1;
         }
 
@@ -1072,7 +1069,7 @@ namespace{
         return ss.str();
     }
 
-    std::string statusToString(gna::StatusMessagetype statusMessageType, std::string statusMessage){
+    std::string statusToString(gna::StatusMessageType statusMessageType, std::string statusMessage){
         std::stringstream ss;
         switch(statusMessageType){
             case gna::NoMsg:
