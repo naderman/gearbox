@@ -1523,6 +1523,8 @@ int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *ext
 			{
 				if (response[statusIndex] != extraOK[0])
 				{
+					// There is an extra line feed after an error status (signalling end of message)
+					SkipLines (1);
 					stringstream ss;
 					ss << "Bad response to " << cmd[0] << " command: " << " " <<
 						SCIP1ErrorToString (response[statusIndex], cmd[0]);
@@ -1531,6 +1533,8 @@ int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *ext
 			}
 			else
 			{
+				// There is an extra line feed after an error status (signalling end of message)
+				SkipLines (1);
 				stringstream ss;
 				ss << "Bad response to " << cmd[0] << " command: " << response[statusIndex] <<
 					" " << SCIP1ErrorToString (response[statusIndex], cmd[0]);
@@ -1593,6 +1597,8 @@ int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *ext
 			{
 				if (response[0] != extraOK[0] || response[1] != extraOK[1])
 				{
+					// There is an extra line feed after an error status (signalling end of message)
+					SkipLines (1);
 					stringstream ss;
 					ss << "Bad response to " << cmd << " command: " << response[0] << response[1] <<
 						" " << SCIP2ErrorToString (response, cmd);
@@ -1601,6 +1607,8 @@ int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *ext
 			}
 			else
 			{
+				// There is an extra line feed after an error status (signalling end of message)
+				SkipLines (1);
 				stringstream ss;
 				ss << "Bad response to " << cmd << " command: " << response[0] << response[1] <<
 					" " << SCIP2ErrorToString (response, cmd);
