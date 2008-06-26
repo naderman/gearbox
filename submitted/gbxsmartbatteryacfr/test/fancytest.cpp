@@ -8,29 +8,25 @@ class MyClass
 {
 public:
     MyClass(const std::string &port, bool debug);
-    ~MyClass();
+    ~MyClass() {};
     void read();
 private:
     gbxsmartbatteryacfr::OceanServerSystem data_;
-    gbxsmartbatteryacfr::OceanServerReader *reader_;
+    gbxutilacfr::TrivialTracer tracer_;
+    gbxsmartbatteryacfr::OceanServerReader reader_;
 };
 
 MyClass::MyClass(const std::string &port, bool debug)
+    : tracer_(debug),
+      reader_( port, tracer_ )
 {
-    gbxutilacfr::TrivialTracer tracer( debug );
-    reader_ = new gbxsmartbatteryacfr::OceanServerReader( port, tracer );
-}
-
-MyClass::~MyClass()
-{
-    delete reader_;
 }
 
 void
 MyClass::read()
 {
     gbxsmartbatteryacfr::OceanServerSystem data;
-    reader_->read(data);
+    reader_.read(data);
     gbxsmartbatteryacfr::updateWithNewData( data, data_ );
 
     cout << "Current data:" << endl 
