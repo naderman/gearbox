@@ -1,4 +1,6 @@
 #include <iostream>
+#include <memory>
+#include <cstdlib>
 #include <gbxutilacfr/trivialtracer.h>
 #include <gbxsmartbatteryacfr/gbxsmartbatteryacfr.h>
 

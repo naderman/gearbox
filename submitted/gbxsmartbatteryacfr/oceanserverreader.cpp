@@ -9,6 +9,7 @@
  */
 
 #include <sstream>
+#include <cstring>
 #include <gbxsmartbatteryacfr/exceptions.h>
 
 #include "oceanserverreader.h"
