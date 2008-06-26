@@ -25,7 +25,7 @@
 using namespace std;
 namespace gna = gbxnovatelacfr;
 
-void usage(char *progName, char *optString){
+void usage(char *progName, const char *optString){
     printf("Usage: %s -m [mode] -p [port] -b [baud] -i [imutype] -d -v -h\n", progName);
     printf("\t[mode]:\t\"gps\" to set the system up in GPS only mode\n"
             "\t\t\"ins\" to run INS/GPS mode (default)\n");
@@ -41,7 +41,7 @@ void usage(char *progName, char *optString){
 
 int main(int argc, char *argv[]){
     int opt;
-    char *optString = ":m:p:b:i:dvh";
+    const char *optString = ":m:p:b:i:dvh";
 
     //use sensible defaults
     string mode = "ins";
