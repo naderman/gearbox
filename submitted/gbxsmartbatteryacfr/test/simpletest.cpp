@@ -28,7 +28,7 @@ int main( int argc, char **argv )
         }
     }
     
-    const unsigned int numRecords = 10;
+    const unsigned int numRecords = 5;
     cout << "INFO(simple_test): The plan is to read " << numRecords << " records from the oceanserver system and display the results." << endl << endl;
 
     // instantiate reader

@@ -39,9 +39,7 @@ OceanServerReader::OceanServerReader( const string        &device,
 
     // send the command to start reading data
     serial_.flush();
-    
     const char startReading = 'X';
-    
     serial_.write(&startReading, 1);
 }
 
@@ -94,10 +92,6 @@ OceanServerReader::checkConnection()
             throw HardwareReadingException( ERROR_INFO, "Connected to the wrong serial port. Didn't recognize any of the strings.");
         }
     }
-}
-
-OceanServerReader::~OceanServerReader()
-{
 }    
 
 void 
@@ -143,7 +137,6 @@ OceanServerReader::read( OceanServerSystem &system )
     }
     else
     {
-        
         tracer_.debug( "OceanServerReader: We already have the first line from the previous record", 5 );
         stringList.push_back( beginningRecordLine_ );
     }
@@ -163,8 +156,7 @@ OceanServerReader::read( OceanServerSystem &system )
             stringList.push_back(serialData);
         }
         
-        // (4) Save the last line for next time, it's the S-record
-        //     Otherwise we'd miss a record
+        // (4) Save the last line: it is the beginning of the next record
         beginningRecordLine_ = serialData;
         if (firstTime_) {
             firstTime_ = false;

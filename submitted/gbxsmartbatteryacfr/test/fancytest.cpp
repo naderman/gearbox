@@ -70,7 +70,7 @@ int main( int argc, char **argv )
         }
     }
     
-    unsigned int numRecords=10;
+    const unsigned int numRecords = 5;
     MyClass myClass( port, debug );
     
     for (unsigned int i=0; i<=numRecords; i++)

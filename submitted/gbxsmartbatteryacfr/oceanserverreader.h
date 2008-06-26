@@ -35,7 +35,7 @@ public:
     OceanServerReader( const std::string   &device,
                        gbxutilacfr::Tracer &tracer );
 
-    ~OceanServerReader();
+    ~OceanServerReader() {};
     
     //! May throw HardwareReadingException
     void read( OceanServerSystem &system );
