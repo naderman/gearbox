@@ -12,6 +12,9 @@ SET( build TRUE )
 # INCLUDE( ${GBX_CMAKE_DIR}/FindIceUtil.cmake )
 # GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
 
+SET( dep_libs GbxUtilAcfr GbxSerialAcfr )
+GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
+
 IF( build )
     
     INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
