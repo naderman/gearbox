@@ -31,7 +31,7 @@ class OceanServerReader
 {
 public:
     
-    //! May throw SerialPortException
+    //! May throw HardwareReadingException
     OceanServerReader( const std::string   &device,
                        gbxutilacfr::Tracer &tracer );
 

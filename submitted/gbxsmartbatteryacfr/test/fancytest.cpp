@@ -13,20 +13,29 @@ public:
 private:
     gbxsmartbatteryacfr::OceanServerSystem data_;
     gbxutilacfr::TrivialTracer tracer_;
-    gbxsmartbatteryacfr::OceanServerReader reader_;
+    auto_ptr<gbxsmartbatteryacfr::OceanServerReader> reader_;
 };
 
 MyClass::MyClass(const std::string &port, bool debug)
-    : tracer_(debug),
-      reader_( port, tracer_ )
+    : tracer_(debug)
 {
+    try 
+    {
+        reader_.reset(new gbxsmartbatteryacfr::OceanServerReader( port, tracer_ ));
+    }
+    catch ( gbxsmartbatteryacfr::HardwareReadingException &e )
+    {
+        cout << "ERROR(fancy_test): Caught a hardware reading exception when initialising reader: " 
+                << e.what() << endl;
+        exit(1);
+    }        
 }
 
 void
 MyClass::read()
 {
     gbxsmartbatteryacfr::OceanServerSystem data;
-    reader_.read(data);
+    reader_->read(data);
     gbxsmartbatteryacfr::updateWithNewData( data, data_ );
 
     cout << "Current data:" << endl 

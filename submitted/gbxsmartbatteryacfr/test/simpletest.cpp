@@ -33,7 +33,19 @@ int main( int argc, char **argv )
 
     // instantiate reader
     gbxutilacfr::TrivialTracer tracer( debug );
-    gbxsmartbatteryacfr::OceanServerReader reader( port, tracer );
+    
+    gbxsmartbatteryacfr::OceanServerReader *reader;
+    
+    try 
+    {
+        reader = new gbxsmartbatteryacfr::OceanServerReader( port, tracer );
+    } 
+    catch ( gbxsmartbatteryacfr::HardwareReadingException &e )
+    {
+        cout << "ERROR(simple_test): Caught a hardware reading exception when initialising reader: " 
+                << e.what() << endl;
+        return 1;
+    }
     
     // data storage
     gbxsmartbatteryacfr::OceanServerSystem data;
@@ -42,7 +54,7 @@ int main( int argc, char **argv )
     {
         try 
         {
-            reader.read( data );
+            reader->read( data );
             cout << "TRACE(simple_test): Reading record " << i << ": " << endl
                     << "=====================================" << endl << endl
                     << gbxsmartbatteryacfr::toString( data ) << endl;
@@ -74,5 +86,6 @@ int main( int argc, char **argv )
 
     cout << "INFO(simple_test): Successfully read " << numRecords << " records." << endl;
     
+    delete reader;
     return 0;
 }
