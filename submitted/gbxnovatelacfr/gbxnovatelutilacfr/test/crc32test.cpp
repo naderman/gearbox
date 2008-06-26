@@ -135,8 +135,8 @@ int main(void){
             do{
                 errorByteThree = (int) ((double)faultBufLen * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
                 errorBitThree = (int) (8.0 * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
-            }while (errorByteThree==errorByte && errorBitThree==errorBit
-                    || errorByteThree==errorByteTwo && errorBitThree==errorBitTwo);// make sure we don't flip the same bit twice
+            }while ((errorByteThree==errorByte && errorBitThree==errorBit)
+                    || (errorByteThree==errorByteTwo && errorBitThree==errorBitTwo));// make sure we don't flip the same bit twice
             if(0 == faultBuf[errorByteThree] && (1<<errorBitThree))
                 faultBuf[errorByteThree] = faultBuf[errorByteThree] + (1<<errorBitThree);
             else
