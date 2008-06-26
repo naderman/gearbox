@@ -15,10 +15,7 @@
 @defgroup gbx_library_gbxsmartbatteryacfr GbxSmartBatteryAcfr
 @brief A library to read data from a smart battery system
 
-This library provides a set of classes and functions to read data from a Smart Battery System (SBS). SBS is a specification for determining accurate battery readings.
-
-The library also contains classes which are specialised to a battery system provided by OceanServer Technologies Inc.
-
+This library provides a set of classes and functions to read data from a Smart Battery System (SBS). SBS is a specification for determining accurate battery readings. The library also contains classes which are specialised to a battery system provided by OceanServer Technologies Inc.
 
 @par Header file
 
@@ -55,10 +52,11 @@ The library also contains classes which are specialised to a battery system prov
 - The library is tailored to the OceanServer battery system.
 - Has been tested with the following firmware: V2.10 (2007)
 
-@par OceanServer Battery Management Module Layout
+@par OceanServer Layout
 
-The battery number reported by the driver corresponds to the following connectors on the board:
+The battery number reported by the driver corresponds to the following connectors on the Battery Management Module board:
 
+@verbatim
 Level 1 (lower level):
         ==================
         |                |
@@ -73,6 +71,7 @@ Level 2 (upper level):
 (J22) 8 |                | 6 (J21)
 (J17) 7 |                | 5 (J12)
         ==================
+@endverbatim  
   
 Note that the lower level needs to be powered (at least one battery module needs to be plugged in) to be able to read from the serial port.
 

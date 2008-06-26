@@ -8,10 +8,9 @@
  *
  */
 
-#ifndef OCEANSERVER_READER_H
-#define OCEANSERVER_READER_H
+#ifndef GBX_OCEANSERVER_READER_H
+#define GBX_OCEANSERVER_READER_H
 
-#include <string>
 #include <gbxserialacfr/serial.h>
 #include <gbxutilacfr/tracer.h>
 

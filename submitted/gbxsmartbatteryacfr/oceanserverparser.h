@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef OCEANSERVER_PARSER_H
-#define OCEANSERVER_PARSER_H
+#ifndef GBX_OCEANSERVER_PARSER_H
+#define GBX_OCEANSERVER_PARSER_H
 
 #include <map>
 #include <gbxutilacfr/tracer.h>
@@ -31,25 +31,25 @@ class OceanServerSystem
         OceanServerSystem();
         ~OceanServerSystem() {};
         
-        // read access to all batteries
+        //! Read access to all batteries
         const std::map<int,SmartBattery>& batteries() const;
         
-        // easy write access to single battery, instantiates a new one if it doesn't exist
+        //! Easy write access to single battery, instantiates a new one if it doesn't exist
         SmartBattery& battery( unsigned int batteryNumber );   
         
-        // easy read access to single battery, battery must exist
+        //! Easy read access to single battery, battery must exist
         const SmartBattery& battery( unsigned int batteryNumber ) const;
         
-        // erase a battery
+        //! Erase a battery
         void eraseBattery( unsigned int batteryNumber );
         
-        // average battery values
+        //! Average battery values
         int percentCharge;
         int minToEmpty;
         std::string messageToSystem;
         
-        // values from the controller
-        // each vector is always of size 8 because oceanserver system has 8 slots
+        //! Battery module states
+        //! Each vector is always of size 8 because oceanserver system has 8 slots
         std::vector<bool> availableBatteries;
         std::vector<bool> chargingStates;
         std::vector<bool> supplyingPowerStates;
@@ -58,13 +58,15 @@ class OceanServerSystem
         std::vector<bool> chargeInhibitedStates;
  
     private:
+        
+        // key: slot number, data: a single smart battery module
         std::map<int,SmartBattery> batteries_;
 };
 
-//! Puts all available data into a human-readable string
+//! Puts OceanServerSystem data into a human-readable string
 std::string toString( const OceanServerSystem &system );
 
-//! Puts all available data into a machine-readable ASCII string
+//! Puts OceanServerSystem data into a machine-readable ASCII string
 std::string toLogString( const OceanServerSystem &system );
     
 //! Updates all fields in 'to' with data from 'from'. Also reapes batteries in 'to' if they are not in 'from'.

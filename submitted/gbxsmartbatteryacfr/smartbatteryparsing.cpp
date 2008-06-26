@@ -8,7 +8,6 @@
  *
  */
 
-#include <iostream>
 #include <sstream>
 #include <gbxsmartbatteryacfr/exceptions.h>
 
@@ -49,7 +48,7 @@ int readUnsignedInt( const string &str )
 int readUnsignedInt16( const string &str )
 {    
     if (str.size()!=4) 
-        throw ParsingException("ERROR(smartbatteryparsing.cpp): readUnsignedInt16 called with string size != 4");
+        throw ParsingException( ERROR_INFO, "readUnsignedInt16 called with string size != 4" );
 
     return readUnsignedInt( str );
 }
@@ -57,7 +56,7 @@ int readUnsignedInt16( const string &str )
 int readUnsignedInt8( const string &str )
 {    
     if (str.size()!=2) 
-        throw ParsingException("ERROR(smartbatteryparsing.cpp): readUnsignedInt8 called with string size != 2");
+        throw ParsingException( ERROR_INFO, "readUnsignedInt8 called with string size != 2" );
 
     return readUnsignedInt( str );
 }
@@ -65,7 +64,7 @@ int readUnsignedInt8( const string &str )
 int16_t readSignedInt16( const string &str )
 {
     if (str.size()!=4) 
-        throw ParsingException("ERROR(smartbatteryparsing.cpp): readSignedInt16 called with string size != 4");
+        throw ParsingException( ERROR_INFO, "readSignedInt16 called with string size != 4" );
    
     stringstream ss(str);
     int value;
@@ -149,9 +148,8 @@ int readRate( const string &str )
     return readUnsignedInt16( str );
 }
 
-bool
-isChecksumValid( const string &data, 
-                 const string &expectedChecksumStr )
+bool isChecksumValid( const string &data, 
+                      const string &expectedChecksumStr )
 { 
     int computedChecksum=0;
     
@@ -183,13 +181,13 @@ void toKeyValuePairs( const vector<string> &fields,
     
     // make sure we have an equal number
     if (fields.size()%2 != 0)
-        throw ParsingException("ERROR(smartbatteryparsing.cpp): toKeyValuePairs: odd number of inputs");
+        throw ParsingException( ERROR_INFO, "toKeyValuePairs: odd number of inputs" );
     
     unsigned int i=0;
     while(true)
     {   
         if (fields.size() <= i+1)
-            throw ParsingException("ERROR(smartbatteryparsing.cpp): toKeyValuePairs: wrong number of inputs");
+            throw ParsingException( ERROR_INFO, "toKeyValuePairs: wrong number of inputs" );
         pairs[fields[i]] = fields[i+1];
         i=i+2;
         if (fields.size()==i) break;
@@ -207,6 +205,7 @@ void splitIntoFields( const string   &str,
 {
     // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiter, 0);
+    
     // Find first "non-delimiter".
     string::size_type pos     = str.find_first_of(delimiter, lastPos);
 
@@ -217,6 +216,7 @@ void splitIntoFields( const string   &str,
 
         // Skip delimiters.  Note the "not_of"
         lastPos = str.find_first_not_of(delimiter, pos);
+        
         // Find next "non-delimiter"
         pos = str.find_first_of(delimiter, lastPos);
     }
@@ -227,7 +227,7 @@ void readSingleByte( const string &str,
                      vector<bool> &flags )
 {
     if (str.size()!=2) 
-        throw ParsingException("ERROR(smartbatteryparsing.cpp): readSingleByte called with string size != 2");
+        throw ParsingException( ERROR_INFO, "readSingleByte called with string size != 2" );
     
     stringstream ss(str);
     int allFlags;

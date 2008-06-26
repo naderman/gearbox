@@ -8,11 +8,8 @@
  *
  */
 
-#include <iostream>
 #include <sstream>
-
 #include <gbxsmartbatteryacfr/exceptions.h>
-#include <gbxsmartbatteryacfr/oceanserverparser.h>
 
 #include "oceanserverreader.h"
 
@@ -84,7 +81,7 @@ OceanServerReader::checkConnection()
         string serialData;        
         int ret = serial_.readLine( serialData );
         if (ret<0)  {
-          throw HardwareReadingException("Connected to the wrong serial port. Timed out while trying to read a line.");
+          throw HardwareReadingException( ERROR_INFO, "Connected to the wrong serial port. Timed out while trying to read a line.");
         }
         if ( isOceanServerSystem(serialData.c_str()) ) {
             tracer_.info( "Oceanserverreader.cpp: We are connected to an Oceanserver system. Good." );
@@ -94,7 +91,7 @@ OceanServerReader::checkConnection()
         ss.str(""); ss << "OceanServerReader: Trying to find out whether this is an oceanserver system. Attempt number " << numTries << "/" << maxTries << ".";
         tracer_.info( ss.str() );
         if (numTries>=maxTries) {
-            throw HardwareReadingException("Connected to the wrong serial port. Didn't recognize any of the strings.");
+            throw HardwareReadingException( ERROR_INFO, "Connected to the wrong serial port. Didn't recognize any of the strings.");
         }
     }
 }
@@ -119,7 +116,7 @@ OceanServerReader::tryToReadLineFromSerialPort( std::string &serialData )
         if (numTries>=maxTries) {
             stringstream ss;
             ss << "Can't read data from serial port. Timed out and/or empty strings " << maxTries << " times in a row.";
-            throw HardwareReadingException( ss.str().c_str() );
+            throw HardwareReadingException( ERROR_INFO,  ss.str().c_str() );
         }
     }
 }

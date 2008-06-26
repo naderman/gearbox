@@ -8,10 +8,9 @@
  *
  */
 
-#ifndef SMARTBATTERY_PARSING_H
-#define SMARTBATTERY_PARSING_H
+#ifndef GBX_SMARTBATTERY_PARSING_H
+#define GBX_SMARTBATTERY_PARSING_H
 
-#include <string>
 #include <vector>
 #include <map>
 
@@ -21,7 +20,7 @@ namespace gbxsmartbatteryacfr
 {
     
 //! 
-//! Functions to parse data using the smart battery data standard
+//! Functions to parse SmartBattery data
 //! and some helper functions
 //!
 //! @author Tobias Kaupp

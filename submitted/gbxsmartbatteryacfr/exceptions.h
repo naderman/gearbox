@@ -8,47 +8,27 @@
  *
  */
 
-#ifndef GBX_SMARTBATTERY_ACFR_EXCEPTIONS_H
-#define GBX_SMARTBATTERY_ACFR_EXCEPTIONS_H
+#ifndef GBX_SMARTBATTERYACFR_EXCEPTIONS_H
+#define GBX_SMARTBATTERYACFR_EXCEPTIONS_H
 
-#include <exception>
-#include <string>
+#include <gbxutilacfr/exceptions.h>
 
 namespace gbxsmartbatteryacfr {
     
-//!
-//! Exceptions for gbxsmartbatteryacfr
-//!
-class Exception : public std::exception
-{
-public:
-
-    Exception(const char *message)
-        : message_(message) {}
-    Exception(const std::string &message)
-        : message_(message) {}
-
-    virtual ~Exception() throw() {}
-
-    virtual const char* what() const throw() { return message_.c_str(); }
-
-protected:
-
-    std::string  message_;
-};
-
-class HardwareReadingException : public Exception
+//! Exception for hardware reading problems
+class HardwareReadingException : public gbxutilacfr::Exception
 {  
     public:
-        HardwareReadingException( const char * message )
-            : Exception( message ) {}     
+        HardwareReadingException( const char *file, const char *line, const char *message )
+        : Exception( file, line, message ) {}     
 };
 
-class ParsingException : public Exception
+//! Exception for parsing problems
+class ParsingException : public gbxutilacfr::Exception
 {  
     public:
-        ParsingException( const char * message )
-            : Exception( message ) {}    
+        ParsingException( const char *file, const char *line, const char *message )
+        : Exception( file, line, message ) {}    
 };
 
 }

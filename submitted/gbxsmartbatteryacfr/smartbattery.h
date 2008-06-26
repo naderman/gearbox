@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef SMARTBATTERY_H
-#define SMARTBATTERY_H
+#ifndef GBX_SMARTBATTERY_H
+#define GBX_SMARTBATTERY_H
 
 #include <vector>
 #include <string>
@@ -18,7 +18,7 @@
 namespace gbxsmartbatteryacfr {
 
 //! Smart battery data specification
-//! Table of fields can be found at http://sbs-forum.org/specs/
+//! Specs can be found at http://sbs-forum.org/specs/
 enum SmartBatteryDataField 
 {
     ManufacturerAccess = 0,
@@ -60,7 +60,7 @@ enum SmartBatteryDataField
 //! Converts a string to a SmartBatteryDataField, returns NUM_SMARTBATTERY_FIELDS if string is not valid
 SmartBatteryDataField stringToSmartField( const std::string &fieldStr );
     
-//! SmartBattery class holds all the data of a single smart battery
+//! SmartBattery class holds all the data of a single smart battery.
 //! Since not all data is always present, access to data needs to be done as follows:
 //! if (has(Temperature)) { myTemp = smartBattery.temperature(); }
 class SmartBattery 
@@ -211,10 +211,10 @@ class SmartBattery
         
 };
 
-//! Prints the data the SmartBattery contains in a human-readable format
+//! Puts SmartBattery data into a human-readable string
 std::string toString( const SmartBattery &b );
 
-//! Prints the data the SmartBattery contains in a machine-readable format (ASCII)
+//! Puts SmartBattery data into a machine-readable ASCII string
 std::string toLogString( const SmartBattery &b );
 
 }

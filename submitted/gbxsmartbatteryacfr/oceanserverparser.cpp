@@ -8,9 +8,7 @@
  *
  */
 
-#include <iostream>
 #include <sstream>
-
 #include <gbxsmartbatteryacfr/exceptions.h>
 #include <gbxsmartbatteryacfr/smartbatteryparsing.h>
 
@@ -148,11 +146,11 @@ void updateWithNewData( const OceanServerSystem &from,
         if ( fromB.has( ManufacturerData  ) ) toB.setManufacturerData ( fromB.manufacturerData () );
     }
     
-    // check if reaping needs to be done
+    // check if reaping needs to be done, if not return
     if ( from.batteries().size() == to.batteries().size() ) 
         return;
   
-    // store batteries to be reaped in a vector
+    // store battery ids from batteries which need to be reaped in a vector
     vector<int> reapingIds;
 
     // go through all 'to' batteries and check if they are also in 'from'
@@ -162,12 +160,12 @@ void updateWithNewData( const OceanServerSystem &from,
         
         BatIt itFrom = from.batteries().find( batId );
         if ( itFrom == from.batteries().end() ) {
-            // battery is in 'to' but not in 'from' -> needs to be deleted
+            // battery is in 'to' but not in 'from' -> needs to be reaped
             reapingIds.push_back( batId );
         }
     }
     
-    // erase batteries
+    // reap batteries
     for (unsigned int i=0; i<reapingIds.size(); i++) {
         to.eraseBattery( reapingIds[i] );
     }
@@ -225,8 +223,8 @@ OceanServerSystem::battery( unsigned int batteryNumber ) const
     if ( it==batteries_.end() )
     {
         stringstream ss; 
-        ss << "ERROR(OceanServerParser.cpp): trying to read from non-existent battery " << batteryNumber;
-        throw ParsingException( ss.str().c_str() );
+        ss << "Trying to read from non-existent battery " << batteryNumber;
+        throw ParsingException( ERROR_INFO, ss.str().c_str() );
     }
     return it->second;
 }
@@ -269,8 +267,8 @@ OceanServerParser::parseSystemData( const map<string,string> &keyValuePairs,
         else 
         {
             stringstream ss;
-            ss << "OceanServerParser: Unknown System key: " << it->first;
-            throw ParsingException(ss.str().c_str());
+            ss << "Unknown System key: " << it->first;
+            throw ParsingException( ERROR_INFO, ss.str().c_str() );
         }
     }
 }
@@ -315,8 +313,8 @@ OceanServerParser::parseControllerData( const map<string,string> &keyValuePairs,
         else 
         {
             stringstream ss;
-            ss << "OceanServerParser: Unknown controller key: " << it->first;
-            throw ParsingException(ss.str().c_str());
+            ss << "Unknown controller key: " << it->first;
+            throw ParsingException( ERROR_INFO, ss.str().c_str() );
         }
 
     }
@@ -407,8 +405,8 @@ OceanServerParser::parseSingleBatteryData( const map<string,string> &keyValuePai
                 bat.setManufacturerData( read16Flags( it->second ) ); break;
             case NUM_SMARTBATTERY_FIELDS:
             default:
-                stringstream ss; ss << "OceanServerParser: Unknown Battery key: " << it->first;
-                throw ParsingException( ss.str().c_str() );
+                stringstream ss; ss << "Unknown Battery key: " << it->first;
+                throw ParsingException( ERROR_INFO, ss.str().c_str() );
         }
     }
     
@@ -450,8 +448,8 @@ OceanServerParser::parseFields( vector<string>    &fields,
     else
     {
         stringstream ss;
-        ss << "OceanServerParser: Unknown message type: " << msgTypeKey;
-        throw ParsingException(ss.str().c_str());
+        ss << "Unknown message type: " << msgTypeKey;
+        throw ParsingException( ERROR_INFO, ss.str().c_str() );
     }
 }
 
@@ -488,9 +486,8 @@ OceanServerParser::parse( vector<string>    &stringList,
 {
     
     //
-    // Uncomment for DEBUG information
+    // Debugging output
     //
-
     stringstream ss;
     ss << "OceanServerParser: Received the following input: " << endl;
     for (unsigned int i=0; i<stringList.size(); i++)
@@ -511,16 +508,20 @@ OceanServerParser::parse( vector<string>    &stringList,
     ss << endl;
     tracer_.debug( ss.str(), 10 );
     
+    //
+    // Parsing
+    //
     for (unsigned int i=0; i<stringList.size(); i++)
     {
         const string &line = stringList[i];
 
-        // check for control characters in the line (sometimes they are accidently inserted)
-        // don't check the last 2 characters: they're \0 and \n
+        // Known problem with oceanserver system: sometimes \0 is inserted in the middle of the string.
+        // To get around this, we check for 'control characters' in the string.
+        // Don't check the last 2 characters of the string: they're \0 and \n.
         for (unsigned int k=0; k<line.size()-2; k++)
         {
             if ( iscntrl( line[k] ) )
-                throw ParsingException("ERROR(oceanserverparser.cpp): Found a control character (binary) in the string!");
+                throw ParsingException( ERROR_INFO, "Found a control character (binary) in the string!" );
         }
 
         // divide the line into 2 parts: data and checksum (if present)
@@ -530,12 +531,12 @@ OceanServerParser::parse( vector<string>    &stringList,
         {
             // we have a checksum, is it correct?
             if (!isChecksumValid( checksumList[0], checksumList[1] ) )
-                throw ParsingException("ERROR(oceanserverparser.cpp): Checksum failed!");
+                throw ParsingException( ERROR_INFO, "Checksum failed!" );
         }
                  
         // divide the data into individual fields and parse
         if (checksumList.size()==0)
-            throw ParsingException("ERROR(oceanserverparser.cpp): String length is 0");
+            throw ParsingException( ERROR_INFO, "String length is 0" );
         vector<string> fields;
         splitIntoFields( checksumList[0], fields, ",");
         parseFields( fields, batterySystem );
