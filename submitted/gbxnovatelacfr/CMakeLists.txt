@@ -4,8 +4,8 @@ GBX_ADD_LICENSE( LGPL )
 SET( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
-INCLUDE( ${GBX_CMAKE_DIR}/FindIceUtil.cmake )
-GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
+#INCLUDE( ${GBX_CMAKE_DIR}/FindIceUtil.cmake )
+#GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
 
 SET( int_libs GbxUtilAcfr GbxSerialAcfr )
 GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
