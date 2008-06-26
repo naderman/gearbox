@@ -18,7 +18,7 @@ class ImuDecoderHg1700 : public gnua::ImuDecoder {
 public:
     virtual ~ImuDecoderHg1700(){}
     inline bool statusIsGood(const uint32_t imuStatus){
-        return 0 == (imuStatus & 0xf8000010);
+        return 0 == ((imuStatus & 0xf8000010));
     }
     std::string statusToString(const uint32_t imuStatus);
 };
@@ -42,25 +42,25 @@ std::string
 ImuDecoderHg1700::statusToString(const uint32_t imuStatus){
     std::stringstream ss;
     ss << "IMU test: "
-        << (( 0 == imuStatus & 0x00000010) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000010)) ? "pass;" : "fail;") << " ";
     ss << "Z-gyro path-length control: "
-        << (( 0 == imuStatus & 0x00000020) ? "good;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000020)) ? "good;" : "fail;") << " ";
     ss << "Y-gyro path-length control: "
-        << (( 0 == imuStatus & 0x00000040) ? "good;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000040)) ? "good;" : "fail;") << " ";
     ss << "X-gyro path-length control: "
-        << (( 0 == imuStatus & 0x00000080) ? "good;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000080)) ? "good;" : "fail;") << " ";
     ss << "Gyro tests: "
-        << (( 0 == imuStatus & 0x08000000) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x08000000)) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer tests: "
-        << (( 0 == imuStatus & 0x10000000) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x10000000)) ? "pass;" : "fail;") << " ";
     ss << "Other test: "
-        << (( 0 == imuStatus & 0x20000000) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x20000000)) ? "pass;" : "fail;") << " ";
     ss << "Memory test: "
-        << (( 0 == imuStatus & 0x40000000) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x40000000)) ? "pass;" : "fail;") << " ";
     ss << "Processor test: "
-        << (( 0 == imuStatus & 0x80000000) ? "pass;" : "fail;") << " ";
-    int temprAccel = (imuStatus & 0x0000ff00) >> 8;
-    int softwVersion = (imuStatus & 0x00ff0000) >> 16;
+        << (( 0 == (imuStatus & 0x80000000)) ? "pass;" : "fail;") << " ";
+    int temprAccel = ((imuStatus & 0x0000ff00)) >> 8;
+    int softwVersion = ((imuStatus & 0x00ff0000)) >> 16;
     ss << "Accelerometer temprature [C]: " << temprAccel << " ";
     ss << "Software version number: " << softwVersion;
 
@@ -75,7 +75,7 @@ public:
         std::cout << "This driver has _not_ been tested with this IMU!\n";
     };
     inline bool statusIsGood(const uint32_t imuStatus){
-        return 0 == (imuStatus & 0xefec9580);
+        return 0 == ((imuStatus & 0xefec9580));
     }
     std::string statusToString(const uint32_t imuStatus);
 };
@@ -84,45 +84,45 @@ std::string
 ImuDecoderImarFsas::statusToString(const uint32_t imuStatus){
     std::stringstream ss;
     ss << "Gyro warm-up: "
-        << (( 0 == imuStatus & 0x00000010 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000010 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro self-test active: "
-        << (( 0 == imuStatus & 0x00000020 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000020 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro status bit set: "
-        << (( 0 == imuStatus & 0x00000040 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000040 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro time-out command interface: "
-        << (( 0 == imuStatus & 0x00000080 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000080 )) ? "pass;" : "fail;") << " ";
     ss << "Power-up built-in test (PBIT): "
-        << (( 0 == imuStatus & 0x00000100 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000100 )) ? "pass;" : "fail;") << " ";
     ss << "Interrupt: "
-        << (( 0 == imuStatus & 0x00000400 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000400 )) ? "pass;" : "fail;") << " ";
     ss << "Warm-up: "
-        << (( 0 == imuStatus & 0x00001000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00001000 )) ? "pass;" : "fail;") << " ";
     ss << "Initiated built-in test (IBIT): "
-        << (( 0 == imuStatus & 0x00008000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00008000 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer: "
-        << (( 0 == imuStatus & 0x00040000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00040000 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer time-out: "
-        << (( 0 == imuStatus & 0x00080000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00080000 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro initiated BIT: "
-        << (( 0 == imuStatus & 0x00200000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00200000 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro self-test: "
-        << (( 0 == imuStatus & 0x00400000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00400000 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro time-out: "
-        << (( 0 == imuStatus & 0x00800000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00800000 )) ? "pass;" : "fail;") << " ";
     ss << "Analog-to-Digital (AD): "
-        << (( 0 == imuStatus & 0x01000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x01000000 )) ? "pass;" : "fail;") << " ";
     ss << "Testmode: "
-        << (( 0 == imuStatus & 0x02000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x02000000 )) ? "pass;" : "fail;") << " ";
     ss << "Software: "
-        << (( 0 == imuStatus & 0x04000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x04000000 )) ? "pass;" : "fail;") << " ";
     ss << "RAM/ROM: "
-        << (( 0 == imuStatus & 0x08000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x08000000 )) ? "pass;" : "fail;") << " ";
     ss << "Operational: "
-        << (( 0 == imuStatus & 0x20000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x20000000 )) ? "pass;" : "fail;") << " ";
     ss << "Interface: "
-        << (( 0 == imuStatus & 0x40000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x40000000 )) ? "pass;" : "fail;") << " ";
     ss << "Interface time-out: "
-        << (( 0 == imuStatus & 0x80000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x80000000 )) ? "pass;" : "fail;") << " ";
 
     return ss.str();
 }
@@ -136,7 +136,7 @@ public:
         std::cout << "This driver has _not_ been tested with this IMU!\n";
     };
     inline bool statusIsGood(const uint32_t imuStatus){
-        return 0 == (imuStatus & 0xf8000010);
+        return 0 == ((imuStatus & 0xf8000010));
     }
     std::string statusToString(const uint32_t imuStatus);
 };
@@ -146,47 +146,47 @@ ImuDecoderLn200::statusToString(const uint32_t imuStatus){
     std::stringstream ss;
 
     ss << "Delta_velocity_counter: "
-        << (( 0 == imuStatus & 0x00000001 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000001 )) ? "pass;" : "fail;") << " ";
     ss << "D/A_converter: "
-        << (( 0 == imuStatus & 0x00000002 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000002 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro: "
-        << (( 0 == imuStatus & 0x00000004 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000004 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer: "
-        << (( 0 == imuStatus & 0x00000008 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000008 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro_loop_control: "
-        << (( 0 == imuStatus & 0x00000010 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000010 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro_temperature_control: "
-        << (( 0 == imuStatus & 0x00000020 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000020 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer_temperature: "
-        << (( 0 == imuStatus & 0x00000040 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000040 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer_temperature: "
-        << (( 0 == imuStatus & 0x00000040 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000040 )) ? "pass;" : "fail;") << " ";
     ss << "A/D_converter: "
-        << (( 0 == imuStatus & 0x00000100 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000100 )) ? "pass;" : "fail;") << " ";
     ss << "Serial_I/O: "
-        << (( 0 == imuStatus & 0x00000200 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000200 )) ? "pass;" : "fail;") << " ";
     ss << "Serial_I/O: "
-        << (( 0 == imuStatus & 0x00000200 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000200 )) ? "pass;" : "fail;") << " ";
     ss << "Laser_diode: "
-        << (( 0 == imuStatus & 0x00000800 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00000800 )) ? "pass;" : "fail;") << " ";
     ss << "Thermo-electric_cooler_(TEC): "
-        << (( 0 == imuStatus & 0x00001000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00001000 )) ? "pass;" : "fail;") << " ";
     ss << "Broadband_Fiber_Source_(BFS)_fiber_temperature: "
-        << (( 0 == imuStatus & 0x00002000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00002000 )) ? "pass;" : "fail;") << " ";
     ss << "Optical_receiver: "
-        << (( 0 == imuStatus & 0x00004000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x00004000 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro_accuracy: "
-        << (( 0 == imuStatus & 0x01000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x01000000 )) ? "pass;" : "fail;") << " ";
     ss << "Gyro: "
-        << (( 0 == imuStatus & 0x02000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x02000000 )) ? "pass;" : "fail;") << " ";
     ss << "Shut_down_on_failure: "
-        << (( 0 == imuStatus & 0x04000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x04000000 )) ? "pass;" : "fail;") << " ";
     ss << "Fast_start: "
-        << (( 0 == imuStatus & 0x08000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x08000000 )) ? "pass;" : "fail;") << " ";
     ss << "Commanded_bit_in_progress: "
-        << (( 0 == imuStatus & 0x10000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x10000000 )) ? "pass;" : "fail;") << " ";
     ss << "Accelerometer_data: "
-        << (( 0 == imuStatus & 0x40000000 ) ? "pass;" : "fail;") << " ";
+        << (( 0 == (imuStatus & 0x40000000 )) ? "pass;" : "fail;") << " ";
 
     return ss.str();
 }
