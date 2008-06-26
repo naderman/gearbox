@@ -174,7 +174,7 @@ string SCIP1ErrorToString (char error, char cmd)
 }
 
 // error must be null-terminated
-string SCIP2ErrorToString (char *error, char *cmd)
+string SCIP2ErrorToString (const char *error, const char *cmd)
 {
 	stringstream ss;
 
@@ -1469,7 +1469,8 @@ void HokuyoLaser::SkipLines (int count)
 // If paramLength is 0, no parameters will be sent or expected in the reply.
 // extraOK must be a 1-byte string for SCIP1 and a 2-byte string for SCIP2.
 // Return value is the status code returned for the command.
-int HokuyoLaser::SendCommand (char *cmd, char *param, int paramLength, char *extraOK)
+int HokuyoLaser::SendCommand (const char *cmd, const char *param,
+							int paramLength, const char *extraOK)
 {
 	int statusCode = -1;
 	char response[16];

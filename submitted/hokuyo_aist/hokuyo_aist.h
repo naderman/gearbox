@@ -423,7 +423,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		int ReadLine (char *buffer, int expectedLength = -1);
 		int ReadLineWithCheck (char *buffer, int expectedLength = -1, bool hasSemicolon = false);
 		void SkipLines (int count);
-		int SendCommand (char *cmd, char *param, int paramLength, char *extraOK);
+		int SendCommand (const char *cmd, const char *param, int paramLength, const char *extraOK);
 
 		void GetAndSetSCIPVersion (void);
 		void GetDefaults (void);
