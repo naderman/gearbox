@@ -217,6 +217,24 @@ including the "," delimiters, between -- but not including -- the "$" and "*" de
 The hexadecimal value of the most significant and least significant 4 bits of the result are converted 
 to two ASCII characters (0-9, A-F) for transmission. The most significant character is transmitted first.
 
+@section gbx_library_gbxgarminacfr_troubleshooting Troubleshooting
+
+To verify connectivity to the GPS device manually:
+
+- Connect using a terminal emulator (eg minicom) at 4800 8N1.
+- type the following (and hit return): $PGRMO,GPGGA,1
+
+The second step enables output from the GPS module.  You should see a bunch of stuff like:
+@verbatim
+$GPGGA,043932,3353.3699,S,15111.5817,E,1,11,0.8,47.2,M,19.8,M,,*64
+$GPGGA,043933,3353.3699,S,15111.5817,E,1,11,0.8,47.2,M,19.8,M,,*65
+$GPGGA,043934,3353.3699,S,15111.5817,E,1,11,0.8,47.1,M,19.8,M,,*61
+$GPGGA,043935,3353.3699,S,15111.5817,E,1,11,0.8,47.1,M,19.8,M,,*60
+$GPGGA,043936,3353.3699,S,15111.5817,E,1,11,0.8,47.0,M,19.8,M,,*62
+$GPGGA,043937,3353.3699,S,15111.5817,E,1,11,0.8,47.0,M,19.8,M,,*63
+@endverbatim
+scrolling past.
+
 */
 
 
