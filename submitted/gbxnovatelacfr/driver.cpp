@@ -701,7 +701,12 @@ BestGpsPosData::toString(){
     ss << "sigmaLatitude " << sigmaLatitude << " ";
     ss << "sigmaLongitude " << sigmaLongitude << " ";
     ss << "sigmaHeight " << sigmaHeight << " ";
-    ss << "baseStationId[4] " << baseStationId[4] << " ";
+    ss << "baseStationId "
+        << baseStationId[0]
+        << baseStationId[1]
+        << baseStationId[2]
+        << baseStationId[3]
+        << " ";
     ss << "diffAge " << diffAge << " ";
     ss << "solutionAge " << solutionAge << " ";
     ss << "numObservations " << numObservations << " ";
@@ -933,7 +938,10 @@ namespace{
         data->sigmaLatitude = bestGpsPos.data.sigmaLatitude;
         data->sigmaLongitude = bestGpsPos.data.sigmaLongitude;
         data->sigmaHeight = bestGpsPos.data.sigmaHeight;
-        data->baseStationId[4] = bestGpsPos.data.baseStationId[4];
+        data->baseStationId[0] = bestGpsPos.data.baseStationId[0];
+        data->baseStationId[1] = bestGpsPos.data.baseStationId[1];
+        data->baseStationId[2] = bestGpsPos.data.baseStationId[2];
+        data->baseStationId[3] = bestGpsPos.data.baseStationId[3];
         data->diffAge = bestGpsPos.data.diffAge;
         data->solutionAge = bestGpsPos.data.solutionAge;
         data->numObservations = bestGpsPos.data.numObservations;
