@@ -7,7 +7,9 @@
  * the LICENSE file included in this distribution.
  *
  */
-class gbxserialacfr::Serial;
+namespace gbxserialacfr{
+    class Serial;
+}
 
 // test connectivity to a [serial] device at a [baudrate];
 // Assumes that you can figure out a [challenge] (command ...) to
