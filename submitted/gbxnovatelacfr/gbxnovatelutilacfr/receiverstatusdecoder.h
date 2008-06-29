@@ -15,7 +15,7 @@
 #include <sstream>
 namespace gbxnovatelutilacfr{
 bool receiverStatusIsGood(uint32_t receiverStatus){
-    return 0 == receiverStatus & 0xe1fe8fef;
+    return 0 == (receiverStatus & 0xe1fe8fef);
 }
 //bool receiverStatusIsWarning(uint32_t receiverStatus){
 //}
