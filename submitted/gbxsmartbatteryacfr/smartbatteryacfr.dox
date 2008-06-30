@@ -24,8 +24,8 @@ This library provides a set of classes and functions to read data from a Smart B
 @endverbatim
 
 @par Examples
-- See 'test/simpletest.cpp' for a simple example of how to use the library.
-- See 'test/fancytest.cpp' for a more advanced example.
+- See 'test/simpletest.cpp' for a simple example of how to use the library. The test reads a few records from the oceanserver system and prints the results on the screen.
+- See 'test/fancytest.cpp' for a more advanced example. The test uses a class to read a few records from the oceanserver system and stores an internal (full) record which only gets updated with new data.
 
 @par Style
   See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html

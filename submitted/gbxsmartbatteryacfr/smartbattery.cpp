@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <gbxsmartbatteryacfr/exceptions.h>
 
 #include "smartbattery.h"
 
@@ -52,8 +53,12 @@ SmartBatteryDataField stringToSmartField( const string &fieldStr )
     else if (fieldStr=="21") return DeviceName;
     else if (fieldStr=="22") return DeviceChemistry;
     else if (fieldStr=="23") return ManufacturerData;
-    else cout << "ERROR: Unknown field: " << fieldStr << endl;
-    
+    else 
+    {
+        stringstream ss;
+        ss << "Unknown field: " << fieldStr;
+        throw ParsingException( ERROR_INFO, ss.str().c_str() );
+    }    
     return NUM_SMARTBATTERY_FIELDS;
 }
 
