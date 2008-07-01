@@ -99,7 +99,7 @@ MACRO( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
     ENDIF( ${int_deps} )
 
     CONFIGURE_FILE( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/${PROJECT_NAME}/ )
+    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
 ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #
