@@ -178,22 +178,28 @@ string SCIP2ErrorToString (const char *error, const char *cmd)
 {
 	stringstream ss;
 
-	// Check for universal errors first
-	if (error[1] == 'A')
+	// Check for non-errors
+	if (error[0] == '0' && error[1] == '0')
+		return "Status OK - 00";
+	else if (error[0] == '9' && error[1] == '9')
+		return "Status OK - 99";
+
+	// Check for universal errors
+	if (error[0] == '0' && error[1] == 'A')
 		return "Unable to create transmission data or reply command internally";
-	else if (error[1] == 'B')
+	else if (error[0] == '0' && error[1] == 'B')
 		return "Buffer shortage or command repeated that is already processed";
-	else if (error[1] == 'C')
+	else if (error[0] == '0' && error[1] == 'C')
 		return "Command with insufficient parameters 1";
-	else if (error[1] == 'D')
+	else if (error[0] == '0' && error[1] == 'D')
 		return "Undefined command 1";
-	else if (error[1] == 'E')
+	else if (error[0] == '0' && error[1] == 'E')
 		return "Undefined command 2";
-	else if (error[1] == 'F')
+	else if (error[0] == '0' && error[1] == 'F')
 		return "Command with insufficient parameters 2";
-	else if (error[1] == 'G')
+	else if (error[0] == '0' && error[1] == 'G')
 		return "String character in command exceeds 16 letters";
-	else if (error[1] == 'H')
+	else if (error[0] == '0' && error[1] == 'H')
 		return "String character has invalid letters";
 	else if (error[0] == '0' && error[1] == 'I')
 		return "Sensor is now in firmware update mode";
@@ -236,10 +242,8 @@ string SCIP2ErrorToString (const char *error, const char *cmd)
 				return "Ending step is out of range";
 			case 5:
 				return "Ending step is smaller than start step";
-			case 6:
-				return "Scan interval is greater than 9";
-			case 7:
-				return "Number of scans is greater than 99";
+			case 10:
+				return "Laser is off";
 			default:
 				if (errorCode >= 50)
 					ss << "Hardware error: " << errorCode;
@@ -265,12 +269,22 @@ string SCIP2ErrorToString (const char *error, const char *cmd)
 			case 5:
 				return "Ending step is smaller than start step";
 			case 6:
-				return "Scan interval is greater than 9";
+				return "Scan interval has non-numeric value";
 			case 7:
-				return "Number of scans is greater than 99";
+				return "Number of scans is non-numeric";
 			default:
-				if (errorCode >= 50)
+				if (errorCode >= 21 && errorCode <= 49)
+				{
+					return "Processing stopped to verify error. "
+							"This function is not yet supported by hokuyo_aist.";
+				}
+				else if (errorCode >= 50 && errorCode <= 97)
 					ss << "Hardware error: " << errorCode;
+				else if (errorCode == 98)
+				{
+					return "Resumption of processing after confirming normal laser opteration. "
+						"This function is not yet supported by hokuyo_aist.";
+				}
 				else
 					ss << "Unknown error code " << errorCode << " for command " << cmd[0] << cmd[1];
 
@@ -301,6 +315,8 @@ string SCIP2ErrorToString (const char *error, const char *cmd)
 				return "Invalid baud rate";
 			case 3:
 				return "Sensor is already running at that baud rate";
+			case 4:
+				return "Not compatible with the sensor model";
 		}
 	}
 	else if (cmd[0] == 'C' && cmd[1] == 'R')
@@ -313,6 +329,20 @@ string SCIP2ErrorToString (const char *error, const char *cmd)
 				return "Speed is out of range";
 			case 3:
 				return "Motor is already running at that speed";
+			case 4:
+				return "Not compatible with the sensor model";
+		}
+	}
+	else if (cmd[0] == 'H' && cmd[1] == 'S')
+	{
+		switch (errorCode)
+		{
+			case 1:
+				return "Parameter error";
+			case 2:
+				return "Already running in the set mode";
+			case 3:
+				return "Not compatible with the sensor model";
 		}
 	}
 // No info in the manual for this.
@@ -457,8 +487,8 @@ string HokuyoError::AsString (void) const throw ()
 
 HokuyoSensorInfo::HokuyoSensorInfo (void)
 	: minRange (0), maxRange (0), steps (0), firstStep (0), lastStep (0), frontStep (0),
-	standardSpeed (0), power (false), speed (0), baud (0), time (0), minAngle (0.0), maxAngle (0.0),
-	resolution (0.0), scanableSteps (0)
+	standardSpeed (0), power (false), speed (0), speedLevel (0), baud (0), time (0), minAngle (0.0),
+	maxAngle (0.0),	resolution (0.0), scanableSteps (0)
 {
 }
 
@@ -504,8 +534,9 @@ string HokuyoSensorInfo::AsString (void)
 	ss << "Standard motor speed: " << standardSpeed << "rpm" << endl;
 
 	ss << "Power status: " << (power ? "On" : "Off") << "\tMeasurement state: " <<
-			measureState << endl;
-	ss << "Motor speed: " << speed << "rpm\tBaud rate: " << baud << "bps" << endl;
+		measureState << endl;
+	ss << "Motor speed: " << speed << "rpm (level " << speedLevel << ")\tBaud rate: " << baud <<
+		"bps" << endl;
 	ss << "Time stamp: " << time << "ms" << endl;
 	ss << "Sensor diagnostic: " << sensorDiagnostic << endl;
 
@@ -517,24 +548,58 @@ string HokuyoSensorInfo::AsString (void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HokuyoData::HokuyoData (void)
-	: _data (NULL), _length (0), _error (-1), _time (0)
+	: _ranges (NULL), _intensities (NULL), _length (0),
+	_error (false), _time (0), _sensorIsUTM30LX (false)
 {
 }
 
-HokuyoData::HokuyoData (unsigned short *data, unsigned int length, short error, unsigned int time)
+HokuyoData::HokuyoData (uint32_t *ranges, unsigned int length, bool error, unsigned int time)
 	: _error (error), _time (time)
 {
 	_length = length;
 	if (_length == 0)
-		_data = NULL;
+	{
+		_ranges = NULL;
+		_intensities = NULL;
+	}
 	else
 	{
-		if ((_data = new unsigned short[_length]) == NULL)
+		if ((_ranges = new uint32_t[_length]) == NULL)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy range data.");
 		}
-		memcpy (_data, data, sizeof (unsigned short) * _length);
+		memcpy (_ranges, ranges, sizeof (uint32_t) * _length);
+
+		_intensities = NULL;    // No intensity data to copy
+	}
+}
+
+HokuyoData::HokuyoData (uint32_t *ranges, uint32_t *intensities, unsigned int length, bool error,
+						unsigned int time)
+	: _error (error), _time (time)
+{
+	_length = length;
+	if (_length == 0)
+	{
+		_ranges = NULL;
+		_intensities = NULL;
+	}
+	else
+	{
+		if ((_ranges = new uint32_t[_length]) == NULL)
+		{
+			_length = 0;
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy range data.");
+		}
+		memcpy (_ranges, ranges, sizeof (uint32_t) * _length);
+
+		if ((_intensities = new uint32_t[_length]) == NULL)
+		{
+			throw HokuyoError (HOKUYO_ERR_MEMORY,
+					"Failed to allocate space to copy intensity data.");
+		}
+		memcpy (_intensities, intensities, sizeof (uint32_t) * _length);
 	}
 }
 
@@ -542,76 +607,111 @@ HokuyoData::HokuyoData (const HokuyoData &rhs)
 {
 	_length = rhs.Length ();
 	if (_length == 0)
-		_data = NULL;
+		_ranges = NULL;
 	else
 	{
-		if ((_data = new unsigned short[_length]) == NULL)
+		if ((_ranges = new uint32_t[_length]) == NULL)
 		{
 			_length = 0;
 			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
 		}
-		memcpy (_data, rhs.Ranges (), sizeof (unsigned short) * _length);
+		memcpy (_ranges, rhs.Ranges (), sizeof (uint32_t) * _length);
+
+		if (rhs.Intensities () != NULL)
+		{
+			if ((_intensities = new uint32_t[_length]) == NULL)
+			{
+				throw HokuyoError (HOKUYO_ERR_MEMORY,
+						"Failed to allocate space to copy intensity data.");
+			}
+			memcpy (_intensities, rhs.Intensities (), sizeof (uint32_t) * _length);
+		}
 	}
-	_error = rhs.GetErrorCode ();
+	_error = rhs.GetErrorStatus ();
 	_time = rhs.TimeStamp ();
 }
 
 HokuyoData::~HokuyoData (void)
 {
-	if (_data != NULL)
-		delete[] _data;
+	if (_ranges != NULL)
+		delete[] _ranges;
 }
 
-string HokuyoData::ErrorCodeToString (void)
+string HokuyoData::ErrorCodeToString (uint32_t errorCode)
 {
-	switch (_error)
+	if (_sensorIsUTM30LX)
 	{
-		case -1:
-			return "No error.";
-		case 0:
-			return "Possibility of detected object is at 22m.";
-		case 1:
-			return "Reflected light has low intensity.";
-		case 2:
-			return "Reflected light has low intensity.";
-		case 3:
-			return "Reflected light has low intensity.";
-		case 4:
-			return "Reflected light has low intensity.";
-		case 5:
-			return "Reflected light has low intensity.";
-		case 6:
-			return "Possibility of detected object is at 5.7m.";
-		case 7:
-			return "Distance data on the preceding and succeeding steps have errors.";
-		case 8:
-			return "Others.";
-		case 9:
-			return "The same step had error in the last two scan.";
-		case 10:
-			return "Others.";
-		case 11:
-			return "Others.";
-		case 12:
-			return "Others.";
-		case 13:
-			return "Others.";
-		case 14:
-			return "Others.";
-		case 15:
-			return "Others.";
-		case 16:
-			return "Possibility of detected object is in the range 4096mm.";
-		case 17:
-			return "Others.";
-		case 18:
-			return "Unspecified.";
-		case 19:
-			return "Non-measurable distance.";
-		default:
-			stringstream ss;
-			ss << "Unknown error code: " << _error;
-			return ss.str ();
+		switch (errorCode)
+		{
+			case -1:
+				return "No error.";
+			case 1:
+				return "No object in the range.";
+			case 2:
+				return "Object is too near (internal error).";
+			case 3:
+				return "Measurement error (may be due to interference).";
+			case 4:
+				return "Object out of range (at the near end).";
+			case 5:
+				return "Other error.";
+			default:
+				stringstream ss;
+				ss << "Unknown error code: " << errorCode;
+				return ss.str ();
+		}
+	}
+	else
+	{
+		switch (errorCode)
+		{
+			case -1:
+				return "No error.";
+			case 0:
+				return "Detected object is possibly at 22m.";
+			case 1:
+				return "Reflected light has low intensity.";
+			case 2:
+				return "Reflected light has low intensity.";
+			case 3:
+				return "Reflected light has low intensity.";
+			case 4:
+				return "Reflected light has low intensity.";
+			case 5:
+				return "Reflected light has low intensity.";
+			case 6:
+				return "Possibility of detected object is at 5.7m.";
+			case 7:
+				return "Distance data on the preceding and succeeding steps have errors.";
+			case 8:
+				return "Others.";
+			case 9:
+				return "The same step had error in the last two scan.";
+			case 10:
+				return "Others.";
+			case 11:
+				return "Others.";
+			case 12:
+				return "Others.";
+			case 13:
+				return "Others.";
+			case 14:
+				return "Others.";
+			case 15:
+				return "Others.";
+			case 16:
+				return "Possibility of detected object is in the range 4096mm.";
+			case 17:
+				return "Others.";
+			case 18:
+				return "Unspecified.";
+			case 19:
+				return "Non-measurable distance.";
+			default:
+				stringstream ss;
+				ss << "Unknown error code: " << errorCode;
+				return ss.str ();
+		}
 	}
 }
 
@@ -620,46 +720,71 @@ HokuyoData& HokuyoData::operator= (const HokuyoData &rhs)
 	if (rhs.Length () == 0)
 	{
 		_length = 0;
-		if (_data != NULL)
-			delete[] _data;
-		_data = NULL;
-		_error = rhs.GetErrorCode ();
+		if (_ranges != NULL)
+			delete[] _ranges;
+		_ranges = NULL;
+		if (_intensities != NULL)
+			delete[] _intensities;
+		_intensities = NULL;
+		_error = rhs.GetErrorStatus ();
 		_time = rhs.TimeStamp ();
 	}
 	else
 	{
 		unsigned int rhsLength = rhs.Length ();
-		unsigned short *newData;
+		uint32_t *newData;
 		if (rhsLength != _length)
 		{
 			// Copy the data into a temporary variable pointing to new space (prevents dangling
 			// pointers on allocation error and prevents self-assignment making a mess).
-			if ((newData = new unsigned short[rhsLength]) == NULL)
-				throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
-			memcpy (newData, rhs.Ranges (), sizeof (unsigned short) * rhsLength);
-			if (_data != NULL)
-				delete[] _data;
-			_data = newData;
+			if ((newData = new uint32_t[rhsLength]) == NULL)
+			{
+				throw HokuyoError (HOKUYO_ERR_MEMORY,
+					"Failed to allocate space to copy range data.");
+			}
+			memcpy (newData, rhs.Ranges (), sizeof (uint32_t) * rhsLength);
+			if (_ranges != NULL)
+				delete[] _ranges;
+			_ranges = newData;
 			_length = rhs.Length ();
+
+			if (rhs.Intensities () != NULL)
+			{
+				if ((newData = new uint32_t[rhsLength]) == NULL)
+				{
+					// We have to remove any old intensity data or the length won't match
+					if (_intensities != NULL)
+						delete[] _intensities;
+					_intensities = NULL;
+					throw HokuyoError (HOKUYO_ERR_MEMORY,
+						"Failed to allocate space to copy intensity data.");
+				}
+				memcpy (newData, rhs.Intensities (), sizeof (uint32_t) * rhsLength);
+				if (_intensities != NULL)
+					delete[] _intensities;
+				_intensities = newData;
+			}
 		}
 		else
 		{
 			// If lengths are the same, no need to reallocate
-			memcpy (_data, rhs.Ranges (), sizeof (unsigned short) * _length);
+			memcpy (_ranges, rhs.Ranges (), sizeof (uint32_t) * _length);
+			if (rhs.Intensities () != NULL)
+				memcpy (_intensities, rhs.Intensities (), sizeof (uint32_t) * _length);
 		}
 
-		_error = rhs.GetErrorCode ();
+		_error = rhs.GetErrorStatus ();
 		_time = rhs.TimeStamp ();
 	}
 
 	return *this;
 }
 
-unsigned short HokuyoData::operator[] (unsigned int index)
+uint32_t HokuyoData::operator[] (unsigned int index)
 {
 	if (index >= _length)
 		throw HokuyoError (HOKUYO_ERR_BADARG, "Invalid data index.");
-	return _data[index];
+	return _ranges[index];
 }
 
 string HokuyoData::AsString (void)
@@ -668,8 +793,25 @@ string HokuyoData::AsString (void)
 
 	ss << _length << " readings:" << endl;
 	for (unsigned int ii = 0; ii < _length; ii++)
-		ss << _data[ii] << "\t";
-	ss << endl << "Data error: (" << _error << ") " << ErrorCodeToString () << endl;
+		ss << _ranges[ii] << "\t";
+	if (_intensities != NULL)
+	{
+		ss << endl << _length << " intensities:" << endl;
+		for (unsigned int ii = 0; ii < _length; ii++)
+			ss << _intensities[ii] << "\t";
+	}
+	ss << endl;
+	if (_error)
+	{
+		ss << "Detected data errors:" << endl;
+		for (unsigned int ii = 0; ii < _length; ii++)
+		{
+			if (_ranges[ii] < 20)
+				ss << ii << ": " << ErrorCodeToString (_ranges[ii]) << endl;
+		}
+	}
+	else
+		ss << "No data errors." << endl;
 	ss << "Time stamp: " << _time << endl;
 
 	return ss.str ();
@@ -677,38 +819,71 @@ string HokuyoData::AsString (void)
 
 void HokuyoData::CleanUp (void)
 {
-	if (_data != NULL)
-		delete[] _data;
-	_data = NULL;
+	if (_ranges != NULL)
+		delete[] _ranges;
+	_ranges = NULL;
+	if (_intensities != NULL)
+		delete[] _intensities;
+	_intensities = NULL;
 	_length = 0;
-	_error = 0;
+	_error = false;
 	_time = 0;
 }
 
-void HokuyoData::AllocateData (unsigned int length)
+void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 {
 	// If no data yet, allocate new
-	if (_data == NULL)
+	if (_ranges == NULL)
 	{
-		if ((_data = new unsigned short[length]) == NULL)
+		if ((_ranges = new uint32_t[length]) == NULL)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space for range data.");
 		}
 		_length = length;
 	}
 	// If there is data, reallocate only if the length is different
 	else if (length != _length)
 	{
-		delete[] _data;
-		if ((_data = new unsigned short[length]) == NULL)
+		delete[] _ranges;
+		if ((_ranges = new uint32_t[length]) == NULL)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space for range data.");
 		}
 		_length = length;
 	}
 	// Else data is already allocated to the right length, so do nothing
+
+	if (includeIntensities)
+	{
+		// If no data yet, allocate new
+		if (_intensities == NULL)
+		{
+			if ((_intensities = new uint32_t[length]) == NULL)
+			{
+				throw HokuyoError (HOKUYO_ERR_MEMORY,
+						"Failed to allocate space for intensity data.");
+			}
+		}
+		// If there is data, reallocate only if the length is different
+		else if (length != _length)
+		{
+			delete[] _intensities;
+			if ((_intensities = new uint32_t[length]) == NULL)
+			{
+				throw HokuyoError (HOKUYO_ERR_MEMORY,
+						"Failed to allocate space for intensity data.");
+			}
+		}
+		// Else data is already allocated to the right length, so do nothing
+	}
+	else if (_intensities != NULL)
+	{
+		// If not told to allocate space for intensity data and it exists, remove it
+		delete[] _intensities;
+		_intensities = NULL;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -719,8 +894,8 @@ void HokuyoData::AllocateData (unsigned int length)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HokuyoLaser::HokuyoLaser (void)
-	: _port (NULL), _scipVersion (1), _verbose (false), _minAngle (0.0), _maxAngle (0.0),
-	_resolution (0.0), _firstStep (0), _lastStep (0), _frontStep (0)
+	: _port (NULL), _scipVersion (1), _verbose (false), _sensorIsUTM30LX (false),_minAngle (0.0),
+	_maxAngle (0.0), _resolution (0.0), _firstStep (0), _lastStep (0), _frontStep (0)
 {
 }
 
@@ -878,11 +1053,21 @@ void HokuyoLaser::SetMotorSpeed (unsigned int speed)
 	else if (_scipVersion == 2)
 	{
 		// Sanity check the value
-		if ((speed > 600 || speed < 540 || (speed % 6) != 0) && speed != 0)
+		if (speed > 10 & speed != 99)
 			throw HokuyoError (HOKUYO_ERR_BADARG, "Invalid motor speed.");
 		char buffer[3];
-		buffer[2] = '\0';
 		if (speed == 0)
+		{
+			if (_verbose)
+			{
+				cerr << "HokuyoLaser::" << __func__ << "() Reseting motor speed to default." <<
+					endl;
+			}
+			buffer[0] = '0';
+			buffer[1] = '0';
+			buffer[2] = '\0';
+		}
+		else if (speed == 99)
 		{
 			if (_verbose)
 			{
@@ -891,26 +1076,48 @@ void HokuyoLaser::SetMotorSpeed (unsigned int speed)
 			}
 			buffer[0] = '9';
 			buffer[1] = '9';
+			buffer[2] = '\0';
 		}
 		else
 		{
 			if (_verbose)
 			{
-				cerr << "HokuyoLaser::" << __func__ << "() Setting motor speed to " <<
-					speed << "rpm." << endl;
+				cerr << "HokuyoLaser::" << __func__ << "() Setting motor speed to ratio " <<
+					speed << endl;
 			}
-			if (speed == 540)
-			{
-				buffer[0] = '1';
-				buffer[1] = '0';
-			}
-			else
-			{
-				buffer[0] = '0';
-				buffer[1] = 100 - (speed / 6) + 0x30;
-			}
+			NumberToString (speed, buffer, 2);
 		}
 		SendCommand ("CR", buffer, 2, "03");
+		SkipLines (1);
+	}
+	else
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
+}
+
+void HokuyoLaser::SetHighSensitivity (bool on)
+{
+	if (_scipVersion == 1)
+	{
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
+				"SCIP version 1 does not support the set high sensitivity command.");
+	}
+	else if (_scipVersion == 2)
+	{
+		if (on)
+		{
+			if (_verbose)
+				cerr << "HokuyoLaser::" << __func__ << "() Switching to high sensitivity." << endl;
+			SendCommand ("HS", "1", 1, "02");
+		}
+		else
+		{
+			if (_verbose)
+			{
+				cerr << "HokuyoLaser::" << __func__ << "() Switching to normal sensitivity." <<
+					endl;
+			}
+			SendCommand ("HS", "0", 1, "02");
+		}
 		SkipLines (1);
 	}
 	else
@@ -1080,9 +1287,28 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 			info->power = true;
 		// Motor speed
 		ReadLineWithCheck (buffer, -1, true);
-		// TODO: check if the format of this line changes if the motor speed is changed
-		if (sscanf (buffer, "SCSP:%*7s(%d[rpm]", &info->speed) != 1)
-			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Motor speed line parse failed.");
+		if (strncmp (&buffer[5], "Initial", 7) == 0)
+		{
+			// Unchanged motor speed
+			if (sscanf (buffer, "SCSP:%*7s(%d[rpm]", &info->speed) != 1)
+			{
+				stringstream ss;
+				ss << "Motor speed line parse failed: " << buffer;
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+			}
+			info->speedLevel = 0;
+		}
+		else
+		{
+			// Changed motor speed, format is:
+			// <level>%<ignored string>(<speed>[rpm])
+			if (sscanf (buffer, "SCSP:%hd%%%*4s(%d[rpm]", &info->speedLevel, &info->speed) != 2)
+			{
+				stringstream ss;
+				ss << "Motor speed line parse failed: " << buffer;
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+			}
+		}
 		// Measuring state
 		ReadLineWithCheck (buffer, -1, true);
 		info->measureState = &buffer[5];
@@ -1094,11 +1320,19 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 			info->baud = 0;
 		}
 		else if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
-			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Baud rate line parse failed.");
+		{
+			stringstream ss;
+			ss << "Baud rate line parse failed: " << buffer;
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
 		// Time stamp
 		ReadLineWithCheck (buffer, -1, true);
 		if (sscanf (buffer, "TIME:%x", &info->time) != 1)
-			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Timestamp line parse failed.");
+		{
+			stringstream ss;
+			ss << "Timestamp line parse failed: " << buffer;
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
 		// Diagnostic
 		ReadLineWithCheck (buffer, -1, true);
 		info->sensorDiagnostic = &buffer[5];
@@ -1169,7 +1403,7 @@ unsigned int HokuyoLaser::GetRanges (HokuyoData *data, int startStep, int endSte
 		NumberToString (startStep, buffer, 3);
 		NumberToString (endStep, &buffer[3], 3);
 		NumberToString (clusterCount, &buffer[6], 2);
-		data->_error = SendCommand ("G", buffer, 8, NULL);
+		SendCommand ("G", buffer, 8, NULL);
 		// In SCIP1 mode we're going to get back 2-byte data
 		Read2ByteRangeData (data, numSteps);
 	}
@@ -1179,7 +1413,7 @@ unsigned int HokuyoLaser::GetRanges (HokuyoData *data, int startStep, int endSte
 		NumberToString (startStep, buffer, 4);
 		NumberToString (endStep, &buffer[4], 4);
 		NumberToString (clusterCount, &buffer[8], 2);
-		data->_error = SendCommand ("GD", buffer, 10, NULL);
+		SendCommand ("GD", buffer, 10, NULL);
 		// There will be a timestamp before the data (if there is data)
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
@@ -1257,7 +1491,7 @@ unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, int startStep, int end
 		NumberToString (clusterCount, &buffer[8], 2);
 		NumberToString (1, &buffer[10], 1);
 		NumberToString (1, &buffer[11], 2);
-		data->_error = SendCommand ("MD", buffer, 13, NULL);
+		SendCommand ("MD", buffer, 13, NULL);
 		// There will be a timestamp before the data (if there is data)
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
@@ -1303,6 +1537,90 @@ unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, double startAngle, dou
 
 	// Get the data
 	return GetNewRanges (data, startStep, endStep, clusterCount);
+}
+
+unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, int startStep, int endStep,
+													unsigned int clusterCount)
+{
+	if (data == NULL)
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
+
+	if (_scipVersion == 1)
+	{
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
+				"SCIP version 1 does not support the get new ranges and intensities command.");
+	}
+	else if (_scipVersion == 2)
+	{
+		char buffer[14];
+		memset (buffer, 0, sizeof (char) * 14);
+
+		if (startStep < 0)
+			startStep = _firstStep;
+		if (endStep < 0)
+			endStep = _lastStep;
+
+		unsigned int numSteps = (endStep - startStep + 1) / clusterCount;
+		if (_verbose)
+		{
+			cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps <<
+				" new ranges between " << startStep << " and " << endStep <<
+				" with a cluster count of " << clusterCount << endl;
+		}
+
+		// Send the command to ask for the most recent range data with intensity data from startStep
+		// to endStep
+		NumberToString (startStep, buffer, 4);
+		NumberToString (endStep, &buffer[4], 4);
+		NumberToString (clusterCount, &buffer[8], 2);
+		NumberToString (1, &buffer[10], 1);
+		NumberToString (1, &buffer[11], 2);
+		SendCommand ("ME", buffer, 13, NULL);
+		// There will be a timestamp before the data (if there is data)
+		// Normally we would send 6 for the expected length, but we may get no timestamp back if
+		// there was no data.
+		if (ReadLineWithCheck (buffer) == 0)
+			throw HokuyoError (HOKUYO_ERR_NODATA, "No data received. Check data error code.");
+		data->_time = Decode4ByteValue (buffer);
+		// In SCIP2 mode we're going to get back 3-byte data because we're sending the ME command
+		Read3ByteRangeAndIntensityData (data, numSteps);
+	}
+	else
+		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
+
+	return data->_length;
+}
+
+unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, double startAngle,
+													double endAngle, unsigned int clusterCount)
+{
+	if (data == NULL)
+		throw HokuyoError (HOKUYO_ERR_NODESTINATION, "No data destination provided.");
+	if (_scipVersion == 1)
+	{
+		throw HokuyoError (HOKUYO_ERR_UNSUPPORTED,
+				"SCIP version 1 does not support the get new ranges and intensities command.");
+	}
+
+	// Calculate the given angles in steps, rounding towards _frontStep
+	int startStep, endStep;
+	startStep = AngleToStep (startAngle);
+	endStep = AngleToStep (endAngle);
+
+	// Check the steps are within the allowable range
+	if (startStep < _firstStep || startStep > _lastStep)
+		throw HokuyoError (HOKUYO_ERR_BADARG, "Start step is out of range.");
+	if (endStep < _firstStep || endStep > _lastStep)
+		throw HokuyoError (HOKUYO_ERR_BADARG, "End step is out of range.");
+
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Start angle " << startAngle << " is step " <<
+			startStep << ", end angle " << endAngle << " is step " << endStep << endl;
+	}
+
+	// Get the data
+	return GetNewRangesAndIntensities (data, startStep, endStep, clusterCount);
 }
 
 double HokuyoLaser::StepToAngle (unsigned int step)
@@ -1803,6 +2121,8 @@ void HokuyoLaser::Read2ByteRangeData (HokuyoData *data, unsigned int numSteps)
 
 	// This will automatically take care of whether it actually needs to (re)allocate or not.
 	data->AllocateData (numSteps);
+	data->_sensorIsUTM30LX = _sensorIsUTM30LX;
+	data->_error = false;
 
 	// 2 byte data is easy since it fits neatly in a 64-byte block
 	char buffer[SCIP2_LINE_LENGTH];
@@ -1820,10 +2140,12 @@ void HokuyoLaser::Read2ByteRangeData (HokuyoData *data, unsigned int numSteps)
 		{
 			if (buffer[ii] == '\n' || buffer[ii + 1] == '\n')
 			{
-				// Line feed in the middle of a line? Why?
+				// Line feed in the middle of a data block? Why?
 				throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Found line feed in a data block.");
 			}
-			data->_data[currentStep] = Decode2ByteValue (&buffer[ii]);
+			data->_ranges[currentStep] = Decode2ByteValue (&buffer[ii]);
+			if (data->_ranges[currentStep] < 20)
+				data->_error = true;
 		}
 		// End of this line. Go around again.
 	}
@@ -1841,6 +2163,8 @@ void HokuyoLaser::Read3ByteRangeData (HokuyoData *data, unsigned int numSteps)
 
 	// This will automatically take care of whether it actually needs to (re)allocate or not.
 	data->AllocateData (numSteps);
+	data->_sensorIsUTM30LX = _sensorIsUTM30LX;
+	data->_error = false;
 
 	// 3 byte data is a pain because it crosses the line boundary, it may overlap by 0, 1 or 2 bytes
 	char buffer[SCIP2_LINE_LENGTH];
@@ -1880,29 +2204,31 @@ void HokuyoLaser::Read3ByteRangeData (HokuyoData *data, unsigned int numSteps)
 				if (splitCount == 1)
 				{
 					splitValue[2] = buffer[ii++];
-					data->_data[currentStep] = Decode3ByteValue (splitValue);
+					data->_ranges[currentStep] = Decode3ByteValue (splitValue);
 				}
 				else if (splitCount == 2)
 				{
 					splitValue[1] = buffer[ii++];
 					splitValue[2] = buffer[ii++];
-					data->_data[currentStep] = Decode3ByteValue (splitValue);
+					data->_ranges[currentStep] = Decode3ByteValue (splitValue);
 				}
 				else
 				{
-					data->_data[currentStep] = Decode3ByteValue (&buffer[ii]);
+					data->_ranges[currentStep] = Decode3ByteValue (&buffer[ii]);
 					ii += 3;
 				}
-				if (data->_data[currentStep] > _maxRange)
+				if (data->_ranges[currentStep] > _maxRange)
 				{
 					cerr << "WARNING: HokuyoLaser::" << __func__ <<
 						"() Value at step " << currentStep << " beyond maximum range: " <<
-						data->_data[currentStep] << " (raw bytes: ";
+						data->_ranges[currentStep] << " (raw bytes: ";
 					if (splitCount != 0)
 						cerr << splitValue[0] << splitValue[1] << splitValue[2] << ")" << endl;
 					else
 						cerr << buffer[0] << buffer[1] << buffer[2] << ")" << endl;
 				}
+				else if (data->_ranges[currentStep] < 20)
+					data->_error = true;
 				currentStep++;
 				splitCount = 0;     // Reset this here now that it's been used
 			}
@@ -1916,6 +2242,111 @@ void HokuyoLaser::Read3ByteRangeData (HokuyoData *data, unsigned int numSteps)
 	{
 		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
 			"Read a  different number of range readings than were asked for.");
+	}
+}
+
+void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int numSteps)
+{
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Reading " << numSteps <<
+			" ranges and intensities." << endl;
+	}
+
+	// This will automatically take care of whether it actually needs to (re)allocate or not.
+	data->AllocateData (numSteps, true);
+	data->_sensorIsUTM30LX = _sensorIsUTM30LX;
+
+	// 3 byte data is a pain because it crosses the line boundary, it may overlap by 0, 1 or 2 bytes
+	char buffer[SCIP2_LINE_LENGTH];
+	unsigned int currentStep = 0;
+	int numBytesInLine = 0, splitCount = 0;
+	char splitValue[3];
+	bool nextIsIntensity = false;
+	while (true)
+	{
+		// Read a line of data
+		numBytesInLine = ReadLineWithCheck (buffer);
+		// Check if we've reached the end of the data
+		if (numBytesInLine == 0)
+			break;
+		// Process triplets of bytes until we encounter or overrun the end of the line
+		for (int ii = 0; ii < numBytesInLine;)
+		{
+			if (buffer[ii] == '\n' || buffer[ii + 1] == '\n')
+			{
+				// Line feed in the middle of a line? Why?
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Found line feed in a data block.");
+			}
+			if (ii == numBytesInLine - 2)       // Short 1 byte
+			{
+				splitValue[0] = buffer[ii];
+				splitValue[1] = buffer[ii + 1];
+				splitCount = 1;     // Will be reset on the next iteration, after it's used
+				ii += 2;
+			}
+			else if (ii == numBytesInLine - 1)  // Short 2 bytes
+			{
+				splitValue[0] = buffer[ii];
+				splitCount = 2;     // Will be reset on the next iteration, after it's used
+				ii += 1;
+			}
+			else
+			{
+				if (splitCount == 1)
+				{
+					splitValue[2] = buffer[ii++];
+					if (nextIsIntensity)
+						data->_intensities[currentStep] = Decode3ByteValue (splitValue);
+					else
+						data->_ranges[currentStep] = Decode3ByteValue (splitValue);
+				}
+				else if (splitCount == 2)
+				{
+					splitValue[1] = buffer[ii++];
+					splitValue[2] = buffer[ii++];
+					if (nextIsIntensity)
+						data->_intensities[currentStep] = Decode3ByteValue (splitValue);
+					else
+						data->_ranges[currentStep] = Decode3ByteValue (splitValue);
+				}
+				else
+				{
+					if (nextIsIntensity)
+						data->_intensities[currentStep] = Decode3ByteValue (&buffer[ii]);
+					else
+						data->_ranges[currentStep] = Decode3ByteValue (&buffer[ii]);
+					ii += 3;
+				}
+				if (data->_ranges[currentStep] > _maxRange && !nextIsIntensity)
+				{
+					cerr << "WARNING: HokuyoLaser::" << __func__ <<
+						"() Value at step " << currentStep << " beyond maximum range: " <<
+						data->_ranges[currentStep] << " (raw bytes: ";
+					if (splitCount != 0)
+						cerr << splitValue[0] << splitValue[1] << splitValue[2] << ")" << endl;
+					else
+						cerr << buffer[0] << buffer[1] << buffer[2] << ")" << endl;
+				}
+				else if (data->_ranges[currentStep] < 20)
+					data->_error = true;
+				currentStep++;
+				splitCount = 0;     // Reset this here now that it's been used
+				nextIsIntensity = !nextIsIntensity; // Alternate between range and intensity values
+			}
+		}
+		// End of this line. Go around again.
+	}
+
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Read " << currentStep <<
+			" ranges and intensities." << endl;
+	}
+	if (currentStep != numSteps)
+	{
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
+			"Read a  different number of range and intensity readings than were asked for.");
 	}
 }
 

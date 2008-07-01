@@ -69,7 +69,9 @@ inline string StrError (int errNo)
 #endif
 }
 
-const size_t CHUNK_HEADER_SIZE = sizeof (size_t) + sizeof (struct timeval);
+// Chunk header is two uint32_t's for the time stamp (seconds and microseconds) + one uint32_t for
+// the data length.
+const size_t CHUNK_HEADER_SIZE = (sizeof (uint32_t) * 2) + sizeof (uint32_t);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +167,7 @@ void LogFile::Close (void)
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
+		_readFile = NULL;
 	}
 	if (_writeFile != NULL)
 	{
@@ -176,6 +179,7 @@ void LogFile::Close (void)
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
+		_writeFile = NULL;
 	}
 
 	if (_readBuffer != NULL)
@@ -994,8 +998,14 @@ bool LogFile::DataAvailableWithinLimit (FILE * const file, const struct timeval 
 void LogFile::GetNextChunkInfo (FILE * const file, struct timeval &timeStamp, size_t &size)
 {
 	// Read the chunk info
-	ReadFromFile (file, &timeStamp, sizeof (timeStamp));
-	ReadFromFile (file, &size, sizeof (size));
+	uint32_t secs, usecs, tempSize;
+	ReadFromFile (file, &secs, sizeof (secs));
+	ReadFromFile (file, &usecs, sizeof (usecs));
+	timeStamp.tv_sec = ntohl (secs);
+	timeStamp.tv_usec = ntohl (usecs);
+	ReadFromFile (file, &tempSize, sizeof (tempSize));
+	size = ntohl (tempSize);
+
 	// Rewind the file back to the beginning of the chunk header
 	if (fseek (file, -1 * CHUNK_HEADER_SIZE, SEEK_CUR) < 0)
 	{
@@ -1228,15 +1238,19 @@ void LogFile::ReadFromFile (FILE * const file, void * const dest, size_t count)
 	}
 
 	// Test if this file is actually open
-	if (file == NULL || ftell (file) < 0)
+	if (file == NULL)
 		throw PortException (string ("LogFile::") + __func__ + string ("() Log file is not open."));
+	else if (ftell (file) < 0)
+		throw PortException (string ("LogFile::") + __func__ + string ("() Log file is not open."));
+
 	if (dest == NULL)
 		throw PortException (string ("LogFile::") + __func__ + string ("() No destination."));
 
 	size_t numRead;
 	if ((numRead = fread (dest, 1, count, file)) < count)
 	{
-		cerr << "Only read " << numRead << " of " << count << " bytes" << endl;
+		cerr << "LogFile::" << __func__ << "() Only read " << numRead << " of " << count <<
+			" bytes" << endl;
 		if (feof (file))
 		{
 			// Close the files

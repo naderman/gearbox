@@ -196,6 +196,8 @@ class HOKUYO_AIST_EXPORT HokuyoSensorInfo
 		bool power;
 		/// Current motor speed (rpm).
 		unsigned int speed;
+		/// Speed level (0 for default)
+		unsigned short speedLevel;
 		/// Measurement state.
 		std::string measureState;
 		/// Baud rate.
@@ -230,9 +232,12 @@ class HOKUYO_AIST_EXPORT HokuyoData
 
 		/// This constructor creates an empty HokuyoData with no data currently allocated.
 		HokuyoData (void);
-		/// This constructor performs a deep copy of data.
-		HokuyoData (unsigned short *data, unsigned int length, short error, unsigned int time);
-		/// This copy constructor performs a deep copy of data.
+		/// This constructor performs a deep copy of range data.
+		HokuyoData (uint32_t *ranges, unsigned int length, bool error, unsigned int time);
+		/// This constructor performs a deep copy of range and intensity data.
+		HokuyoData (uint32_t *ranges, uint32_t *intensities, unsigned int length,
+					bool error, unsigned int time);
+		/// This copy constructor performs a deep copy of present data.
 		HokuyoData (const HokuyoData &rhs);
 		~HokuyoData (void);
 
@@ -240,23 +245,26 @@ class HOKUYO_AIST_EXPORT HokuyoData
 
 		Values less than 20mm indicate an error. Check the error value for the data to see a
 		probable cause for the error. Most of the time, it will just be an out-of-range reading. */
-		const unsigned short* Ranges (void) const           { return _data; }
+		const uint32_t* Ranges (void) const                 { return _ranges; }
+		/// @brief Return a pointer to an array of intensity readings.
+		const uint32_t* Intensities (void) const            { return _intensities; }
 		/// @brief Get the number of samples in the data.
 		unsigned int Length (void) const                    { return _length; }
-		/** @brief Error code for the data (if any).
-
-		@return -1 indicates no error. */
-		short GetErrorCode (void) const                     { return _error; }
-		/// @brief Return a string representing the error code for the data.
-		std::string ErrorCodeToString (void);
+		/** @brief Indicates if one or more steps had an error.
+		
+		A step's value will be less than 20 if it had an error. Use @ref ErrorCodeToString to get
+		a textual representation of the error. */
+		bool GetErrorStatus (void) const                    { return _error; }
+		/// @brief Return a string representing the error for the given error code.
+		std::string ErrorCodeToString (uint32_t errorCode);
 		/** @brief Get the time stamp of the data in milliseconds (only available using SCIP
 		version 2). */
 		unsigned int TimeStamp (void) const                 { return _time; }
 
 		/// @brief Assignment operator.
 		HokuyoData& operator= (const HokuyoData &rhs);
-		/// @brief Subscript operator.
-		unsigned short operator[] (unsigned int index);
+		/// @brief Subscript operator. Provides direct access to an element of the range data.
+		uint32_t operator[] (unsigned int index);
 
 		/// @brief Format the entire object into a string.
 		std::string AsString (void);
@@ -265,12 +273,14 @@ class HOKUYO_AIST_EXPORT HokuyoData
 		void CleanUp (void);
 
 	private:
-		unsigned short *_data;
+		uint32_t *_ranges;
+		uint32_t *_intensities;
 		unsigned int _length;
-		short _error;
+		bool _error;
 		unsigned int _time;
+		bool _sensorIsUTM30LX;
 
-		void AllocateData (unsigned int length);
+		void AllocateData (unsigned int length, bool includeIntensities = false);
 };
 
 /** @brief Hokuyo laser scanner class.
@@ -313,13 +323,19 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		Not available with the SCIP v1 protocol. */
 		void Reset (void);
 
-		/** @brief Set the speed at which the scanner's sensor spins in revolutions per minute.
+		/** @brief Set the speed at which the scanner's sensor spins.
 
-		Valid speeds are: 540, 546, 552, 558, 564, 570, 576, 582, 588, 594, 600. Set the speed to 0
-		to have it reset to the default value.
+		Set the speed to 0 to have it reset to the default value, and 99 to reset it to the initial
+		(startup) value. Values between 1 and 10 specify a ratio of the default speed. The speeds in
+		revolutions per minute that these correspond to will depend on the scanner model. For
+		example, for a URG-04LX, they are (from 1 to 10) 594, 588, 576, 570, 564, 558, 552, 546, and
+		540 rpm. 
 
 		Not available with the SCIP v1 protocol. */
 		void SetMotorSpeed (unsigned int speed);
+
+		/// @brief Switch the scanner between normal and high sensitivity modes.
+		void SetHighSensitivity (bool on);
 
 		/** @brief Get various information about the scanner.
 
@@ -399,6 +415,38 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		unsigned int GetNewRanges (HokuyoData *data, double startAngle, double endAngle,
 								unsigned int clusterCount = 1);
 
+		/** @brief Get a new scan from the scanner with intensity data.
+
+		Unlike @ref GetRanges, which returns the most recent scan the scanner took, this function
+		will request a new scan. This means it will wait while the scanner performs the scan.
+		Otherwise behaves identicallty to @ref GetRanges.
+
+		Not available with the SCIP v1 protocol.
+
+		@param data Pointer to a @ref HokuyoData object to store the range readings in.
+		@param clusterCount The number of readings to cluster together into a single reading. The
+		minimum value from a cluster is returned as the range for that cluster.
+		@param startStep The first step to get ranges from. Set to -1 for the first scannable step.
+		@param endStep The last step to get ranges from. Set to -1 for the last scannable step.
+		@return The number of range readings read into @ref data. */
+		unsigned int GetNewRangesAndIntensities (HokuyoData *data, int startStep = -1,
+												int endStep = -1, unsigned int clusterCount = 1);
+
+		/** @brief Get a new scan from the scanner with intensity data.
+
+		Not available with the SCIP v1 protocol.
+
+		@param data Pointer to a @ref HokuyoData object to store the range readings in.
+		@param startAngle The angle to get range readings from. Exclusive; if this falls between two
+		steps the step inside the angle will be returned, but the step outside won't.
+		@param endAngle The angle to get range readings to. Exclusive; if this falls between two
+		steps the step inside the angle will be returned, but the step outside won't.
+		@param clusterCount The number of readings to cluster together into a single reading. The
+		minimum value from a cluster is returned as the range for that cluster.
+		@return The number of range readings read into @ref data. */
+		unsigned int GetNewRangesAndIntensities (HokuyoData *data, double startAngle,
+												double endAngle, unsigned int clusterCount = 1);
+
 		/// @brief Return the major version of the SCIP protocol in use.
 		uint8_t SCIPVersion (void) const            { return _scipVersion; }
 
@@ -415,7 +463,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		flexiport::Port *_port;
 
 		uint8_t _scipVersion;
-		bool _verbose;
+		bool _verbose, _sensorIsUTM30LX;
 		double _minAngle, _maxAngle, _resolution;
 		int _firstStep, _lastStep, _frontStep;
 		unsigned int _maxRange;
@@ -429,6 +477,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		void GetDefaults (void);
 		void Read2ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeData (HokuyoData *data, unsigned int numSteps);
+		void Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int numSteps);
 };
 
 } // namespace hokuyo_aist
