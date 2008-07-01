@@ -17,6 +17,8 @@
 
 This library provides a set of classes and functions to read data from a Smart Battery System (SBS). SBS is a specification for determining accurate battery readings. The library also contains classes which are specialised to a battery system provided by OceanServer Technologies Inc.
 
+For a full list of classes and functions, see @ref gbxsmartbatteryacfr.
+
 @par Header file
 
 @verbatim
