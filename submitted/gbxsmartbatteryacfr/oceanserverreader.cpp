@@ -18,12 +18,20 @@ using namespace std;
 
 namespace gbxsmartbatteryacfr {
     
+// baudrate is fixed
 static const int BAUDRATE = 19200;
+
+// timeout for reading from the serial port
 static const int TIMEOUT_SEC = 2;
+
+// the maximum number of lines to read until we are confident that we are not
+// connected to an OceanServer system
+static const int MAX_TRIES = 50;
+
  
-OceanServerReader::OceanServerReader( const string        &device,
+OceanServerReader::OceanServerReader( const string        &serialPort,
                                       gbxutilacfr::Tracer &tracer )
-    : serial_( device, BAUDRATE, gbxserialacfr::Serial::Timeout(TIMEOUT_SEC,0) ),
+    : serial_( serialPort, BAUDRATE, gbxserialacfr::Serial::Timeout(TIMEOUT_SEC,0) ),
       tracer_(tracer),
       parser_(tracer),
       firstTime_(true)
@@ -45,12 +53,18 @@ OceanServerReader::OceanServerReader( const string        &device,
 }
 
 bool
-OceanServerReader::isOceanServerSystem( const char* oceanServerString )
-{
-    for (unsigned int i=0; i<oceanServerStrings_.size(); i++)
+OceanServerReader::isOceanServerSystem( string &oceanServerString )
+{   
+    // number of characters which we require to match
+    // if they match, we are pretty sure we have an OceanServerSystem
+    unsigned int numCharRequired = 8;
+    
+    if ( oceanServerString.size()<numCharRequired ) return false;
+    
+    for (unsigned int i=0; i<oceanServerStrings_.size(); i++) 
     {
-        // if the first 8 characters agree we are pretty sure we have an OceanServerSystem
-        if (strncmp(oceanServerStrings_[i].c_str(),oceanServerString,8)==0) return true;
+        if ( strncmp(oceanServerStrings_[i].c_str(),oceanServerString.c_str(),numCharRequired)==0 ) 
+            return true;
     }
     return false;
 }
@@ -64,42 +78,44 @@ OceanServerReader::checkConnection()
     const char menuMode = ' ';
     serial_.write(&menuMode, 1);
     
-    // if we were in battery reading mode before, we might have to skip quite 
-    // a few lines until we get something from the menu
-    const int maxTries = 40;
     int numTries=0;
-    
-    // for tracer output
     stringstream ss;
 
     while(true)
     {
-        ss.str(""); ss << "OceanServerReader: Trying to read from serial port with timeout of " << TIMEOUT_SEC << "s" << endl;
+        ss.str(""); ss << "OceanServerReader: " << __func__ << ": Trying to read from serial port with timeout of " << TIMEOUT_SEC << "s" << endl;
         tracer_.info( ss.str() );
         
+        // reading from serial port
         string serialData;        
         int ret = serial_.readLine( serialData );
-        if (ret<0)  {
-          throw HardwareReadingException( ERROR_INFO, "Connected to the wrong serial port. Timed out while trying to read a line.");
+        if ( ret<0 )  {
+          throw HardwareReadingException( ERROR_INFO, "Timed out while trying to read a line from serial port.");
         }
-        if ( isOceanServerSystem(serialData.c_str()) ) {
-            tracer_.info( "Oceanserverreader.cpp: We are connected to an Oceanserver system. Good." );
+        
+        // checking whether we are connected to an oceanserver system
+        if ( isOceanServerSystem(serialData) ) {
+            tracer_.info( "OceanServerReader: We are connected to an Oceanserver system. Good." );
             break;
         }
+        
+        // count the number of tries
         numTries++;
-        ss.str(""); ss << "OceanServerReader: Trying to find out whether this is an oceanserver system. Attempt number " << numTries << "/" << maxTries << ".";
+        ss.str(""); ss << "OceanServerReader: Trying to find out whether this is an oceanserver system. Attempt number " << numTries << "/" << MAX_TRIES << ".";
         tracer_.info( ss.str() );
-        if (numTries>=maxTries) {
-            throw HardwareReadingException( ERROR_INFO, "Connected to the wrong serial port. Didn't recognize any of the strings.");
+        
+        if ( numTries >= MAX_TRIES ) {
+            throw HardwareReadingException( ERROR_INFO, "Didn't recognize any of the strings. We may be connected to the wrong serial port.");
         }
     }
 }    
 
-void 
-OceanServerReader::tryToReadLineFromSerialPort( std::string &serialData )
+std::string
+OceanServerReader::tryToReadLineFromSerialPort()
 {
     const int maxTries=5;
     int numTries=0;
+    string serialData;
     
     while(true)
     {
@@ -114,6 +130,8 @@ OceanServerReader::tryToReadLineFromSerialPort( std::string &serialData )
             throw HardwareReadingException( ERROR_INFO,  ss.str().c_str() );
         }
     }
+    
+    return serialData;
 }
 
 void 
@@ -125,10 +143,14 @@ OceanServerReader::read( OceanServerSystem &system )
     if (firstTime_) 
     {
         // (1) Wait until we got the beginning of the record
+        int numTries=0;
         while(true)
         {
-            tryToReadLineFromSerialPort( serialData );
-            if (parser_.atBeginningOfRecord( serialData.c_str() )) break;
+            if ( numTries > MAX_TRIES ) 
+                throw gbxutilacfr::Exception( ERROR_INFO, "Couldn't find the beginning of a valid OceanServer record" );
+            numTries++;
+            serialData = tryToReadLineFromSerialPort();
+            if (parser_.atBeginningOfRecord( serialData )) break;
         }
         
         tracer_.debug( "OceanServerReader: Beginning of a new record", 5 );
@@ -145,19 +167,23 @@ OceanServerReader::read( OceanServerSystem &system )
     try {
         
         // (3) Read the rest of the record line-by-line
+        int numTries=0;
         while(true)
         {        
-            tryToReadLineFromSerialPort( serialData );
-            if ( parser_.atEndOfRecord( serialData.c_str() ) ) 
+            if ( numTries > MAX_TRIES ) 
+                throw gbxutilacfr::Exception( ERROR_INFO, "Couldn't find the beginning of a valid OceanServer record" );
+            numTries++;
+            serialData = tryToReadLineFromSerialPort();
+            if ( parser_.atBeginningOfRecord( serialData ) ) 
             {   
-                tracer_.debug( "OceanServerReader: End of record", 5 );
+                tracer_.debug( "OceanServerReader: End of the record (beginning of the NEXT record)", 5 );
                 parser_.parse( stringList, system );
                 break; 
             }
             stringList.push_back(serialData);
         }
         
-        // (4) Save the last line: it is the beginning of the next record
+        // (4) Save the beginning of the next record
         beginningRecordLine_ = serialData;
         if (firstTime_) {
             firstTime_ = false;
@@ -167,7 +193,7 @@ OceanServerReader::read( OceanServerSystem &system )
     {
         stringstream ss;
         ss << "OceanServerReader: Caught ParsingException: " << e.what() << ". ";
-        ss << "It's not critical, we are trying to find the beginning of a new record.";
+        ss << "It's not critical, we will try to find the beginning of a new record.";
         tracer_.warning( ss.str() );
         firstTime_ = true;
         

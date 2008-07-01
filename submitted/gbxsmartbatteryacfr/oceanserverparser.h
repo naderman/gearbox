@@ -27,8 +27,7 @@ class OceanServerParser
 {
 public:
     
-    OceanServerParser( gbxutilacfr::Tracer &tracer ); 
-    ~OceanServerParser() {};
+    OceanServerParser( gbxutilacfr::Tracer &tracer );
     
     //! Expects a full record of batterydata as a stringList (one line per string) produced by the oceanserver controller.
     //! Parses each line and sets corresponding fields in batterySystem
@@ -36,10 +35,7 @@ public:
                 OceanServerSystem        &batterySystem );
     
     //! Checks whether the passed string (one line) is the first line of the record
-    bool atBeginningOfRecord( const char *string );
-    
-    //! Checks whether the passed string (one line) is the end of the record
-    bool atEndOfRecord( const char *string );
+    bool atBeginningOfRecord( const std::string &line );
 
 private:       
     

@@ -18,48 +18,47 @@ using namespace std;
 
 namespace gbxsmartbatteryacfr {
 
-SmartBatteryDataField stringToSmartField( const string &fieldStr )
+SmartBatteryDataField keyToSmartField( const string &key )
 {
-    if  (fieldStr=="00") return ManufacturerAccess;
-    else if (fieldStr=="01") return RemainingCapacityAlarm;
-    else if (fieldStr=="02") return RemainingTimeAlarm;
-    else if (fieldStr=="03") return BatteryMode;
-    else if (fieldStr=="04") return AtRate;
-    else if (fieldStr=="05") return AtRateTimeToFull;
-    else if (fieldStr=="06") return AtRateTimeToEmpty;
-    else if (fieldStr=="07") return AtRateOk;
-    else if (fieldStr=="08") return Temperature;
-    else if (fieldStr=="09") return Voltage;
-    else if (fieldStr=="0A") return Current;
-    else if (fieldStr=="0B") return AverageCurrent;
-    else if (fieldStr=="0C") return MaxError;
-    else if (fieldStr=="0D") return RelativeStateOfCharge;
-    else if (fieldStr=="0E") return AbsoluteStateOfCharge;
-    else if (fieldStr=="0F") return RemainingCapacity;
-    else if (fieldStr=="10") return FullChargeCapacity;
-    else if (fieldStr=="11") return RunTimeToEmpty;
-    else if (fieldStr=="12") return AverageTimeToEmpty;
-    else if (fieldStr=="13") return AverageTimeToFull;
-    else if (fieldStr=="14") return ChargingCurrent;
-    else if (fieldStr=="15") return ChargingVoltage;
-    else if (fieldStr=="16") return BatteryStatus;
-    else if (fieldStr=="17") return CycleCount;
-    else if (fieldStr=="18") return DesignCapacity;
-    else if (fieldStr=="19") return DesignVoltage;
-    else if (fieldStr=="1A") return SpecificationInfo;
-    else if (fieldStr=="1B") return ManufactureDate;
-    else if (fieldStr=="1C") return SerialNumber;
-    else if (fieldStr=="20") return ManufacturerName;
-    else if (fieldStr=="21") return DeviceName;
-    else if (fieldStr=="22") return DeviceChemistry;
-    else if (fieldStr=="23") return ManufacturerData;
+    if  (key=="00") return ManufacturerAccess;
+    else if (key=="01") return RemainingCapacityAlarm;
+    else if (key=="02") return RemainingTimeAlarm;
+    else if (key=="03") return BatteryMode;
+    else if (key=="04") return AtRate;
+    else if (key=="05") return AtRateTimeToFull;
+    else if (key=="06") return AtRateTimeToEmpty;
+    else if (key=="07") return AtRateOk;
+    else if (key=="08") return Temperature;
+    else if (key=="09") return Voltage;
+    else if (key=="0A") return Current;
+    else if (key=="0B") return AverageCurrent;
+    else if (key=="0C") return MaxError;
+    else if (key=="0D") return RelativeStateOfCharge;
+    else if (key=="0E") return AbsoluteStateOfCharge;
+    else if (key=="0F") return RemainingCapacity;
+    else if (key=="10") return FullChargeCapacity;
+    else if (key=="11") return RunTimeToEmpty;
+    else if (key=="12") return AverageTimeToEmpty;
+    else if (key=="13") return AverageTimeToFull;
+    else if (key=="14") return ChargingCurrent;
+    else if (key=="15") return ChargingVoltage;
+    else if (key=="16") return BatteryStatus;
+    else if (key=="17") return CycleCount;
+    else if (key=="18") return DesignCapacity;
+    else if (key=="19") return DesignVoltage;
+    else if (key=="1A") return SpecificationInfo;
+    else if (key=="1B") return ManufactureDate;
+    else if (key=="1C") return SerialNumber;
+    else if (key=="20") return ManufacturerName;
+    else if (key=="21") return DeviceName;
+    else if (key=="22") return DeviceChemistry;
+    else if (key=="23") return ManufacturerData;
     else 
     {
         stringstream ss;
-        ss << "Unknown field: " << fieldStr;
+        ss << "Unknown field: " << key;
         throw ParsingException( ERROR_INFO, ss.str().c_str() );
-    }    
-    return NUM_SMARTBATTERY_FIELDS;
+    }
 }
 
 string toString( const SmartBattery &b )

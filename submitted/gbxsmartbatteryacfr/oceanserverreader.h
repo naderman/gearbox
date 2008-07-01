@@ -31,18 +31,20 @@ class OceanServerReader
 {
 public:
     
-    //! May throw HardwareReadingException
-    OceanServerReader( const std::string   &device,
+    //! Connects to the serial port (e.g. /dev/ttyS0) and checks
+    //! whether we are connected to an OceanServer system.
+    //! Throws a HardwareReadingException if any of the above goes wrong.
+    OceanServerReader( const std::string   &serialPort,
                        gbxutilacfr::Tracer &tracer );
-
-    ~OceanServerReader() {};
     
-    //! May throw HardwareReadingException
+    //! May throw HardwareReadingExceptions and ParsingExceptions
     void read( OceanServerSystem &system );
 
 private:   
     
-    bool isOceanServerSystem( const char* oceanServerString );
+    // Returns true if 100% sure that we are connected to an OceanServer system, otherwise false
+    bool isOceanServerSystem( std::string &oceanServerString );
+    
     std::vector<std::string> oceanServerStrings_;
     
     gbxserialacfr::Serial serial_;
@@ -50,7 +52,7 @@ private:
     gbxsmartbatteryacfr::OceanServerParser parser_;
     
     void checkConnection();
-    void tryToReadLineFromSerialPort( std::string &serialData );
+    std::string tryToReadLineFromSerialPort();
     
     std::string beginningRecordLine_;
     bool firstTime_;

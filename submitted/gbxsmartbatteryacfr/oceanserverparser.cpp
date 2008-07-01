@@ -9,6 +9,7 @@
  */
 
 #include <sstream>
+#include <gbxutilacfr/tokenise.h>
 #include <gbxsmartbatteryacfr/exceptions.h>
 #include <gbxsmartbatteryacfr/smartbatteryparsing.h>
 
@@ -63,30 +64,30 @@ OceanServerParser::parseControllerData( const map<string,string> &keyValuePairs,
         vector<bool> states;
         
         if (it->first=="01") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.availableBatteries = states;
         }
         else if (it->first=="02") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.chargingStates = states;
         }
         else if (it->first=="03") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.supplyingPowerStates = states;
         }
         else if (it->first=="04") {
             // reserved, do nothing
         }
         else if (it->first=="05") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.chargePowerPresentStates = states;
         }
         else if (it->first=="06") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.powerNoGoodStates = states;
         }
         else if (it->first=="07") {
-            readSingleByte(it->second, states);
+            readFlags(it->second, states);
             batterySystem.chargeInhibitedStates = states;
         }
         else 
@@ -112,7 +113,7 @@ OceanServerParser::parseSingleBatteryData( const map<string,string> &keyValuePai
     
     for (it=keyValuePairs.begin(); it!=keyValuePairs.end(); it++)
     {   
-        SmartBatteryDataField smartField = stringToSmartField( it->first );
+        SmartBatteryDataField smartField = keyToSmartField( it->first );
         
         switch( smartField )
         {
@@ -131,7 +132,7 @@ OceanServerParser::parseSingleBatteryData( const map<string,string> &keyValuePai
             case AtRateTimeToEmpty:
                 bat.setAtRateTimeToEmpty( readMinutes( it->second ) ); break;
             case AtRateOk:
-                bat.setAtRateOk( readBool( it->second ) ); break;
+                bat.setAtRateOk( readRate( it->second ) ); break;
             case Temperature: 
                 bat.setTemperature( readTemperature( it->second ) ); break;
             case Voltage:
@@ -233,10 +234,9 @@ OceanServerParser::parseFields( vector<string>    &fields,
 }
 
 bool 
-OceanServerParser::atBeginningOfRecord( const char* line )
+OceanServerParser::atBeginningOfRecord( const std::string &line )
 {
-    vector<string> tokens;
-    splitIntoFields( line, tokens, ",");
+    vector<string> tokens = gbxutilacfr::tokenise( line, ",");
         
     if (tokens.size()>0) {
         if (tokens[0]!="$S") {
@@ -244,18 +244,6 @@ OceanServerParser::atBeginningOfRecord( const char* line )
         }
     }
     return true;
-}
-
-bool
-OceanServerParser::atEndOfRecord( const char* line )    
-{
-    vector<string> tokens;
-    splitIntoFields( line, tokens, ",");
-    
-    if (tokens.size()>0) {
-        if (tokens[0]=="$S") return true;
-    }
-    return false;
 }
 
 
@@ -308,8 +296,7 @@ OceanServerParser::parse( vector<string>    &stringList,
         }
 
         // divide the line into 2 parts: data and checksum (if present)
-        vector<string> checksumList;
-        splitIntoFields(line, checksumList, "%" );
+        vector<string> checksumList = gbxutilacfr::tokenise( line, "%" );
         if (checksumList.size()==2)
         {
             // we have a checksum, is it correct?
@@ -320,8 +307,7 @@ OceanServerParser::parse( vector<string>    &stringList,
         // divide the data into individual fields and parse
         if (checksumList.size()==0)
             throw ParsingException( ERROR_INFO, "String length is 0" );
-        vector<string> fields;
-        splitIntoFields( checksumList[0], fields, ",");
+        vector<string> fields = gbxutilacfr::tokenise( checksumList[0], "," );
         parseFields( fields, batterySystem );
     }
 }

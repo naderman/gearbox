@@ -57,8 +57,9 @@ enum SmartBatteryDataField
     NUM_SMARTBATTERY_FIELDS
 };
     
-//! Converts a string to a SmartBatteryDataField, returns NUM_SMARTBATTERY_FIELDS if string is not valid
-SmartBatteryDataField stringToSmartField( const std::string &fieldStr );
+//! Converts a key (string) to a SmartBatteryDataField.
+//! Throws a ParsingException if key is unknown.
+SmartBatteryDataField keyToSmartField( const std::string &key );
     
 //! SmartBattery class holds all the data of a single smart battery.
 //! Since not all data is always present, access to data needs to be done as follows:

@@ -72,6 +72,7 @@ int main( int argc, char **argv )
             cout << "ERROR(simple_test): Caught a hardware reading exception: " 
                     << e.what() << endl 
                     << "This shouldn't happen!" << endl;
+            delete reader;
             return 1;
         }
         catch(std::exception &e)
@@ -79,6 +80,7 @@ int main( int argc, char **argv )
             cout << "ERROR(simple_test): Caught an unknown exception: " 
                     << e.what() << endl
                     << "This shouldn't happen!" << endl;
+            delete reader;
             return 1;
         }
     } //end of for loop

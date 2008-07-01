@@ -17,14 +17,12 @@ using namespace std;
 
 namespace gbxsmartbatteryacfr {
 
-//
-// Not part of the public interface
-//
-
+namespace {
+    
 int readNumPositiveFlags(const string &str)
 {
     vector<bool> flags;
-    readSingleByte( str, flags );
+    readFlags( str, flags );
     
     int numPositiveFlags=0;
 
@@ -74,10 +72,8 @@ int16_t readSignedInt16( const string &str )
     return value16;
 }
 
+} // end of namespace
 
-//
-// Public interface functions
-//
 
 double readTemperature( const string &str )
 {
@@ -137,12 +133,6 @@ int readNumber( const string &str )
     return readUnsignedInt16( str );   
 }
 
-bool readBool( const string &str )
-{
-    return readUnsignedInt16( str );
-}
-
-
 int readRate( const string &str )
 {
     return readUnsignedInt16( str );
@@ -199,35 +189,11 @@ void toKeyValuePairs( const vector<string> &fields,
 }
 
 
-void splitIntoFields( const string   &str, 
-                      vector<string> &fields, 
-                      const string   &delimiter)
-{
-    // Skip delimiters at beginning.
-    string::size_type lastPos = str.find_first_not_of(delimiter, 0);
-    
-    // Find first "non-delimiter".
-    string::size_type pos     = str.find_first_of(delimiter, lastPos);
-
-    while (string::npos != pos || string::npos != lastPos)
-    {
-        // Found a token, add it to the vector.
-        fields.push_back(str.substr(lastPos, pos - lastPos));
-
-        // Skip delimiters.  Note the "not_of"
-        lastPos = str.find_first_not_of(delimiter, pos);
-        
-        // Find next "non-delimiter"
-        pos = str.find_first_of(delimiter, lastPos);
-    }
-}
-
-
-void readSingleByte( const string &str, 
-                     vector<bool> &flags )
+void readFlags( const string &str, 
+                vector<bool> &flags )
 {
     if (str.size()!=2) 
-        throw ParsingException( ERROR_INFO, "readSingleByte called with string size != 2" );
+        throw ParsingException( ERROR_INFO, "readFlags called with string size != 2" );
     
     stringstream ss(str);
     int allFlags;

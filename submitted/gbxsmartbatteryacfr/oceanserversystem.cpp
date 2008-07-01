@@ -21,6 +21,7 @@ namespace gbxsmartbatteryacfr {
 //
 // Helper functions    
 //
+namespace {
     
 string toString( const vector<bool> &flags )
 {
@@ -41,12 +42,13 @@ string toLogString( const vector<bool> &flags )
     }
     return ss.str();
 }
+
+}
     
     
 //
 // Non-member functions
 //
-
 string toString( const OceanServerSystem &system )
 {
     stringstream ss;
@@ -177,7 +179,6 @@ void updateWithNewData( const OceanServerSystem &from,
 //
 // Member functions
 //
-
 OceanServerSystem::OceanServerSystem()
     : percentCharge(0),
       minToEmpty(0),
