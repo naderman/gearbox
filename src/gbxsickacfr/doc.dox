@@ -15,7 +15,7 @@
 @defgroup gbx_library_gbxsickacfr GbxSickAcfr
 @brief ACFR driver for SICK laser range-finder.
 
-Drives SICK hardware, directly connected to the computer. 
+Drives SICK hardware, directly connected to the computer. For a full list of classes and functions, see @ref gbxsickacfr.
 
 @par Header file
 
