@@ -16,6 +16,7 @@
 @brief ACFR utility functions and drivers
 
 Utility functions and objects used accross ACFR libraries and drivers. For a full list of classes and functions, see @ref gbxutilacfr.
+For a full list of classes and functions, see @ref gbxutilacfr.
 
 @par Header file
 
