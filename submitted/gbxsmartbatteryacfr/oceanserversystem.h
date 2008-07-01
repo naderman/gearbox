@@ -68,7 +68,7 @@ std::string toString( const OceanServerSystem &system );
 //! Puts OceanServerSystem data into a machine-readable ASCII string
 std::string toLogString( const OceanServerSystem &system );
     
-//! Updates all fields in 'to' with data from 'from'. Also reapes batteries in 'to' if they are not in 'from'.
+//! Updates all fields in 'to' with data from 'from'. Also reaps batteries in 'to' if they are not in 'from'.
 //! Has persistence capabilities: if fields in 'from' are not set and corresponding fields in 'to' are set, the ones in 'to' are kept.
 //! Use case: a class stores 'to' as a member variable, receives the latest records into 'from', calls this function to update 'to'.
 //! The reaping capability makes sure that battery modules which are no longer connected don't persist.
