@@ -90,6 +90,7 @@ int main(int argc, char **argv)
 				cout << "-n\t\tGet new ranges instead of latest ranges." << endl;
 				cout << "-o options\tPort options (see flexiport library)." << endl;
 				cout << "-s angle\tStart angle to get ranges from." << endl;
+				cout << "-v\t\tPut the hokuyo_aist library into verbose mode." << endl;
 				return 1;
 		}
 	}
