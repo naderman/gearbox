@@ -18,6 +18,8 @@
 Uses Garmin serial implementation. Written for Garmin-GPS15L. 
 Tries to establish communication at 4800 baud (non-configurable).
 
+For a full list of classes and functions, see @ref gbxgarminacfr.
+
 @par Header file
 
 @verbatim
