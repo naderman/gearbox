@@ -17,7 +17,7 @@ namespace gbxutilacfr {
     
 std::vector<string> tokenise( const string &str, const string &delimiter )
 {
-#define SKIP_DELIMS false
+#define SKIP_DELIMS 0
 #if !SKIP_DELIMS
     std::vector<std::string> tokens;
 
