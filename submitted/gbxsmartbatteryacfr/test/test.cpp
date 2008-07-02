@@ -39,7 +39,6 @@ int main( int argc, char **argv )
         
         for (unsigned int i=0; i<=numRecords; i++)
         {            
-            oceanserver.read();
             gbxsmartbatteryacfr::OceanServerSystem data = oceanserver.getData();
             
             cout << "TRACE(test): Reading record " << i << ": " << endl
@@ -54,11 +53,18 @@ int main( int argc, char **argv )
                 << "This shouldn't happen!" << endl;
         return 1;
     }
+    catch ( gbxutilacfr::Exception &e )
+    {
+        cout << "ERROR(test): Caught a gbxutilacfr::Exception: " 
+             << e.what() << endl 
+             << "This shouldn't happen!" << endl;
+        return 1;
+    }
     catch ( std::exception &e )
     {
         cout << "ERROR(test): Caught an unknown exception: " 
-                << e.what() << endl
-                << "This shouldn't happen!" << endl;
+             << e.what() << endl
+             << "This shouldn't happen!" << endl;
         return 1;
     }
     

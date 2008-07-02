@@ -18,15 +18,44 @@ using namespace std;
 
 namespace gbxsmartbatteryacfr {
     
-// baudrate is fixed
-static const int BAUDRATE = 19200;
+namespace { 
+       
+    // baudrate is fixed
+    static const int BAUDRATE = 19200;
+    
+    // timeout for reading from the serial port
+    static const int TIMEOUT_SEC = 2;
+    
+    // the maximum number of lines to read until we are confident that we are not
+    // connected to an OceanServer system
+    static const int MAX_TRIES = 50;
+    
+    // Returns true if 100% sure that we are connected to an OceanServer system, otherwise false
+    bool isOceanServerSystem( const string &candidateString )
+    {   
+        // number of characters which we require to match
+        // if they match, we are pretty sure we have an OceanServerSystem
+        unsigned int numCharRequired = 8;
+        if ( candidateString.size()<numCharRequired ) return false;
+    
+        // some menu entries from the OceanServer system - used to recognize whether
+        // we are connected to the right device
+        std::vector<std::string> oceanServerStrings;
+        oceanServerStrings.push_back(" S - Setup Controller");
+        oceanServerStrings.push_back(" B - Battery Status");
+        oceanServerStrings.push_back(" X - Host HEX");
+        oceanServerStrings.push_back(" H - Help");
+        oceanServerStrings.push_back(" www.ocean-server.com");
+        
+        for (unsigned int i=0; i<oceanServerStrings.size(); i++) 
+        {
+            if ( strncmp(oceanServerStrings[i].c_str(),candidateString.c_str(),numCharRequired)==0 ) 
+                return true;
+        }
+        return false;
+    }
 
-// timeout for reading from the serial port
-static const int TIMEOUT_SEC = 2;
-
-// the maximum number of lines to read until we are confident that we are not
-// connected to an OceanServer system
-static const int MAX_TRIES = 50;
+}
 
  
 OceanServerReader::OceanServerReader( const string        &serialPort,
@@ -35,38 +64,13 @@ OceanServerReader::OceanServerReader( const string        &serialPort,
       tracer_(tracer),
       parser_(tracer),
       firstTime_(true)
-{
-    // some menu entries from the OceanServer system - used to recognize whether
-    // we are connected to the right device
-    oceanServerStrings_.push_back(" S - Setup Controller");
-    oceanServerStrings_.push_back(" B - Battery Status");
-    oceanServerStrings_.push_back(" X - Host HEX");
-    oceanServerStrings_.push_back(" H - Help");
-    oceanServerStrings_.push_back(" www.ocean-server.com");
-    
+{   
     checkConnection();
 
     // send the command to start reading data
     serial_.flush();
     const char startReading = 'X';
     serial_.write(&startReading, 1);
-}
-
-bool
-OceanServerReader::isOceanServerSystem( string &oceanServerString )
-{   
-    // number of characters which we require to match
-    // if they match, we are pretty sure we have an OceanServerSystem
-    unsigned int numCharRequired = 8;
-    
-    if ( oceanServerString.size()<numCharRequired ) return false;
-    
-    for (unsigned int i=0; i<oceanServerStrings_.size(); i++) 
-    {
-        if ( strncmp(oceanServerStrings_[i].c_str(),oceanServerString.c_str(),numCharRequired)==0 ) 
-            return true;
-    }
-    return false;
 }
 
 void

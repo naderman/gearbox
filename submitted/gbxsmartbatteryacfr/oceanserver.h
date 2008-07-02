@@ -33,17 +33,18 @@ public:
     OceanServer( const std::string      &port,
                  gbxutilacfr::Tracer    &tracer);
     
-    //! Reads data from OceanServer and incrementally updates internal storage
-    void read();
-    
-    //! Returns a reference to the current (incrementally updated) OceanServer data
-    const gbxsmartbatteryacfr::OceanServerSystem& getData() const;
+    //! Reads data from OceanServer, incrementally updates internal storage    
+    //! Returns a reference to the internal storage
+    //! May throw gbxutilacfr::Exception
+    const gbxsmartbatteryacfr::OceanServerSystem& getData();
     
 private:
     
     gbxsmartbatteryacfr::OceanServerSystem data_;
     gbxutilacfr::Tracer& tracer_;
     auto_ptr<gbxsmartbatteryacfr::OceanServerReader> reader_;
+    
+    int exceptionCounter_;
     
 };
 

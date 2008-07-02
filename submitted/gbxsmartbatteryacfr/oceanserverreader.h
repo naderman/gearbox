@@ -42,11 +42,6 @@ public:
 
 private:   
     
-    // Returns true if 100% sure that we are connected to an OceanServer system, otherwise false
-    bool isOceanServerSystem( std::string &oceanServerString );
-    
-    std::vector<std::string> oceanServerStrings_;
-    
     gbxserialacfr::Serial serial_;
     gbxutilacfr::Tracer& tracer_;
     gbxsmartbatteryacfr::OceanServerParser parser_;
