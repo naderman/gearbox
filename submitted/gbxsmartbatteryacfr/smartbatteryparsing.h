@@ -40,11 +40,11 @@ double readVoltage( const std::string &str );
 //! May throw ParsingException
 int readNumBatteries( const std::string &str );
 
-//! Expects 4 hex characters, returns percentage
+//! Expects 4 hex characters, returns percentage [%]
 //! May throw ParsingException
 int readPercentWord( const std::string &str );
 
-//! Expects 2 hex characters, returns percentage
+//! Expects 2 hex characters, returns percentage [%]
 //! May throw ParsingException
 int readPercentByte( const std::string &str );
 

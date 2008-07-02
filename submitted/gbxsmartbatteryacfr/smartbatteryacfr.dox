@@ -26,8 +26,7 @@ For a full list of classes and functions, see @ref gbxsmartbatteryacfr.
 @endverbatim
 
 @par Examples
-- See 'test/simpletest.cpp' for a simple example of how to use the library. The test reads a few records from the oceanserver system and prints the results on the screen.
-- See 'test/fancytest.cpp' for a more advanced example. The test uses a class to read a few records from the oceanserver system and stores an internal (full) record which gets incrementally updated with new data.
+- See 'test/test.cpp' for a simple example of how to use the library. The test makes use of the 'oceanserver' class to read a few records from the oceanserver system and prints the results on the screen.
 
 @par Style
   See http://orca-robotics.sourceforge.net/orca/orca_doc_style.html

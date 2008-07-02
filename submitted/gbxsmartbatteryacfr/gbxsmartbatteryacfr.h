@@ -11,6 +11,7 @@
 #ifndef GBX_SMARTBATTERY_ACFR_H
 #define GBX_SMARTBATTERY_ACFR_H
 
+#include <gbxsmartbatteryacfr/oceanserver.h>
 #include <gbxsmartbatteryacfr/oceanserverparser.h>
 #include <gbxsmartbatteryacfr/oceanserverreader.h>
 #include <gbxsmartbatteryacfr/exceptions.h>
