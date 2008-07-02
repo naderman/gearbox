@@ -10,6 +10,7 @@
 
 /*!
 @ingroup gbx_libs
+@ingroup gbx_hardware
 @ingroup gbx_cpp
 @ingroup gbx_linux
 @defgroup gbx_library_gbxsickacfr GbxSickAcfr
