@@ -12,10 +12,10 @@ IF (build)
 	INCLUDE (${GBX_CMAKE_DIR}/UseBasicRules.cmake)
 
 	SET (hdrs hokuyo_aist.h)
-    SET (srcs hokuyo_aist.cpp)
+	SET (srcs hokuyo_aist.cpp)
 
 	IF (WIN32)
-		ADD_DEFINITIONS (-DURG_NZ_EXPORTS)
+		ADD_DEFINITIONS (-DHOKUYO_AIST_EXPORTS)
 	ENDIF (WIN32)
 	GBX_ADD_LIBRARY (${libName} SHARED ${srcs})
 	TARGET_LINK_LIBRARIES (${libName} ${reqLibs})

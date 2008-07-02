@@ -31,6 +31,8 @@ using namespace hokuyo_aist;
 #include <flexiport/flexiport.h>
 #include <flexiport/port.h>
 #include <flexiport/serialport.h>
+
+#include <cstring>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -1053,7 +1055,7 @@ void HokuyoLaser::SetMotorSpeed (unsigned int speed)
 	else if (_scipVersion == 2)
 	{
 		// Sanity check the value
-		if (speed > 10 & speed != 99)
+		if (speed > 10 && speed != 99)
 			throw HokuyoError (HOKUYO_ERR_BADARG, "Invalid motor speed.");
 		char buffer[3];
 		if (speed == 0)
@@ -1954,7 +1956,7 @@ void HokuyoLaser::GetAndSetSCIPVersion (void)
 	{
 		SendCommand ("V", NULL, 0, NULL);
 	}
-	catch (HokuyoError &e)
+	catch (HokuyoError)
 	{
 		// That didn't work too well...
 		if (_verbose)
@@ -1973,7 +1975,7 @@ void HokuyoLaser::GetAndSetSCIPVersion (void)
 		{
 			SendCommand ("VV", NULL, 0, NULL);
 		}
-		catch (HokuyoError &e)
+		catch (HokuyoError)
 		{
 			throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
 		}
@@ -2068,7 +2070,7 @@ void HokuyoLaser::GetAndSetSCIPVersion (void)
 			{
 				SendCommand ("S", "CIP2.0", 6, NULL);
 			}
-			catch (HokuyoError &e)
+			catch (HokuyoError)
 			{
 				if (_verbose)
 					cerr << "HokuyoLaser::" << __func__ <<

@@ -180,12 +180,12 @@ int DoParent (string portOptions)
 
 int main (int argc, char **argv)
 {
-	int opt;
 	string portOptions;
 
 #if defined (WIN32)
 	portOptions = "";
 #else
+	int opt;
 	// Get some options from the command line
 	while ((opt = getopt (argc, argv, "o:")) != -1)
 	{

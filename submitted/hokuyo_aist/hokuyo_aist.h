@@ -33,6 +33,7 @@
 
 #if defined (WIN32)
 	typedef unsigned char           uint8_t;
+	typedef unsigned int            uint32_t;
 	#if defined (HOKUYO_AIST_EXPORTS)
 		#define HOKUYO_AIST_EXPORT       __declspec (dllexport)
 	#else

@@ -25,7 +25,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <time.h>
+#if defined (WIN32)
+	#include <time.h>
+	// timeval is only in WinSock (stupidity)
+	#include <winsock2.h>
+#else
+	#include <sys/time.h>
+#endif
 
 #include "timeout.h"
 

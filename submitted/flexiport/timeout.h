@@ -32,6 +32,12 @@
 #include <string>
 
 #if defined (WIN32)
+	// No timespec on Windows
+	typedef struct timespec
+	{
+		int tv_sec;
+		int tv_nsec;
+	} timespec;
 	#if defined (FLEXIPORT_EXPORTS)
 		#define FLEXIPORT_EXPORT    __declspec (dllexport)
 	#else

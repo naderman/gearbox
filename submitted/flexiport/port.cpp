@@ -28,6 +28,7 @@
 #include "port.h"
 #include "flexiport.h"
 
+#include <cstring>
 #include <assert.h>
 #include <errno.h>
 #include <time.h>

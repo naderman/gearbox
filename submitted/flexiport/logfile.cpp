@@ -28,6 +28,8 @@
 #include "flexiport.h"
 #include "logfile.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>

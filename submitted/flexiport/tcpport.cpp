@@ -264,8 +264,13 @@ ssize_t TCPPort::ReadFull (void * const buffer, size_t count)
 
 	while (receivedBytes < count)
 	{
+#if defined (WIN32)
+		numReceived = recv (_sock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
+				count, 0); // No MSG_WAITALL on older versions of visual c, it seems
+#else
 		numReceived = recv (_sock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
 				count, MSG_WAITALL);
+#endif
 		if (_debug >= 2)
 			cerr << "TCPPort::" << __func__ << "() Received " << numReceived << " bytes" << endl;
 		if (numReceived < 0)

@@ -54,12 +54,12 @@ inline void USleep (int length)
 
 int main (int argc, char **argv)
 {
-	int opt;
 	string portOptions = "type=serial,device=/dev/ttyS0,timeout=1";
 
 #if defined (WIN32)
 	portOptions = "type=serial,device=COM1,timeout=1";
 #else
+	int opt;
 	// Get some options from the command line
 	while ((opt = getopt (argc, argv, "o:")) != -1)
 	{

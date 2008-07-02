@@ -35,13 +35,14 @@ int main(int argc, char **argv)
 {
 	string portOptions = "type=serial,device=/dev/ttyACM0,timeout=1";
 	double startAngle = 0.0, endAngle = 0.0;
-	int opt, firstStep = -1, lastStep = -1;
+	int firstStep = -1, lastStep = -1;
 	unsigned int baud = 19200, speed = 0, clusterCount = 1;
 	bool getNew = false, verbose = false;
 
 #if defined (WIN32)
 	portOptions = "type=serial,device=COM3,timeout=1";
 #else
+	int opt;
 	// Get some options from the command line
 	while ((opt = getopt(argc, argv, "b:c:e:f:l:m:no:s:vh")) != -1)
 	{

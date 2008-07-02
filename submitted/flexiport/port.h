@@ -33,6 +33,12 @@
 
 #if defined (WIN32)
 	typedef unsigned char           uint8_t;
+	typedef unsigned int            uint32_t;
+	#if defined (_WIN64)
+		typedef __int64                 ssize_t;
+	#else
+		typedef _W64 int                ssize_t;
+	#endif
 	#if defined (FLEXIPORT_EXPORTS)
 		#define FLEXIPORT_EXPORT    __declspec (dllexport)
 	#else
