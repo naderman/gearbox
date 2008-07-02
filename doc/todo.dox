@@ -28,10 +28,18 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 - Build system
     - cmake files updated for cmake 2.6
+    
+- Compiler
+    - compiles cleanly under gcc43
 
 @par New libraries
 
 - libGbxGarminAcfr
+- libGbxUtilAcfr
+- libGbxNovatelAcfr
+- flexiport
+- libGbxSmartBatteryAcfr
+- hokuyo_aist
 
 @par Updated libraries
 
