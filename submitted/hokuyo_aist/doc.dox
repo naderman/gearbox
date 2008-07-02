@@ -11,6 +11,8 @@ This library provides a driver for Hokuyo laser scanner devices using the SCIP p
 that conforms to these protocol versions. For a full list of functions and classes see
 @ref hokuyo_aist.
 
+For a full list of classes and functions, see @ref hokuyo_aist.
+
 Header file:
 @verbatim
 #include <hokuyo_aist/hokuyo_aist.h>

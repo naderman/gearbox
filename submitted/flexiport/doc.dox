@@ -25,6 +25,8 @@ date without the original hardware present.
 The @ref SerialPort and @ref TCPPort port types are cross-platform, usable on Linux, Mac OSX and
 Microsoft Windows.
 
+For a full list of classes and functions, see @ref flexiport.
+
 @par Header file
 
 Necessary:
