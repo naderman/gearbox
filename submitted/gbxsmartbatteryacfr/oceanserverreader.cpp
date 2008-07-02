@@ -171,12 +171,12 @@ OceanServerReader::read( OceanServerSystem &system )
         while(true)
         {        
             if ( numTries > MAX_TRIES ) 
-                throw gbxutilacfr::Exception( ERROR_INFO, "Couldn't find the beginning of a valid OceanServer record" );
+                throw gbxutilacfr::Exception( ERROR_INFO, "Couldn't find the beginning of a SUBSEQUENT valid OceanServer record" );
             numTries++;
             serialData = tryToReadLineFromSerialPort();
             if ( parser_.atBeginningOfRecord( serialData ) ) 
             {   
-                tracer_.debug( "OceanServerReader: End of the record (beginning of the NEXT record)", 5 );
+                tracer_.debug( "OceanServerReader: End of the record (beginning of a SUBSEQUENT record)", 5 );
                 parser_.parse( stringList, system );
                 break; 
             }
