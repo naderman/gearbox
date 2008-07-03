@@ -28,25 +28,24 @@
 #include "flexiport.h"
 #include "logfile.h"
 
-#include <cstdlib>
-#include <cstring>
-#include <arpa/inet.h>
+#if !defined (WIN32)
+	#include <arpa/inet.h>
+	#include <unistd.h>
+	#include <windows.h> // For Sleep()
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
 #include <iostream>
 using namespace std;
 
 #if defined (WIN32)
 	#define __func__        __FUNCTION__
-	#define timercmp(a, b, CMP)           \
-		(((a)->tv_sec == (b)->tv_sec) ?   \
-		((a)->tv_usec CMP (b)->tv_usec) : \
-		((a)->tv_sec CMP (b)->tv_sec))
 	#define timeradd(a, b, result)                           \
 		do {                                                 \
 			(result)->tv_sec = (a)->tv_sec + (b)->tv_sec;    \
@@ -66,7 +65,6 @@ using namespace std;
 				(result)->tv_usec += 1000000;                \
 			}                                                \
 		} while (0)
-	#define timerclear(tvp)	((tvp)->tv_sec = (tvp)->tv_usec = 0)
 #endif
 
 namespace flexiport
@@ -137,14 +135,14 @@ void LogFile::Open (string fileName, bool read, bool ignoreTimes)
 
 	if (_read)
 	{
-		if ((_readFile = fopen ((fileName + "r").c_str (), "r")) == NULL)
+		if ((_readFile = fopen ((fileName + "r").c_str (), "rb")) == NULL)
 		{
 			stringstream ss;
 			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
-		if ((_writeFile = fopen ((fileName + "w").c_str (), "r")) == NULL)
+		if ((_writeFile = fopen ((fileName + "w").c_str (), "rb")) == NULL)
 		{
 			stringstream ss;
 			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " <<
@@ -157,14 +155,14 @@ void LogFile::Open (string fileName, bool read, bool ignoreTimes)
 	}
 	else
 	{
-		if ((_readFile = fopen ((fileName + "r").c_str (), "w")) == NULL)
+		if ((_readFile = fopen ((fileName + "r").c_str (), "wb")) == NULL)
 		{
 			stringstream ss;
 			ss << "LogFile::" << __func__ << "() fopen(_readFile) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
-		if ((_writeFile = fopen ((fileName + "w").c_str (), "w")) == NULL)
+		if ((_writeFile = fopen ((fileName + "w").c_str (), "wb")) == NULL)
 		{
 			stringstream ss;
 			ss << "LogFile::" << __func__ << "() fopen(_writeFile) error: (" << ErrNo () << ") " <<
@@ -401,7 +399,16 @@ ssize_t LogFile::Read (void *data, size_t count, Timeout &timeout)
 					cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec << "s " <<
 						diff2.tv_nsec << "ns." << endl;
 				}
+#if defined (WIN32)
+				DWORD sleepTime = 0;
+				if (diff2.tv_sec > 0)
+					sleepTime += diff2.tv_sec * 1000;
+				if (diff2.tv_nsec > 0)
+					sleepTime += diff2.tv_nsec / 1000000;
+				Sleep (sleepTime);
+#else
 				nanosleep (&diff2, NULL);
+#endif
 			}
 			return totalRead;
 		}
@@ -438,7 +445,16 @@ ssize_t LogFile::Read (void *data, size_t count, Timeout &timeout)
 						cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec << "s " <<
 							diff2.tv_nsec << "ns." << endl;
 					}
+#if defined (WIN32)
+					DWORD sleepTime = 0;
+					if (diff2.tv_sec > 0)
+						sleepTime += diff2.tv_sec * 1000;
+					if (diff2.tv_nsec > 0)
+						sleepTime += diff2.tv_nsec / 1000000;
+					Sleep (sleepTime);
+#else
 					nanosleep (&diff2, NULL);
+#endif
 				}
 				return totalRead;
 			}
@@ -516,7 +532,16 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 					cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec << "s " <<
 						diff2.tv_nsec << "ns." << endl;
 				}
+#if defined (WIN32)
+				DWORD sleepTime = 0;
+				if (diff2.tv_sec > 0)
+					sleepTime += diff2.tv_sec * 1000;
+				if (diff2.tv_nsec > 0)
+					sleepTime += diff2.tv_nsec / 1000000;
+				Sleep (sleepTime);
+#else
 				nanosleep (&diff2, NULL);
+#endif
 			}
 			return size;
 		}
@@ -553,7 +578,16 @@ ssize_t LogFile::BytesAvailable (const Timeout &timeout)
 						cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec << "s " <<
 							diff2.tv_nsec << "ns." << endl;
 					}
+#if defined (WIN32)
+					DWORD sleepTime = 0;
+					if (diff2.tv_sec > 0)
+						sleepTime += diff2.tv_sec * 1000;
+					if (diff2.tv_nsec > 0)
+						sleepTime += diff2.tv_nsec / 1000000;
+					Sleep (sleepTime);
+#else
 					nanosleep (&diff2, NULL);
+#endif
 				}
 				return size;
 			}
@@ -683,7 +717,16 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 						cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec << "s " <<
 							diff2.tv_nsec << "ns." << endl;
 					}
+#if defined (WIN32)
+					DWORD sleepTime = 0;
+					if (diff2.tv_sec > 0)
+						sleepTime += diff2.tv_sec * 1000;
+					if (diff2.tv_nsec > 0)
+						sleepTime += diff2.tv_nsec / 1000000;
+					Sleep (sleepTime);
+#else
 					nanosleep (&diff2, NULL);
+#endif
 				}
 			}
 			else if (timeout->_sec > 0 || timeout->_usec > 0)
@@ -719,7 +762,16 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 							cerr << "LogFile::" << __func__ << "() Sleeping for " << diff2.tv_sec <<
 								"s " << diff2.tv_nsec << "ns." << endl;
 						}
+#if defined (WIN32)
+						DWORD sleepTime = 0;
+						if (diff2.tv_sec > 0)
+							sleepTime += diff2.tv_sec * 1000;
+						if (diff2.tv_nsec > 0)
+							sleepTime += diff2.tv_nsec / 1000000;
+						Sleep (sleepTime);
+#else
 						nanosleep (&diff2, NULL);
+#endif
 					}
 				}
 				// else no data available
@@ -1039,7 +1091,7 @@ void LogFile::GetNextChunkInfo (FILE * const file, struct timeval &timeStamp, si
 	size = ntohl (tempSize);
 
 	// Rewind the file back to the beginning of the chunk header
-	if (fseek (file, -1 * CHUNK_HEADER_SIZE, SEEK_CUR) < 0)
+	if (fseek (file, -1 * static_cast<int> (CHUNK_HEADER_SIZE), SEEK_CUR) < 0)
 	{
 		stringstream ss;
 		ss << "LogFile::" << __func__ << "() fseek() error: (" << ErrNo () << ") " <<
@@ -1189,7 +1241,7 @@ size_t LogFile::GetSingleChunk (FILE * const file, void *data, size_t count,
 		}
 
 		// Read as much as can fit into data
-		ReadFromFile (file, data, sizeof (*reinterpret_cast<uint8_t*> (data)) * count);
+		ReadFromFile (file, data, sizeof (uint8_t) * count);
 		if (_debug >= 3)
 		{
 			cerr << "LogFile::" << __func__ << "() Read " <<
@@ -1209,7 +1261,7 @@ size_t LogFile::GetSingleChunk (FILE * const file, void *data, size_t count,
 	else
 	{
 		// It'll fit so read straight into data
-		ReadFromFile (file, data, sizeof (*reinterpret_cast<uint8_t*> (data)) * size);
+		ReadFromFile (file, data, sizeof (uint8_t) * size);
 		if (_debug >= 3)
 		{
 			cerr << "LogFile::" << __func__ << "() Read " <<

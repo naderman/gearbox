@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "timeout.h"
+#include "flexiport_types.h"
 
 namespace flexiport
 {
