@@ -28,10 +28,11 @@
 #include "flexiport.h"
 #include "logfile.h"
 
-#if !defined (WIN32)
+#if defined (WIN32)
+	#include <windows.h> // For Sleep()
+#else
 	#include <arpa/inet.h>
 	#include <unistd.h>
-	#include <windows.h> // For Sleep()
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
