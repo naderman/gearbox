@@ -42,7 +42,32 @@
 using namespace std;
 
 #if defined (WIN32)
+	#include <winsock2.h> // For htnol, etc
 	#define __func__        __FUNCTION__
+	#define timercmp(a, b, CMP)           \
+		(((a)->tv_sec == (b)->tv_sec) ?   \
+		((a)->tv_usec CMP (b)->tv_usec) : \
+		((a)->tv_sec CMP (b)->tv_sec))
+	#define timeradd(a, b, result)                           \
+		do {                                                 \
+			(result)->tv_sec = (a)->tv_sec + (b)->tv_sec;    \
+			(result)->tv_usec = (a)->tv_usec + (b)->tv_usec; \
+			if ((result)->tv_usec >= 1000000)                \
+			{                                                \
+				++(result)->tv_sec;                          \
+				(result)->tv_usec -= 1000000;                \
+			}                                                \
+		} while (0)
+	#define timersub(a, b, result)                           \
+		do {                                                 \
+			(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;    \
+			(result)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
+			if ((result)->tv_usec < 0) {                     \
+				--(result)->tv_sec;                          \
+				(result)->tv_usec += 1000000;                \
+			}                                                \
+		} while (0)
+	#define timerclear(tvp)	((tvp)->tv_sec = (tvp)->tv_usec = 0)
 #endif
 
 namespace flexiport
@@ -84,7 +109,6 @@ LogFile::LogFile (unsigned int debug)
 	: _read (false), _readFile (NULL), _writeFile (NULL), _readFileSize (0), _writeFileSize (0),
 	_debug (debug), _readUsage (0), _writeUsage (0), _readSize (0), _writeSize (0),
 	_readBuffer (NULL), _writeBuffer (NULL), _ignoreTimes (false)
-//	_bufferSize (0),
 {
 	timerclear (&_openTime);
 }
@@ -228,13 +252,6 @@ bool LogFile::IsOpen (void) const
 	return true;
 }
 
-//void LogFile::SetBufferSize (unsigned int bufferSize)
-//{
-//	_bufferSize = bufferSize;
-//	AllocateReadBuffer (_bufferSize);
-//	AllocateWriteBuffer (_bufferSize);
-//}
-
 void LogFile::ResetFile (void)
 {
 	// Rewind file positions
@@ -258,6 +275,12 @@ void LogFile::ResetFile (void)
 	DeallocateWriteBuffer ();
 
 	// Reset file open time
+#if defined (WIN32)
+	SYSTEMTIME sysTime;
+	GetSystemTime (&sysTime);
+	_openTime.tv_sec = sysTime.wSecond;
+	_openTime.tv_usec = sysTime.wMilliseconds * 1000;
+#else
 	if (gettimeofday (&_openTime, NULL) < 0)
 	{
 		stringstream ss;
@@ -265,6 +288,7 @@ void LogFile::ResetFile (void)
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+#endif
 
 	if (_debug >= 1)
 		cerr << "LogFile::" << __func__ << "() Reset file." << endl;
@@ -970,6 +994,12 @@ void LogFile::GetCurrentFileTime (struct timeval &dest)
 {
 	struct timeval now;
 
+#if defined (WIN32)
+	SYSTEMTIME sysTime;
+	GetSystemTime (&sysTime);
+	now.tv_sec = sysTime.wSecond;
+	now.tv_usec = sysTime.wMilliseconds * 1000;
+#else
 	if (gettimeofday (&now, NULL) < 0)
 	{
 		stringstream ss;
@@ -977,6 +1007,7 @@ void LogFile::GetCurrentFileTime (struct timeval &dest)
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+#endif
 
 	timersub (&now, &_openTime, &dest);
 	if (_debug >= 3)
@@ -1308,6 +1339,12 @@ void LogFile::WriteTimeStamp (FILE * const file)
 {
 	// Calculate the time difference between now and the time the file was opened
 	struct timeval now, diff;
+#if defined (WIN32)
+	SYSTEMTIME sysTime;
+	GetSystemTime (&sysTime);
+	now.tv_sec = sysTime.wSecond;
+	now.tv_usec = sysTime.wMilliseconds * 1000;
+#else
 	if (gettimeofday (&now, NULL) < 0)
 	{
 		stringstream ss;
@@ -1315,6 +1352,7 @@ void LogFile::WriteTimeStamp (FILE * const file)
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+#endif
 	timersub (&now, &_openTime, &diff);
 	uint32_t secs, usecs;
 	secs = htonl (static_cast<uint32_t> (diff.tv_sec));

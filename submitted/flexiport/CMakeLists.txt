@@ -9,12 +9,7 @@ IF (build)
 
 	OPTION (FLEXIPORT_INCLUDE_SERIAL "Include the serial port in FlexiPort" ON)
 	OPTION (FLEXIPORT_INCLUDE_TCP "Include the TCP network port in FlexiPort" ON)
-	IF (GBX_OS_WIN)
-		SET (FLEXIPORT_INCLUDE_LOGGING OFF)
-		MESSAGE (STATUS "Flexiport log file system is not currently supported on Windows.")
-	ELSE (GBX_OS_WIN)
-		OPTION (FLEXIPORT_INCLUDE_LOGGING "Include the log reader/writer ports in FlexiPort" ON)
-	ENDIF (GBX_OS_WIN)
+	OPTION (FLEXIPORT_INCLUDE_LOGGING "Include the log reader/writer ports in FlexiPort" ON)
 	MARK_AS_ADVANCED (FLEXIPORT_INCLUDE_SERIAL FLEXIPORT_INCLUDE_TCP)
 
 	SET (flexiport_config_h_in ${CMAKE_CURRENT_SOURCE_DIR}/flexiport_config.h.in)

@@ -34,11 +34,6 @@
 
 #include "timeout.h"
 
-#if defined (WIN32)
-	// We're passing FILE types all over the place so easier to #define it for Win32
-	#define FILE HANDLE
-#endif
-
 namespace flexiport
 {
 

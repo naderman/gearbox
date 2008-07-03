@@ -51,6 +51,11 @@ To create a LogWriterPort, append "log" to the port type in the port options pas
 @ref CreatePort. For example, a log writer that uses a serial port would be specified as the type
 "seriallog". Similarly, for a TCP port, use "tcplog". 
 
+@note Log files greater than 2GB in size are not supported.
+
+@note The timer resolution under Windows is milliseconds, not microseconds. This may result in
+inaccurate replay when using a log file created on a POSIX-compatible operating system.
+
 See the @ref Port class documentation for how to use the common API.
 
 @par Options
