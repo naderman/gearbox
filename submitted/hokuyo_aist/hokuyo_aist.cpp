@@ -1494,6 +1494,43 @@ unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, int startStep, int end
 		NumberToString (1, &buffer[10], 1);
 		NumberToString (1, &buffer[11], 2);
 		SendCommand ("MD", buffer, 13, NULL);
+		// Mx commands will perform a scan, then send the data prefixed with another command echo
+		// Read back the command echo (minimum of 3 bytes, maximum of 16 bytes)
+		char response[17];
+		SkipLines (1); // End of the command echo message 
+		ReadLine (response, 16); // Size is command (2) + params (13) + new line (1)
+		// Check the echo is correct
+		if (response[0] != 'M' || response[1] != 'D')
+		{
+			stringstream ss;
+			ss << "Incorrect data prefix: MD" << " != " << response[0] << response[1];
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+		// Then compare the parameters
+		buffer[12] = '0'; // There will be zero scans remaining after this one
+		if (memcmp (&response[2], buffer, 13) != 0)
+		{
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Incorrect paramaters prefix for MD data.");
+		}
+		// The next line should be the status line
+		ReadLineWithCheck (response, 4);
+		if (_verbose)
+		{
+			cerr << "HokuyoLaser::" << __func__ << "() MD data prefix status: " << response[0] <<
+				response[1] << endl;
+		}
+		// Check the status code is OK - should only get 99 here
+		if (response[0] != '9' || response[1] != '9')
+		{
+			// There is an extra line feed after an error status (signalling end of message)
+			SkipLines (1);
+			stringstream ss;
+			ss << "Bad status for MD data: " << response[0] << response[1] <<
+				" " << SCIP2ErrorToString (response, "MD");
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+
+		// Now the actual data will arrive
 		// There will be a timestamp before the data (if there is data)
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
@@ -1578,6 +1615,43 @@ unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, int star
 		NumberToString (1, &buffer[10], 1);
 		NumberToString (1, &buffer[11], 2);
 		SendCommand ("ME", buffer, 13, NULL);
+		// Mx commands will perform a scan, then send the data prefixed with another command echo
+		// Read back the command echo (minimum of 3 bytes, maximum of 16 bytes)
+		char response[17];
+		SkipLines (1); // End of the command echo message 
+		ReadLine (response, 16); // Size is command (2) + params (13) + new line (1)
+		// Check the echo is correct
+		if (response[0] != 'M' || response[1] != 'E')
+		{
+			stringstream ss;
+			ss << "Incorrect data prefix: ME" << " != " << response[0] << response[1];
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+		// Then compare the parameters
+		buffer[12] = '0'; // There will be zero scans remaining after this one
+		if (memcmp (&response[2], buffer, 13) != 0)
+		{
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Incorrect paramaters prefix for ME data.");
+		}
+		// The next line should be the status line
+		ReadLineWithCheck (response, 4);
+		if (_verbose)
+		{
+			cerr << "HokuyoLaser::" << __func__ << "() ME data prefix status: " << response[0] <<
+				response[1] << endl;
+		}
+		// Check the status code is OK - should only get 99 here
+		if (response[0] != '9' || response[1] != '9')
+		{
+			// There is an extra line feed after an error status (signalling end of message)
+			SkipLines (1);
+			stringstream ss;
+			ss << "Bad status for ME data: " << response[0] << response[1] <<
+				" " << SCIP2ErrorToString (response, "MD");
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+
+		// Now the actual data will arrive
 		// There will be a timestamp before the data (if there is data)
 		// Normally we would send 6 for the expected length, but we may get no timestamp back if
 		// there was no data.
@@ -1648,9 +1722,21 @@ unsigned int HokuyoLaser::AngleToStep (double angle)
 // Private functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Sometimes, just flushing isn't enough, as it appears the scanner will wait when the buffer gets
+// full, then continue sending data. If we flush, we get rid of what was sent, and the scanner just
+// sends more. This is a problem if we're trying to clear the result of a previous command.
+// To get around this, keep flushing until the port reports there is no data left after a timeout.
+// This shouldn't be called too much, as it introduces a delay as big as the timeout (which may be
+// infinite).
+void HokuyoLaser::ClearReadBuffer (void)
+{
+	while (_port->BytesAvailableWait () > 0)
+		_port->Flush ();
+}
+
 // If expectedLength is not -1, it should include the terminating line feed but not the NULL
 // (although the buffer still has to include this).
-// If expectedLenght is -1, this function expects buffer to be a certain length to allow up to the
+// If expectedLength is -1, this function expects buffer to be a certain length to allow up to the
 // maximum line length to be read. See SCIP1_LINE_LENGTH and SCIP2_LINE_LENGTH.
 // The line feed that terminates a line will be replaced with a NULL.
 // The return value is the number of bytes received, not including the NULL byte or the line feed.
@@ -1793,7 +1879,11 @@ int HokuyoLaser::SendCommand (const char *cmd, const char *param,
 							int paramLength, const char *extraOK)
 {
 	int statusCode = -1;
-	char response[16];
+	char response[17];
+
+	// Flush first to clear out the dregs of any previous commands
+	_port->Flush ();
+
 	if (_scipVersion == 1)
 	{
 		if (_verbose)
@@ -1948,6 +2038,7 @@ int HokuyoLaser::SendCommand (const char *cmd, const char *param,
 void HokuyoLaser::GetAndSetSCIPVersion (void)
 {
 	bool scip1Failed = false;
+	
 
 	if (_verbose)
 		cerr << "HokuyoLaser::" << __func__ << "() Testing SCIP protocol version." << endl;

@@ -469,6 +469,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		int _firstStep, _lastStep, _frontStep;
 		unsigned int _maxRange;
 
+		void ClearReadBuffer (void);
 		int ReadLine (char *buffer, int expectedLength = -1);
 		int ReadLineWithCheck (char *buffer, int expectedLength = -1, bool hasSemicolon = false);
 		void SkipLines (int count);

@@ -88,7 +88,7 @@ FLEXIPORT_EXPORT Port* CreatePort (std::map<std::string, std::string> options);
 /** @brief Overloaded factory function. Accepts options as a string.
 
 This overload accepts the options as a string. For example:
-"type=serial device=/dev/ttyS0 baudrate=4800 readwrite"
+"type=serial device=/dev/ttyS0 baud=4800 readwrite"
 Options may be separated by any of: spaces, tabs, new lines or commas. Do not put whitespace around
 an equals sign.
 

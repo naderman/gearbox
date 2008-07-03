@@ -34,6 +34,11 @@
 
 #include "timeout.h"
 
+#if defined (WIN32)
+	// We're passing FILE types all over the place so easier to #define it for Win32
+	#define FILE HANDLE
+#endif
+
 namespace flexiport
 {
 
@@ -47,7 +52,6 @@ class LogFile
 		void Open (std::string fileName, bool read, bool ignoreTimes = false);
 		void Close (void);
 		bool IsOpen (void) const;
-//		void SetBufferSize (unsigned int bufferSize);
 		void ResetFile (void);
 
 		// File reading
@@ -70,7 +74,6 @@ class LogFile
 		// When writing, this is the time the file was opened. When reading, it's the reset time.
 		struct timeval _openTime;
 		unsigned int _debug;
-//		unsigned int _bufferSize;
 		size_t _readUsage, _writeUsage;
 		size_t _readSize, _writeSize;
 		uint8_t *_readBuffer, *_writeBuffer;
