@@ -17,7 +17,7 @@ IF (build)
 	CONFIGURE_FILE (${flexiport_config_h_in} ${flexiport_config_h})
 	INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 
-	SET (hdrs flexiport.h port.h timeout.h ${flexiport_config_h})
+	SET (hdrs flexiport.h port.h timeout.h flexiport_types.h ${flexiport_config_h})
 	SET (srcs flexiport.cpp port.cpp timeout.cpp ${flexiport_config_h})
 	IF (FLEXIPORT_INCLUDE_SERIAL)
 		SET (hdrs ${hdrs} serialport.h)

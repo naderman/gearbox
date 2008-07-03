@@ -28,7 +28,11 @@
 #ifndef __LOGFILE_H
 #define __LOGFILE_H
 
-#include <sys/time.h>
+#if defined (WIN32)
+	#include <winsock2.h> // For timeval
+#else
+	#include <sys/time.h>
+#endif
 #include <string>
 #include <vector>
 

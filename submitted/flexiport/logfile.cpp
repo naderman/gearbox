@@ -42,7 +42,6 @@
 using namespace std;
 
 #if defined (WIN32)
-	#include <winsock2.h> // For htnol, etc
 	#define __func__        __FUNCTION__
 	#define timercmp(a, b, CMP)           \
 		(((a)->tv_sec == (b)->tv_sec) ?   \

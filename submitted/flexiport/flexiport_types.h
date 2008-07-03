@@ -25,60 +25,19 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TIMEOUT_H
-#define __TIMEOUT_H
-
-#include <map>
-#include <string>
+#ifndef __FLEXIPORT_TYPES_H
+#define __FLEXIPORT_TYPES_H
 
 #if defined (WIN32)
-	#if defined (FLEXIPORT_EXPORTS)
-		#define FLEXIPORT_EXPORT    __declspec (dllexport)
+	typedef unsigned char           uint8_t;
+	typedef unsigned int            uint32_t;
+	#if defined (_WIN64)
+		typedef __int64                 ssize_t;
 	#else
-		#define FLEXIPORT_EXPORT    __declspec (dllimport)
+		typedef _W64 int                ssize_t;
 	#endif
-	// No timespec on Windows
-	typedef struct timespec
-	{
-		int tv_sec;
-		int tv_nsec;
-	} timespec;
 #else
-	#define FLEXIPORT_EXPORT
+	#include <stdint.h>
 #endif
 
-struct timeval;
-struct timespec;
-
-/** @ingroup gbx_library_flexiport
-@{
-*/
-
-namespace flexiport
-{
-
-/** @brief An object used to represent timeouts. */
-class FLEXIPORT_EXPORT Timeout
-{
-	public:
-		Timeout (int sec, int usec) : _sec (sec), _usec (usec) {}
-		Timeout (const Timeout &rhs) : _sec (rhs._sec), _usec (rhs._usec) {}
-
-		void AsTimeval (struct timeval &dest) const;
-		void FromTimeval (const struct timeval &src);
-		void AsTimespec (struct timespec &dest) const;
-		void FromTimespec (const struct timespec &src);
-
-		Timeout& operator= (const Timeout &rhs);
-		Timeout& operator= (const struct timeval &rhs);
-		Timeout& operator= (const struct timespec &rhs);
-
-		int _sec;
-		int _usec;
-};
-
-} // namespace flexiport
-
-/** @} */
-
-#endif // __TIMEOUT_H
+#endif // __FLEXIPORT_TYPES_H
