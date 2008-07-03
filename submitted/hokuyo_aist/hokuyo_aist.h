@@ -389,8 +389,14 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		Unlike @ref GetRanges, which returns the most recent scan the scanner took, this function
 		will request a new scan. This means it will wait while the scanner performs the scan.
 		Otherwise behaves identicallty to @ref GetRanges.
-
+		
 		Not available with the SCIP v1 protocol.
+
+		@note The command used to retrieve a fresh scan is also used for the continuous scanning
+		mode (not yet supported by this library). After completing a scan, it will turn the laser
+		off (in anticipation of another continuous scan command being sent, which will automatically
+		turn the laser back on again). If you want to mix @ref GetNewRanges and @ref GetRanges, you
+		will need to turn the laser on after each call to @ref GetNewRanges.
 
 		@param data Pointer to a @ref HokuyoData object to store the range readings in.
 		@param clusterCount The number of readings to cluster together into a single reading. The
@@ -423,6 +429,12 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		Otherwise behaves identicallty to @ref GetRanges.
 
 		Not available with the SCIP v1 protocol.
+
+		@note The command used to retrieve a fresh scan is also used for the continuous scanning
+		mode (not yet supported by this library). After completing a scan, it will turn the laser
+		off (in anticipation of another continuous scan command being sent, which will automatically
+		turn the laser back on again). If you want to mix @ref GetNewRanges and @ref GetRanges, you
+		will need to turn the laser on after each call to @ref GetNewRanges.
 
 		@param data Pointer to a @ref HokuyoData object to store the range readings in.
 		@param clusterCount The number of readings to cluster together into a single reading. The
