@@ -141,13 +141,13 @@ typedef struct{                 //offs  size    comment
     //  Y - forward
     //  Z - up
     //  X - out the right hand side
-    uint32_t zAccelCnt;         //16    4
-    uint32_t yNegativAccelCnt;  //20    4
-    uint32_t xAccelCnt;         //24    4
-    uint32_t zGyroCnt;          //28    4
-    uint32_t yNegativGyroCnt;   //32    4
-    uint32_t xGyroCnt;          //36    4
-    uint32_t crc;               //40    4
+    int32_t zAccelCnt;          //16    4
+    int32_t yNegativAccelCnt ;  //20    4
+    int32_t xAccelCnt;          //24    4
+    int32_t zGyroCnt;           //28    4
+    int32_t yNegativGyroCnt;    //32    4
+    int32_t xGyroCnt;           //36    4
+    int32_t crc;                //40    4
 }RawImuData;
 
 //binary log with full headers
