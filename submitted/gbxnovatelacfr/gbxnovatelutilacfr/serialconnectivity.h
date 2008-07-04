@@ -19,7 +19,7 @@ namespace gbxserialacfr{
 // Limitations: amount of data expected before timeOutMsec should be
 // reasonably small
 //
-// returns 0 for Success; -1 for failure
+// returns true for Success; false for failure
 namespace gbxnovatelutilacfr{
 bool testConnectivity(
         std::string &challenge,
@@ -29,4 +29,19 @@ bool testConnectivity(
         int numTry,
         int successThresh,
         int baudrate);
+
+// send a [challenge] (command ...) to
+// which the device will answer with a unique [ack] in [timeOutMsec] milliseconds.
+//
+// Limitations: amount of data expected before timeOutMsec should be
+// reasonably small
+//
+// returns true for Success (i.e. ack received in time),
+// false for failure, in case of failure errorResponse contains the reply from the receiver
+bool sendCmdWaitForResponse(
+        std::string &challenge,
+        std::string &ack,
+        std::string &errorResponse,
+        gbxserialacfr::Serial& serial,
+        int timeOutMsec);
 }

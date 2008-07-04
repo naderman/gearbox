@@ -44,41 +44,23 @@ testConnectivity(
         serial.flush();
     }
     catch( SerialException &e ){
-        std::cout <<"Caught SerialException: " << e.what()<<"\n";
+        std::cerr <<"Caught SerialException: " << e.what()<<"\n";
         return false;
     }
     catch( std::exception &e ){
-        std::cout <<"Caught std::exception: " << e.what()<<"\n";
+        std::cerr <<"Caught std::exception: " << e.what()<<"\n";
         return false;
     }
     catch(...){
-        std::cout <<"Caught unknown Exception :-(\n";
+        std::cerr <<"Caught unknown Exception :-(\n";
         return false;
     }
 
     int successCnt = 0;
+    std::string errorResponse;
     for(int i=0; i<numTry; i++){
-        // send challenge
-        serial.writeString(challenge.c_str());
-        usleep(timeOutMsec*1000);
-
-        //read response
-        int available;
-        available = serial.bytesAvailable();
-        if(0<available){
-            char *buf;
-            buf = new char[available+1];
-            int read = serial.read(buf, available);
-            assert( read != -1 );
-
-            //and look for an ACK
-            buf[read] = '\0';
-            std::string response(buf);
-            size_t found = response.find(ack);
-            if(std::string::npos != found){
-                successCnt++;
-            }
-            delete []buf;
+        if(true == sendCmdWaitForResponse( challenge, ack, errorResponse, serial, timeOutMsec)){
+            successCnt++;
         }
     }
     std::cout << successCnt << "/"<< numTry << " ";
@@ -89,5 +71,39 @@ testConnectivity(
         std::cout << "Fail\n";
         return false;
     }
+}
+
+bool sendCmdWaitForResponse(
+        std::string &challenge,
+        std::string &ack,
+        std::string &errorResponse,
+        gbxserialacfr::Serial& serial,
+        int timeOutMsec){
+    // send challenge
+    serial.writeString(challenge.c_str());
+    usleep(timeOutMsec*1000);
+
+    //read response
+    int available;
+    bool success = false;
+    available = serial.bytesAvailable();
+    if(0<available){
+        char *buf;
+        buf = new char[available+1];
+        int read = serial.read(buf, available);
+        assert( read != -1 );
+
+        //and look for an ACK
+        buf[read] = '\0';
+        std::string response(buf);
+        size_t found = response.find(ack);
+        if(std::string::npos != found){
+            success = true;
+        }else{
+            errorResponse = response;
+        }
+        delete []buf;
+    }
+    return success;
 }
 }//namespace
