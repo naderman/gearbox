@@ -72,7 +72,7 @@ public:
     ImuDecoderImarFsas(){
         gyroConstant_ = gnua::GyroConstantImarFsas;
         accelConstant_ = gnua::AccelConstantImarFsas;
-        std::cout << "This driver has _not_ been tested with this IMU!\n";
+        std::cerr << "This driver has _not_ been tested with this IMU!\n";
     };
     inline bool statusIsGood(const uint32_t imuStatus){
         return 0 == ((imuStatus & 0xefec9580));
@@ -133,7 +133,7 @@ public:
     ImuDecoderLn200(){
         gyroConstant_ = gnua::GyroConstantLn200;
         accelConstant_ = gnua::AccelConstantLn200;
-        std::cout << "This driver has _not_ been tested with this IMU!\n";
+        std::cerr << "This driver has _not_ been tested with this IMU!\n";
     };
     inline bool statusIsGood(const uint32_t imuStatus){
         return 0 == ((imuStatus & 0xf8000010));

@@ -30,8 +30,8 @@ const double AccelConstantLn200 = 6.103515625e-5;
 class ImuDecoder {
 public:
     virtual ~ImuDecoder(){}
-    inline double gyroCnt2Rad(const uint32_t cnt){ return cnt*gyroConstant_; }
-    inline double accelCnt2MperSec(const uint32_t cnt){ return cnt*accelConstant_; }
+    inline double gyroCnt2Rad(const int32_t cnt){ return cnt*gyroConstant_; }
+    inline double accelCnt2MperSec(const int32_t cnt){ return cnt*accelConstant_; }
     virtual inline bool statusIsGood(const uint32_t imuStatus){return true;} // possibly we need isWarning(), isError() as well. Currently anything not good is treated as error.
     virtual std::string statusToString(const uint32_t imuStatus)=0;
 
