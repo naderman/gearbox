@@ -20,6 +20,7 @@
 #include <gbxutilacfr/trivialtracer.h>
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <stdlib.h>
 #include <assert.h>
@@ -106,12 +107,14 @@ Driver::configure( ) {
     baud_ = config_.baudRate_;
     std::string serialDevice = config_.serialDevice_;
     serial_.reset(new Serial( serialDevice, baud_, Serial::Timeout(1,0) ));
+    assert(0 != serial_.get());
     serial_->setDebugLevel(0);
-    connectToHardware();
 
+    connectToHardware();
     // just in case something is running... stops the novatel logging any messages
     serial_->writeString( "unlogall\r\n" );
     serial_->drain();
+    serial_->flush();
     configureImu();
     configureIns();
     configureGps();
@@ -154,7 +157,7 @@ Driver::connectToHardware() {
     tracer_->info( "Trying to hook up to receiver at different Baudrates" );
     int maxTry = 4;
     int successThresh = 4;
-    int timeOutMsec = 150;
+    int timeOutMsec = 250;
     std::string challenge("unlogall\r\n");
     std::string ack("<OK");
     size_t i=0;
@@ -188,39 +191,63 @@ Driver::connectToHardware() {
 
 void
 Driver::configureImu() {
-    int put;
+    std::string challenge = "";
+    std::string ack = "<OK";
+    std::string errorResponse = "";
+    int timeOutMsec = 200;
 
     if(config_.enableImu_){
+        tracer_->info("Configuring IMU, switching INS ON!");
         imuDecoder_.reset(gnua::createImuDecoder(config_.imuType_));
         std::stringstream ss;
         // tell the novatel what serial port the imu is attached to (com3 == aux)
-        put = serial_->writeString( "interfacemode com3 imu imu on\r\n" );
+        challenge = ( "interfacemode com3 imu imu on\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
         // the type of imu being used
         ss << "setimutype "
             << config_.imuType_
             << "\r\n";
-        put = serial_->writeString( ss.str().c_str() );
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
+        challenge = "inscommand enable\r\n";
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
         //force the IMU to re-align at every startup
         //put = serial_->writeString( "inscommand reset\r\n" );
         //tracer_->info("Reset IMU; Waiting 5 seconds before continuing!");
         //sleep(5);
     }else{
-        // no IMU --> disable INS
-        put = serial_->writeString( "inscommand disable\r\n" );
+        tracer_->info("No IMU, switching INS OFF!");
+        challenge = "inscommand disable\r\n";
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
     return;
 }
 
 void
 Driver::configureIns() {
-    int put;
+    std::string challenge = "";
+    std::string ack = "<OK";
+    std::string errorResponse = "";
+    int timeOutMsec = 200;
+
     if(config_.enableSetImuOrientation_ && config_.enableImu_){
         std::stringstream ss;
         // imu orientation constant
         // this tells the imu where its z axis (up) is pointing. constants defined in manual.
         // with imu mounted upside down, constant is 6 and axes are remapped: x = y, y = x, -z = z 
         ss << "setimuorientation " << config_.setImuOrientation_ << "\r\n";
-        put = serial_->writeString( ss.str().c_str() );
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     if(config_.enableVehicleBodyRotation_ && config_.enableImu_){
@@ -240,102 +267,155 @@ Driver::configureIns() {
                 << config_.vehicleBodyRotationUncertainty_[2];
         }
         ss << "\r\n";
-        put = serial_->writeString( ss.str().c_str() );
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     if(config_.enableImu_){
         std::stringstream ss;
         // The span system kalman fiter needs this info; make _sure_ you do this right
         ss << "setimutoantoffset "
-            << config_.imuToGpsOffset_[0]
-            << config_.imuToGpsOffset_[1]
+            << config_.imuToGpsOffset_[0] << " "
+            << config_.imuToGpsOffset_[1] << " "
             << config_.imuToGpsOffset_[2];
 
         if( 3 == config_.imuToGpsOffsetUncertainty_.size() ){
-            ss << config_.imuToGpsOffsetUncertainty_[0]
-                << config_.imuToGpsOffsetUncertainty_[1]
+            ss << " "
+                << config_.imuToGpsOffsetUncertainty_[0] << " "
+                << config_.imuToGpsOffsetUncertainty_[1] << " "
                 << config_.imuToGpsOffsetUncertainty_[2];
         }
         ss << "\r\n";
-        put = serial_->writeString( ss.str().c_str() );
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
     return;
 }
 
 void
 Driver::configureGps() {
+    std::string challenge = "";
+    std::string ack = "<OK";
+    std::string errorResponse = "";
+    int timeOutMsec = 200;
+
     // hardcoded settings first
 
     // turn off posave as this command implements position averaging for base stations.
-    int put = serial_->writeString( "posave off\r\n" );
     // make sure that fixposition has not been set
-    put = serial_->writeString( "fix none\r\n" );
+    challenge = ( "fix none\r\n" );
+    if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+        throw ( gua::Exception(ERROR_INFO, errorResponse));
+    }
     // select the geodetic datum for operation of the receiver (wgs84 = default)
-    put = serial_->writeString( "datum wgs84\r\n" );
+    challenge = ( "datum wgs84\r\n" );
+    if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+        throw ( gua::Exception(ERROR_INFO, errorResponse));
+    }
     //Let the receiver figure out which range corrections are best
-    put = serial_->writeString( "PSRDIFFSOURCE AUTO\r\n" );
+    challenge = ( "PSRDIFFSOURCE AUTO\r\n" );
+    if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+        throw ( gua::Exception(ERROR_INFO, errorResponse));
+    }
 
     // CDGPS
     if(config_.enableCDGPS_){
         tracer_->info("Turning on CDGPS!");
-        put = serial_->writeString( "ASSIGNLBAND CDGPS 1547547 4800\r\n" );
+        challenge = ( "ASSIGNLBAND CDGPS 1547547 4800\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     // turn SBAS on/off (essentially global DGPS)
     if(config_.enableSBAS_){
         tracer_->info("Turning on SBAS!");
-        put = serial_->writeString( "SBASCONTROL ENABLE Auto 0 ZEROTOTWO\r\n");
+        challenge = ( "SBASCONTROL ENABLE Auto 0 ZEROTOTWO\r\n");
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
         //we try to use WAAS satellites even below the horizon
-        put = serial_->writeString( "WAASECUTOFF -5.0\r\n");
+        challenge = ( "WAASECUTOFF -5.0\r\n");
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
     else{
         tracer_->info("Turning off SBAS!");
-        put = serial_->writeString( "SBASCONTROL DISABLE Auto 0 NONE\r\n");
+        challenge = ( "SBASCONTROL DISABLE Auto 0 NONE\r\n");
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     // rtk
     if(config_.enableRTK_){
         tracer_->info("Turning on RTK!");
-        put = serial_->writeString( "com com2,9600,n,8,1,n,off,on\r\n" );
-        put = serial_->writeString( "interfacemode com2 rtca none\r\n" );
+        challenge = ( "com com2,9600,n,8,1,n,off,on\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
+        challenge = ( "interfacemode com2 rtca none\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     if(config_.enableUseOfOmniStarCarrier_){
         //Let the receiver figure out which rtk corrections are best
-        put = serial_->writeString( "RTKSOURCE AUTO\r\n" );
+        challenge = ( "RTKSOURCE AUTO\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }else{
         //We only use our own rtk corrections; _not_ OmniSTAR HP/XP
-        put = serial_->writeString( "RTKSOURCE RTCA ANY\r\n" );
+        challenge = ( "RTKSOURCE RTCA ANY\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
     return;
 }
 
 void
 Driver::requestData() {
+    std::string challenge = "";
+    std::string ack = "<OK";
+    std::string errorResponse = "";
+    int timeOutMsec = 200;
     //we assume that the config_ has been checked at this point (isValid())
     //so we don't need to check that the rates make sense
-    int put;
 
     // GPS messages
 
     // gps position without ins
     if(config_.enableGpsPos_){
         std::stringstream ss;
-        ss << "log bestgpsposb ontime " << config_.dtGpsPos_ << "\r\n";
-        put = serial_->writeString(ss.str().c_str());
-        ss.str("");
         ss << "Turning on GPS position at " << 1.0/config_.dtGpsPos_ << "Hz!";
         tracer_->info(ss.str().c_str());
+        ss.str("");
+        ss << "log bestgpsposb ontime " << config_.dtGpsPos_ << "\r\n";
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            //throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
     // gps velocity without ins
     if(config_.enableGpsVel_){
         std::stringstream ss;
-        ss << "log bestgpsvelb ontime " << config_.dtGpsVel_ << "\r\n";
-        put = serial_->writeString(ss.str().c_str());
-        ss.str("");
         ss << "Turning on GPS velocity at " << 1.0/config_.dtGpsVel_ << "Hz!";
         tracer_->info(ss.str().c_str());
+        ss.str("");
+        ss << "log bestgpsvelb ontime " << config_.dtGpsVel_ << "\r\n";
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            //throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
 
@@ -344,11 +424,14 @@ Driver::requestData() {
     // pva data in wgs84 coordinates
     if(config_.enableInsPva_){
         std::stringstream ss;
-        ss << "log inspvasb ontime " << config_.dtInsPva_ << "\r\n";
-        put = serial_->writeString(ss.str().c_str());
-        ss.str("");
         ss << "Turning on INS position/velocity/orientation at " << 1.0/config_.dtInsPva_ << "Hz!";
         tracer_->info(ss.str().c_str());
+        ss.str("");
+        ss << "log inspvasb ontime " << config_.dtInsPva_ << "\r\n";
+        challenge = ss.str();
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            //throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
     }
 
 
@@ -356,7 +439,10 @@ Driver::requestData() {
 
     // raw accelerometer and gyro data
     if(config_.enableRawImu_){
-        put = serial_->writeString( "log rawimusb onnew\r\n" );
+        challenge = ( "log rawimusb onnew\r\n" );
+        if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
+            //throw ( gua::Exception(ERROR_INFO, errorResponse));
+        }
         tracer_->info("Turning on raw imu data!");
     }
 
@@ -497,7 +583,7 @@ Config::isValid() {
                 && 57600 != baudRate_
                 && 115200 != baudRate_
                 && 230400 != baudRate_)){
-        std::cout << "serial settings invalid\n";
+        std::cerr << "serial settings invalid\n";
         valid = false;
     }
 
@@ -507,59 +593,59 @@ Config::isValid() {
                 || 3 != imuToGpsOffset_.size()
                 || ( 3 != imuToGpsOffsetUncertainty_.size()
                     && 0  != imuToGpsOffsetUncertainty_.size()))){
-        std::cout << "imuType/imuToGpsOffset invalid\n";
+        std::cerr << "imuType/imuToGpsOffset invalid\n";
         valid = false;
     }
     if(enableImu_ && enableSetImuOrientation_
             && ( 0 > setImuOrientation_
                 || 6 < setImuOrientation_)){
-        std::cout << "setImuOrientation invalid\n";
+        std::cerr << "setImuOrientation invalid\n";
         valid = false;
     }
     if(enableImu_ && enableVehicleBodyRotation_
             && ( 3 != vehicleBodyRotation_.size()
                 || ( 3 != vehicleBodyRotationUncertainty_.size()
                     && 0 != vehicleBodyRotationUncertainty_.size()))){
-        std::cout << "vehicleBodyRotation invalid\n";
+        std::cerr << "vehicleBodyRotation invalid\n";
         valid = false;
     }
 
     //ins gear
     if(enableImu_ && enableInsOffset_
             && 3 != insOffset_.size()){
-        std::cout << "insOffset invalid\n";
+        std::cerr << "insOffset invalid\n";
         valid = false;
     }
 
     //data
     if(false == (enableInsPva_ || enableGpsPos_ || enableGpsVel_ || enableRawImu_)){
-        std::cout << "data settings invalid, you need to enable at least one message\n";
+        std::cerr << "data settings invalid, you need to enable at least one message\n";
         valid = false;
     }
     if(enableRawImu_ && 0.02 > dtInsPva_){
         if(fixInvalidRateSettings_){
-            std::cout << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled. FIXED!\n";
+            std::cerr << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled. FIXED!\n";
             dtInsPva_ = 0.02;
         }else{
-            std::cout << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled\n";
+            std::cerr << "data rate for InsPva too high; must be 50Hz or less if RawImu is enabled\n";
             valid = false;
         }
     }
     if( (enableRawImu_ || enableInsPva_) && 0.2 > dtGpsPos_ ){
         if(fixInvalidRateSettings_){
-            std::cout << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
+            std::cerr << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
             dtGpsPos_ = 0.2;
         }else{
-            std::cout << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
+            std::cerr << "data rate for BestGpsPos too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
             valid = false;
         }
     }
     if( (enableRawImu_ || enableInsPva_) && 0.2 > dtGpsVel_ ){
         if(fixInvalidRateSettings_){
-            std::cout << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
+            std::cerr << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled. FIXED!\n";
             dtGpsVel_ = 0.2;
         }else{
-            std::cout << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
+            std::cerr << "data rate for BestGpsVel too high; must be 5Hz or less if RawImu or InsPva is enabled\n";
             valid = false;
         }
     }
@@ -579,11 +665,11 @@ Config::isValid() {
         dataRate += 1.0/dtGpsVel_ * 8 * sizeof (gnua::BestGpsVelLogB);
     }
     if(dataRate > (double)baudRate_){
-        std::cout << "The combined data-rate of the messages/message rates you configured excceeds the configured baud rate " << dataRate << " / " << baudRate_ << "\n";
+        std::cerr << "The combined data-rate of the messages/message rates you configured excceeds the configured baud rate " << dataRate << " / " << baudRate_ << "\n";
         valid = false;
     }else if(dataRate > 0.95 * baudRate_){
-        std::cout << "The combined data-rate of the messages/message rates you configured is more than 95\% of the configured baud rate! " << dataRate << " / " << baudRate_ << "\n";
-        std::cout << "Consider using a higher baud rate (maximum 230400) or less messages or lower message-rates.";
+        std::cerr << "The combined data-rate of the messages/message rates you configured is more than 95\% of the configured baud rate! " << dataRate << " / " << baudRate_ << "\n";
+        std::cerr << "Consider using a higher baud rate (maximum 230400) or less messages or lower message-rates.";
     }
 
     return valid;
@@ -667,13 +753,14 @@ GpsOnlyConfig::toString(){
 std::string
 InsPvaData::toString(){
     std::stringstream ss;
+    int defPrecsion = ss.precision();
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
-    ss << "gpsWeekNr " << gpsWeekNr << " ";
+    ss << "gpsWeekNr " << std::fixed << std::setprecision(4) << gpsWeekNr << " ";
     ss << "secIntoWeek " << secIntoWeek << " ";
-    ss << "latitude " << latitude << " ";
+    ss << "latitude " << std::setprecision(9) << latitude << " "; // ~1/10mm resolution (equator)
     ss << "longitude " << longitude << " ";
-    ss << "height " << height << " ";
+    ss << "height " << std::setprecision(4) << height << " ";
     ss << "northVelocity " << northVelocity << " ";
     ss << "eastVelocity " << eastVelocity << " ";
     ss << "upVelocity " << upVelocity << " ";
@@ -693,9 +780,9 @@ BestGpsPosData::toString(){
     ss << "msIntoWeek " << msIntoWeek << " ";
     ss << "solutionStatus " << solutionStatus << " ";
     ss << "positionType " << positionType << " ";
-    ss << "latitude " << latitude << " ";
+    ss << "latitude " << std::fixed << std::setprecision(9) << latitude << " "; // ~1/10mm resolution (equator)
     ss << "longitude " << longitude << " ";
-    ss << "heightAMSL " << heightAMSL << " ";
+    ss << "heightAMSL " << std::setprecision(4) << heightAMSL << " ";
     ss << "undulation " << undulation << " ";
     ss << "datumId " << datumId << " ";
     ss << "sigmaLatitude " << sigmaLatitude << " ";
@@ -726,7 +813,7 @@ std::string
     ss << "msIntoWeek " << msIntoWeek << " ";
     ss << "solutionStatus " << solutionStatus << " ";
     ss << "positionType " << positionType << " ";
-    ss << "latency " << latency << " ";
+    ss << "latency " << std::fixed << std::setprecision(4) << latency << " ";
     ss << "diffAge " << diffAge << " ";
     ss << "horizontalSpeed " << horizontalSpeed << " ";
     ss << "trackOverGround " << trackOverGround << " ";
@@ -738,14 +825,15 @@ std::string
 std::string
 RawImuData::toString(){
     std::stringstream ss;
+    //int defPrecsion = ss.precision();
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
-    ss << "gpsWeekNr " << gpsWeekNr << " ";
-    ss << "secIntoWeek " << secIntoWeek << " ";
-    ss << "zDeltaV " << zDeltaV << " ";
+    ss << "gpsWeekNr " << std::fixed << gpsWeekNr << " ";
+    ss << "secIntoWeek " << std::setprecision(4) << secIntoWeek << " ";
+    ss << "zDeltaV "  << std::setprecision(10)<< zDeltaV << " "; // ~1/10 LSB for best IMU
     ss << "yDeltaV " << yDeltaV << " ";
     ss << "xDeltaV " << xDeltaV << " ";
-    ss << "zDeltaAng " << zDeltaAng << " ";
+    ss << "zDeltaAng " <<  std::setprecision(11) << zDeltaAng << " ";  // ~1/10 LSB for best IMU
     ss << "yDeltaAng " << yDeltaAng << " ";
     ss << "xDeltaAng " << xDeltaAng << " ";
     ss << statusToString(statusMessageType, statusMessage);
@@ -1036,6 +1124,7 @@ namespace{
         data->zDeltaV = imuDecoder->accelCnt2MperSec(rawImu.data.zAccelCnt);
         data->yDeltaV = -1.0*imuDecoder->accelCnt2MperSec(rawImu.data.yNegativAccelCnt);
         data->xDeltaV = imuDecoder->accelCnt2MperSec(rawImu.data.xAccelCnt);
+        //std::cout << "\nCnt " << rawImu.data.xAccelCnt << " decoded " << data->xDeltaV << "\n";
         //gyros
         data->zDeltaAng = imuDecoder->gyroCnt2Rad(rawImu.data.zGyroCnt);
         data->yDeltaAng = -1.0*imuDecoder->gyroCnt2Rad(rawImu.data.yNegativGyroCnt);

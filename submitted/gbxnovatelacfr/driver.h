@@ -172,7 +172,7 @@ public:
 
     //!@name INS settings for fast (dynamic) alignment
     //! !I'd strongly recommend that you read the manual _very_ closely!
-    //! These guys enbale the Span system to do an alignment while moving, they also allow you to mount the IMU in weird ways (e.g. upside down).
+    //! These guys enable the Span system to do an alignment while moving, they also allow you to mount the IMU in weird ways (e.g. upside down).
     //! It's worth to accept a fair amount of pain to mount the IMU in the recommended way. Otherwise you'll probably need a good amount of
     //! experimentation/calibration to get a parameter-set that works.
     //
@@ -420,7 +420,7 @@ class Driver {
 public:
 
     //! @name Ctor:
-    //! @brief Trys to establish serial communication to the GPS receiver, then configures it
+    //! @brief Tries to establish serial communication to the GPS receiver, then configures it
     //
     //!@{
 
