@@ -753,7 +753,6 @@ GpsOnlyConfig::toString(){
 std::string
 InsPvaData::toString(){
     std::stringstream ss;
-    int defPrecsion = ss.precision();
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
     ss << "gpsWeekNr " << std::fixed << std::setprecision(4) << gpsWeekNr << " ";
