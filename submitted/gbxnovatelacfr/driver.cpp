@@ -753,6 +753,7 @@ GpsOnlyConfig::toString(){
 std::string
 InsPvaData::toString(){
     std::stringstream ss;
+    ss << "InsPvaData ";
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
     ss << "gpsWeekNr " << std::fixed << std::setprecision(4) << gpsWeekNr << " ";
@@ -773,6 +774,7 @@ InsPvaData::toString(){
 std::string
 BestGpsPosData::toString(){
     std::stringstream ss;
+    ss << "BestGpsPosData ";
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
     ss << "gpsWeekNr " << gpsWeekNr << " ";
@@ -804,8 +806,9 @@ BestGpsPosData::toString(){
 };
 
 std::string
- BestGpsVelData::toString(){
+BestGpsVelData::toString(){
     std::stringstream ss;
+    ss << "BestGpsVelData ";
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
     ss << "gpsWeekNr " << gpsWeekNr << " ";
@@ -824,7 +827,7 @@ std::string
 std::string
 RawImuData::toString(){
     std::stringstream ss;
-    //int defPrecsion = ss.precision();
+    ss << "RawImuData ";
     ss << "timeStampSec " << timeStampSec << " ";
     ss << "timeStampUSec " << timeStampUSec << " ";
     ss << "gpsWeekNr " << std::fixed << gpsWeekNr << " ";
@@ -1054,10 +1057,41 @@ namespace{
                 data->statusMessage = "all is good";
                 lastStatusWasGood = true;
             }
-        }else{
-            //whoops
-            data->statusMessageType = gna::Fault; // warning?
+        }else if(true == gnua::receiverStatusIsWarning(bestGpsPos.header.receiverStatus)){
+            data->statusMessageType = gna::Warning;
             data->statusMessage = gnua::receiverStatusToString(bestGpsPos.header.receiverStatus);
+            lastStatusWasGood = false;
+        }else if(true == gnua::receiverStatusIsError(bestGpsPos.header.receiverStatus)){
+            data->statusMessageType = gna::Fault;
+            data->statusMessage = gnua::receiverStatusToString(bestGpsPos.header.receiverStatus);
+            lastStatusWasGood = false;
+        }else if(true == gnua::receiverStatusIsFatal(bestGpsPos.header.receiverStatus)){
+            //ouch, need to bug out
+            std::stringstream ss;
+            ss << "Receiver reports hardware-error! This is not recoverable!\n"
+                << "You can get additional information by sending \"log rxstatusa once\" to the receiver (minicom/other-terminal-program)!\n"
+                << "GpsStatus:\n";
+            ss << gnua::receiverStatusToString(bestGpsPos.header.receiverStatus);
+            lastStatusWasGood = false;
+            throw ( gua::HardwareException(ERROR_INFO, ss.str()) );
+        }else if(true == gnua::receiverStatusIsReservedValue(bestGpsPos.header.receiverStatus)){
+            //whoops
+            data->statusMessageType = gna::Warning;
+            std::stringstream ss;
+            ss << "Got GPS status which used to be a reserved value: 0x" << hex << bestGpsPos.header.receiverStatus
+                << " Please check your manual what this means, and tell us (gearbox-devel@lists.sourceforge.net) about it.\n"
+                << "Thanks.\n";
+            data->statusMessage = ss.str();
+            lastStatusWasGood = false;
+        }else{
+            // Can't happen
+            data->statusMessageType = gna::Warning;
+            std::stringstream ss;
+            ss << "Failed to decode GPS status: 0x" << hex << bestGpsPos.header.receiverStatus
+                << " Please send a bug-report to gearbox-devel@lists.sourceforge.net.\n"
+                << "Include this message and details about your hardware/software configuration.\n"
+                << "Thanks.\n";
+            data->statusMessage = ss.str();
             lastStatusWasGood = false;
         }
         return genericData;
@@ -1100,12 +1134,47 @@ namespace{
                 data->statusMessage = "all is good";
                 lastStatusWasGood = true;
             }
-        }else{
-            //whoops
-            data->statusMessageType = gna::Fault; // warning?
+        }else if(true == gnua::receiverStatusIsWarning(bestGpsVel.header.receiverStatus)){
+            data->statusMessageType = gna::Warning;
             data->statusMessage = gnua::receiverStatusToString(bestGpsVel.header.receiverStatus);
             lastStatusWasGood = false;
+        }else if(true == gnua::receiverStatusIsError(bestGpsVel.header.receiverStatus)){
+            data->statusMessageType = gna::Fault;
+            data->statusMessage = gnua::receiverStatusToString(bestGpsVel.header.receiverStatus);
+            lastStatusWasGood = false;
+        }else if(true == gnua::receiverStatusIsFatal(bestGpsVel.header.receiverStatus)){
+            //ouch, need to bug out
+            std::stringstream ss;
+            ss << "Receiver reports hardware-error! This is not recoverable!\n"
+                << "You can get additional information by sending \"log rxstatusa once\" to the receiver (minicom/other-terminal-program)!\n"
+                << "GpsStatus:\n";
+            ss << gnua::receiverStatusToString(bestGpsVel.header.receiverStatus);
+            lastStatusWasGood = false;
+            throw ( gua::HardwareException(ERROR_INFO, ss.str()) );
+        }else if(true == gnua::receiverStatusIsReservedValue(bestGpsVel.header.receiverStatus)){
+            //whoops
+            data->statusMessageType = gna::Warning;
+            std::stringstream ss;
+            ss << "Got GPS status which used to be a reserved value: 0x" << hex << bestGpsVel.header.receiverStatus
+                << " Please check your manual what this means, and tell us (gearbox-devel@lists.sourceforge.net) about it.\n"
+                << "Thanks.\n";
+            data->statusMessage = ss.str();
+            lastStatusWasGood = false;
+        }else{
+            // Can't happen
+            data->statusMessageType = gna::Warning;
+            std::stringstream ss;
+            ss << "Failed to decode GPS status: 0x" << hex << bestGpsVel.header.receiverStatus
+                << " Please send a bug-report to gearbox-devel@lists.sourceforge.net.\n"
+                << "Include this message and details about your hardware/software configuration.\n"
+                << "Thanks.\n";
+            data->statusMessage = ss.str();
+            lastStatusWasGood = false;
         }
+
+
+
+
         return genericData;
     }
 
