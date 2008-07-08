@@ -62,9 +62,9 @@ typedef struct{                 //offs  size    comment
     double   heightAMSL;        //24    8       [m] AMSL == above mean sea level (geoid)
     float    undulation;        //32    4       [m] aka geoidal seperation: undulation == heigth_ellipsoid - height_geoid/AMSL
     uint32_t datumId;           //36    4
-    float    sigmaLatitude;     //40    4       [m? deg?] 1 standard deviation error estimate
-    float    sigmaLongitude;    //44    4       [m? deg?] 1 standard deviation error estimate
-    float    sigmaHeight;       //48    4       [m? deg?] 1 standard deviation error estimate
+    float    sigmaLatitude;     //40    4       [m] 1 standard deviation error estimate
+    float    sigmaLongitude;    //44    4       [m] 1 standard deviation error estimate
+    float    sigmaHeight;       //48    4       [m] 1 standard deviation error estimate
     int8_t   baseStationId[4];  //52    4
     float    diffAge;           //56    4       [s]
     float    solutionAge;       //60    4       [s]
