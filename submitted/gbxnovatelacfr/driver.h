@@ -334,9 +334,9 @@ class BestGpsPosData : public GenericData {
         double       heightAMSL;                //!< [m] AMSL == above mean sea level (geoid)
         float        undulation;                //!< [m] aka geoidal seperation: undulation == heigth_ellipsoid - height_geoid/AMSL
         unsigned int datumId;                   //
-        float        sigmaLatitude;             //!< [m? deg?] 1 standard deviation error estimate
-        float        sigmaLongitude;            //!< [m? deg?] 1 standard deviation error estimate
-        float        sigmaHeight;               //!< [m? deg?] 1 standard deviation error estimate
+        float        sigmaLatitude;             //!< [m] 1 standard deviation error estimate
+        float        sigmaLongitude;            //!< [m] 1 standard deviation error estimate
+        float        sigmaHeight;               //!< [m] 1 standard deviation error estimate
         char         baseStationId[4];          //
         float        diffAge;                   //!< [s] how old the correction info from the basestation is
         float        solutionAge;               //!< [s] 
