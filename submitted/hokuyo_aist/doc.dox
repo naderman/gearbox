@@ -49,6 +49,10 @@ Header file:
 @par Dependencies
   @ref Flexiport
 
+@par Known issues
+  - There has been a report that retrieving data over the serial connection of a URG-04LX is
+    unusually slow (~1Hz).
+
 */
 
 /*!

@@ -387,8 +387,9 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		/** @brief Get a new scan from the scanner.
 
 		Unlike @ref GetRanges, which returns the most recent scan the scanner took, this function
-		will request a new scan. This means it will wait while the scanner performs the scan.
-		Otherwise behaves identicallty to @ref GetRanges.
+		will request a new scan. This means it will wait while the scanner performs the scan, which
+		means the rate at which scans can be retrieved using this function is less than with @ref
+		GetRanges. Otherwise behaves identicallty to @ref GetRanges.
 		
 		Not available with the SCIP v1 protocol.
 

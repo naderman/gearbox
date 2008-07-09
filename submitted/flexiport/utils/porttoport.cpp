@@ -212,7 +212,7 @@ int main (int argc, char **argv)
 					if ((buffer = reinterpret_cast<uint8_t*> (realloc (buffer,
 							sizeof (uint8_t) * bytesWaiting + 1))) == NULL)
 					{
-						cerr << "Failed to reallocate memory for right buffer." << endl;
+						cerr << "Failed to reallocate memory for buffer." << endl;
 						exit (1);
 					}
 					bytesToRead = bytesWaiting;
