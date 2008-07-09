@@ -52,12 +52,12 @@ For a full list of classes and functions, see @ref gbxsmartbatteryacfr.
 - This is a Linux-only implementation (due to the Linux-only serial library).  
 - It works with those serial devices which @ref gbx_library_gbxserialacfr supports.
 - The library is tailored to the OceanServer battery system.
-- Has been tested with the following hardware configuration: battery management module MP08SR, DC/DC converter module DC123SR, and a variable number of battery modules of type BA95HC-FL (can be added and removed at runtime)
+- Has been tested with Battery Management Modules MP08SR and BB04FR and a variable number of battery modules of type BA95HC-FL (individual modules can be added and removed at runtime).
 - Has been tested with the following firmware: V2.10 (2007)
 
-@par MP08SR Layout
+@par MP08SR and BB04FR Layouts
 
-The battery number reported by the driver corresponds to the following connectors on the Battery Management Module board MP08SR:
+The battery number reported by the driver corresponds to the following connectors on the Battery Management Module boards (the BB04FR board only has the lower level whereas the MP08SR has both levels):
 
 @verbatim
 Level 1 (lower level):
@@ -82,6 +82,7 @@ Note that the lower level needs to be powered (at least one battery module needs
 - SmartBattery standard: http://sbs-forum.org/specs/
 - OceanServer battery systems: http://www.ocean-server.com/overview.html
 - OceanServer battery system manuals: http://www.ocean-server.com/download.html
+- OceanServer online store: http://www.oceanserver-store.com/
 
 */
 

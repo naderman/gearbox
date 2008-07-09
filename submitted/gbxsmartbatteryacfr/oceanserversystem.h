@@ -47,8 +47,8 @@ class OceanServerSystem
         int minToEmpty;
         std::string messageToSystem;
         
-        //! Battery module states.
-        //! Each vector is always of size 8 because OceanServer's MP08 battery management module has 8 slots
+        //! Battery module states. Each vector is always of size 8 because OceanServer's Battery 
+        //! Management Modules have a maximum of 8 slots (either 2, 4, or 8 dependent on the model)
         std::vector<bool> availableBatteries;
         std::vector<bool> chargingStates;
         std::vector<bool> supplyingPowerStates;
