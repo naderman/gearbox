@@ -35,8 +35,8 @@ namespace gbxnovatelacfr{
 //! Minimum information to configure the receiver in INS mode
 class SimpleConfig{
 public:
-    //! @param imuType see Config::imuType_ for details
-    //! @param imuToGpsOffset see Config::imuToGpsOffset_ for details
+    //! @param imuType see @ref Config::imuType_ for details
+    //! @param imuToGpsOffset see @ref Config::imuToGpsOffset_ for details
     SimpleConfig(std::string serialDevice, int baudRate, std::string imuType, std::vector<double > &imuToGpsOffset):
         serialDevice_(serialDevice),
         baudRate_(baudRate),
@@ -153,7 +153,7 @@ public:
     //
     //!@{
     std::vector<double > imuToGpsOffset_;            //!< vector (xyz [m]) from IMU center to Antenna Phase Center, in IMU coordinates, vital for INS performance, make sure you get this right!
-    std::vector<double > imuToGpsOffsetUncertainty_; //!< optional (size 3 or 0)
+    std::vector<double > imuToGpsOffsetUncertainty_; //!< optional (size 3 or 0) xyz; !it is unclear to me whether these are factors, or absolute values (in [m])!
     bool enableInsOffset_;
     std::vector<double > insOffset_;                 //!< report INS position/velocity offset (xyz [m] in IMU coordinates) from the IMU center; useful e.g. to get data w.r. to robot's center of rotation
     bool enableInsPhaseUpdate_;                      //!< tightly coupled (phase based vs position based) filter; Chance of better performance in adverse conditions
@@ -219,6 +219,7 @@ enum GpsSolutionStatusType{
     ImuUnplugged,      //!< No IMU detected
     Pending,           //!< When a FIX POSITION command is entered, the receiver computes its own position and determines if the fixed position is valid
     InvalidFix,        //!< The fixed position, entered using the FIX POSITION command, is not valid
+    ReservedGpsSolutionStatusType,
     UnknownGpsSolutionStatusType
 };
 
@@ -253,6 +254,7 @@ enum GpsPosVelType{
     OmniStarHp,       //!< OmniSTAR high precision a
     OmniStarXp,       //!< OmniSTAR extra precision a
     CdGps,            //!< Position solution using CDGPS corrections
+    ReservedGpsPosVelType,
     UnknownGpsPosVelType
 };
 
@@ -291,7 +293,7 @@ class InsPvaData : public GenericData {
         double   longitude;         //!< [deg] east positive WGS84
         double   height;            //!< [m] above ellipsoid WGS84 (heigth_ellipsoid - undulation == height_geoid (aka AMSL)
 
-        //!@name Orientation
+        //!@name Velocity vector
         //!Relativ to true North/East and geoid vertical (I think)
         //
         //@{
