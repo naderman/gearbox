@@ -56,20 +56,22 @@ namespace {
         // these guys are used to directly decode messages;
         // obviously fails on endian mismatch, any sort of size mismatch and is rather nasty in general;
         // feel free to implement something better
-        // TODO: at least add runtime checking
         gnua::BestGpsPosLogB bestGpsPos;
         gnua::BestGpsVelLogB bestGpsVel;
         gnua::InsPvaLogSB   insPva;
         gnua::RawImuLogSB   rawImu;
     };
 #pragma pack(pop)
+    // this guy checks if the assumptions for the gear above are correct (abort()s through assert() otherwise)
+    void checkParserAssumptions();
+
     int readNovatelMessage(union novatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::InsPvaLogSB &insPva, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsPosLogB &bestGpsPos, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder);
 
-    //helper functions for the toString() gear
+    // helper functions for the toString() gear
     std::string statusToString(gna::StatusMessageType statusMessageType, std::string statusMessage);
     std::string doubleVectorToString(vector<double > &vec, std::string seperator = std::string(" "));
 }
@@ -102,6 +104,8 @@ Driver::configure( ) {
     if(false == config_.isValid()){
         throw (gua::Exception(ERROR_INFO, "Invalid Configuration!"));
     }
+
+    checkParserAssumptions();
 
     // configure serial port
     baud_ = config_.baudRate_;
@@ -167,9 +171,7 @@ Driver::connectToHardware() {
         i++;
     }
     if(false == correctBaudrate){
-        std::stringstream ss;
-        ss  << "!Failed to establish a connection to the receiver! Check physical connections; Check manually (minicom) for Baudrates < 9600kb/s.";
-        throw ( gua::Exception(ERROR_INFO, ss.str()) );
+        throw ( gua::Exception(ERROR_INFO, "!Failed to establish a connection to the receiver! Check physical connections; Check manually (minicom) for Baudrates < 9600kb/s."));
     }
     // ok, we've got a working link
     std::stringstream ss;
@@ -182,9 +184,7 @@ Driver::connectToHardware() {
     sprintf( str,"com com1 %d n 8 1 n off on\r\n", baud_ );
     serial_->writeString( str );
     if(false == gnua::testConnectivity( challenge, ack, *(serial_.get()), timeOutMsec, maxTry, successThresh, baud_)){
-        std::stringstream ss;
-        ss  << "!Failed to reset connection to configured baudrate!";
-        throw ( gua::Exception(ERROR_INFO, ss.str()) );
+        throw ( gua::Exception(ERROR_INFO, "!Failed to reset connection to configured baudrate!"));
     }
     return;
 }
@@ -203,7 +203,9 @@ Driver::configureImu() {
         // tell the novatel what serial port the imu is attached to (com3 == aux)
         challenge = ( "interfacemode com3 imu imu on\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
         // the type of imu being used
         ss << "setimutype "
@@ -211,11 +213,15 @@ Driver::configureImu() {
             << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
         challenge = "inscommand enable\r\n";
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
         //force the IMU to re-align at every startup
         //put = serial_->writeString( "inscommand reset\r\n" );
@@ -225,7 +231,9 @@ Driver::configureImu() {
         tracer_->info("No IMU, switching INS OFF!");
         challenge = "inscommand disable\r\n";
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
     return;
@@ -246,7 +254,9 @@ Driver::configureIns() {
         ss << "setimuorientation " << config_.setImuOrientation_ << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -269,7 +279,9 @@ Driver::configureIns() {
         ss << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -290,7 +302,9 @@ Driver::configureIns() {
         ss << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
     return;
@@ -309,17 +323,23 @@ Driver::configureGps() {
     // make sure that fixposition has not been set
     challenge = ( "fix none\r\n" );
     if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-        throw ( gua::Exception(ERROR_INFO, errorResponse));
+        std::stringstream ss;
+        ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+        throw ( gua::Exception(ERROR_INFO, ss.str()));
     }
     // select the geodetic datum for operation of the receiver (wgs84 = default)
     challenge = ( "datum wgs84\r\n" );
     if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-        throw ( gua::Exception(ERROR_INFO, errorResponse));
+        std::stringstream ss;
+        ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+        throw ( gua::Exception(ERROR_INFO, ss.str()));
     }
     //Let the receiver figure out which range corrections are best
     challenge = ( "PSRDIFFSOURCE AUTO\r\n" );
     if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-        throw ( gua::Exception(ERROR_INFO, errorResponse));
+        std::stringstream ss;
+        ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+        throw ( gua::Exception(ERROR_INFO, ss.str()));
     }
 
     // CDGPS
@@ -327,7 +347,9 @@ Driver::configureGps() {
         tracer_->info("Turning on CDGPS!");
         challenge = ( "ASSIGNLBAND CDGPS 1547547 4800\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -336,19 +358,25 @@ Driver::configureGps() {
         tracer_->info("Turning on SBAS!");
         challenge = ( "SBASCONTROL ENABLE Auto 0 ZEROTOTWO\r\n");
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
         //we try to use WAAS satellites even below the horizon
         challenge = ( "WAASECUTOFF -5.0\r\n");
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
     else{
         tracer_->info("Turning off SBAS!");
         challenge = ( "SBASCONTROL DISABLE Auto 0 NONE\r\n");
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -357,11 +385,15 @@ Driver::configureGps() {
         tracer_->info("Turning on RTK!");
         challenge = ( "com com2,9600,n,8,1,n,off,on\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
         challenge = ( "interfacemode com2 rtca none\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -369,13 +401,17 @@ Driver::configureGps() {
         //Let the receiver figure out which rtk corrections are best
         challenge = ( "RTKSOURCE AUTO\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }else{
         //We only use our own rtk corrections; _not_ OmniSTAR HP/XP
         challenge = ( "RTKSOURCE RTCA ANY\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            throw ( gua::Exception(ERROR_INFO, errorResponse));
+            std::stringstream ss;
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
     return;
@@ -402,6 +438,7 @@ Driver::requestData() {
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             //throw ( gua::Exception(ERROR_INFO, errorResponse));
+            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
         }
     }
 
@@ -415,6 +452,7 @@ Driver::requestData() {
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             //throw ( gua::Exception(ERROR_INFO, errorResponse));
+            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
         }
     }
 
@@ -431,6 +469,7 @@ Driver::requestData() {
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             //throw ( gua::Exception(ERROR_INFO, errorResponse));
+            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
         }
     }
 
@@ -439,11 +478,12 @@ Driver::requestData() {
 
     // raw accelerometer and gyro data
     if(config_.enableRawImu_){
+        tracer_->info("Turning on raw imu data!");
         challenge = ( "log rawimusb onnew\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             //throw ( gua::Exception(ERROR_INFO, errorResponse));
+            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
         }
-        tracer_->info("Turning on raw imu data!");
     }
 
     return;
@@ -461,7 +501,7 @@ Driver::read(){
         // Timeouts are not adjusted once a serial call returns;
         // So we could be stuck here for longer than the set timeout.
         int ret = serial_->bytesAvailableWait();
-        if ( ret >= 0 ) {
+        if ( ret > 0 ) {
             switch(readNovatelMessage(msg, timeStamp, serial_.get())){
                 case gnua::InsPvaSBLogType:
                     data = createExternalMsg(msg.insPva, timeStamp);
@@ -478,8 +518,7 @@ Driver::read(){
                 default:
                     {
                         std::stringstream ss;
-                        ss << "Warning("<<__FILE__<<":"<< __LINE__
-                            <<" : got unexpected message from receiver; id: " << msg.header.msgId << std::endl;
+                        ss <<"Got unexpected message type from receiver; id: " << msg.header.msgId << std::endl;
                         if(config_.ignoreUnknownMessages_){
                             tracer_->warning(ss.str());
                         }else{
@@ -490,12 +529,9 @@ Driver::read(){
             }
         }
         else {
-            std::stringstream ss;
-            ss << "Warning("<<__FILE__<<":"<< __LINE__
-             << "Timed out while waiting for data";
-            throw ( gua::Exception(ERROR_INFO, ss.str()) );
+            throw ( gua::Exception(ERROR_INFO, "Timed out while waiting for data"));
         }
-    }while(NULL == data.get()); // repeat till we get valid data
+    }while(NULL == data.get()); // repeat till we get a known message
 
     return data;
 }
@@ -845,61 +881,63 @@ RawImuData::toString(){
 } //namespace
 
 namespace{
+    void
+    checkParserAssumptions(){
+        assert((8 == CHAR_BIT) && "Sorry our parser won't work on this platform");
+        assert((8 == sizeof(double)) && "Sorry our parser won't work on this platform");
+        assert((4 == sizeof(float)) && "Sorry our parser won't work on this platform");
+
+        union EndianCheck{
+            uint32_t full;
+            uint8_t bytes[4];
+        };
+        EndianCheck endianCheck;
+        endianCheck.bytes[0] = 0x21;
+        endianCheck.bytes[1] = 0x43;
+        endianCheck.bytes[2] = 0x65;
+        endianCheck.bytes[3] = 0x87;
+        assert(0x87654321 == endianCheck.full && "Sorry our parser won't work on this platform");
+        return;
+    }
+
     int
     readNovatelMessage(union novatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial) {
         // read the three sync bytes which are always at the start of the message header
-        unsigned short id;
+        unsigned short id = -1;
         unsigned long crc;
         unsigned long in_crc;
         msg.header.sb1 = 0;
-        int skip = -1;
-        int got;
 
-        // read the first sync byte
+        // skip everything until we get the first sync byte
         do{
-            got = serial->readFull( &msg.header.sb1, 1 );
-            if ( got <= 0 ) {
-                return got;
-            }
-            if( got>0 ) {
-                skip++;
+            if( 1 != serial->readFull( &msg.header.sb1, 1 )){
+                throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 1 (possibly timeout) " ) );
             }
         }while( msg.header.sb1 != 0xaa );
 
         // get timestamp after the first byte for accuracy
         gettimeofday(&timeStamp, NULL);
 
-        // read the second sync byte
-        do {
-            got = serial->readFull( &msg.header.sb2, 1 );
-            if ( got <= 0 ) {
-                return got;
-            }
-        }while( got!=1 );
-
-        if( msg.header.sb2 != 0x44 ) {
-            return -1;
+        // read the second and third sync byte
+        if( 1 != serial->readFull( &msg.header.sb2, 1 )
+                || msg.header.sb2 != 0x44 ) {
+            throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 2 (possibly timeout) " ) );
         }
-
-         // read the third sync byte
-        do {
-            got = serial->readFull( &msg.header.sb3, 1 );
-            if ( got <= 0 ) {
-                return got;
-            }
-        }while( got != 1 );
+        if( 1 != serial->readFull( &msg.header.sb3, 1 )){
+            throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 3 (possibly timeout) " ) );
+        }
 
         switch( msg.header.sb3 ) {
             case 0x12: //long packet
                 if( // how long is the header ?
-                    -1 == serial->readFull( &msg.header.headerLength, 1 )
+                    1 != serial->readFull( &msg.header.headerLength, 1 )
                     // read all of the header...
-                    || -1 == serial->readFull( &msg.header.msgId, msg.header.headerLength-4 )
+                    || msg.header.headerLength-4 != serial->readFull( &msg.header.msgId, msg.header.headerLength-4 )
                     // read the  message data
-                    || -1 == serial->readFull( &msg.data, msg.header.msgLength )
-                    || -1 == serial->readFull( &in_crc, 4 )
+                    || msg.header.msgLength != serial->readFull( &msg.data, msg.header.msgLength )
+                    || 4 != serial->readFull( &in_crc, 4 )
                   ){
-                    return -1;
+                    throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read long packet (possibly timeout) " ) );
                 }
 
                 id = msg.header.msgId;
@@ -910,11 +948,11 @@ namespace{
 
             case 0x13: //short packet
                 if( // read rest of the header 12 bytes - 3 bytes already read, then the actual data, then the CRC
-                    -1 == serial->readFull( &msg.shortHeader.msgLength, 9 )
-                    || -1 == serial->readFull( &msg.shortData, msg.shortHeader.msgLength )
-                    || -1 == serial->readFull( &in_crc, 4 )
+                    9 != serial->readFull( &msg.shortHeader.msgLength, 9 )
+                    || msg.shortHeader.msgLength != serial->readFull( &msg.shortData, msg.shortHeader.msgLength )
+                    || 4 != serial->readFull( &in_crc, 4 )
                   ){
-                    return -1;
+                    throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read short packet (possibly timeout) " ) );
                 }
 
                 id = msg.shortHeader.msgId;
@@ -923,11 +961,10 @@ namespace{
                 break;
 
             default: //bollocks
-                return -1;
+                throw ( gua::Exception(ERROR_INFO, "Unknown binary packet type" ) );
         }
 
         if(in_crc != crc) {
-            fprintf( stderr,"CRC Error: 0x%lx, 0x%lx\n",in_crc,crc );
             throw ( gua::Exception(ERROR_INFO, "CRC Error" ) );
             return -1;
         }
