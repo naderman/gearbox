@@ -138,14 +138,7 @@ int main (int argc, char **argv)
 			}
 		}
 		else
-		{
-			// Allocate 1 byte each for now so we can realloc() later without a check
-			if ((buffer = reinterpret_cast<uint8_t*> (malloc (1))) == NULL)
-			{
-				cerr << "Failed to allocate memory for buffer." << endl;
-				exit (1);
-			}
-		}
+			buffer = NULL;
 
 		// Begin an infinite loop, checking each port for data and then sleeping a little while
 		while (true)
