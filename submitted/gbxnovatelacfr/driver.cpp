@@ -22,12 +22,14 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <vector>
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
-#include <vector>
+#include <limits.h>
 
 #include <sys/time.h>
 #include <time.h>
