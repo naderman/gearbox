@@ -198,7 +198,7 @@ OceanServerReader::read( OceanServerSystem &system )
         stringstream ss;
         ss << "OceanServerReader: Caught ParsingException: " << e.what() << ". ";
         ss << "It's not critical, we will try to find the beginning of a new record.";
-        tracer_.warning( ss.str() );
+        tracer_.info( ss.str() );
         firstTime_ = true;
         
         // we have to rethrow, so that the caller knows that it may receive a corrupt record
