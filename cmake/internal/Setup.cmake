@@ -84,7 +84,7 @@ ENABLE_TESTING()
 #
 ADD_SUBDIRECTORY( src )
 ADD_SUBDIRECTORY( submitted )
-# ADD_SUBDIRECTORY( retired )
+ADD_SUBDIRECTORY( retired )
 
 # Some cmake and shell scripts need to be installed
 ADD_SUBDIRECTORY( cmake )

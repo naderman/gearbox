@@ -6,10 +6,12 @@ MESSAGE( STATUS "== SRC ==" )
 # Otherwise, maintain alphabetical order.
 
 ADD_SUBDIRECTORY( basicexample )
+ADD_SUBDIRECTORY( flexiport )
 ADD_SUBDIRECTORY( gbxadvancedexample )
 ADD_SUBDIRECTORY( gbxserialacfr )
 ADD_SUBDIRECTORY( gbxutilacfr )
 ADD_SUBDIRECTORY( gbxgarminacfr )
 ADD_SUBDIRECTORY( gbxsickacfr )
 ADD_SUBDIRECTORY( gbxsmartbatteryacfr )
-ADD_SUBDIRECTORY( urg_nz )
+ADD_SUBDIRECTORY( hokuyo_aist )
+

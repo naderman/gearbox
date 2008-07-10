@@ -9,6 +9,8 @@
 
 For a full list of functions and classes see @ref urg_nz.
 
+<b>This library has been retired.</b>
+
 Header file:
 @verbatim
 #include <urglaser/urg_laser.h>
