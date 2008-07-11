@@ -42,7 +42,6 @@ namespace gna = gbxnovatelacfr;
 namespace gua = gbxutilacfr;
 
 namespace {
-// binary messages defined by novatel
 #pragma pack(push,1)
     // Our quick and dirty message-decoder
     // Maximum size is (legacy) hardcoded to 516bytes. The real upper limit (for long headers) would be 65535+28+4 bytes.
@@ -75,7 +74,10 @@ namespace {
     // this guy checks if the assumptions for the gear above are correct (abort()s through assert() otherwise)
     void checkParserAssumptions();
 
+    // returns the id of the message it received (in msg), or throws an gbxutilacfr::Exception
     uint16_t readNovatelMessage(union NovatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial);
+
+    // take novatel data and create stuff according to our external api
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::InsPvaLogSB &insPva, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsPosLogB &bestGpsPos, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp);
@@ -925,7 +927,7 @@ namespace{
         // skip everything until we get the first sync byte
         do{
             if( 1 != serial->readFull( &msg.header.sb1, 1 )){
-                throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 1 (possibly timeout) " ) );
+                throw ( gua::Exception(ERROR_INFO, "Timed out while trying to read sync byte 1") );
             }
         }while( msg.header.sb1 != 0xaa );
 
@@ -933,12 +935,16 @@ namespace{
         gettimeofday(&timeStamp, NULL);
 
         // read the second and third sync byte
-        if( 1 != serial->readFull( &msg.header.sb2, 1 )
-                || msg.header.sb2 != 0x44 ) {
-            throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 2 (possibly timeout) " ) );
+        if( 1 != serial->readFull( &msg.header.sb2, 1) ){
+            throw ( gua::Exception(ERROR_INFO, "Timed out while trying to read sync byte 2" ) );
+        }
+        if (msg.header.sb2 != 0x44 ) {
+            std::stringstream ss;
+            ss << "Expected sync byte 2 (0x44) got: " << hex << msg.header.sb2;
+            throw ( gua::Exception(ERROR_INFO, ss.str()) );
         }
         if( 1 != serial->readFull( &msg.header.sb3, 1 )){
-            throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 3 (possibly timeout) " ) );
+            throw ( gua::Exception(ERROR_INFO, "Timed out while trying to read sync byte 3") );
         }
 
         // figure out what binary format we have, and read the full packet
@@ -951,7 +957,7 @@ namespace{
                     // read the  message data plus 4 bytes for the crc
                     || msg.header.msgLength+4 != serial->readFull( &msg.data, msg.header.msgLength+4 )
                   ){
-                    throw ( gua::Exception(ERROR_INFO, "Failure while trying to read long packet (possibly timeout) " ) );
+                    throw ( gua::Exception(ERROR_INFO, "Timed out while trying to read long packet") );
                 }
 
                 id = msg.header.msgId;
@@ -966,7 +972,7 @@ namespace{
                     9 != serial->readFull( &msg.shortHeader.msgLength, 9 )
                     || msg.shortHeader.msgLength+4 != serial->readFull( &msg.shortData, msg.shortHeader.msgLength+4 )
                   ){
-                    throw ( gua::Exception(ERROR_INFO, "Failure while trying to read short packet (possibly timeout) " ) );
+                    throw ( gua::Exception(ERROR_INFO, "Timed out while trying to read short packet") );
                 }
 
                 id = msg.shortHeader.msgId;
@@ -1364,7 +1370,7 @@ namespace{
             default:
                    ss << "UnknownStatus" << " ";
         }
-        ss << statusMessage;
+        ss << "[" << statusMessage << "]";
         return ss.str();
     }
 }//namespace
