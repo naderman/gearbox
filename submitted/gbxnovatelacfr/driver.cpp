@@ -44,16 +44,24 @@ namespace gua = gbxutilacfr;
 namespace {
 // binary messages defined by novatel
 #pragma pack(push,1)
-    union novatelMessage{
+    // Our quick and dirty message-decoder
+    // Maximum size is (legacy) hardcoded to 516bytes. The real upper limit (for long headers) would be 65535+28+4 bytes.
+    // Problems should hopefully be picked up by checkParserAssumptions().
+    //
+    // Todo: write a proper parser
+    static const int rawMsgSize = 516; // maximum size of message we can decode (including header, crc, and data)
+    static const int longMsgDataSize = rawMsgSize - sizeof(gnua::Oem4BinaryHeader);
+    static const int shortMsgDataSize = rawMsgSize - sizeof(gnua::Oem4ShortBinaryHeader);
+    union NovatelMessage{
         struct{
             gnua::Oem4BinaryHeader header;
-            char               data[484];
+            uint8_t               data[longMsgDataSize];
         };
         struct{
             gnua::Oem4ShortBinaryHeader shortHeader;
-            char               shortData[500];
+            uint8_t               shortData[shortMsgDataSize];
         };
-        unsigned char rawMessage[512];
+        uint8_t rawMessage[rawMsgSize];
 
         // these guys are used to directly decode messages;
         // obviously fails on endian mismatch, any sort of size mismatch and is rather nasty in general;
@@ -67,11 +75,13 @@ namespace {
     // this guy checks if the assumptions for the gear above are correct (abort()s through assert() otherwise)
     void checkParserAssumptions();
 
-    int readNovatelMessage(union novatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial);
+    uint16_t readNovatelMessage(union NovatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::InsPvaLogSB &insPva, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsPosLogB &bestGpsPos, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp);
     std::auto_ptr<gna::GenericData> createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder);
+    enum gna::GpsSolutionStatusType externalGpsSolutionStatus(uint32_t novatelGpsSolutionStatus);
+    enum gna::GpsPosVelType externalGpsPosVelType(uint32_t novatelGpsPosVelType);
 
     // helper functions for the toString() gear
     std::string statusToString(gna::StatusMessageType statusMessageType, std::string statusMessage);
@@ -493,7 +503,7 @@ Driver::requestData() {
 
 std::auto_ptr<GenericData>
 Driver::read(){
-    union novatelMessage msg;
+    union NovatelMessage msg;
     std::auto_ptr<GenericData> data;
     data.reset(0);
     struct timeval timeStamp = {0,0};
@@ -852,7 +862,7 @@ BestGpsVelData::toString(){
     ss << "gpsWeekNr " << gpsWeekNr << " ";
     ss << "msIntoWeek " << msIntoWeek << " ";
     ss << "solutionStatus " << solutionStatus << " ";
-    ss << "positionType " << positionType << " ";
+    ss << "velocityType " << velocityType << " ";
     ss << "latency " << std::fixed << std::setprecision(4) << latency << " ";
     ss << "diffAge " << diffAge << " ";
     ss << "horizontalSpeed " << horizontalSpeed << " ";
@@ -885,9 +895,11 @@ RawImuData::toString(){
 namespace{
     void
     checkParserAssumptions(){
-        assert((8 == CHAR_BIT) && "Sorry our parser won't work on this platform");
-        assert((8 == sizeof(double)) && "Sorry our parser won't work on this platform");
-        assert((4 == sizeof(float)) && "Sorry our parser won't work on this platform");
+        // we have a fairly dodgy parser, which makes unsound assumptions about the binary layout of things in memory.
+        // This gear makes sure that we fail at runtime instead of delivering garbage.
+        assert((8 == CHAR_BIT) && "Unsupported size of byte: our parser won't work on this platform");
+        assert((8 == sizeof(double)) && "Unsupported size of double: our parser won't work on this platform");
+        assert((4 == sizeof(float)) && "Unsupported size of float: our parser won't work on this platform");
 
         union EndianCheck{
             uint32_t full;
@@ -898,22 +910,22 @@ namespace{
         endianCheck.bytes[1] = 0x43;
         endianCheck.bytes[2] = 0x65;
         endianCheck.bytes[3] = 0x87;
-        assert(0x87654321 == endianCheck.full && "Sorry our parser won't work on this platform");
+        assert(0x87654321 == endianCheck.full && "Unsupported endianness: our parser won't work on this platform");
+        assert(rawMsgSize == sizeof(union NovatelMessage)
+                && "Overflow: Someone included a log definition in [NovatelMessage] which is bigger than the buffer for it"
+                && "Depending on the pickiness of your hardware this might actually work, but I'll shut down on general principle");
         return;
     }
 
-    int
-    readNovatelMessage(union novatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial) {
-        // read the three sync bytes which are always at the start of the message header
-        unsigned short id = -1;
-        unsigned long crc;
-        unsigned long in_crc;
+    uint16_t
+    readNovatelMessage(union NovatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial) {
+        uint16_t id = -1;
         msg.header.sb1 = 0;
 
         // skip everything until we get the first sync byte
         do{
             if( 1 != serial->readFull( &msg.header.sb1, 1 )){
-                throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 1 (possibly timeout) " ) );
+                throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 1 (possibly timeout) " ) );
             }
         }while( msg.header.sb1 != 0xaa );
 
@@ -923,62 +935,56 @@ namespace{
         // read the second and third sync byte
         if( 1 != serial->readFull( &msg.header.sb2, 1 )
                 || msg.header.sb2 != 0x44 ) {
-            throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 2 (possibly timeout) " ) );
+            throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 2 (possibly timeout) " ) );
         }
         if( 1 != serial->readFull( &msg.header.sb3, 1 )){
-            throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read sync byte 3 (possibly timeout) " ) );
+            throw ( gua::Exception(ERROR_INFO, "Failure while trying to read sync byte 3 (possibly timeout) " ) );
         }
 
+        // figure out what binary format we have, and read the full packet
         switch( msg.header.sb3 ) {
             case 0x12: //long packet
                 if( // how long is the header ?
                     1 != serial->readFull( &msg.header.headerLength, 1 )
-                    // read all of the header...
+                    // read all of the header
                     || msg.header.headerLength-4 != serial->readFull( &msg.header.msgId, msg.header.headerLength-4 )
-                    // read the  message data
-                    || msg.header.msgLength != serial->readFull( &msg.data, msg.header.msgLength )
-                    || 4 != serial->readFull( &in_crc, 4 )
+                    // read the  message data plus 4 bytes for the crc
+                    || msg.header.msgLength+4 != serial->readFull( &msg.data, msg.header.msgLength+4 )
                   ){
-                    throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read long packet (possibly timeout) " ) );
+                    throw ( gua::Exception(ERROR_INFO, "Failure while trying to read long packet (possibly timeout) " ) );
                 }
 
                 id = msg.header.msgId;
 
-                crc = gnua::crc( msg.rawMessage,
-                                   msg.header.msgLength+msg.header.headerLength );
+                if(0 != gnua::crc( msg.rawMessage, msg.header.msgLength+msg.header.headerLength+4 )){
+                    throw ( gua::Exception(ERROR_INFO, "CRC Error" ) );
+                }
                 break;
 
             case 0x13: //short packet
-                if( // read rest of the header 12 bytes - 3 bytes already read, then the actual data, then the CRC
+                if( // read rest of the header 12 bytes - 3 bytes already read, then the actual data plus 4 bytes for the CRC
                     9 != serial->readFull( &msg.shortHeader.msgLength, 9 )
-                    || msg.shortHeader.msgLength != serial->readFull( &msg.shortData, msg.shortHeader.msgLength )
-                    || 4 != serial->readFull( &in_crc, 4 )
+                    || msg.shortHeader.msgLength+4 != serial->readFull( &msg.shortData, msg.shortHeader.msgLength+4 )
                   ){
-                    throw ( gua::Exception(ERROR_INFO, "Failure while reading trying to read short packet (possibly timeout) " ) );
+                    throw ( gua::Exception(ERROR_INFO, "Failure while trying to read short packet (possibly timeout) " ) );
                 }
 
                 id = msg.shortHeader.msgId;
 
-                crc = gnua::crc( msg.rawMessage,msg.shortHeader.msgLength + 12 );
+                if( 0 != gnua::crc( msg.rawMessage,msg.shortHeader.msgLength + 16 )){
+                    throw ( gua::Exception(ERROR_INFO, "CRC Error" ) );
+                }
                 break;
 
             default: //bollocks
-                throw ( gua::Exception(ERROR_INFO, "Unknown binary packet type" ) );
+                throw ( gua::Exception(ERROR_INFO, "Unknown binary packet format" ) );
         }
-
-        if(in_crc != crc) {
-            throw ( gua::Exception(ERROR_INFO, "CRC Error" ) );
-            return -1;
-        }
-
         return  id;
     }
 
 
     std::auto_ptr<gna::GenericData>
     createExternalMsg(gnua::InsPvaLogSB &insPva, struct timeval &timeStamp){
-        //static int cnt;
-        //if(0 == cnt++ % 1000) cout << __func__ << " ins; implement me properly!\n";
         gna::InsPvaData *data = new gna::InsPvaData;
         std::auto_ptr<gna::GenericData> genericData( data );
 
@@ -1003,7 +1009,7 @@ namespace{
         switch( insPva.data.insStatus ) {
             case 0:
                 data->statusMessage = "Ins is inactive";
-                data->statusMessageType = gna::Fault; // TODO: check if this happens during startup
+                data->statusMessageType = gna::Initialising; // TODO: how can we distinguish between the startup-behavior and a genuine fault during operation?? Timer from when we first established a connection?
                 break;
             case 1:
                 data->statusMessage = "Ins is aligning";
@@ -1049,16 +1055,14 @@ namespace{
 
     std::auto_ptr<gna::GenericData>
     createExternalMsg(gnua::BestGpsPosLogB &bestGpsPos, struct timeval &timeStamp){
-        static int cnt;
-        if(0 == cnt++ % 100) cout << __func__ << " gpspos; implement me properly!\n";
         gna::BestGpsPosData *data = new gna::BestGpsPosData;
         std::auto_ptr<gna::GenericData> genericData( data );
 
         //data
         data->gpsWeekNr = bestGpsPos.header.gpsWeekNr;
         data->msIntoWeek = bestGpsPos.header.msIntoWeek;
-        //data->solutionStatus = bestGpsPos.data.solutionStatus;
-        //data->positionType = bestGpsPos.data.positionType;
+        data->solutionStatus = externalGpsSolutionStatus( bestGpsPos.data.solutionStatus );
+        data->positionType = externalGpsPosVelType( bestGpsPos.data.positionType );
         data->latitude = bestGpsPos.data.latitude;
         data->longitude = bestGpsPos.data.longitude;
         data->heightAMSL = bestGpsPos.data.heightAMSL;
@@ -1139,16 +1143,14 @@ namespace{
 
     std::auto_ptr<gna::GenericData>
     createExternalMsg(gnua::BestGpsVelLogB &bestGpsVel, struct timeval &timeStamp){
-        static int cnt;
-        if(0 == cnt++ % 100) cout << __func__ << " gpsvel; implement me properly!\n";
         gna::BestGpsVelData *data = new gna::BestGpsVelData;
         std::auto_ptr<gna::GenericData> genericData( data );
 
         //data
         data->gpsWeekNr = bestGpsVel.header.gpsWeekNr;
         data->msIntoWeek = bestGpsVel.header.msIntoWeek;
-        //data->solutionStatus = bestGpsVel.data.solutionStatus;
-        //data->velocityType = bestGpsVel.data.velocityType;
+        data->solutionStatus = externalGpsSolutionStatus( bestGpsVel.data.solutionStatus );
+        data->velocityType = externalGpsPosVelType( bestGpsVel.data.velocityType );
         data->latency = bestGpsVel.data.latency;
         data->diffAge = bestGpsVel.data.diffAge;
         data->horizontalSpeed = bestGpsVel.data.horizontalSpeed;
@@ -1219,8 +1221,6 @@ namespace{
 
     std::auto_ptr<gna::GenericData>
     createExternalMsg(gnua::RawImuLogSB &rawImu, struct timeval &timeStamp, gnua::ImuDecoder *imuDecoder){
-        //static int cnt;
-        //if(0 == cnt++ % 500) cout << __func__ << " imu; implement me properly!\n";
         gna::RawImuData *data = new gna::RawImuData;
         std::auto_ptr<gna::GenericData> genericData( data );
 
@@ -1231,7 +1231,6 @@ namespace{
         data->zDeltaV = imuDecoder->accelCnt2MperSec(rawImu.data.zAccelCnt);
         data->yDeltaV = -1.0*imuDecoder->accelCnt2MperSec(rawImu.data.yNegativAccelCnt);
         data->xDeltaV = imuDecoder->accelCnt2MperSec(rawImu.data.xAccelCnt);
-        //std::cout << "\nCnt " << rawImu.data.xAccelCnt << " decoded " << data->xDeltaV << "\n";
         //gyros
         data->zDeltaAng = imuDecoder->gyroCnt2Rad(rawImu.data.zGyroCnt);
         data->yDeltaAng = -1.0*imuDecoder->gyroCnt2Rad(rawImu.data.yNegativGyroCnt);
@@ -1262,6 +1261,77 @@ namespace{
             lastStatusWasGood = false;
         }
         return genericData;
+    }
+
+    enum gna::GpsSolutionStatusType externalGpsSolutionStatus(uint32_t novatelGpsSolutionStatus){
+        enum gna::GpsSolutionStatusType external;
+        switch(novatelGpsSolutionStatus){
+            case 0: external = gna::SolComputed; break;
+            case 1: external = gna::InsufficientObs; break;
+            case 2: external = gna::NoConvergence; break;
+            case 3: external = gna::Singularity; break;
+            case 4: external = gna::CovTrace; break;
+            case 5: external = gna::TestDist; break;
+            case 6: external = gna::ColdStart; break;
+            case 7: external = gna::VHLimit; break;
+            case 8: external = gna::Variance; break;
+            case 9: external = gna::Residuals; break;
+            case 10: external = gna::DeltaPos; break;
+            case 11: external = gna::NegativeVar; break;
+            case 13: external = gna::IntegrityWarning; break;
+            case 14: external = gna::InsInactive; break;
+            case 15: external = gna::InsAligning; break;
+            case 16: external = gna::InsBad; break;
+            case 17: external = gna::ImuUnplugged; break;
+            case 18: external = gna::Pending; break;
+            case 19: external = gna::InvalidFix; break;
+
+            case 12: external = gna::ReservedGpsSolutionStatusType; break;
+            default: external = gna::UnknownGpsSolutionStatusType; break;
+        }
+        return external;
+    }
+
+    enum gna::GpsPosVelType externalGpsPosVelType(uint32_t novatelGpsPosVelType){
+        enum gna::GpsPosVelType external;
+        switch(novatelGpsPosVelType){
+            case 0: external = gna::None; break;
+            case 1: external = gna::FixedPos; break;
+            case 2: external = gna::FixedHeight; break;
+            case 4: external = gna::FloatConv; break;
+            case 5: external = gna::WideLane; break;
+            case 6: external = gna::NarrowLane; break;
+            case 8: external = gna::DopplerVelocity; break;
+            case 16: external = gna::Single; break;
+            case 17: external = gna::PsrDiff; break;
+            case 18: external = gna::Waas; break;
+            case 19: external = gna::Propagated; break;
+            case 20: external = gna::Omnistar; break;
+            case 32: external = gna::L1Float; break;
+            case 33: external = gna::IonoFreeFloat; break;
+            case 34: external = gna::NarrowFloat; break;
+            case 48: external = gna::L1Int; break;
+            case 49: external = gna::WideInt; break;
+            case 50: external = gna::NarrowInt; break;
+            case 51: external = gna::RtkDirectIns; break;
+            case 52: external = gna::Ins; break;
+            case 53: external = gna::InsPsrSp; break;
+            case 54: external = gna::InsPsrDiff; break;
+            case 55: external = gna::InsRtkFloat; break;
+            case 56: external = gna::InsRtkFixed; break;
+            case 64: external = gna::OmniStarHp; break;
+            case 65: external = gna::OmniStarXp; break;
+            case 66: external = gna::CdGps; break;
+
+            case 3: //fallthrough
+            case 7: //fallthrough
+            case 9: case 10: case 11: case 12: case 13: case 14: case 15: //fallthrough
+            case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:  case 30: case 31: //fallthrough
+            // these guys are _not_ named as reserved in the manual case 34: case 35: case 36: case 37: case 38: case 38:  case 39: case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47:
+                     external = gna::ReservedGpsPosVelType; break;
+            default: external = gna::UnknownGpsPosVelType; break;
+        }
+        return external;
     }
 
     std::string doubleVectorToString(vector<double > &vec, std::string seperator){
