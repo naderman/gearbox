@@ -24,7 +24,7 @@ enum BinaryLogType{
 typedef struct Oem4BinaryHeader{        //offs, size,   comment
     uint8_t  sb1;                       //0     1       0xaa
     uint8_t  sb2;                       //1     1       0x44
-    uint8_t  sb3;                       //2     1       0x12
+    uint8_t  sb3;                       //2     1       0x12/0x13 , depending on long/short format
     uint8_t  headerLength;              //3     1
     uint16_t msgId;                     //4     2       which log we have
     uint8_t  msgType;                   //6     1       binary, ascii ...
