@@ -364,7 +364,7 @@ class BestGpsVelData : public GenericData {
         int          gpsWeekNr;                 //!< number of full weeks since midnight 05/Jan/1980 (UTC)
         unsigned int msIntoWeek;                //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         GpsSolutionStatusType  solutionStatus;  //
-        GpsPosVelType          positionType;    //
+        GpsPosVelType          velocityType;    //
         float        latency;                   //!< [s] gps speed can be calculated from instantanious or integrated doppler. The latter refers to the average speed over the last interval -> is delayed by half an interval
         float        diffAge;                   //!< [s]
         double       horizontalSpeed;           //!< [m/s]
