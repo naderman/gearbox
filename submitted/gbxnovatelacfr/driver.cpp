@@ -499,7 +499,7 @@ Driver::requestData() {
         tracer_->info("Turning on raw imu data!");
         challenge = ( "log rawimusb onnew\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            ss.str("");
+            std::stringstream ss;
             ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
             throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
