@@ -9,6 +9,7 @@
  */
 
 #include <gbxnovatelacfr/driver.h>
+
 #include <gbxnovatelacfr/gbxnovatelutilacfr/serialconnectivity.h>
 #include <gbxnovatelacfr/gbxnovatelutilacfr/novatelmessages.h>
 #include <gbxnovatelacfr/gbxnovatelutilacfr/imudecoder.h>
@@ -74,7 +75,7 @@ namespace {
     // this guy checks if the assumptions for the gear above are correct (abort()s through assert() otherwise)
     void checkParserAssumptions();
 
-    // returns the id of the message it received (in msg), or throws an gbxutilacfr::Exception
+    // returns the id of the message it read (msg), or throws an gbxutilacfr::Exception
     uint16_t readNovatelMessage(union NovatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial);
 
     // take novatel data and create stuff according to our external api
@@ -451,8 +452,9 @@ Driver::requestData() {
         ss << "log bestgpsposb ontime " << config_.dtGpsPos_ << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            //throw ( gua::Exception(ERROR_INFO, errorResponse));
-            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -465,8 +467,9 @@ Driver::requestData() {
         ss << "log bestgpsvelb ontime " << config_.dtGpsVel_ << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            //throw ( gua::Exception(ERROR_INFO, errorResponse));
-            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -482,8 +485,9 @@ Driver::requestData() {
         ss << "log inspvasb ontime " << config_.dtInsPva_ << "\r\n";
         challenge = ss.str();
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            //throw ( gua::Exception(ERROR_INFO, errorResponse));
-            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -495,8 +499,9 @@ Driver::requestData() {
         tracer_->info("Turning on raw imu data!");
         challenge = ( "log rawimusb onnew\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
-            //throw ( gua::Exception(ERROR_INFO, errorResponse));
-            // unfortunately this simple approach doesn't work here. The 'ack' is usually lost in the binary data we've just requested
+            ss.str("");
+            ss << " Failure!\n Tried to send: " << challenge << " Receiver responded: " << errorResponse;
+            throw ( gua::Exception(ERROR_INFO, ss.str()));
         }
     }
 
@@ -839,12 +844,12 @@ BestGpsPosData::toString(){
     ss << "sigmaLatitude " << sigmaLatitude << " ";
     ss << "sigmaLongitude " << sigmaLongitude << " ";
     ss << "sigmaHeight " << sigmaHeight << " ";
-    ss << "baseStationId "
+    ss << "baseStationId ["
         << baseStationId[0]
         << baseStationId[1]
         << baseStationId[2]
         << baseStationId[3]
-        << " ";
+        << "] ";
     ss << "diffAge " << diffAge << " ";
     ss << "solutionAge " << solutionAge << " ";
     ss << "numObservations " << numObservations << " ";
@@ -1343,9 +1348,11 @@ namespace{
     std::string doubleVectorToString(vector<double > &vec, std::string seperator){
         std::stringstream ss;
         int max = vec.size();
+        ss << "[";
         for (int i=0; i<max; i++){
             ss << vec[i] << seperator;
         }
+        ss << "]";
         return ss.str();
     }
 
