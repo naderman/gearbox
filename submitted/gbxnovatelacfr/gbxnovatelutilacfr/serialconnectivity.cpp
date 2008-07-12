@@ -94,7 +94,14 @@ bool sendCmdWaitForResponse(
         assert( read != -1 );
 
         //and look for an ACK
+        //it's possible that we have read binary data with embedded '\0'; we want one at the end (string delimeter), but replace the rest with '\1'
         buf[read] = '\0';
+        while(0<read){
+            read--;
+            if('\0' == buf[read]){
+                buf[read] = '\1';
+            }
+        }
         std::string response(buf);
         size_t found = response.find(ack);
         if(std::string::npos != found){
