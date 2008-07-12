@@ -141,10 +141,12 @@ int main(int argc, char *argv[]){
             driver.reset( new gna::Driver( *(cfg.get()) ) );
         }
         catch(std::exception &e){
-            cout << e.what() << "\n";
+            cout << e.what() << "\nWaiting 5 sec before re-trying.\n\n";
+            sleep(5);
         }
         catch(...){
-            cout << "caught unknown exception!\n";
+            cout << "caught unknown exception!\nWaiting 5 sec before re-trying.\n\n";
+            sleep(5);
         }
     }while(0 == driver.get() && errorCnt++<5); // try up to 5 times 
     //check that we succeeded
