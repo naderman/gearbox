@@ -27,7 +27,12 @@
 
 #include "flexiport.h"
 #include "tcpport.h"
+#include "flexiport_config.h"
 
+#if defined (FLEXIPORT_HAVE_GETADDRINFO)
+	#include <sys/socket.h>
+	#include <netdb.h>
+#endif
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
@@ -39,13 +44,16 @@ using namespace std;
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	#define __func__        __FUNCTION__
-	#define HOST_NAME_MAX   64
 #else
 	#include <unistd.h>
 	#include <errno.h>
 	#include <sys/socket.h>
 	#include <sys/ioctl.h>
 	#include <netdb.h>
+#endif
+
+#if !defined (HOST_NAME_MAX)
+	#define HOST_NAME_MAX   256
 #endif
 
 namespace flexiport
@@ -546,8 +554,6 @@ bool TCPPort::ProcessOption (const std::string &option, const std::string &value
 // Connect to a remote server: used when not in listen mode
 void TCPPort::Connect (void)
 {
-	struct hostent *hp = NULL;
-	
 	Close ();    // To make sure
 
 	_sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -565,10 +571,38 @@ void TCPPort::Connect (void)
 
 	sockaddr_in sockAddr;
 	memset (&sockAddr, 0, sizeof (sockAddr));
+#if defined (FLEXIPORT_HAVE_GETADDRINFO)
+	struct addrinfo *res = NULL, hints;
+	memset (&hints, 0, sizeof (hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	int errorCode;
+	if ((errorCode = getaddrinfo (_ip.c_str (), NULL, &hints, &res)) != 0)
+	{
+		Close ();
+		stringstream ss;
+#if defined (WIN32)
+		ss << "TCPPort::" << __func__ << "() getaddrinfo() error: (" << ErrNo () << ") " << 
+			StrError (ErrNo ());
+#else
+		ss << "TCPPort::" << __func__ << "() getaddrinfo() error: (" << errorCode << ") " <<
+			gai_strerror (errorCode);
+#endif
+		throw PortException (ss.str ());
+	}
+	memcpy (&sockAddr, res[0].ai_addr, res[0].ai_addrlen);
+	freeaddrinfo (res);
+#else // defined (FLEXIPORT_HAVE_GETADDRINFO)
+	struct hostent *hp = NULL;
 	if ((hp = gethostbyname (_ip.c_str ())) == NULL)
+	{
+		Close ();
 		throw PortException (string ("TCPPort::") + __func__ + string (" gethostbyname() error."));
+	}
 	memcpy (&sockAddr.sin_addr, hp->h_addr, hp->h_length);
 	sockAddr.sin_family = hp->h_addrtype;
+#endif // defined (FLEXIPORT_HAVE_GETADDRINFO)
 	sockAddr.sin_port = htons (_port);
 
 	if (_debug >= 1)
@@ -628,12 +662,36 @@ void TCPPort::WaitForConnection (void)
 	else
 	{
 		// Listen on the specified interface only
+#if defined (FLEXIPORT_HAVE_GETADDRINFO)
+		struct addrinfo *res = NULL, hints;
+		memset (&hints, 0, sizeof (hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		int errorCode;
+		if ((errorCode = getaddrinfo (_ip.c_str (), NULL, &hints, &res)) != 0)
+		{
+			Close ();
+			stringstream ss;
+#if defined (WIN32)
+			ss << "TCPPort::" << __func__ << "() getaddrinfo() error: (" << ErrNo () << ") " << 
+				StrError (ErrNo ());
+#else
+			ss << "TCPPort::" << __func__ << "() getaddrinfo() error: (" << errorCode << ") " <<
+				gai_strerror (errorCode);
+#endif
+			throw PortException (ss.str ());
+		}
+		memcpy (&sockAddr, res[0].ai_addr, res[0].ai_addrlen);
+		freeaddrinfo (res);
+#else // defined (FLEXIPORT_HAVE_GETADDRINFO)
 		if ((hp = gethostbyname (_ip.c_str ())) == NULL)
 		{
 			throw PortException (string ("TCPPort::") + __func__ +
 					string (" gethostbyname() error."));
 		}
 		sockAddr.sin_family = hp->h_addrtype;
+#endif // defined (FLEXIPORT_HAVE_GETADDRINFO)
 		sockAddr.sin_port = htons (_port);
 	}
 

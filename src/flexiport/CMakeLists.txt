@@ -12,6 +12,12 @@ IF (build)
 	OPTION (FLEXIPORT_INCLUDE_LOGGING "Include the log reader/writer ports in FlexiPort" ON)
 	MARK_AS_ADVANCED (FLEXIPORT_INCLUDE_SERIAL FLEXIPORT_INCLUDE_TCP)
 
+    IF (GBX_OS_QNX)
+        SET (CMAKE_REQUIRED_LIBRARIES socket)
+    ENDIF (GBX_OS_QNX)
+    CHECK_FUNCTION_EXISTS (getaddrinfo FLEXIPORT_HAVE_GETADDRINFO)
+    SET (CMAKE_REQUIRED_LIBRARIES)
+
 	SET (flexiport_config_h_in ${CMAKE_CURRENT_SOURCE_DIR}/flexiport_config.h.in)
 	SET (flexiport_config_h ${CMAKE_CURRENT_BINARY_DIR}/flexiport_config.h)
 	CONFIGURE_FILE (${flexiport_config_h_in} ${flexiport_config_h})
