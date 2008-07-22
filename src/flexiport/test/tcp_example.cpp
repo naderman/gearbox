@@ -9,7 +9,7 @@
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
- * Japan. Registration number: ___
+ * Japan. Registration number: H20PRO-881
  * 
  * This file is part of flexiport.
  *
