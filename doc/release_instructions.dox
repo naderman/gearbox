@@ -30,21 +30,21 @@
   -# Check in those changes.
   -# Tag the distributions, eg with:
 @verbatim
-$ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/tags/RELEASE_1.7.0 -m 'Tagging release 1.7.0'
+$ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/tags/RELEASE_9.02 -m 'Tagging release 9.02'
 @endverbatim
   -# Delete all .svn directories (eg with 'find . -name .svn | xargs rm -rf')
-  -# Create tar-ball, named eg. 'gearbox-1.7.0.tar.gz'
+  -# Create tar-ball, named eg. 'gearbox-9.02.tar.gz'
   -# Now the tar-ball is ready to roll. But first test that the original untars and builds cleanly.
   -# Copy the tar-ball to a machine with external access.
 -# On a machine with external access:
-  -# ftp to upload.sf.net (anonymous login)
-  -# cd /incoming
+  -# sftp [USERNAME]\@frs.sf.net
+  -# cd uploads
   -# 'put' the tarball
 -# Create a new distro through the sourceforge web interface
   - Login a project administrator
   - (Go through "'Admin' -> 'File Releases'" from the GearBox project page)
 -# Update the web page
   - Use the script: <distro>/doc/rebuild_docco.sh
--# Increment the version numbers (eg '1.7.0' -> '1.7.0+') in the top-level CMakeLists.txt files.
+-# Increment the version numbers (eg '9.02' -> '9.02+') in the top-level CMakeLists.txt files.
 
 */

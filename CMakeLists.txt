@@ -11,7 +11,7 @@ PROJECT( gearbox )
 #
 # project version string
 #
-SET( GBX_PROJECT_VERSION    8.07 CACHE STRING "Version of GearBox distribution" )
+SET( GBX_PROJECT_VERSION    8.07+ CACHE STRING "Version of GearBox distribution" )
 
 #
 # The rest is done by a script
