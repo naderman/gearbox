@@ -24,7 +24,7 @@
   -# Modify the project version in the top-level CMakeLists.txt file.
   -# Modify the 'news' section in the 'index.dox' file.
   -# (Possibly) delete retired directory.
-  -# Update LICENSE information by running cmake with BUILD_LICENSE=ON.
+  -# Update LICENSE information by running cmake with GBX_BUILD_LICENSE=ON.
   -# Shunt everything down in 'doc/history.dox'.
   -# Delete any temporary files created by an editor.
   -# Check in those changes.

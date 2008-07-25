@@ -10,8 +10,7 @@ src/gbxserialacfr/lockfile                                  LGPL
 src/gbxutilacfr                                             LGPL
 src/gbxgarminacfr                                           LGPL
 src/gbxsickacfr                                             LGPL
+src/gbxsickacfr/gbxiceutilacfr                              LGPL
 src/gbxsickacfr/gbxserialdeviceacfr                         LGPL
 src/gbxsmartbatteryacfr                                     LGPL
 src/hokuyo_aist                                             LGPL
-submitted/gbxnovatelacfr                                    LGPL
-submitted/gbxnovatelacfr/gbxnovatelutilacfr                 LGPL
