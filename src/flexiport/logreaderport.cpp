@@ -52,11 +52,7 @@ LogReaderPort::LogReaderPort (map<string, string> options)
 	ProcessOptions (options);
 
 	// Initialise the log file
-	if ((_logFile = new LogFile (_debug)) == NULL)
-	{
-		throw PortException (string ("LogReaderPort::") + __func__ +
-				string ("() Failed to allocate LogFile object."));
-	}
+	_logFile = new LogFile (_debug);
 	_logFile->Open (_logFileName, true, _ignoreTimes);
 
 	if (_alwaysOpen)

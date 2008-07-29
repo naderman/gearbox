@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: H20PRO-881
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -103,49 +103,28 @@ Port* CreatePort (map<string, string> options)
 
 #ifdef FLEXIPORT_INCLUDE_SERIAL
 	if (type == "serial")
-	{
-		SerialPort *newPort = new SerialPort (options);
-		if (newPort == NULL)
-			throw PortException ("Failed to allocate new port");
-		return newPort;
-	}
+		return new SerialPort (options);
 #endif // FLEXIPORT_INCLUDE_SERIAL
 #ifdef FLEXIPORT_INCLUDE_TCP
 	if (type == "tcp")
-	{
-		TCPPort *newPort = new TCPPort (options);
-		if (newPort == NULL)
-			throw PortException ("Failed to allocate new port");
-		return newPort;
-	}
+		return new TCPPort (options);
 #endif // FLEXIPORT_INCLUDE_TCP
 
 #ifdef FLEXIPORT_INCLUDE_LOGGING
 	if (type == "logreader")
-	{
-		LogReaderPort *newPort = new LogReaderPort (options);
-		if (newPort == NULL)
-			throw PortException ("Failed to allocate new port");
-		return newPort;
-	}
+		return new LogReaderPort (options);
 	#ifdef FLEXIPORT_INCLUDE_SERIAL
 		if (type == "seriallog")
 		{
 			options["type"] = "serial";
-			LogWriterPort *newPort = new LogWriterPort (options);
-			if (newPort == NULL)
-				throw PortException ("Failed to allocate new port");
-			return newPort;
+			return new LogWriterPort (options);
 		}
 	#endif // FLEXIPORT_INCLUDE_SERIAL
 	#ifdef FLEXIPORT_INCLUDE_TCP
 		if (type == "tcplog")
 		{
 			options["type"] = "tcp";
-			LogWriterPort *newPort = new LogWriterPort (options);
-			if (newPort == NULL)
-				throw PortException ("Failed to allocate new port");
-			return newPort;
+			return new LogWriterPort (options);
 		}
 	#endif // FLEXIPORT_INCLUDE_TCP
 #endif // FLEXIPORT_INCLUDE_LOGGING

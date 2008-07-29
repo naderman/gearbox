@@ -633,11 +633,7 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 
 	// Allocate space to store the data to compare with
 	uint8_t *fileData;
-	if ((fileData = new uint8_t[count]) == NULL)
-	{
-		throw PortException (string ("LogFile::") + __func__ +
-				string ("Failed to allocate temporary space for write comparison."));
-	}
+	fileData = new uint8_t[count];
 
 	// Pull any data out of the overflow first
 	bool needMore = true;

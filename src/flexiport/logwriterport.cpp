@@ -71,11 +71,7 @@ LogWriterPort::LogWriterPort (map<string, string> options)
 	_port = CreatePort (options);
 
 	// Initialise the log file
-	if ((_logFile = new LogFile (_debug)) == NULL)
-	{
-		throw PortException (string ("LogWriterPort::") + __func__ +
-				string ("() Failed to allocate LogFile object."));
-	}
+	_logFile = new LogFile (_debug);
 	_logFile->Open (_logFileName, false);
 }
 

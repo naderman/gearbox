@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: H20PRO-881
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -73,7 +73,7 @@ ssize_t Port::ReadString (std::string &buffer)
 {
 	char *charBuffer = NULL;
 	ssize_t bytesAvailable = 0, numRead = 0;
-	
+
 	buffer.clear ();
 	CheckPort (true);
 
@@ -86,17 +86,13 @@ ssize_t Port::ReadString (std::string &buffer)
 
 	if (_debug >= 2)
 	{
-		cerr << "Port::" << __func__ << "() Got " << bytesAvailable << 
+		cerr << "Port::" << __func__ << "() Got " << bytesAvailable <<
 			" bytes waiting to be read into a string" << endl;
 	}
 
 	// Read this many characters into a string - include space for a NULL incase one doesn't
 	// come in the transmitted data.
-	if ((charBuffer = new char[bytesAvailable + 1]) == NULL)
-	{
-		throw PortException (string ("Port::") + __func__ + 
-				string ("() Failed to allocate temporary string storage."));
-	}
+	charBuffer = new char[bytesAvailable + 1];
 	if ((numRead = Read (charBuffer, bytesAvailable)) < 0)
 		return -1; // Timeout
 	charBuffer[numRead] = '\0';
@@ -104,8 +100,8 @@ ssize_t Port::ReadString (std::string &buffer)
 
 	if (numRead != bytesAvailable && _debug >= 1)
 	{
-		cerr << "WARNING: Port::" << __func__ << 
-			" Read different number of bytes than peek said were available: " << 
+		cerr << "WARNING: Port::" << __func__ <<
+			" Read different number of bytes than peek said were available: " <<
 			numRead << " != " << bytesAvailable << endl;
 	}
 	if (_debug >= 2)
@@ -125,7 +121,7 @@ ssize_t Port::ReadUntil (void * const buffer, size_t count, uint8_t terminator)
 
 	if (_debug >= 2)
 	{
-		cerr << "Port::" << __func__ << "() Reading until '" << terminator << "' or " << 
+		cerr << "Port::" << __func__ << "() Reading until '" << terminator << "' or " <<
 			count << " bytes." << endl;
 	}
 	// Read bytes one at a time until either a timeout occurs, we hit the terminator byte, or
@@ -170,7 +166,7 @@ ssize_t Port::ReadStringUntil (std::string &buffer, char terminator)
 
 	if (_debug >= 2)
 	{
-		cerr << "Port::" << __func__ << "() Reading string until receive '" << terminator << 
+		cerr << "Port::" << __func__ << "() Reading string until receive '" << terminator <<
 			"'" << endl;
 	}
 	// Read bytes one at a time until either a timeout occurs or we hit the terminator byte
@@ -256,7 +252,7 @@ ssize_t Port::SkipUntil (uint8_t terminator, unsigned int count)
 
 	if (_debug >= 2)
 	{
-		cerr << "Port::" << __func__ << "() Skipping until '" << terminator << "' is seen " << 
+		cerr << "Port::" << __func__ << "() Skipping until '" << terminator << "' is seen " <<
 			count << " times." << endl;
 	}
 	// Read bytes one at a time until either a timeout occurs or we hit the terminator byte
@@ -309,15 +305,15 @@ ssize_t Port::WriteFull (const void * const buffer, size_t count)
 			if (!IsOpen ())
 			{
 				stringstream ss;
-				ss << "Port::" << __func__ << "() Port closed while trying to write " << 
+				ss << "Port::" << __func__ << "() Port closed while trying to write " <<
 					count << " bytes";
 				throw PortException (ss.str ());
 			}
 			// If it is open we can keep going, but with a warning
 			if (_debug >= 1)
 			{
-				cerr << "WARNING: Port::" << __func__ << 
-					" Port closed during WriteFull operation; data may be missing/corrupted." << 
+				cerr << "WARNING: Port::" << __func__ <<
+					" Port closed during WriteFull operation; data may be missing/corrupted." <<
 					endl;
 			}
 		}
@@ -342,7 +338,7 @@ ssize_t Port::WriteString (const char * const buffer)
 		return -1; // Timeout
 	if (numWritten < numToWrite && _debug >= 1)
 	{
-		cerr << "WARNING: Port::" << __func__ << "() Did not write whole string; only wrote " << 
+		cerr << "WARNING: Port::" << __func__ << "() Did not write whole string; only wrote " <<
 			numWritten << " of " << numToWrite << " bytes" << endl;
 	}
 

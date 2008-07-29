@@ -566,10 +566,14 @@ HokuyoData::HokuyoData (uint32_t *ranges, unsigned int length, bool error, unsig
 	}
 	else
 	{
-		if ((_ranges = new uint32_t[_length]) == NULL)
+		try
+		{
+			_ranges = new uint32_t[_length];
+		}
+		catch (std::bad_alloc &e)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy range data.");
+			throw;
 		}
 		memcpy (_ranges, ranges, sizeof (uint32_t) * _length);
 
@@ -589,18 +593,18 @@ HokuyoData::HokuyoData (uint32_t *ranges, uint32_t *intensities, unsigned int le
 	}
 	else
 	{
-		if ((_ranges = new uint32_t[_length]) == NULL)
+		try
+		{
+			_ranges = new uint32_t[_length];
+		}
+		catch (std::bad_alloc &e)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy range data.");
+			throw;
 		}
 		memcpy (_ranges, ranges, sizeof (uint32_t) * _length);
 
-		if ((_intensities = new uint32_t[_length]) == NULL)
-		{
-			throw HokuyoError (HOKUYO_ERR_MEMORY,
-					"Failed to allocate space to copy intensity data.");
-		}
+		_intensities = new uint32_t[_length];
 		memcpy (_intensities, intensities, sizeof (uint32_t) * _length);
 	}
 }
@@ -612,20 +616,20 @@ HokuyoData::HokuyoData (const HokuyoData &rhs)
 		_ranges = NULL;
 	else
 	{
-		if ((_ranges = new uint32_t[_length]) == NULL)
+		try
+		{
+			_ranges = new uint32_t[_length];
+		}
+		catch (std::bad_alloc &e)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space to copy data.");
+			throw;
 		}
 		memcpy (_ranges, rhs.Ranges (), sizeof (uint32_t) * _length);
 
 		if (rhs.Intensities () != NULL)
 		{
-			if ((_intensities = new uint32_t[_length]) == NULL)
-			{
-				throw HokuyoError (HOKUYO_ERR_MEMORY,
-						"Failed to allocate space to copy intensity data.");
-			}
+			_intensities = new uint32_t[_length];
 			memcpy (_intensities, rhs.Intensities (), sizeof (uint32_t) * _length);
 		}
 	}
@@ -739,11 +743,7 @@ HokuyoData& HokuyoData::operator= (const HokuyoData &rhs)
 		{
 			// Copy the data into a temporary variable pointing to new space (prevents dangling
 			// pointers on allocation error and prevents self-assignment making a mess).
-			if ((newData = new uint32_t[rhsLength]) == NULL)
-			{
-				throw HokuyoError (HOKUYO_ERR_MEMORY,
-					"Failed to allocate space to copy range data.");
-			}
+			newData = new uint32_t[rhsLength];
 			memcpy (newData, rhs.Ranges (), sizeof (uint32_t) * rhsLength);
 			if (_ranges != NULL)
 				delete[] _ranges;
@@ -752,14 +752,17 @@ HokuyoData& HokuyoData::operator= (const HokuyoData &rhs)
 
 			if (rhs.Intensities () != NULL)
 			{
-				if ((newData = new uint32_t[rhsLength]) == NULL)
+				try
+				{
+					newData = new uint32_t[rhsLength];
+				}
+				catch (std::bad_alloc &e)
 				{
 					// We have to remove any old intensity data or the length won't match
 					if (_intensities != NULL)
 						delete[] _intensities;
 					_intensities = NULL;
-					throw HokuyoError (HOKUYO_ERR_MEMORY,
-						"Failed to allocate space to copy intensity data.");
+					throw;
 				}
 				memcpy (newData, rhs.Intensities (), sizeof (uint32_t) * rhsLength);
 				if (_intensities != NULL)
@@ -837,10 +840,14 @@ void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 	// If no data yet, allocate new
 	if (_ranges == NULL)
 	{
-		if ((_ranges = new uint32_t[length]) == NULL)
+		try
+		{
+			_ranges = new uint32_t[length];
+		}
+		catch (std::bad_alloc &e)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space for range data.");
+			throw;
 		}
 		_length = length;
 	}
@@ -848,10 +855,14 @@ void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 	else if (length != _length)
 	{
 		delete[] _ranges;
-		if ((_ranges = new uint32_t[length]) == NULL)
+		try
+		{
+			_ranges = new uint32_t[length];
+		}
+		catch (std::bad_alloc &e)
 		{
 			_length = 0;
-			throw HokuyoError (HOKUYO_ERR_MEMORY, "Failed to allocate space for range data.");
+			throw;
 		}
 		_length = length;
 	}
@@ -862,21 +873,13 @@ void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 		// If no data yet, allocate new
 		if (_intensities == NULL)
 		{
-			if ((_intensities = new uint32_t[length]) == NULL)
-			{
-				throw HokuyoError (HOKUYO_ERR_MEMORY,
-						"Failed to allocate space for intensity data.");
-			}
+			_intensities = new uint32_t[length];
 		}
 		// If there is data, reallocate only if the length is different
 		else if (length != _length)
 		{
 			delete[] _intensities;
-			if ((_intensities = new uint32_t[length]) == NULL)
-			{
-				throw HokuyoError (HOKUYO_ERR_MEMORY,
-						"Failed to allocate space for intensity data.");
-			}
+			_intensities = new uint32_t[length];
 		}
 		// Else data is already allocated to the right length, so do nothing
 	}
@@ -1497,7 +1500,7 @@ unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, int startStep, int end
 		// Mx commands will perform a scan, then send the data prefixed with another command echo
 		// Read back the command echo (minimum of 3 bytes, maximum of 16 bytes)
 		char response[17];
-		SkipLines (1); // End of the command echo message 
+		SkipLines (1); // End of the command echo message
 		ReadLine (response, 16); // Size is command (2) + params (13) + new line (1)
 		// Check the echo is correct
 		if (response[0] != 'M' || response[1] != 'D')
@@ -1618,7 +1621,7 @@ unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, int star
 		// Mx commands will perform a scan, then send the data prefixed with another command echo
 		// Read back the command echo (minimum of 3 bytes, maximum of 16 bytes)
 		char response[17];
-		SkipLines (1); // End of the command echo message 
+		SkipLines (1); // End of the command echo message
 		ReadLine (response, 16); // Size is command (2) + params (13) + new line (1)
 		// Check the echo is correct
 		if (response[0] != 'M' || response[1] != 'E')
@@ -2038,7 +2041,7 @@ int HokuyoLaser::SendCommand (const char *cmd, const char *param,
 void HokuyoLaser::GetAndSetSCIPVersion (void)
 {
 	bool scip1Failed = false;
-	
+
 
 	if (_verbose)
 		cerr << "HokuyoLaser::" << __func__ << "() Testing SCIP protocol version." << endl;
