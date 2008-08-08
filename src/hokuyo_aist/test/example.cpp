@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 			else
 				laser.GetRanges (&data, -1, -1, clusterCount);
 		}
-		else if (firstStep != -1 && lastStep != -1)
+		else if (firstStep != -1 || lastStep != -1)
 		{
 			// Get by step
 			if (getNew)
@@ -149,9 +149,9 @@ int main(int argc, char **argv)
 		{
 			// Get by angle
 			if (getNew)
-				laser.GetNewRanges (&data, startAngle, endAngle, clusterCount);
+				laser.GetNewRangesByAngle (&data, startAngle, endAngle, clusterCount);
 			else
-				laser.GetRanges (&data, startAngle, endAngle, clusterCount);
+				laser.GetRangesByAngle (&data, startAngle, endAngle, clusterCount);
 		}
 
 		cout << "Laser range data:" << endl;

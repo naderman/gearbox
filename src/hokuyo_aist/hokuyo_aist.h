@@ -252,7 +252,7 @@ class HOKUYO_AIST_EXPORT HokuyoData
 		/// @brief Get the number of samples in the data.
 		unsigned int Length (void) const                    { return _length; }
 		/** @brief Indicates if one or more steps had an error.
-		
+
 		A step's value will be less than 20 if it had an error. Use @ref ErrorCodeToString to get
 		a textual representation of the error. */
 		bool GetErrorStatus (void) const                    { return _error; }
@@ -273,7 +273,7 @@ class HOKUYO_AIST_EXPORT HokuyoData
 		/// @brief Force the data to clean up.
 		void CleanUp (void);
 
-	private:
+	protected:
 		uint32_t *_ranges;
 		uint32_t *_intensities;
 		unsigned int _length;
@@ -330,7 +330,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		(startup) value. Values between 1 and 10 specify a ratio of the default speed. The speeds in
 		revolutions per minute that these correspond to will depend on the scanner model. For
 		example, for a URG-04LX, they are (from 1 to 10) 594, 588, 576, 570, 564, 558, 552, 546, and
-		540 rpm. 
+		540 rpm.
 
 		Not available with the SCIP v1 protocol. */
 		void SetMotorSpeed (unsigned int speed);
@@ -381,7 +381,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		@param clusterCount The number of readings to cluster together into a single reading. The
 		minimum value from a cluster is returned as the range for that cluster.
 		@return The number of range readings read into @ref data. */
-		unsigned int GetRanges (HokuyoData *data, double startAngle, double endAngle,
+		unsigned int GetRangesByAngle (HokuyoData *data, double startAngle, double endAngle,
 								unsigned int clusterCount = 1);
 
 		/** @brief Get a new scan from the scanner.
@@ -390,7 +390,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		will request a new scan. This means it will wait while the scanner performs the scan, which
 		means the rate at which scans can be retrieved using this function is less than with @ref
 		GetRanges. Otherwise behaves identicallty to @ref GetRanges.
-		
+
 		Not available with the SCIP v1 protocol.
 
 		@note The command used to retrieve a fresh scan is also used for the continuous scanning
@@ -420,7 +420,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		@param clusterCount The number of readings to cluster together into a single reading. The
 		minimum value from a cluster is returned as the range for that cluster.
 		@return The number of range readings read into @ref data. */
-		unsigned int GetNewRanges (HokuyoData *data, double startAngle, double endAngle,
+		unsigned int GetNewRangesByAngle (HokuyoData *data, double startAngle, double endAngle,
 								unsigned int clusterCount = 1);
 
 		/** @brief Get a new scan from the scanner with intensity data.
@@ -458,7 +458,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		@param clusterCount The number of readings to cluster together into a single reading. The
 		minimum value from a cluster is returned as the range for that cluster.
 		@return The number of range readings read into @ref data. */
-		unsigned int GetNewRangesAndIntensities (HokuyoData *data, double startAngle,
+		unsigned int GetNewRangesAndIntensitiesByAngle (HokuyoData *data, double startAngle,
 												double endAngle, unsigned int clusterCount = 1);
 
 		/// @brief Return the major version of the SCIP protocol in use.

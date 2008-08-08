@@ -1434,7 +1434,7 @@ unsigned int HokuyoLaser::GetRanges (HokuyoData *data, int startStep, int endSte
 	return data->_length;
 }
 
-unsigned int HokuyoLaser::GetRanges (HokuyoData *data, double startAngle,
+unsigned int HokuyoLaser::GetRangesByAngle (HokuyoData *data, double startAngle,
 									double endAngle, unsigned int clusterCount)
 {
 	if (data == NULL)
@@ -1549,7 +1549,7 @@ unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, int startStep, int end
 	return data->_length;
 }
 
-unsigned int HokuyoLaser::GetNewRanges (HokuyoData *data, double startAngle, double endAngle,
+unsigned int HokuyoLaser::GetNewRangesByAngle (HokuyoData *data, double startAngle, double endAngle,
 									unsigned int clusterCount)
 {
 	if (data == NULL)
@@ -1670,7 +1670,7 @@ unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, int star
 	return data->_length;
 }
 
-unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, double startAngle,
+unsigned int HokuyoLaser::GetNewRangesAndIntensitiesByAngle (HokuyoData *data, double startAngle,
 													double endAngle, unsigned int clusterCount)
 {
 	if (data == NULL)
