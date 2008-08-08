@@ -11,7 +11,7 @@ int main( int argc, char **argv )
     bool debug = false;
     
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:")) != -1)
+    while ((opt = getopt(argc, argv, "p:v")) != -1)
     {
         switch ( opt )
         {

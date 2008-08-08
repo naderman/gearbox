@@ -12,6 +12,6 @@ $ cd gbxsmartbatteryacfr_example
 $ ccmake /usr/local/share/gearbox/gbxsmartbatteryacfr 
 (press 'c' and 'g')
 $ make
-$ ./gbxsmartbatteryacfrtest
+$ ./gbxsmartbatteryshorttest
 
 See the library documentation (smartbatteryacfr.dox) for a description of the test.

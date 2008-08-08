@@ -8,6 +8,7 @@
  *
  */
 
+#include <iostream>
 #include <sstream>
 #include <gbxutilacfr/tokenise.h>
 #include <gbxsmartbatteryacfr/exceptions.h>
@@ -259,25 +260,21 @@ OceanServerParser::parse( vector<string>    &stringList,
     if (tracer_.verbosity( gbxutilacfr::Tracer::DebugTrace, gbxutilacfr::Tracer::ToAny ) >= debugLevel)
     {
         stringstream ss;
-        ss << "OceanServerParser: Received the following input: " << endl;
         for (unsigned int i=0; i<stringList.size(); i++)
         {
             const string &str = stringList[i];
-            ss << i << ": " << str;
-    
-            // output in hex
-            ss << i << " hex: ";
-            for (unsigned k=0; k<str.size(); k++)
+            ss << "Line: " << str;
+            for (unsigned k=0; k<str.size()-2; k++)
             {
                 unsigned int charValue = (unsigned int)str[k];
-                ss << str[k] << ": " << std::hex << charValue << "  ";
+                ss << "Character (str/hex): " << str[k] << "/" << std::hex << charValue << endl;
             }
-            ss << std::dec;
-    
+            ss << std::dec << endl;
         }
         ss << endl;
         tracer_.debug( ss.str(), debugLevel );
-    }
+    } 
+    
     
     //
     // Parsing
@@ -285,20 +282,31 @@ OceanServerParser::parse( vector<string>    &stringList,
     for (unsigned int i=0; i<stringList.size(); i++)
     {
         const string &line = stringList[i];
-
-        // Known problem with oceanserver system: sometimes \0 is inserted in the middle of the string.
-        // To get around this, we check for 'control characters' in the string.
-        // Don't check the last 2 characters of the string: they're \0 and \n.
+        
+        stringstream filteredStream;
+        bool haveBinary = false;
+        
         for (unsigned int k=0; k<line.size()-2; k++)
-        {
-            if ( iscntrl( line[k] ) )
-                throw ParsingException( ERROR_INFO, "Found a control character (binary) in the string!" );
+        {            
+            // Sometimes we get binary characters in the string: either caused by dodgy serial ports
+            // or by the oceanserver controller. We need to remove those.
+            if ( !iscntrl( line[k] ) ) {
+                filteredStream << line[k];
+                haveBinary = true;
+            } else {
+                unsigned int charValue = (unsigned int)line[k];
+                stringstream ss; 
+                ss << "Found a binary character in the following line: " << endl << line;
+                ss << "The character is: " << std::hex << charValue << ". Will remove it.";
+                tracer_.warning( ss.str() );
+            }
         }
-
-        // divide the line into 2 parts: data and checksum (if present)
-        vector<string> checksumList = gbxutilacfr::tokenise( line, "%" );
-        if (checksumList.size()==2)
-        {
+        string filteredString = filteredStream.str();
+        
+        // divide the filteredString into 2 parts: data and checksum (if present)
+        vector<string> checksumList = gbxutilacfr::tokenise( filteredString, "%" );
+        if ( (checksumList.size()==2) && (!haveBinary) )
+        {        
             // we have a checksum, is it correct?
             if (!isChecksumValid( checksumList[0], checksumList[1] ) )
                 throw ParsingException( ERROR_INFO, "Checksum failed!" );
@@ -310,6 +318,7 @@ OceanServerParser::parse( vector<string>    &stringList,
         vector<string> fields = gbxutilacfr::tokenise( checksumList[0], "," );
         parseFields( fields, batterySystem );
     }
+
 }
 
 }
