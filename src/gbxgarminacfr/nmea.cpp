@@ -124,7 +124,7 @@ NmeaMessage::testChecksumOk()
     //These are straight after the '*' character
     ptr = strchr(sentence_, NMEAChecksumDelim);
     if ( !ptr ) {
-        cout<<"device: no checksum delimiter"<<endl;
+//         cout<<"device: no checksum delimiter"<<endl;
         return false;
     }
    
@@ -150,8 +150,8 @@ NmeaMessage::testChecksumOk()
     }
    
     //failed the checksum!
-    cout<<"device: '"<<chksum_HIB<<chksum_LOB   <<"' ("<<std::hex<<(unsigned int)chksum_HIB<<","<<(unsigned int)chksum_LOB<<std::dec<<") "
-        <<"driver: '"<<*ptr<<*(ptr+1)<<"'"      <<"' ("<<std::hex<<(unsigned int)*ptr<<","<<(unsigned int)*(ptr+1)<<std::dec<<") "<<endl;
+//     cout<<"device: '"<<chksum_HIB<<chksum_LOB   <<"' ("<<std::hex<<(unsigned int)chksum_HIB<<","<<(unsigned int)chksum_LOB<<std::dec<<") "
+//         <<"driver: '"<<*ptr<<*(ptr+1)<<"'"      <<"' ("<<std::hex<<(unsigned int)*ptr<<","<<(unsigned int)*(ptr+1)<<std::dec<<") "<<endl;
     return false;
 }
 

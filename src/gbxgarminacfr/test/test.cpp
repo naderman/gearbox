@@ -31,18 +31,23 @@ int main( int argc, char **argv )
     int opt;
     // defaults
     string port = "/dev/ttyS0";
+    bool quiet = false;
 
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:")) != -1)
+    while ((opt = getopt(argc, argv, "p:q")) != -1)
     {
         switch ( opt )
         {
         case 'p':
             port = optarg;
             break;
+        case 'q':
+            quiet = true;
+            break;
         default:
             cout << "Usage: " << argv[0] << " [-p port]" << endl << endl
-                 << "-p port\tPort the device is connected to. E.g. /dev/ttyS0" << endl;
+                 << "-p port\tPort the device is connected to. E.g. /dev/ttyS0" 
+                 << "-q     \tMakes normal operation quiet, only errors are traced." << endl;
             return 1;
         }
     }
@@ -61,7 +66,9 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    const bool debug = true;
+    bool debug = true;
+    if ( quiet )
+        debug = false;
     gbxutilacfr::TrivialTracer tracer( debug );
     gbxutilacfr::TrivialStatus status( tracer );
 
@@ -81,7 +88,7 @@ int main( int argc, char **argv )
     std::auto_ptr<gbxgarminacfr::GenericData> data;
 
     // Read a few times
-    const int numReads = 30;
+    const int numReads = 30 + 10000000;
     for ( int i=0; i < numReads; i++ )
     {
         try 
@@ -94,25 +101,31 @@ int main( int argc, char **argv )
                 case gbxgarminacfr::GpGga :
                 {
                     gbxgarminacfr::GgaData* d = (gbxgarminacfr::GgaData*)data.get();
-                    cout<<"GPGGA:"<<endl
-                        <<"  satellites     = "<<d->satellites<<endl
-                        <<"  fix type       = "<<d->fixType<<endl
-                        <<"  longitude      = "<<d->longitude<<endl
-                        <<"  latitude       = "<<d->latitude<<endl;
+                    if ( !quiet ) {
+                        cout<<"GPGGA:"<<endl
+                            <<"  satellites     = "<<d->satellites<<endl
+                            <<"  fix type       = "<<d->fixType<<endl
+                            <<"  longitude      = "<<d->longitude<<endl
+                            <<"  latitude       = "<<d->latitude<<endl;
+                    }
                     break;
                 }
                 case gbxgarminacfr::GpVtg :
                 {
                     gbxgarminacfr::VtgData* d = (gbxgarminacfr::VtgData*)data.get();
-                    cout<<"GPVTG:"<<endl
-                        <<"   speed         = "<<d->speed<<endl;
+                    if ( !quiet ) {
+                        cout<<"GPVTG:"<<endl
+                            <<"   speed         = "<<d->speed<<endl;
+                    }
                     break;
                 }
                 case gbxgarminacfr::PgRme :
                 {
                     gbxgarminacfr::RmeData* d = (gbxgarminacfr::RmeData*)data.get();
-                    cout<<"PGRME:"<<endl
-                        <<"   horiz error   = "<<d->horizontalPositionError<<endl;
+                    if ( !quiet ) {
+                        cout<<"PGRME:"<<endl
+                            <<"   horiz error   = "<<d->horizontalPositionError<<endl;
+                    }
                     break;
                 }
                 default :
@@ -121,7 +134,8 @@ int main( int argc, char **argv )
 
             // no need to delete the data object, the auto pointer will delete it automatically
 
-            cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
+            if ( !quiet )
+                cout<<"Test: Got data "<<i+1<<" of "<<numReads<<endl;
         }
         catch ( const std::exception& e )
         {
