@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: H20PRO-881
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -154,7 +154,7 @@ class FLEXIPORT_EXPORT Port
 		/** @brief Read a new-line terminated string of data.
 
 		A convenience function that reads until a newline character (\\n, 0x0A) is received and
-		stores the received data in a caller-provided buffer, @ref buffer. Good for text-based 
+		stores the received data in a caller-provided buffer, @ref buffer. Good for text-based
 		protocols that use newlines as message terminators. Will not read more than @ref count
 		bytes.
 
@@ -166,10 +166,10 @@ class FLEXIPORT_EXPORT Port
 		strlen ()).
 
 		@note This function makes many calls to Read, each of which has an individual timeout. The
-		maximum length of time this function make take may therefore be longer than one timeout.
+		maximum length of time this function may take may therefore be longer than one timeout.
 
 		@note If the port is set to non-blocking mode (by setting the timeout to zero), this will
-		effectively timeout immediatly when there is no data available, returning -1 irrespective of
+		effectively timeout immediately when there is no data available, returning -1 irrespective of
 		the quantity of data actually received before that point.
 
 		@return The length of the string (including the new line), or -1 if a timeout occured. */
@@ -180,7 +180,7 @@ class FLEXIPORT_EXPORT Port
 		A convenience function that reads until a newline character (\\n, 0x0A) is received and
 		stores the received data in a string, @buffer. Good for text-based protocols that use
 		newlines as message terminators.
-		
+
 		@note This function makes many calls to Read, each of which has an individual timeout. The
 		maximum length of time this function make take may therefore be longer than one timeout.
 
@@ -268,7 +268,7 @@ class FLEXIPORT_EXPORT Port
 		/** @brief Set the timeout value. Set seconds to -1 to disable timeouts and block forever.
 
 		@note On Mac OS X, the timer is reset each time data is received, making the timeout an
-		inactivity timer in that there must be no data at all for the length of the timeout for it 
+		inactivity timer in that there must be no data at all for the length of the timeout for it
 		to trigger. This can potentially lead to very long blocking if the sender is sending data
 		slightly faster than the timeout. */
 		virtual void SetTimeout (Timeout timeout) = 0;

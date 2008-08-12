@@ -118,7 +118,14 @@ int main(int argc, char **argv)
 			cerr << "Failed to change baud rate: (" << e.Code () << ") " << e.what () << endl;
 		}
 		// Set the motor speed
-		laser.SetMotorSpeed (speed);
+		try
+		{
+			laser.SetMotorSpeed (speed);
+		}
+		catch (hokuyo_aist::HokuyoError e)
+		{
+			cerr << "Failed to set motor speed: (" << e.Code () << ") " << e.what () << endl;
+		}
 
 		// Get some laser info
 		cout << "Laser sensor information:" << endl;

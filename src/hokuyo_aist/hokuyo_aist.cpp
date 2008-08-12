@@ -1165,7 +1165,7 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		info->serial = &buffer[5];
 		// Get either the status line or the end of message
 		ReadLine (buffer);
-		if (buffer[0] != '\n')
+		if (buffer[0] != '\0')
 		{
 			// Got a status line
 			info->sensorDiagnostic = &buffer[5];
@@ -1191,7 +1191,7 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 			}
 			// Now put it through sscanf and hope...
 			int aperture;
-			int numFound = sscanf (valueStart, "%d-%d[mm],%d[deg],%d-%d[step],%d[rpm]",
+			int numFound = sscanf (valueStart, "(%d-%d[mm],%d[deg],%d-%d[step],%d[rpm]",
 									&info->minRange, &info->maxRange, &aperture,
 									&info->firstStep, &info->lastStep, &info->speed);
 			if (numFound != 6)
@@ -1201,19 +1201,28 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 				info->CalculateValues ();
 				if (_verbose)
 				{
-					cerr << "Retrieved sensor info (hard-coded):" << endl;
+					cerr << "Retrieved sensor info (hard-coded, not enough values):" << endl;
 					cerr << info->AsString ();
 				}
 			}
+			else
+			{
+				// Need to calculate stuff differently since it gave us an aperture value
+				info->resolution = DTOR (static_cast<double> (aperture)) /
+										static_cast<double> (info->lastStep - info->firstStep);
+				// Assume that the range is evenly spread
+				info->scanableSteps = info->lastStep - info->firstStep + 1;
+				info->frontStep = info->scanableSteps / 2 + info->firstStep - 1;
+				info->minAngle = (static_cast<int> (info->firstStep) -
+						static_cast<int> (info->frontStep)) * info->resolution;
+				info->maxAngle = (info->lastStep - info->frontStep) * info->resolution;
 
-			// Need to calculate stuff differently since it gave us an aperture value
-			info->resolution = static_cast<double> (aperture) /
-									static_cast<double> (info->lastStep - info->firstStep);
-			// Assume that the range is evenly spread
-			info->scanableSteps = info->lastStep - info->firstStep + 1;
-			info->frontStep = info->scanableSteps / 2;
-			info->minAngle = (info->firstStep - info->frontStep) * info->resolution;
-			info->maxAngle = (info->lastStep - info->frontStep) * info->resolution;
+				if (_verbose)
+				{
+					cerr << "Retrieved sensor info (from FIRM line):" << endl;
+					cerr << info->AsString ();
+				}
+			}
 		}
 		else
 		{
