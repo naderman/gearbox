@@ -284,15 +284,14 @@ OceanServerParser::parse( vector<string>    &stringList,
         const string &line = stringList[i];
         
         stringstream filteredStream;
-        bool haveBinary = false;
         
         for (unsigned int k=0; k<line.size()-2; k++)
         {            
-            // Sometimes we get binary characters in the string: either caused by dodgy serial ports
-            // or by the oceanserver controller. We need to remove those.
+            // It is possible that binary characters enter the stream,
+            // e.g. caused by electrical interference or dodgy serial ports.
+            // We try to remove those.
             if ( !iscntrl( line[k] ) ) {
                 filteredStream << line[k];
-                haveBinary = true;
             } else {
                 unsigned int charValue = (unsigned int)line[k];
                 stringstream ss; 
@@ -305,7 +304,7 @@ OceanServerParser::parse( vector<string>    &stringList,
         
         // divide the filteredString into 2 parts: data and checksum (if present)
         vector<string> checksumList = gbxutilacfr::tokenise( filteredString, "%" );
-        if ( (checksumList.size()==2) && (!haveBinary) )
+        if ( checksumList.size()==2 )
         {        
             // we have a checksum, is it correct?
             if (!isChecksumValid( checksumList[0], checksumList[1] ) )

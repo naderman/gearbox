@@ -30,6 +30,8 @@ class OceanServer
 {    
 public:
     
+    //! Initialises an OceanServerReader
+    //! May throw a HardwareReadingException
     OceanServer( const std::string      &port,
                  gbxutilacfr::Tracer    &tracer);
     
