@@ -130,16 +130,9 @@ inline void NORMALISE_ANGLE( float &theta )
 //dox For example, ROUND_TO(8,5) and ROUND_TO(12,5) will both result in 10.
 #define ROUND_TO(n,d)    (d*rint(n/d))
 #endif
-//#ifndef SQR
-//#define SQR(x)           ((x)*(x))
-//#endif
 #ifndef SIGN
 //dox Sign of a number.
 #define SIGN(A)          ((A)<0?(-1):(1))
-#endif
-#ifndef HYPOTENEUSE
-//dox Finds hypoeneuse
-#define HYPOTENEUSE(a,b) (sqrt(SQR(a)+SQR(b)))
 #endif
 #ifndef COS_LAW
 //dox Law of cosines.
