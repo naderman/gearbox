@@ -359,7 +359,9 @@ Driver::read()
                 continue;
             }
             else {
-                throw gbxutilacfr::Exception( ERROR_INFO,"More than 3 sequential messages failed the checksum");
+                stringstream ss; 
+                ss << "More than "<<nmeaFailChecksumMaxCount<<" sequential messages failed the checksum";
+                throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
             }
         }
         nmeaFailChecksumCount = 0;
