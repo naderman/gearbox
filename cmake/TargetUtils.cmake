@@ -33,13 +33,13 @@ MACRO( GBX_ADD_LIBRARY name type )
         CMAKE_POLICY( SET CMP0003 NEW )
     ENDIF( COMMAND cmake_policy )
 
-    IF( type STREQUAL SHARED )
+    IF( ${type} STREQUAL SHARED )
         SET( libType SHARED )
-    ELSEIF( type STREQUAL STATIC )
+    ELSEIF( ${type} STREQUAL STATIC )
         SET( libType STATIC )
-    ELSE( type STREQUAL SHARED )
+    ELSE( ${type} STREQUAL SHARED )
         SET( libType ${GBX_DEFAULT_LIB_TYPE} )
-    ENDIF( type STREQUAL SHARED )
+    ENDIF( ${type} STREQUAL SHARED )
 
     ADD_LIBRARY( ${name} ${libType} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
