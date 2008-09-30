@@ -29,7 +29,9 @@
 #define __TIMEOUT_H
 
 #if defined (WIN32)
-	#if defined (FLEXIPORT_EXPORTS)
+	#if defined (FLEXIPORT_STATIC)
+		#define FLEXIPORT_EXPORT
+	#elif defined (FLEXIPORT_EXPORTS)
 		#define FLEXIPORT_EXPORT    __declspec (dllexport)
 	#else
 		#define FLEXIPORT_EXPORT    __declspec (dllimport)

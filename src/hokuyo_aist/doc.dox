@@ -13,6 +13,9 @@ full list of functions and classes, see @ref hokuyo_aist.
 
 For a full list of classes and functions, see @ref hokuyo_aist.
 
+If this library is compiled as static on Windows, you must define the @c HOKUYO_AIST_STATIC
+preprocessor variable when compiling code that includes hokuyo_aist.h.
+
 Header file:
 @verbatim
 #include <hokuyo_aist/hokuyo_aist.h>

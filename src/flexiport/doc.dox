@@ -23,7 +23,11 @@ to test with. Logging is possible, which allows communications sessions to be pl
 date without the original hardware present.
 
 The @ref SerialPort and @ref TCPPort port types are cross-platform, usable on Linux, Mac OSX and
-Microsoft Windows.
+Microsoft Windows. If this library is compiled as static on Windows, you must define the
+@c FLEXIPORT_STATIC preprocessor variable when compiling code that includes port.h, flexiport.h or
+timeout.h.
+
+
 
 For a full list of classes and functions, see @ref flexiport.
 
