@@ -17,7 +17,7 @@ IF (build)
 	IF (WIN32)
 		ADD_DEFINITIONS (-DHOKUYO_AIST_EXPORTS)
 	ENDIF (WIN32)
-	GBX_ADD_LIBRARY (${libName} SHARED ${srcs})
+	GBX_ADD_LIBRARY (${libName} DEFAULT ${srcs})
 	TARGET_LINK_LIBRARIES (${libName} ${reqLibs})
 	GBX_ADD_PKGCONFIG (${libName} ${libDesc} ${reqLibs} "" "" "")
 

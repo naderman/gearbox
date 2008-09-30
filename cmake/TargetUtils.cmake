@@ -4,9 +4,9 @@
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
 #
 MACRO( GBX_ADD_EXECUTABLE name )
-    if(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
-    endif(COMMAND cmake_policy)
+    IF( COMMAND cmake_policy )
+        CMAKE_POLICY( SET CMP0003 NEW )
+    ENDIF( COMMAND cmake_policy )
 
     ADD_EXECUTABLE( ${name} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
@@ -17,28 +17,46 @@ MACRO( GBX_ADD_EXECUTABLE name )
     LIST( APPEND templist ${name} )
 #   MESSAGE( STATUS "DEBUG: ${templist}" )
     SET( EXE_LIST ${templist} CACHE INTERNAL "Global list of executables to build" FORCE )
-    MESSAGE( STATUS "Planning to Build Executable: ${name}" )
+    MESSAGE( STATUS "Planning to build executable:      ${name}" )
 ENDMACRO( GBX_ADD_EXECUTABLE name )
 
 #
 # Libraries should add themselves by calling 'GBX_ADD_LIBRARY'
 # instead of 'ADD_LIBRARY' in CMakeLists.txt.
-# Usage is the same as ADD_LIBRARY, all parameters are passed to ADD_LIBRARY.
+# The second parameter specifies the library type to build: SHARED, STATIC, or DEFAULT.
+# If the default is used, the library type will depend on the gearbox-wide value as set
+# by the user (or SHARED if the user hasn't changed it from the original setting).
+# All extra parameters are passed to ADD_LIBRARY as source files.
 #
-MACRO( GBX_ADD_LIBRARY name )
-    if(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
-    endif(COMMAND cmake_policy)
+MACRO( GBX_ADD_LIBRARY name type )
+    IF( COMMAND cmake_policy )
+        CMAKE_POLICY( SET CMP0003 NEW )
+    ENDIF( COMMAND cmake_policy )
 
-    ADD_LIBRARY( ${name} ${ARGN} )
+    IF( type STREQUAL SHARED )
+        SET( libType SHARED )
+    ELSEIF( type STREQUAL STATIC )
+        SET( libType STATIC )
+    ELSE( type STREQUAL SHARED )
+        SET( libType ${GBX_DEFAULT_LIB_TYPE} )
+    ENDIF( type STREQUAL SHARED )
+
+    ADD_LIBRARY( ${name} ${libType} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    INSTALL( TARGETS ${name} LIBRARY DESTINATION lib/${PROJECT_NAME} )
+    INSTALL( TARGETS ${name} DESTINATION lib/${PROJECT_NAME} )
+
     SET( templist ${LIB_LIST} )
     LIST( APPEND templist ${name} )
     SET( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
-    MESSAGE( STATUS "Planning to Build Library   : ${name}" )
+
+    IF( libType STREQUAL SHARED )
+        SET( libTypeDesc "shared" )
+    ELSE( libType STREQUAL SHARED )
+        SET( libTypeDesc "static" )
+    ENDIF( libType STREQUAL SHARED )
+    MESSAGE( STATUS "Planning to build ${libTypeDesc} library:  ${name}" )
 ENDMACRO( GBX_ADD_LIBRARY name )
 
 #
@@ -113,7 +131,7 @@ MACRO( GBX_ADD_ITEM name )
     SET( templist ${ITEM_LIST} )
     LIST( APPEND templist ${name} )
     SET( ITEM_LIST ${templist} CACHE INTERNAL "Global list of special items to build" FORCE )
-    MESSAGE( STATUS "Planning to Build Item      : ${name}" )
+    MESSAGE( STATUS "Planning to build item:            ${name}" )
 ENDMACRO( GBX_ADD_ITEM name )
 
 #
@@ -152,7 +170,7 @@ MACRO( GBX_ADD_TEST name executable )
     SET( templist ${TEST_LIST} )
     LIST( APPEND templist ${name} )
     SET( TEST_LIST ${templist} CACHE INTERNAL "Global list of (CTest) tests to build" FORCE )
-#     MESSAGE( STATUS "Planning to Build Test      : ${name}" )
+#     MESSAGE( STATUS "Planning to build test:          ${name}" )
 ENDMACRO( GBX_ADD_TEST name executable )
 
 #
@@ -163,7 +181,7 @@ MACRO( GBX_NOT_ADD_EXECUTABLE name reason )
   LIST( APPEND templist ${name} )
 #  MESSAGE( STATUS "DEBUG: ${templist}" )
   SET( EXE_NOT_LIST ${templist} CACHE INTERNAL "Global list of executables NOT to build" FORCE )
-  MESSAGE( STATUS "Not planning to Build Executable : ${name} because ${reason}" )
+  MESSAGE( STATUS "Not planning to build executable:  ${name} because ${reason}" )
 ENDMACRO( GBX_NOT_ADD_EXECUTABLE name reason )
 
 #
@@ -174,7 +192,7 @@ MACRO( GBX_NOT_ADD_LIBRARY name reason )
   LIST( APPEND templist ${name} )
 #  MESSAGE( STATUS "DEBUG: ${templist}" )
   SET( LIB_NOT_LIST ${templist} CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
-  MESSAGE( STATUS "Not planning to Build Library   : ${name} because ${reason}" )
+  MESSAGE( STATUS "Not planning to build library:     ${name} because ${reason}" )
 ENDMACRO( GBX_NOT_ADD_LIBRARY name reason )
 
 #
@@ -227,9 +245,10 @@ MACRO( GBX_CONFIG_REPORT )
     # IF( NOT ORCA_MOTHERSHIP )
     #     MESSAGE( STATUS "Using Orca version ${ORCA_VERSION}")
     # ENDIF( NOT ORCA_MOTHERSHIP )
-    MESSAGE( STATUS "Platform          ${CMAKE_SYSTEM}")
-    MESSAGE( STATUS "CMake version     ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}-patch ${CMAKE_PATCH_VERSION}")
-    MESSAGE( STATUS "Install dir       ${CMAKE_INSTALL_PREFIX}")
+    MESSAGE( STATUS "Platform              ${CMAKE_SYSTEM}")
+    MESSAGE( STATUS "CMake version         ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}-patch ${CMAKE_PATCH_VERSION}")
+    MESSAGE( STATUS "Install dir           ${CMAKE_INSTALL_PREFIX}")
+    MESSAGE( STATUS "Default library type  ${GBX_DEFAULT_LIB_TYPE}")
 
     SET( note " " )
     LIST_REPORT( "Will build" "executables" ${note} "${EXE_LIST}" )

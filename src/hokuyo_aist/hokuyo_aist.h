@@ -358,8 +358,6 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		without having to worry about allocating its data, whether it will change or not, while also
 		avoiding excessive allocations.
 
-		Not available with the SCIP v1 protocol.
-
 		@param data Pointer to a @ref HokuyoData object to store the range readings in.
 		@param clusterCount The number of readings to cluster together into a single reading. The
 		minimum value from a cluster is returned as the range for that cluster.
@@ -370,8 +368,6 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 								unsigned int clusterCount = 1);
 
 		/** @brief Get the latest scan data from the scanner.
-
-		Not available with the SCIP v1 protocol.
 
 		@param data Pointer to a @ref HokuyoData object to store the range readings in.
 		@param startAngle The angle to get range readings from. Exclusive; if this falls between two

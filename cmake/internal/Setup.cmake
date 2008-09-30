@@ -14,14 +14,14 @@ SET( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE INTERNAL "Location 
 INCLUDE( ${GBX_CMAKE_DIR}/SetupVersion.cmake )
 
 #
+# Determine OS, and make os-specific choices
+#
+INCLUDE( ${GBX_CMAKE_DIR}/SetupOs.cmake )
+
+#
 # Project directories, including installation
 #
 INCLUDE( ${GBX_CMAKE_DIR}/SetupDirectories.cmake )
-
-#
-# Determine OS, and make os-specefic choices
-#
-INCLUDE( ${GBX_CMAKE_DIR}/SetupOs.cmake )
 
 #
 # Set the build type (affects debugging symbols and optimization)
@@ -41,6 +41,7 @@ INCLUDE( ${GBX_CMAKE_DIR}/DependencyUtils.cmake )
 # (these are defaults. after the user modifies these in GUI they stay in cache)
 #
 OPTION( GBX_BUILD_LICENSE  "Enables writing LICENCE file. For admins only." OFF )
+MARK_AS_ADVANCED( GBX_BUILD_LICENSE )
 
 #
 # check compiler type and version
@@ -52,6 +53,12 @@ INCLUDE( ${GBX_CMAKE_DIR}/CheckCompiler.cmake )
 # (these are defaults. after the user modifies these in GUI they stay in cache)
 #
 OPTION( GBX_BUILD_TESTS    "Enables compilation of all tests" ON  )
+
+#
+# Default library type (shared or static).
+#
+SET( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or STATIC)" )
+MARK_AS_ADVANCED( GBX_DEFAULT_LIB_TYPE )
 
 #
 # Look for low-level C headers, write defines to config.h

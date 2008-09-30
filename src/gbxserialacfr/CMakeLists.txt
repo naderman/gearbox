@@ -21,7 +21,7 @@ IF( build )
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
     GBX_ADD_PKGCONFIG( ${lib_name} "C++ class wrapping a serial port." "" dep_libs "" "" )
 

@@ -11,7 +11,7 @@ IF( build )
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
 
     GBX_ADD_HEADERS( basicexample ${hdrs} )
     # the custom command above is equivalent to this

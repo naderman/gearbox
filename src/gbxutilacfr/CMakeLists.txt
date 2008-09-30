@@ -14,7 +14,7 @@ IF( build )
     # for config.h
     INCLUDE_DIRECTORIES( ${PROJECT_BINARY_DIR} )
 
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
 
     GBX_ADD_HEADERS( gbxutilacfr ${hdrs} )
 

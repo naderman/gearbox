@@ -27,6 +27,7 @@ FIND_PATH( ICEUTIL_HOME_INCLUDE_ICEUTIL IceUtil.h
   # some people may manually choose to install Ice here
   /usr/local/include/IceUtil
   # windows
+  C:/Ice-3.3.0-VC90/include/IceUtil
   C:/Ice-3.3.0-VC80/include/IceUtil
   C:/Ice-3.3.0/include/IceUtil
   C:/Ice-3.2.1-VC80/include/IceUtil

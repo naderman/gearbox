@@ -55,7 +55,7 @@ IF ( build )
     FILE( GLOB hdrs *.h )
     FILE( GLOB srcs *.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
 
     GBX_ADD_HEADERS( gbxadvanced ${hdrs} )
@@ -160,13 +160,13 @@ SET( srcs util.cpp )
 @endverbatim
 
 @verbatim
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
 @endverbatim
-Here we tell CMake to create rules for building a shared library and to specify dependencies. Now you can see why we bothered with defining variables. These commands are generic and can be easily used for other libraries.
+Here we tell CMake to create rules for building a library of the default type (shared or static) and to specify dependencies. Now you can see why we bothered with defining variables. These commands are generic and can be easily used for other libraries.
 
 @c GBX_ADD_LIBRARY is a custom GearBox macro. It does several things:
-- Actually defines a library target (with a standard command @c ADD_LIBRARY ). In Linux, this will produce @c libGbxAdvanced.so
+- Actually defines a library target (with a standard command @c ADD_LIBRARY ). In Linux, this will produce @c libGbxAdvanced.so or @c libGbxAdvanced.a
 - Specifies standard installation directory: @c [PREFIX]/lib/gearbox/
 - Adds the name of the library to the global list of libraries which will be built (for feedback).
 

@@ -13,7 +13,7 @@ IF( build )
     SET( hdrs urg_nz.h )
     SET( srcs urg_nz.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
     GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} "" "" "" "" )
 
     GBX_ADD_HEADERS( ${lib_name} ${hdrs} )

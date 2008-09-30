@@ -16,7 +16,7 @@ IF( build )
     FILE( GLOB srcs *.cpp )
     SET( dep_libs ${int_libs} )
     
-    GBX_ADD_LIBRARY( ${lib_name} SHARED ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
     TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
     
     GBX_ADD_HEADERS( gbxsmartbatteryacfr ${hdrs} )
