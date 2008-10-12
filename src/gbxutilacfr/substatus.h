@@ -27,7 +27,7 @@ namespace gbxutilacfr {
 //! implementation must be thread-safe.
 //!
 //!
-//! @sa SubStatus
+//! @sa Status
 //!
 class SubStatus
 {
