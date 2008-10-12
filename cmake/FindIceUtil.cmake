@@ -22,8 +22,11 @@ FIND_PATH( ICEUTIL_HOME_INCLUDE_ICEUTIL IceUtil.h
   # debian package installs Ice here
   /usr/include/IceUtil
   # Test standard installation points: newer versions first
+  /opt/Ice-4.0/include/IceUtil
+  /opt/Ice-3.6/include/IceUtil
+  /opt/Ice-3.5/include/IceUtil
+  /opt/Ice-3.4/include/IceUtil
   /opt/Ice-3.3/include/IceUtil
-  /opt/Ice-3.2/include/IceUtil
   # some people may manually choose to install Ice here
   /usr/local/include/IceUtil
   # windows
