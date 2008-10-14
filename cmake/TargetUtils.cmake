@@ -1,4 +1,10 @@
 #
+# Default library type (shared or static).
+#
+SET( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or STATIC)" )
+MARK_AS_ADVANCED( GBX_DEFAULT_LIB_TYPE )
+
+#
 # Executables should add themselves by calling 'GBX_ADD_EXECUTABLE'
 # instead of 'ADD_EXECUTABLE' in CMakeLists.txt.
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.

@@ -55,12 +55,6 @@ INCLUDE( ${GBX_CMAKE_DIR}/CheckCompiler.cmake )
 OPTION( GBX_BUILD_TESTS    "Enables compilation of all tests" ON  )
 
 #
-# Default library type (shared or static).
-#
-SET( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or STATIC)" )
-MARK_AS_ADVANCED( GBX_DEFAULT_LIB_TYPE )
-
-#
 # Look for low-level C headers, write defines to config.h
 #
 INCLUDE( ${GBX_CMAKE_DIR}/WriteConfigH.cmake )
