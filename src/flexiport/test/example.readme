@@ -46,6 +46,17 @@ a timeout. e.g.:
 
 tcp_example -o timeout=1,debug=3
 
+Running udp_example
+----------------------
+
+The udp_example is similar to the tcp_example, replacing the TCPPort object
+with a UDPPort object.
+
+You may specify additional options for the UDPPort objects using -o, such as
+a timeout. e.g.:
+
+udp_example -o timeout=1,debug=3
+
 Note for Windows users
 ----------------------
 

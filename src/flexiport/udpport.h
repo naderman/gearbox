@@ -25,8 +25,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TCPPORT_H
-#define __TCPPORT_H
+#ifndef __UDPPORT_H
+#define __UDPPORT_H
 
 #include "port.h"
 
@@ -40,31 +40,45 @@
 namespace flexiport
 {
 
-/** @brief TCP implementation of the @ref Port class.
+/** @brief UDP implementation of the @ref Port class. This class provides UDP communication between
+two known end points. It cannot send to any address other than the configured address.
 
-See the @ref Port class documentation for how to use the common API.
+See the @ref Port class documentation for how to use the common API. Note that some parts of the API
+do not apply due to the nature of the datagram-oriented protocol. Because each datagram is
+individual and no merging is typically performed between datagrams, several flexiport functions do
+not work (they were designed for stream-oriented communications). These are @ref ReadUntil,
+@ref ReadStringUntil, @ref ReadLine, @ref Skip, and @ref SkipUntil. This will be (hopefully) be
+fixed soon.
+
+TODO: Add support for configuring the destination address based on the first data received, to allow
+destination auto-configuration.
+TODO: Add an option to turn buffering on, making the UDP protocol function like a stream-based
+protocol and so enabling the use of those parts of the API that do not function correctly for a
+datagram-based protocol. Alternatively, fix the functions that don't work yet so they read more than
+a byte at a time.
 
 @par Options
- - ip <string>
-   - IP address to connect to. If listen is true, set to "*" to listen on any interface.
+ - dest_ip <string>
+   - IP address to send data to.
    - Default: 127.0.0.1
- - port <integer>
-   - TCP port to connect to/listen on.
+ - dest_port <integer>
+   - UDP port to send data to.
    - Default: 20000
- - listen
-   - Listen on the specified port rather than connecting to it. Other network applications can
-     connect and send data, which will become available as normal.
-   - Default: off */
-class FLEXIPORT_EXPORT TCPPort : public Port
+ - recv_ip <string>
+   - IP address to receive data on. Set to "*" for receiving on any interface.
+   - Default: *
+ - recv_port <integer>
+   - UDP port to receive data on.
+   - Default: 20000 */
+class FLEXIPORT_EXPORT UDPPort : public Port
 {
 	public:
-		TCPPort (std::map<std::string, std::string> options);
-		~TCPPort (void);
+		UDPPort (std::map<std::string, std::string> options);
+		~UDPPort (void);
 
 		/** @brief Open the port.
 
-		For a listening port, this will call accept() and therefore cause the calling process to
-		block until an incoming connection. */
+		This will create a listening socket and a sending socket. */
 		void Open (void);
 		/// @brief Close the port.
 		void Close (void);
@@ -72,6 +86,17 @@ class FLEXIPORT_EXPORT TCPPort : public Port
 		ssize_t Read (void * const buffer, size_t count);
 		/// @brief Read the requested quantity of data from the port.
 		ssize_t ReadFull (void * const buffer, size_t count);
+		/// @brief Read data until a specified termination byte is received.
+		ssize_t ReadUntil (void * const buffer, size_t count, uint8_t terminator);
+		/// @brief Read a string until the specified termination character is received.
+		ssize_t ReadStringUntil (std::string &buffer, char terminator);
+		/// @brief Read a new-line terminated string of data.
+		ssize_t ReadLine (char * const buffer, size_t count);
+		/// @brief Dump data until the specified number of bytes have been read.
+		ssize_t Skip (size_t count);
+		/** @brief Read and dump data until the specified termination character has been seen @ref
+		count times. */
+		ssize_t SkipUntil (uint8_t terminator, unsigned int count);
 		/// @brief Get the number of bytes waiting to be read at the port. Returns immediatly.
 		ssize_t BytesAvailable (void);
 		/// @brief Get the number of bytes waiting after blocking for the timeout.
@@ -94,20 +119,23 @@ class FLEXIPORT_EXPORT TCPPort : public Port
 		bool IsOpen (void) const                        { return _open; }
 
 	private:
-		int _sock;          // Socket connected to wherever the data is coming from.
-		int _listenSock;    // Socket to listen on when in listen mode.
+		int _sendSock;      // Socket to send data from.
+		int _recvSock;      // Socket to receive data on.
 
-		std::string _ip;
-		unsigned int _port;
-		bool _isListener;   // True if this port should listen instead of actively connecting.
+		std::string _destIP;
+		unsigned int _destPort;
+		std::string _recvIP;
+		unsigned int _recvPort;
 		bool _open;
 
 		void CheckPort (bool read);
 
 		bool ProcessOption (const std::string &option, const std::string &value);
 
-		void Connect (void);
-		void WaitForConnection (void);
+		void OpenSender (void);
+		void CloseSender (void);
+		void OpenReceiver (void);
+		void CloseReceiver (void);
 		typedef enum {TIMED_OUT, DATA_AVAILABLE, CAN_WRITE} WaitStatus;
 		WaitStatus WaitForDataOrTimeout (void);
 		bool IsDataAvailable (void);
@@ -119,4 +147,4 @@ class FLEXIPORT_EXPORT TCPPort : public Port
 
 /** @} */
 
-#endif // __TCPPORT_H
+#endif // __UDPPORT_H

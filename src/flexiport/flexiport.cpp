@@ -29,6 +29,7 @@
 #include "port.h"
 #include "serialport.h"
 #include "tcpport.h"
+#include "udpport.h"
 #include "logwriterport.h"
 #include "logreaderport.h"
 #include "flexiport_config.h"
@@ -109,6 +110,10 @@ Port* CreatePort (map<string, string> options)
 	if (type == "tcp")
 		return new TCPPort (options);
 #endif // FLEXIPORT_INCLUDE_TCP
+#ifdef FLEXIPORT_INCLUDE_UDP
+	if (type == "udp")
+		return new UDPPort (options);
+#endif // FLEXIPORT_INCLUDE_UDP
 
 #ifdef FLEXIPORT_INCLUDE_LOGGING
 	if (type == "logreader")
