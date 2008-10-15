@@ -832,7 +832,13 @@ void TCPPort::WaitForConnection (void)
 TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
 {
 	if (IsDataAvailable ())
+	{
+		if (_debug >= 2)
+			cerr << "TCPPort::" << __func__ << "() Found data available immediately." << endl;
 		return DATA_AVAILABLE;
+	}
+	if (_debug >= 2)
+		cerr << "TCPPort::" << __func__ << "() No data available immediately, will wait." << endl;
 
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
@@ -868,7 +874,11 @@ TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
 // Checks if data is available right now
 bool TCPPort::IsDataAvailable (void)
 {
-	// First peek at the buffer to see if there is anything waiting
+	if (_debug >= 3)
+		cerr << "TCPPort::" << __func__ << "() Checking if data is available immediately." << endl;
+
+	// First peek at the buffer to see if there is anything waiting. For an infinite timeout,
+	// this will block indefinitely until we get data.
 	char buffer;
 	ssize_t receivedBytes = 0;
 #if defined (WIN32)
@@ -880,7 +890,7 @@ bool TCPPort::IsDataAvailable (void)
 	{
 		if (_debug >= 3)
 			cerr << "TCPPort::" << __func__ << "() Found data waiting." << endl;
-		return DATA_AVAILABLE;
+		return true;
 	}
 	else if (receivedBytes < 0)
 	{

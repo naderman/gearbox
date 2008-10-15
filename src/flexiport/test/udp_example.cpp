@@ -112,17 +112,6 @@ int DoParent (string portOptions)
 		cout << "Test failed." << endl;
 		return -1;
 	}
-//	cout << "Server testing ReadStringUntil()" << endl;
-//	port->ReadStringUntil (stringBuffer, '\n');
-//	cout << "Server received \"" << stringBuffer << '"' << endl;
-//	if (stringBuffer != "Message #2\n")
-//	{
-//		cout << "Test failed." << endl;
-//		return -1;
-//	}
-//	cout << "Server has " << port->BytesAvailable () << " bytes available immediatly." << endl;
-//	cout << "Server clearing the trailing null byte from that last message." << endl;
-//	port->Read (charBuffer, 1);
 	int bytesWaiting = port->BytesAvailableWait ();
 	cout << "Server has " << bytesWaiting << " bytes available after waiting." << endl;
 	cout << "Server testing ReadFull()" << endl;
@@ -133,16 +122,6 @@ int DoParent (string portOptions)
 		cout << "Test failed." << endl;
 		return -1;
 	}
-//	cout << "Server testing ReadUntil()" << endl;
-//	port->ReadUntil (charBuffer, 32, '\n');
-//	cout << "Server received \"" << charBuffer << '"' << endl;
-//	if (strncmp (charBuffer, "Probably message #4\n", 20) != 0)
-//	{
-//		cout << "Test failed." << endl;
-//		return -1;
-//	}
-//	cout << "Server clearing the trailing null byte from that last message." << endl;
-//	port->Read (charBuffer, 1);
 	cout << "Server testing Read()" << endl;
 	memset (charBuffer, 0, sizeof (char) * 32);
 	port->Read (charBuffer, 32);
@@ -152,14 +131,6 @@ int DoParent (string portOptions)
 		cout << "Test failed." << endl;
 		return -1;
 	}
-//	cout << "Server testing ReadLine()" << endl;
-//	port->ReadLine (stringBuffer);
-//	cout << "Server received \"" << stringBuffer << '"' << endl;
-//	if (stringBuffer != "Finally, message #6\n")
-//	{
-//		cout << "Test failed." << endl;
-//		return -1;
-//	}
 	cout << "Server sending back to client" << endl;
 	port->WriteString ("So long, and thanks for all the text.");
 	SLEEP (5);

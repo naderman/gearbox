@@ -140,7 +140,7 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 		WaitStatus WaitForDataOrTimeout (void);
 		bool IsDataAvailable (void);
 		WaitStatus WaitForWritableOrTimeout (void);
-		void SetPortBlockingFlag (void);
+		void SetSocketBlockingFlag (void);
 };
 
 } // namespace flexiport

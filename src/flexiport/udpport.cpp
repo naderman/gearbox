@@ -145,7 +145,7 @@ void UDPPort::Open (void)
 
 	OpenSender ();
 	OpenReceiver ();
-	SetPortBlockingFlag ();
+	SetSocketBlockingFlag ();
 
 	_open = true;
 	if (_debug >= 2)
@@ -178,16 +178,38 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 	if (_debug >= 2)
 		cerr << "UDPPort::" << __func__ << "() Going to read " << count << " bytes" << endl;
 
-	if (_timeout._sec != -1)
+	if (_timeout._sec == -1)
 	{
-		if (WaitForDataOrTimeout () == TIMED_OUT)
-			return -1;
-	}
+		// Socket is blocking, so just read
 #if defined (WIN32)
-	receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+		receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
 #else
-	receivedBytes = recv (_recvSock, buffer, count, 0);
+		receivedBytes = recv (_recvSock, buffer, count, 0);
 #endif
+	}
+	else
+	{
+		// Socket is non-blocking, so try to read, see if we get any data (if there is none, this
+		// will return immediately, and is much faster than ioctl() and select() calls)
+#if defined (WIN32)
+		receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+#else
+		receivedBytes = recv (_recvSock, buffer, count, 0);
+#endif
+		// Check if that call "timed out"
+		if (receivedBytes < 0 && ErrNo () == ERRNO_EAGAIN)
+		{
+			// No data was available, so wait for data or timeout, then read if data is available
+			if (WaitForDataOrTimeout () == TIMED_OUT)
+				return -1;
+#if defined (WIN32)
+			receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+#else
+			receivedBytes = recv (_recvSock, buffer, count, 0);
+#endif
+		}
+		// If first call doesn't return a timeout, fall through to the result/error checking below
+	}
 
 	if (_debug >= 2)
 		cerr << "UDPPort::" << __func__ << "() Read " << receivedBytes << " bytes" << endl;
@@ -332,9 +354,6 @@ ssize_t UDPPort::BytesAvailable (void)
 	// instead, then use that first during read calls. See http://support.microsoft.com/kb/192599
 
 	CheckPort (true);
-
-	if (!IsDataAvailable ())
-		return 0;
 
 #if defined (WIN32)
 	unsigned long bytesAvailable = 0;
@@ -513,7 +532,7 @@ std::string UDPPort::GetStatus (void) const
 void UDPPort::SetTimeout (Timeout timeout)
 {
 	_timeout = timeout;
-	SetPortBlockingFlag ();
+	SetSocketBlockingFlag ();
 }
 
 void UDPPort::SetCanRead (bool canRead)
@@ -847,6 +866,15 @@ void UDPPort::CloseReceiver (void)
 // Checks if data is available, waiting for the timeout if none is available immediatly
 UDPPort::WaitStatus UDPPort::WaitForDataOrTimeout (void)
 {
+	if (IsDataAvailable ())
+	{
+		if (_debug >= 2)
+			cerr << "UDPPort::" << __func__ << "() Found data available immediately." << endl;
+		return DATA_AVAILABLE;
+	}
+	if (_debug >= 2)
+		cerr << "UDPPort::" << __func__ << "() No data available immediately, will wait." << endl;
+
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
 
@@ -868,46 +896,65 @@ UDPPort::WaitStatus UDPPort::WaitForDataOrTimeout (void)
 	}
 	else if (result == 0)
 	{
-		if (_debug >= 3)
+		if (_debug >= 2)
 			cerr << "UDPPort::" << __func__ << "() Timed out" << endl;
 		// Time out
 		return TIMED_OUT;
 	}
 	if (_debug >= 2)
-		cerr << "UDPPort::" << __func__ << "() Found data waiting" << endl;
+		cerr << "UDPPort::" << __func__ << "() Found data after waiting" << endl;
 	return DATA_AVAILABLE;
 }
 
 // Checks if data is available right now
 bool UDPPort::IsDataAvailable (void)
 {
-	fd_set fdSet;
-	struct timeval tv;
+	if (_debug >= 3)
+		cerr << "UDPPort::" << __func__ << "() Checking if data is available immediately." << endl;
 
-	FD_ZERO (&fdSet);
-	FD_SET (_recvSock, &fdSet);
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-
-	int result = select (_recvSock + 1, &fdSet, NULL, NULL, &tv);
-
-	if (result < 0)
-	{
-		stringstream ss;
-		ss << "UDPPort::" << __func__ << "() select() error: (" << ErrNo () << ") " <<
-			StrError (ErrNo ());
-		throw PortException (ss.str ());
-	}
-	else if (result == 0)
+	// First peek at the buffer to see if there is anything waiting
+	char buffer;
+	ssize_t receivedBytes = 0;
+#if defined (WIN32)
+	receivedBytes = recv (_recvSock, &buffer, 1, MSG_PEEK);
+#else
+	receivedBytes = recv (_recvSock, reinterpret_cast<void*> (&buffer), 1, MSG_PEEK);
+#endif
+	if (receivedBytes > 0)
 	{
 		if (_debug >= 3)
-			cerr << "UDPPort::" << __func__ << "() Found no data waiting" << endl;
-		// No data
-		return false;
+			cerr << "TCPPort::" << __func__ << "() Found data waiting." << endl;
+		return DATA_AVAILABLE;
+	}
+	else if (receivedBytes < 0)
+	{
+		if (ErrNo () != ERRNO_EAGAIN)
+		{
+			// General error
+			stringstream ss;
+			ss << "TCPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+				StrError (ErrNo ());
+			throw PortException (ss.str ());
+		}
+		// Else no data available yet
+	}
+	else // receivedBytes == 0
+	{
+		// Peer disconnected cleanly, do the same at this end
+		if (_debug >= 1)
+			cerr << "TCPPort::" << __func__ << "() Peer disconnected cleanly." << endl;
+		Close ();
+		if (_alwaysOpen)
+		{
+			if (_debug >= 1)
+				cerr << "TCPPort::" << __func__ << "() Trying to reconnect." << endl;
+			Open ();
+		}
+		// Fall through to return no data
 	}
 	if (_debug >= 3)
-		cerr << "UDPPort::" << __func__ << "() Found data waiting" << endl;
-	return true;
+		cerr << "TCPPort::" << __func__ << "() Found no data waiting." << endl;
+	return false;
 }
 
 // Checks it he port can be written to, waiting for the timeout if it can't be written immediatly
@@ -957,7 +1004,7 @@ void UDPPort::CheckPort (bool read)
 		throw PortException ("Cannot write to read-only port.");
 }
 
-void UDPPort::SetPortBlockingFlag (void)
+void UDPPort::SetSocketBlockingFlag (void)
 {
 	if (_timeout._sec == -1)
 	{
@@ -985,35 +1032,35 @@ void UDPPort::SetPortBlockingFlag (void)
 		int flags;
 
 		// Receive socket
-		if ((flags = fcntl (_recvSock, F_GETFD)) < 0)
+		if ((flags = fcntl (_recvSock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_recvSock, F_GETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_recvSock, F_GETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags &= ~O_NONBLOCK;
-		if (fcntl (_recvSock, F_SETFD, flags) < 0)
+		if (fcntl (_recvSock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_recvSock, F_SETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_recvSock, F_SETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 
 		// Send socket
-		if ((flags = fcntl (_sendSock, F_GETFD)) < 0)
+		if ((flags = fcntl (_sendSock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_GETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_GETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags &= ~O_NONBLOCK;
-		if (fcntl (_sendSock, F_SETFD, flags) < 0)
+		if (fcntl (_sendSock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_SETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_SETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -1045,35 +1092,35 @@ void UDPPort::SetPortBlockingFlag (void)
 		int flags;
 
 		// Receive socket
-		if ((flags = fcntl (_recvSock, F_GETFD)) < 0)
+		if ((flags = fcntl (_recvSock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(F_GETFD) error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() fcntl(F_GETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags |= O_NONBLOCK;
-		if (fcntl (_recvSock, F_SETFD, flags) < 0)
+		if (fcntl (_recvSock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(F_SETFD) error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() fcntl(F_SETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 
 		// Send socket
-		if ((flags = fcntl (_sendSock, F_GETFD)) < 0)
+		if ((flags = fcntl (_sendSock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_GETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_GETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags |= O_NONBLOCK;
-		if (fcntl (_sendSock, F_SETFD, flags) < 0)
+		if (fcntl (_sendSock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_SETFD) error: (" << ErrNo () <<
+			ss << "UDPPort::" << __func__ << "() fcntl(_sendSock, F_SETFL) error: (" << ErrNo () <<
 				") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
