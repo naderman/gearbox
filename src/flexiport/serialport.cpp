@@ -4,17 +4,17 @@
  * Copyright (c) 2008 Geoffrey Biggs
  *
  * flexiport flexible hardware data communications library.
- * 
- * This distribution is licensed to you under the terms described in the LICENSE file included in 
+ *
+ * This distribution is licensed to you under the terms described in the LICENSE file included in
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
  * Japan. Registration number: H20PRO-881
- * 
+ *
  * This file is part of flexiport.
  *
  * flexiport is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of 
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
  *
  * flexiport is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -293,7 +293,7 @@ void SerialPort::Open (void)
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
-	
+
 	SetPortTimeout ();
 #else
 	int flags = 0;
@@ -306,14 +306,14 @@ void SerialPort::Open (void)
 
 	flags |= O_NOCTTY;
 
-	// For simplicity set the port to non-blocking and use select() to wait for data based on the 
+	// For simplicity set the port to non-blocking and use select() to wait for data based on the
 	// timeout.
 	flags |= O_NONBLOCK;
 
 	if ((_fd = open (_device.c_str (), flags)) < 0)
 	{
 		stringstream ss;
-		ss << "Failed to open device " << _device << " with error: (" << ErrNo () << ") " << 
+		ss << "Failed to open device " << _device << " with error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -378,9 +378,27 @@ ssize_t SerialPort::Read (void * const buffer, size_t count)
 	}
 #else
 	ssize_t receivedBytes = 0;
-	if (WaitForDataOrTimeout () == TIMED_OUT)
-		return -1;
-	receivedBytes = read (_fd, buffer, count);
+
+	if (_timeout._sec == -1)
+	{
+		// Port is blocking, so just read
+		receivedBytes = read (_fd, buffer, count);
+	}
+	else
+	{
+		// Port is non-blocking, so try to read, see if we get any data (if there is none, this will
+		// return immediately, and is much faster than ioctl() and select() calls)
+		receivedBytes = read (_fd, buffer, count);
+		// Check if that call "timed out"
+		if (receivedBytes < 0 && ErrNo () == EAGAIN)
+		{
+			// No data was available, so wait for data or timeout, then read if data is available
+			if (WaitForDataOrTimeout () == TIMED_OUT)
+				return -1;
+			receivedBytes = read (_fd, buffer, count);
+		}
+		// If first call doesn't return a timeout, fall through to the result/error checking below
+	}
 
 	if (_debug >= 2)
 		cerr << "SerialPort::" << __func__ << "() Read " << receivedBytes << " bytes" << endl;
@@ -389,11 +407,11 @@ ssize_t SerialPort::Read (void * const buffer, size_t count)
 	{
 		if (ErrNo () == EAGAIN)
 			return -1; // Timed out
-		else 
+		else
 		{
 			// General error
 			stringstream ss;
-			ss << "SerialPort::" << __func__ << "() recv() error: (" << 
+			ss << "SerialPort::" << __func__ << "() read() error: (" <<
 				ErrNo () << ") " << StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -427,11 +445,11 @@ ssize_t SerialPort::ReadFull (void * const buffer, size_t count)
 
 	if (_debug >= 2)
 	{
-		cerr << "SerialPort::" << __func__ << "() Going to read until have " << count << 
+		cerr << "SerialPort::" << __func__ << "() Going to read until have " << count <<
 			" bytes" << endl;
 	}
 
-	// Set the timeout to infinite blocking
+	// Set the port to infinite blocking
 	SetTimeout (Timeout (-1, 0));
 	// Keep calling Read() until count bytes have been received or a timeout
 	while (receivedBytes < count)
@@ -455,15 +473,15 @@ ssize_t SerialPort::ReadFull (void * const buffer, size_t count)
 				// Restore the timeout
 				SetTimeout (oldTimeout);
 				stringstream ss;
-				ss << "SerialPort::" << __func__ << "() Port closed while trying to read " << 
+				ss << "SerialPort::" << __func__ << "() Port closed while trying to read " <<
 					count << " bytes";
 				throw PortException (ss.str ());
 			}
 			// If it is open we can keep going, but with a warning
 			if (_debug >= 1)
 			{
-				cerr << "WARNING: SerialPort::" << __func__ << 
-					" Port closed during ReadFull operation; data may be missing/corrupted." << 
+				cerr << "WARNING: SerialPort::" << __func__ <<
+					" Port closed during ReadFull operation; data may be missing/corrupted." <<
 					endl;
 			}
 		}
@@ -488,19 +506,16 @@ ssize_t SerialPort::BytesAvailable (void)
 	if (!ClearCommError (_fd, &errorType, &comStat))
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() ClearCommError() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() ClearCommError() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
 	bytesAvailable = comStat.cbInQue;
 #else
-	if (!IsDataAvailable ())
-		return 0;
-
 	if (ioctl (_fd, FIONREAD, &bytesAvailable) < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() ioctl() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() ioctl() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -537,11 +552,13 @@ ssize_t SerialPort::BytesAvailableWait (void)
 		bytesAvailable = BytesAvailable ();
 	}
 #else
+	// WaitForDataOrTimeout() will do an initial check to see if there is data available immediately
+	// and only select() if there isn't
 	if (WaitForDataOrTimeout () == TIMED_OUT)
 	{
 		if (_debug >= 2)
 		{
-			cerr << "SerialPort::" << __func__ << 
+			cerr << "SerialPort::" << __func__ <<
 				" Timed out waiting for data to check bytes available" << endl;
 		}
 		if (IsBlocking ())
@@ -553,7 +570,7 @@ ssize_t SerialPort::BytesAvailableWait (void)
 	if (ioctl (_fd, FIONREAD, &bytesAvailable) < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() ioctl() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() ioctl() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -616,7 +633,7 @@ ssize_t SerialPort::Write (const void * const buffer, size_t count)
 		{
 			// General error
 			stringstream ss;
-			ss << "SerialPort::" << __func__ << "() write() error: (" << ErrNo () << ") " << 
+			ss << "SerialPort::" << __func__ << "() write() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -635,7 +652,7 @@ void SerialPort::Flush (void)
 	if (!PurgeComm (_fd, PURGE_RXCLEAR | PURGE_TXCLEAR))
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() PurgeComm() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() PurgeComm() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -643,7 +660,7 @@ void SerialPort::Flush (void)
 	if (tcflush (_fd, TCIOFLUSH) < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcflush() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcflush() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -656,7 +673,7 @@ void SerialPort::Drain (void)
 	if (!FlushFileBuffers (_fd))
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() FlushFileBuffers() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() FlushFileBuffers() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -664,7 +681,7 @@ void SerialPort::Drain (void)
 	if (tcdrain (_fd) < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcdrain() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcdrain() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -695,7 +712,7 @@ std::string SerialPort::GetStatus (void) const
 			status << "Odd" << endl;
 			break;
 		default:
-			throw PortException (string ("SerialPort::") + __func__ + 
+			throw PortException (string ("SerialPort::") + __func__ +
 					string (" Unknown parity setting."));
 			break;
 	}
@@ -708,16 +725,14 @@ std::string SerialPort::GetStatus (void) const
 void SerialPort::SetTimeout (Timeout timeout)
 {
 	_timeout = timeout;
-#if defined (WIN32)
 	SetPortTimeout ();
-#endif
 }
 
 void SerialPort::SetCanRead (bool canRead)
 {
 	if (IsOpen ())
 	{
-		throw PortException (string ("SerialPort::") + __func__ + 
+		throw PortException (string ("SerialPort::") + __func__ +
 				string (" Cannot change read capability of an open port."));
 	}
 	_canRead = canRead;
@@ -727,7 +742,7 @@ void SerialPort::SetCanWrite (bool canWrite)
 {
 	if (IsOpen ())
 	{
-		throw PortException (string ("SerialPort::") + __func__ + 
+		throw PortException (string ("SerialPort::") + __func__ +
 				string (" Cannot change write capability of an open port."));
 	}
 	_canWrite = canWrite;
@@ -742,7 +757,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() GetCommState() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() GetCommState() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -753,7 +768,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() SetCommState() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() SetCommState() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -764,7 +779,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcgetattr() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcgetattr() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -772,7 +787,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() cfsetispeed() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() cfsetispeed() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -781,7 +796,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() cfsetospeed() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() cfsetospeed() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -789,7 +804,7 @@ void SerialPort::SetBaudRate (unsigned int baud)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcsetattr() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcsetattr() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -857,52 +872,14 @@ bool SerialPort::ProcessOption (const std::string &option, const std::string &va
 	return false;
 }
 
-// Checks if data is available right now
-bool SerialPort::IsDataAvailable (void)
-{
-#if defined (WIN32)
-	if (BytesAvailable () <= 0)
-	{
-		// No data
-		if (_debug >= 3)
-			cerr << "SerialPort::" << __func__ << "() Found no data waiting" << endl;
-		return false;
-	}
-#else
-	fd_set fdSet;
-	struct timeval tv;
-
-	FD_ZERO (&fdSet);
-	FD_SET (_fd, &fdSet);
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-
-	int result = select (_fd + 1, &fdSet, NULL, NULL, &tv);
-
-	if (result < 0)
-	{
-		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() select() error: (" << ErrNo () << ") " << 
-			StrError (ErrNo ());
-		throw PortException (ss.str ());
-	}
-	else if (result == 0)
-	{
-		if (_debug >= 3)
-			cerr << "SerialPort::" << __func__ << "() Found no data waiting" << endl;
-		// No data
-		return false;
-	}
-#endif
-	if (_debug >= 3)
-		cerr << "SerialPort::" << __func__ << "() Found data waiting" << endl;
-	return true;
-}
-
 #if !defined (WIN32)
-// Checks if data is available, waiting for the timeout if none is available immediatly
+// Checks if data is available, waiting for the timeout if none is available immediately
 SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout (void)
 {
+	// Check if there is data available immediately before spending time on a select() call
+	if (BytesAvailable () > 0)
+		return DATA_AVAILABLE;
+
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
 
@@ -918,7 +895,7 @@ SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout (void)
 	if (result < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() select() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() select() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -934,7 +911,7 @@ SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout (void)
 	return DATA_AVAILABLE;
 }
 
-// Checks it he port can be written to, waiting for the timeout if it can't be written immediatly
+// Checks if the port can be written to, waiting for the timeout if it can't be written immediately
 SerialPort::WaitStatus SerialPort::WaitForWritableOrTimeout (void)
 {
 	fd_set fdSet;
@@ -952,7 +929,7 @@ SerialPort::WaitStatus SerialPort::WaitForWritableOrTimeout (void)
 	if (result < 0)
 	{
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() select() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() select() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -991,7 +968,7 @@ void SerialPort::SetPortSettings (void)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() GetCommState() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() GetCommState() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1044,7 +1021,7 @@ void SerialPort::SetPortSettings (void)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() SetCommState() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() SetCommState() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1055,7 +1032,7 @@ void SerialPort::SetPortSettings (void)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcgetattr() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcgetattr() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1125,7 +1102,7 @@ void SerialPort::SetPortSettings (void)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() tcsetattr() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() tcsetattr() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
@@ -1134,9 +1111,9 @@ void SerialPort::SetPortSettings (void)
 	SetBaudRate (_baud);
 }
 
-#if defined (WIN32)
 void SerialPort::SetPortTimeout (void)
 {
+#if defined (WIN32)
 	COMMTIMEOUTS timeouts;
 
 	if (_timeout._sec == -1)
@@ -1171,11 +1148,37 @@ void SerialPort::SetPortTimeout (void)
 	{
 		Close ();
 		stringstream ss;
-		ss << "SerialPort::" << __func__ << "() SetCommTimeouts() error: (" << ErrNo () << ") " << 
+		ss << "SerialPort::" << __func__ << "() SetCommTimeouts() error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
-}
+#else
+	int flags;
+	if ((flags = fcntl (_fd, F_GETFL)) < 0)
+	{
+		stringstream ss;
+		ss << "SerialPort::" << __func__ << "() fcntl(F_GETFL) error: (" << ErrNo () << ") " <<
+			StrError (ErrNo ());
+		throw PortException (ss.str ());
+	}
+	if (_timeout._sec == -1)
+	{
+		// Block forever
+		flags &= ~O_NONBLOCK;
+	}
+	else
+	{
+		// Non-blocking operation
+		flags |= O_NONBLOCK;
+	}
+	if (fcntl (_fd, F_SETFL, flags) < 0)
+	{
+		stringstream ss;
+		ss << "SerialPort::" << __func__ << "() fcntl(F_SETFL) error: (" << ErrNo () << ") " <<
+			StrError (ErrNo ());
+		throw PortException (ss.str ());
+	}
 #endif
+}
 
 } // namespace flexiport

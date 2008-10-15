@@ -112,7 +112,7 @@ class FLEXIPORT_EXPORT TCPPort : public Port
 		WaitStatus WaitForDataOrTimeout (void);
 		bool IsDataAvailable (void);
 		WaitStatus WaitForWritableOrTimeout (void);
-		void SetPortBlockingFlag (void);
+		void SetSocketBlockingFlag (void);
 };
 
 } // namespace flexiport

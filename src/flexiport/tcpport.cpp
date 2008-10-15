@@ -159,7 +159,7 @@ void TCPPort::Open (void)
 
 		Connect ();
 	}
-	SetPortBlockingFlag ();
+	SetSocketBlockingFlag ();
 	_open = true;
 	if (_debug >= 2)
 		cerr << "TCPPort::" << __func__ << "() Port is open" << endl;
@@ -212,16 +212,38 @@ ssize_t TCPPort::Read (void * const buffer, size_t count)
 	if (_debug >= 2)
 		cerr << "TCPPort::" << __func__ << "() Going to read " << count << " bytes" << endl;
 
-	if (_timeout._sec != -1)
+	if (_timeout._sec == -1)
 	{
-		if (WaitForDataOrTimeout () == TIMED_OUT)
-			return -1;
-	}
+		// Socket is blocking, so just read
 #if defined (WIN32)
-	receivedBytes = recv (_sock, reinterpret_cast<char*> (buffer), count, 0);
+		receivedBytes = recv (_sock, reinterpret_cast<char*> (buffer), count, 0);
 #else
-	receivedBytes = recv (_sock, buffer, count, 0);
+		receivedBytes = recv (_sock, buffer, count, 0);
 #endif
+	}
+	else
+	{
+		// Socket is non-blocking, so try to read, see if we get any data (if there is none, this
+		// will return immediately, and is much faster than ioctl() and select() calls)
+#if defined (WIN32)
+		receivedBytes = recv (_sock, reinterpret_cast<char*> (buffer), count, 0);
+#else
+		receivedBytes = recv (_sock, buffer, count, 0);
+#endif
+		// Check if that call "timed out"
+		if (receivedBytes < 0 && ErrNo () == ERRNO_EAGAIN)
+		{
+			// No data was available, so wait for data or timeout, then read if data is available
+			if (WaitForDataOrTimeout () == TIMED_OUT)
+				return -1;
+#if defined (WIN32)
+			receivedBytes = recv (_sock, reinterpret_cast<char*> (buffer), count, 0);
+#else
+			receivedBytes = recv (_sock, buffer, count, 0);
+#endif
+		}
+		// If first call doesn't return a timeout, fall through to the result/error checking below
+	}
 
 	if (_debug >= 2)
 		cerr << "TCPPort::" << __func__ << "() Read " << receivedBytes << " bytes" << endl;
@@ -328,12 +350,10 @@ ssize_t TCPPort::BytesAvailable (void)
 {
 	// TODO:
 	// MSG_PEEK is apparently bad on Windows so we should drain what we can into a local buffer
-	// instead, then use that first during read calls. See http://support.microsoft.com/kb/192599
+	// instead, then use that first during read calls. See http://support.microsoft.com/kb/192599.
+	// Unless the buffer is static in size this will affect performance and make real-time not work.
 
 	CheckPort (true);
-
-	if (!IsDataAvailable ())
-		return 0;
 
 #if defined (WIN32)
 	unsigned long bytesAvailable = 0;
@@ -376,7 +396,8 @@ ssize_t TCPPort::BytesAvailableWait (void)
 
 	// TODO:
 	// MSG_PEEK is apparently bad on Windows so we should drain what we can into a local buffer
-	// instead, then use that first during read calls. See http://support.microsoft.com/kb/192599
+	// instead, then use that first during read calls. See http://support.microsoft.com/kb/192599.
+	// Unless the buffer is static in size this will affect performance and make real-time not work.
 #if defined (WIN32)
 	unsigned long bytesAvailable = 0;
 	if (ioctlsocket (_sock, FIONREAD, &bytesAvailable) < 0)
@@ -505,7 +526,7 @@ std::string TCPPort::GetStatus (void) const
 void TCPPort::SetTimeout (Timeout timeout)
 {
 	_timeout = timeout;
-	SetPortBlockingFlag ();
+	SetSocketBlockingFlag ();
 }
 
 void TCPPort::SetCanRead (bool canRead)
@@ -810,6 +831,9 @@ void TCPPort::WaitForConnection (void)
 // Checks if data is available, waiting for the timeout if none is available immediatly
 TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
 {
+	if (IsDataAvailable ())
+		return DATA_AVAILABLE;
+
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
 
@@ -831,46 +855,62 @@ TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
 	}
 	else if (result == 0)
 	{
-		if (_debug >= 3)
-			cerr << "TCPPort::" << __func__ << "() Timed out" << endl;
+		if (_debug >= 2)
+			cerr << "TCPPort::" << __func__ << "() Timed out." << endl;
 		// Time out
 		return TIMED_OUT;
 	}
 	if (_debug >= 2)
-		cerr << "TCPPort::" << __func__ << "() Found data waiting" << endl;
+		cerr << "TCPPort::" << __func__ << "() Found data waiting." << endl;
 	return DATA_AVAILABLE;
 }
 
 // Checks if data is available right now
 bool TCPPort::IsDataAvailable (void)
 {
-	fd_set fdSet;
-	struct timeval tv;
-
-	FD_ZERO (&fdSet);
-	FD_SET (_sock, &fdSet);
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-
-	int result = select (_sock + 1, &fdSet, NULL, NULL, &tv);
-
-	if (result < 0)
-	{
-		stringstream ss;
-		ss << "TCPPort::" << __func__ << "() select() error: (" << ErrNo () << ") " <<
-			StrError (ErrNo ());
-		throw PortException (ss.str ());
-	}
-	else if (result == 0)
+	// First peek at the buffer to see if there is anything waiting
+	char buffer;
+	ssize_t receivedBytes = 0;
+#if defined (WIN32)
+	receivedBytes = recv (_sock, &buffer, 1, MSG_PEEK);
+#else
+	receivedBytes = recv (_sock, reinterpret_cast<void*> (&buffer), 1, MSG_PEEK);
+#endif
+	if (receivedBytes > 0)
 	{
 		if (_debug >= 3)
-			cerr << "TCPPort::" << __func__ << "() Found no data waiting" << endl;
-		// No data
-		return false;
+			cerr << "TCPPort::" << __func__ << "() Found data waiting." << endl;
+		return DATA_AVAILABLE;
+	}
+	else if (receivedBytes < 0)
+	{
+		if (ErrNo () != ERRNO_EAGAIN)
+		{
+			// General error
+			stringstream ss;
+			ss << "TCPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+				StrError (ErrNo ());
+			throw PortException (ss.str ());
+		}
+		// Else no data available yet
+	}
+	else // receivedBytes == 0
+	{
+		// Peer disconnected cleanly, do the same at this end
+		if (_debug >= 1)
+			cerr << "TCPPort::" << __func__ << "() Peer disconnected cleanly." << endl;
+		Close ();
+		if (_alwaysOpen)
+		{
+			if (_debug >= 1)
+				cerr << "TCPPort::" << __func__ << "() Trying to reconnect." << endl;
+			Open ();
+		}
+		// Fall through to return no data
 	}
 	if (_debug >= 3)
-		cerr << "TCPPort::" << __func__ << "() Found data waiting" << endl;
-	return true;
+		cerr << "TCPPort::" << __func__ << "() Found no data waiting." << endl;
+	return false;
 }
 
 // Checks it he port can be written to, waiting for the timeout if it can't be written immediatly
@@ -920,7 +960,7 @@ void TCPPort::CheckPort (bool read)
 		throw PortException ("Cannot write to read-only port.");
 }
 
-void TCPPort::SetPortBlockingFlag (void)
+void TCPPort::SetSocketBlockingFlag (void)
 {
 	if (_timeout._sec == -1)
 	{
@@ -936,18 +976,18 @@ void TCPPort::SetPortBlockingFlag (void)
 		}
 #else
 		int flags;
-		if ((flags = fcntl (_sock, F_GETFD)) < 0)
+		if ((flags = fcntl (_sock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "TCPPort::" << __func__ << "() fcntl(F_GETFD) error: (" << ErrNo () << ") " <<
+			ss << "TCPPort::" << __func__ << "() fcntl(F_GETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags &= ~O_NONBLOCK;
-		if (fcntl (_sock, F_SETFD, flags) < 0)
+		if (fcntl (_sock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "TCPPort::" << __func__ << "() fcntl(F_SETFD) error: (" << ErrNo () << ") " <<
+			ss << "TCPPort::" << __func__ << "() fcntl(F_SETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -967,18 +1007,18 @@ void TCPPort::SetPortBlockingFlag (void)
 		}
 #else
 		int flags;
-		if ((flags = fcntl (_sock, F_GETFD)) < 0)
+		if ((flags = fcntl (_sock, F_GETFL)) < 0)
 		{
 			stringstream ss;
-			ss << "TCPPort::" << __func__ << "() fcntl(F_GETFD) error: (" << ErrNo () << ") " <<
+			ss << "TCPPort::" << __func__ << "() fcntl(F_GETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
 		flags |= O_NONBLOCK;
-		if (fcntl (_sock, F_SETFD, flags) < 0)
+		if (fcntl (_sock, F_SETFL, flags) < 0)
 		{
 			stringstream ss;
-			ss << "TCPPort::" << __func__ << "() fcntl(F_SETFD) error: (" << ErrNo () << ") " <<
+			ss << "TCPPort::" << __func__ << "() fcntl(F_SETFL) error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}

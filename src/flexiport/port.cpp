@@ -82,7 +82,7 @@ ssize_t Port::ReadString (std::string &buffer)
 	if (bytesAvailable < 0)
 		return -1; // Timeout
 	else if (bytesAvailable == 0)
-		return 0; // Nothing available
+		return -1; // Nothing available
 
 	if (_debug >= 2)
 	{
@@ -90,7 +90,7 @@ ssize_t Port::ReadString (std::string &buffer)
 			" bytes waiting to be read into a string" << endl;
 	}
 
-	// Read this many characters into a string - include space for a NULL incase one doesn't
+	// Read this many characters into a string - include space for a NULL in case one doesn't
 	// come in the transmitted data.
 	charBuffer = new char[bytesAvailable + 1];
 	if ((numRead = Read (charBuffer, bytesAvailable)) < 0)
