@@ -81,6 +81,10 @@ int DoChild (string portOptions)
 	SLEEP (5);
 	cout << "Client sending 'Probably message #3.'" << endl;
 	port->WriteString ("Probably message #3.");
+	SLEEP (5);
+	cout << "Client sending 'Probably message #4\\n'" << endl;
+	char charMessage2[] = "Probably message #4\n";
+	port->Write (charMessage2, strlen (charMessage2) + 1);
 	cout << "Client waiting for parting message." << endl;
 	port->ReadString (stringMessage);
 	cout << "Client got parting message: \"" << stringMessage << '"' << endl;
@@ -127,6 +131,15 @@ int DoParent (string portOptions)
 	port->Read (charBuffer, 32);
 	cout << "Server received \"" << charBuffer << '"' << endl;
 	if (strncmp (charBuffer, "Probably message #3.", 20) != 0)
+	{
+		cout << "Test failed." << endl;
+		return -1;
+	}
+	cout << "Server testing ReadUntil()" << endl;
+	int bytesReceived;
+	bytesReceived = port->ReadUntil (charBuffer, 32, 'e');
+	cout << "Server received \"" << charBuffer << "\" (" << bytesReceived << " bytes)" << endl;
+	if (strncmp (charBuffer, "Probably message #4\n", 20) != 0)
 	{
 		cout << "Test failed." << endl;
 		return -1;

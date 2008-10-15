@@ -262,10 +262,10 @@ ssize_t UDPPort::ReadFull (void * const buffer, size_t count)
 	{
 #if defined (WIN32)
 		numReceived = recv (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
-				count, 0); // No MSG_WAITALL on older versions of visual c, it seems
+				count - receivedBytes, 0); // No MSG_WAITALL on older versions of visual c, it seems
 #else
 		numReceived = recv (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
-				count, MSG_WAITALL);
+				count - receivedBytes, MSG_WAITALL);
 #endif
 		if (_debug >= 2)
 			cerr << "UDPPort::" << __func__ << "() Received " << numReceived << " bytes" << endl;
@@ -314,36 +314,86 @@ ssize_t UDPPort::ReadFull (void * const buffer, size_t count)
 
 ssize_t UDPPort::ReadUntil (void * const buffer, size_t count, uint8_t terminator)
 {
-	throw PortException (string ("UDPPort::") + __func__ +
-			string ("() This function does not work for datagram-oriented protocols."));
-	return 0;
+	// For a datagram protocol, any read will remove the entire datagram from the socket buffer, no
+	// matter how much we actually ask for (although we will still get the amount we asked for in
+	// out buffer). This means we cannot read 1 byte at a time, because we would only get the first
+	// byte of each datagram. However, since reading any of a datagram removes the whole lot, we
+	// can just keep reading as much as possible until we see the terminator somewhere in a received
+	// chunk of data.
+	// This will be fixed if static buffers are introduced.
+
+	size_t numRead = 0;
+
+	CheckPort (true);
+
+	if (_debug >= 2)
+	{
+		cerr << "UDPPort::" << __func__ << "() Reading until '" << terminator << "' or " <<
+			count << " bytes." << endl;
+	}
+	while (numRead < count)
+	{
+		ssize_t result = 0;
+		if ((result = Read (reinterpret_cast<void*> (&reinterpret_cast<char*> (buffer)[numRead]), count - numRead)) < 0)
+			return -1; // Timeout
+		else if (result == 0)
+		{
+			// No data received and didn't timeout, so must be in non-blocking mode
+			if (IsBlocking ())
+				cerr << "UDPPort::" << __func__ << "() Got no data when in blocking mode." << endl;
+			return 0;
+		}
+		else
+		{
+			// Got data
+			if (_debug >= 2)
+				cerr << "UDPPort::" << __func__ << "() Read " << result << " bytes." << endl;
+			// Go through the data just received and check if any bytes match the terminator
+			bool foundTerminator = false;
+			// numKeep starts at 1 because we will keep at least one byte if the first is terminal
+			size_t numKeep = 1;
+			for (size_t ii = numRead; ii < numRead + result; ii++, numKeep++)
+			{
+				if (reinterpret_cast<uint8_t*>(buffer)[ii] == terminator)
+				{
+					if (_debug >= 2)
+						cerr << "UDPPort::" << __func__ << "() Got terminator character." << endl;
+					foundTerminator = true;
+					// We don't care about any data passed this point - as far as the application
+					// knows, it's as much garbage as real data, so don't waste time clearing it
+					break;
+				}
+			}
+			numRead += numKeep;
+			if (foundTerminator)
+			{
+				// Got the terminator so stop reading now
+				break;
+			}
+		}
+	}
+
+	return numRead;
 }
 
 ssize_t UDPPort::ReadStringUntil (std::string &buffer, char terminator)
 {
 	throw PortException (string ("UDPPort::") + __func__ +
-			string ("() This function does not work for datagram-oriented protocols."));
-	return 0;
-}
-
-ssize_t UDPPort::ReadLine (char * const buffer, size_t count)
-{
-	throw PortException (string ("UDPPort::") + __func__ +
-			string ("() This function does not work for datagram-oriented protocols."));
+			string ("() This function does not work for datagram protocols."));
 	return 0;
 }
 
 ssize_t UDPPort::Skip (size_t count)
 {
 	throw PortException (string ("UDPPort::") + __func__ +
-			string ("() This function does not work for datagram-oriented protocols."));
+			string ("() This function does not work for datagram protocols."));
 	return 0;
 }
 
 ssize_t UDPPort::SkipUntil (uint8_t terminator, unsigned int count)
 {
 	throw PortException (string ("UDPPort::") + __func__ +
-			string ("() This function does not work for datagram-oriented protocols."));
+			string ("() This function does not work for datagram protocols."));
 	return 0;
 }
 

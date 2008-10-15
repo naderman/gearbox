@@ -46,8 +46,8 @@ two known end points. It cannot send to any address other than the configured ad
 See the @ref Port class documentation for how to use the common API. Note that some parts of the API
 do not apply due to the nature of the datagram-oriented protocol. Because each datagram is
 individual and no merging is typically performed between datagrams, several flexiport functions do
-not work (they were designed for stream-oriented communications). These are @ref ReadUntil,
-@ref ReadStringUntil, @ref ReadLine, @ref Skip, and @ref SkipUntil. This will be (hopefully) be
+not work (they were designed for stream-oriented communications). These are @ref ReadStringUntil,
+@ref ReadLine (std::string version), @ref Skip, and @ref SkipUntil. This will be (hopefully) be
 fixed soon.
 
 TODO: Add support for configuring the destination address based on the first data received, to allow
@@ -90,8 +90,6 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 		ssize_t ReadUntil (void * const buffer, size_t count, uint8_t terminator);
 		/// @brief Read a string until the specified termination character is received.
 		ssize_t ReadStringUntil (std::string &buffer, char terminator);
-		/// @brief Read a new-line terminated string of data.
-		ssize_t ReadLine (char * const buffer, size_t count);
 		/// @brief Dump data until the specified number of bytes have been read.
 		ssize_t Skip (size_t count);
 		/** @brief Read and dump data until the specified termination character has been seen @ref
