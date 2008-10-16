@@ -10,17 +10,18 @@
 
 #include "trivialtracer.h"
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
 namespace gbxutilacfr {
 
-TrivialTracer::TrivialTracer( bool debug, bool info, bool warn, bool error ) :
-    debug_(debug),
-    info_(info),
-    warn_(warn),
-    error_(error)
+TrivialTracer::TrivialTracer( int debug, int info, int warn, int error )
 {
+    traceLevels_[Tracer::InfoTrace]    = info;
+    traceLevels_[Tracer::WarningTrace] = warn;
+    traceLevels_[Tracer::ErrorTrace]   = error;
+    traceLevels_[Tracer::DebugTrace]   = debug;
 }
 
 void
@@ -32,35 +33,36 @@ TrivialTracer::print( const std::string &message )
 void
 TrivialTracer::info( const std::string &message, int level )
 {
-    if ( info_ )
+    if ( traceLevels_[Tracer::InfoTrace] >= level )
         cout << "info: " << message << endl;
 }
 
 void
 TrivialTracer::warning( const std::string &message, int level )
 {
-    if ( warn_ )
+    if ( traceLevels_[Tracer::WarningTrace] >= level )
         cout << "warn: " << message << endl;
 }
     
 void
 TrivialTracer::error( const std::string &message, int level )
 {
-    if ( error_ )
+    if ( traceLevels_[Tracer::ErrorTrace] >= level )
         cout << "error: " << message << endl;
 }
 
 void
 TrivialTracer::debug( const std::string &message, int level )
 {
-    if ( debug_ )
+    if ( traceLevels_[Tracer::DebugTrace] >= level )
         cout << "debug: " << message << endl;
 }
 
 int 
 TrivialTracer::verbosity( TraceType traceType, DestinationType destType ) const
 {
-    return 10;
+    assert( traceType >= 0 && traceType <= Tracer::NumberOfTraceTypes );
+    return traceLevels_[traceType];
 }
 
 }

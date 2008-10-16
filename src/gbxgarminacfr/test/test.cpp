@@ -66,9 +66,9 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    bool debug = true;
+    bool debug = 5;
     if ( quiet )
-        debug = false;
+        debug = 0;
     gbxutilacfr::TrivialTracer tracer( debug );
     gbxutilacfr::TrivialStatus status( tracer );
 

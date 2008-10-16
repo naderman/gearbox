@@ -8,7 +8,7 @@ int main( int argc, char **argv )
 {
     int opt;
     std::string port = "/dev/ttyS0";
-    bool debug = false;
+    int debug = 0;
     
     // Get some options from the command line
     while ((opt = getopt(argc, argv, "p:v")) != -1)
@@ -19,7 +19,7 @@ int main( int argc, char **argv )
                 port = optarg;
                 break;
             case 'v':
-                debug = true;
+                debug = 5;
                 break;
             default:
                 cout << "Usage: " << argv[0] << " [-p port] [-v(erbose)]" << endl

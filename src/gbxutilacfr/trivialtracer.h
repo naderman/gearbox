@@ -23,7 +23,14 @@ namespace gbxutilacfr {
 class TrivialTracer : public Tracer
 {
 public:
-    TrivialTracer( bool debug=false, bool info=true, bool warn=true, bool error=true );
+
+    //!
+    //! Integers specify the tracing level: we'll print out all level at or below this.
+    //!
+    TrivialTracer( int debug=0,
+                   int info=9,
+                   int warn=9,
+                   int error=9 );
 
     virtual void print( const std::string &message );
     virtual void info( const std::string &message, int level=1 );
@@ -33,10 +40,8 @@ public:
     virtual int verbosity( TraceType traceType, DestinationType destType ) const;
 
 private:
-    bool debug_;
-    bool info_;
-    bool warn_;
-    bool error_;
+
+    int traceLevels_[Tracer::NumberOfTraceTypes];
 };
 
 } // namespace

@@ -31,7 +31,7 @@ int main( int argc, char **argv )
     int opt;
     int baud = 38400;
     string port = "/dev/ttyS0";
-    bool debug = false;
+    bool debug = 0;
     bool showScan = false;
 
     // Get some options from the command line
@@ -46,7 +46,7 @@ int main( int argc, char **argv )
             baud = atoi( optarg );
             break;
         case 'v':
-            debug = true;
+            debug = 5;
             break;
         case 's':
             showScan = true;
