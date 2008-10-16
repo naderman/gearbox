@@ -65,7 +65,7 @@ namespace gbxsickacfr {
     //
     // Acknowledgement types
     //
-    inline uChar ack( uChar command ) { return command + 0x80; }
+    inline uChar ack( uChar command ) { return (uChar)(command + 0x80); }
 
     // Need to do this so they can be used in constant expressions (eg in switch stmts)
     const uChar ACK_INIT_AND_RESET = CMD_INIT_AND_RESET + 0x80;
