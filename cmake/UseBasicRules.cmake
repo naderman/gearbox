@@ -16,7 +16,7 @@ ENDIF( GBX_BUILD_SUBMITTED )
 # Platform-specific compiler and linker flags
 #
 IF( NOT GBX_OS_WIN )
-    ADD_DEFINITIONS( "-Wall" )
+    ADD_DEFINITIONS( "-Wall -Wconversion" )
 ELSE ( NOT GBX_OS_WIN )
     ADD_DEFINITIONS( "-Wall -D_CRT_SECURE_NO_DEPRECATE" )
 ENDIF( NOT GBX_OS_WIN )
