@@ -130,8 +130,8 @@ NmeaMessage::testChecksumOk()
    
     //save the high and low bytes of the checksum
     //Make sure they are in upper case!
-    chksum_HIB = toupper(*(++ptr));  
-    chksum_LOB = toupper(*(ptr + 1));
+    chksum_HIB = (char)toupper(*(++ptr));  
+    chksum_LOB = (char)toupper(*(ptr + 1));
    
 
     //invalidate the existing checksum
@@ -189,6 +189,10 @@ NmeaMessage::addCheckSum()
             break;
         }
     
+        // alexm: gcc-4.3 is very strict with the next line.
+        // not sure what to do about it yet.
+        // http://gcc.gnu.org/ml/gcc/2008-05/msg00363.html
+
         // Keep the running XOR total
         chkRunning ^= nextChar;
     }
