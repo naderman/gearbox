@@ -106,10 +106,10 @@ int main(void){
             memcpy(faultBuf, buf, bufLen);
             errorByte = (int) ((double)faultBufLen * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
             errorBit = (int) (8.0 * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
-            if(0 == faultBuf[errorByte] && (1u<<errorBit))
-                faultBuf[errorByte] = faultBuf[errorByte] + (1u<<errorBit);
+            if(0 == faultBuf[errorByte] && (unsigned char)(1<<errorBit))
+                faultBuf[errorByte] = faultBuf[errorByte] + (unsigned char)(1<<errorBit);
             else
-                faultBuf[errorByte] = faultBuf[errorByte] - (1u<<errorBit);
+                faultBuf[errorByte] = faultBuf[errorByte] - (unsigned char)(1<<errorBit);
             uint32_t tmpCrc;
             if(0 == (tmpCrc = gnua::crc(faultBuf, faultBufLen))){
                 singleRandomBitFlipFailNum++;
@@ -121,10 +121,10 @@ int main(void){
                 errorByteTwo = (int) ((double)faultBufLen * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
                 errorBitTwo = (int) (8.0 * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
             }while (errorByte==errorByteTwo && errorBit==errorBitTwo);// make sure we don't flip the same bit twice
-            if(0 == faultBuf[errorByteTwo] && (1u<<errorBitTwo))
-                faultBuf[errorByteTwo] = faultBuf[errorByteTwo] + (1u<<errorBitTwo);
+            if(0 == faultBuf[errorByteTwo] && (unsigned char)(1<<errorBitTwo))
+                faultBuf[errorByteTwo] = faultBuf[errorByteTwo] + (unsigned char)(1<<errorBitTwo);
             else
-                faultBuf[errorByteTwo] = faultBuf[errorByteTwo] - (1u<<errorBitTwo);
+                faultBuf[errorByteTwo] = faultBuf[errorByteTwo] - (unsigned char)(1<<errorBitTwo);
             uint32_t tmpCrc;
             if(0 == (tmpCrc = gnua::crc(faultBuf, faultBufLen))){
                 doubleRandomBitFlipFailNum++;
@@ -137,10 +137,10 @@ int main(void){
                 errorBitThree = (int) (8.0 * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
             }while ((errorByteThree==errorByte && errorBitThree==errorBit)
                     || (errorByteThree==errorByteTwo && errorBitThree==errorBitTwo));// make sure we don't flip the same bit twice
-            if(0 == faultBuf[errorByteThree] && (1u<<errorBitThree))
-                faultBuf[errorByteThree] = faultBuf[errorByteThree] + (1u<<errorBitThree);
+            if(0 == faultBuf[errorByteThree] && (unsigned char)(1<<errorBitThree))
+                faultBuf[errorByteThree] = faultBuf[errorByteThree] + (unsigned char)(1<<errorBitThree);
             else
-                faultBuf[errorByteThree] = faultBuf[errorByteThree] - (1u<<errorBitThree);
+                faultBuf[errorByteThree] = faultBuf[errorByteThree] - (unsigned char)(1<<errorBitThree);
             uint32_t tmpCrc;
             if(0 == (tmpCrc = gnua::crc(faultBuf, faultBufLen))){
                 tripleRandomBitFlipFailNum++;
