@@ -96,20 +96,22 @@ namespace gbxnovatelacfr
 Driver::Driver( const Config& cfg) :
     baud_(115200),
     config_(cfg),
-    tracer_(new gbxutilacfr::TrivialTracer())
+    tracerInternal_(new gbxutilacfr::TrivialTracer()),
+    tracer_(*(tracerInternal_.get()))
 {
-    assert(0 != tracer_.get());
+    //assert(0 != tracer_.get());
     configure();
     return;
 }
 
 Driver::Driver( const Config& cfg,
-        gbxutilacfr::Tracer* tracer) :
+        gbxutilacfr::Tracer &tracer) :
     baud_(115200),
     config_(cfg),
+    tracerInternal_(0),
     tracer_(tracer)
 {
-    assert(0 != tracer_.get());
+    //assert(0 != tracer_.get());
     configure();
     return;
 }
@@ -139,18 +141,18 @@ Driver::configure( ) {
     configureGps();
     requestData();
     serial_->flush();
-    tracer_->info("Setup done, starting normal operation!");
+    tracer_.info("Setup done, starting normal operation!");
     return;
 }
 
 Driver::~Driver() {
     // just in case something is running... stops the novatel logging any messages
     try{
-        tracer_->info("Stopping NovatelSpan driver!");
+        tracer_.info("Stopping NovatelSpan driver!");
         serial_->flush();
         serial_->writeString( "unlogall\r\n" );
         serial_->drain();
-        tracer_->info("NovatelSpan driver stopped!");
+        tracer_.info("NovatelSpan driver stopped!");
     }
     catch(...){
         //no throwing from destructors
@@ -173,7 +175,7 @@ Driver::connectToHardware() {
     int currentBaudrate = 0;
     bool correctBaudrate = false;
 
-    tracer_->info( "Trying to hook up to receiver at different Baudrates" );
+    tracer_.info( "Trying to hook up to receiver at different Baudrates" );
     int maxTry = 4;
     int successThresh = 4;
     int timeOutMsec = 250;
@@ -194,7 +196,7 @@ Driver::connectToHardware() {
         << currentBaudrate << "bps; "
         << "Resetting to configured speed: "
         << baud_ << "bps";
-    tracer_->info(ss.str());
+    tracer_.info(ss.str());
     char str[256];
     sprintf( str,"com com1 %d n 8 1 n off on\r\n", baud_ );
     serial_->writeString( str );
@@ -212,7 +214,7 @@ Driver::configureImu() {
     int timeOutMsec = 200;
 
     if(config_.enableImu_){
-        tracer_->info("Configuring IMU, switching INS ON!");
+        tracer_.info("Configuring IMU, switching INS ON!");
         imuDecoder_.reset(gnua::createImuDecoder(config_.imuType_));
         std::stringstream ss;
         // tell the novatel what serial port the imu is attached to (com3 == aux)
@@ -240,10 +242,10 @@ Driver::configureImu() {
         }
         //force the IMU to re-align at every startup
         //put = serial_->writeString( "inscommand reset\r\n" );
-        //tracer_->info("Reset IMU; Waiting 5 seconds before continuing!");
+        //tracer_.info("Reset IMU; Waiting 5 seconds before continuing!");
         //sleep(5);
     }else{
-        tracer_->info("No IMU, switching INS OFF!");
+        tracer_.info("No IMU, switching INS OFF!");
         challenge = "inscommand disable\r\n";
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -359,7 +361,7 @@ Driver::configureGps() {
 
     // CDGPS
     if(config_.enableCDGPS_){
-        tracer_->info("Turning on CDGPS!");
+        tracer_.info("Turning on CDGPS!");
         challenge = ( "ASSIGNLBAND CDGPS 1547547 4800\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -370,7 +372,7 @@ Driver::configureGps() {
 
     // turn SBAS on/off (essentially global DGPS)
     if(config_.enableSBAS_){
-        tracer_->info("Turning on SBAS!");
+        tracer_.info("Turning on SBAS!");
         challenge = ( "SBASCONTROL ENABLE Auto 0 ZEROTOTWO\r\n");
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -386,7 +388,7 @@ Driver::configureGps() {
         }
     }
     else{
-        tracer_->info("Turning off SBAS!");
+        tracer_.info("Turning off SBAS!");
         challenge = ( "SBASCONTROL DISABLE Auto 0 NONE\r\n");
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -397,7 +399,7 @@ Driver::configureGps() {
 
     // rtk
     if(config_.enableRTK_){
-        tracer_->info("Turning on RTK!");
+        tracer_.info("Turning on RTK!");
         challenge = ( "com com2,9600,n,8,1,n,off,on\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -447,7 +449,7 @@ Driver::requestData() {
     if(config_.enableGpsPos_){
         std::stringstream ss;
         ss << "Turning on GPS position at " << 1.0/config_.dtGpsPos_ << "Hz!";
-        tracer_->info(ss.str().c_str());
+        tracer_.info(ss.str().c_str());
         ss.str("");
         ss << "log bestgpsposb ontime " << config_.dtGpsPos_ << "\r\n";
         challenge = ss.str();
@@ -462,7 +464,7 @@ Driver::requestData() {
     if(config_.enableGpsVel_){
         std::stringstream ss;
         ss << "Turning on GPS velocity at " << 1.0/config_.dtGpsVel_ << "Hz!";
-        tracer_->info(ss.str().c_str());
+        tracer_.info(ss.str().c_str());
         ss.str("");
         ss << "log bestgpsvelb ontime " << config_.dtGpsVel_ << "\r\n";
         challenge = ss.str();
@@ -480,7 +482,7 @@ Driver::requestData() {
     if(config_.enableInsPva_){
         std::stringstream ss;
         ss << "Turning on INS position/velocity/orientation at " << 1.0/config_.dtInsPva_ << "Hz!";
-        tracer_->info(ss.str().c_str());
+        tracer_.info(ss.str().c_str());
         ss.str("");
         ss << "log inspvasb ontime " << config_.dtInsPva_ << "\r\n";
         challenge = ss.str();
@@ -496,7 +498,7 @@ Driver::requestData() {
 
     // raw accelerometer and gyro data
     if(config_.enableRawImu_){
-        tracer_->info("Turning on raw imu data!");
+        tracer_.info("Turning on raw imu data!");
         challenge = ( "log rawimusb onnew\r\n" );
         if(false == gnua::sendCmdWaitForResponse(challenge, ack, errorResponse, *(serial_.get()), timeOutMsec)){
             std::stringstream ss;
@@ -534,12 +536,19 @@ Driver::read(){
                 case gnua::RawImuSBLogType:
                     data = createExternalMsg(msg.rawImu, timeStamp, imuDecoder_.get());
                     break;
+                case gnua::InvalidLogType:
+                    {
+                        std::stringstream ss;
+                        ss <<"Id invalid, looks like we didn't get anything from the receiver!" << std::endl;
+                        throw ( gua::Exception(ERROR_INFO, ss.str()) );
+                    }
+                    break;
                 default:
                     {
                         std::stringstream ss;
                         ss <<"Got unexpected message type from receiver; id: " << msg.header.msgId << std::endl;
                         if(config_.ignoreUnknownMessages_){
-                            tracer_->warning(ss.str());
+                            tracer_.warning(ss.str());
                         }else{
                             throw ( gua::Exception(ERROR_INFO, ss.str()) );
                         }
@@ -926,7 +935,7 @@ namespace{
 
     uint16_t
     readNovatelMessage(union NovatelMessage &msg, struct timeval &timeStamp, gbxserialacfr::Serial *serial) {
-        uint16_t id = -1;
+        uint16_t id = gnua::InvalidLogType;
         msg.header.sb1 = 0;
 
         // skip everything until we get the first sync byte

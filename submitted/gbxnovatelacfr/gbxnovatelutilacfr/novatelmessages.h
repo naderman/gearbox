@@ -14,7 +14,8 @@ enum BinaryLogType{
     RawImuSBLogType = 325,
     BestGpsPosBLogType = 423,
     BestGpsVelBLogType = 506,
-    InsPvaSBLogType = 508
+    InsPvaSBLogType = 508,
+    InvalidLogType
 };
 
 #pragma pack(push,1)

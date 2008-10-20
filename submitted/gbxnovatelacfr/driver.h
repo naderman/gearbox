@@ -432,7 +432,7 @@ public:
     Driver( const Config &cfg);
     //!@brief full control over tracing (e.g. to syslog)
     //!@param tracer you need to provide this guy (via new), do NOT delete it, it will be deleted when your Driver object goes out of scope
-    Driver( const Config &cfg, gbxutilacfr::Tracer* tracer);
+    Driver( const Config &cfg, gbxutilacfr::Tracer &tracer);
     //!@}
     ~Driver();
 
@@ -464,7 +464,8 @@ private:
     int baud_;
 
     Config config_;
-    std::auto_ptr<gbxutilacfr::Tracer > tracer_;
+    std::auto_ptr<gbxutilacfr::Tracer> tracerInternal_;
+    gbxutilacfr::Tracer& tracer_;
 };
 
 
