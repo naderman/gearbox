@@ -107,7 +107,7 @@ int main(void){
             errorByte = (int) ((double)faultBufLen * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
             errorBit = (int) (8.0 * (rand_r(&randSeed) / (RAND_MAX + 1.0)));
             if(0 == faultBuf[errorByte] && (unsigned char)(1<<errorBit))
-                faultBuf[errorByte] = faultBuf[errorByte] + (unsigned char)(1<<errorBit);
+                faultBuf[errorByte] = faultBuf[errorByte] + ((unsigned char)1<<errorBit);
             else
                 faultBuf[errorByte] = faultBuf[errorByte] - (unsigned char)(1<<errorBit);
             uint32_t tmpCrc;
