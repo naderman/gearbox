@@ -133,7 +133,7 @@ public:
     //! function yourself @e before calling error() if there is a significant overhead
     //! in forming the tracing string. See class documentation for an example of such
     //! usage.
-    virtual int verbosity( TraceType traceType, DestinationType destType ) const = 0;
+    virtual int verbosity( TraceType traceType, DestinationType destType=ToAny ) const = 0;
 
     static std::string toString( Tracer::TraceType type )
     {

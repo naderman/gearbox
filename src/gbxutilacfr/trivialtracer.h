@@ -37,7 +37,7 @@ public:
     virtual void warning( const std::string &message, int level=1 );
     virtual void error( const std::string &message, int level=1 );
     virtual void debug( const std::string &message, int level=1 );
-    virtual int verbosity( TraceType traceType, DestinationType destType ) const;
+    virtual int verbosity( TraceType traceType, DestinationType destType=Tracer::ToAny ) const;
 
 private:
 

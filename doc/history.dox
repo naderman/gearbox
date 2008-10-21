@@ -25,6 +25,15 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @section gbx_doc_history_head Changes in SVN since Last Release
 
+@par Updated libraries
+
+- libGbxSickAcfr
+  - A bit more careful when dealing with chunks of buffer that can't be parsed, should be a bit more robust (AlexB).
+
+- libGbxUtilAcfr
+  - Changed interface for Tracer: when querying verbosity, default destination argument is 'ToAny' (AlexB).
+  - Changed implementation of TrivialTracer to allow multiple levels of tracing verbosity (AlexB).
+
 @section gbx_doc_history_807 Changes in Release 8.07
 
 @par Project wide
