@@ -309,7 +309,7 @@ Driver::desiredAngularResolution()
     assert( angleIncrementInHundredthDegrees == ANGULAR_RESOLUTION_1_0_DEG ||
             angleIncrementInHundredthDegrees == ANGULAR_RESOLUTION_0_5_DEG ||
             angleIncrementInHundredthDegrees == ANGULAR_RESOLUTION_0_25_DEG );
-    return angleIncrementInHundredthDegrees;
+    return (uint16_t)angleIncrementInHundredthDegrees;
 }
 
 bool 

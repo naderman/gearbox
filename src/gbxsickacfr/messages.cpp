@@ -120,7 +120,7 @@ toString( const uint16_t *s, int len )
 
 uint16_t getWord( const uChar *buf, int &pos )
 {
-    uint16_t word = buf[pos] | (buf[pos+1]<<8);
+    uint16_t word = (uint16_t)( buf[pos] | (buf[pos+1]<<8) );
     pos += sizeof(uint16_t);
     return word;
 }
@@ -187,7 +187,7 @@ LmsResponse::toString() const
 bool
 LmsResponse::isError() const
 {
-    uChar generalStatus = status & STATUS_GENERAL_MASK ;
+    uChar generalStatus = (uChar)( status & STATUS_GENERAL_MASK );
     if ( generalStatusIsError( generalStatus ) )
     {
         return true;
@@ -212,7 +212,7 @@ LmsResponse::isError() const
 bool
 LmsResponse::isWarn() const
 {
-    uChar generalStatus = status & STATUS_GENERAL_MASK ;
+    uChar generalStatus = (uChar)( status & STATUS_GENERAL_MASK );
     if ( generalStatusIsWarn( generalStatus ) )
     {
         return true;
@@ -547,8 +547,8 @@ parseLmsMeasurementData( const uChar *buf, int len )
 {
     LmsMeasurementData *d = new LmsMeasurementData;
     
-    uChar measurementMode = buf[1] >> 6;
-    float rangeConversion;
+    uChar measurementMode = (uChar)( buf[1] >> 6 );
+    double rangeConversion;
     if ( measurementMode == MEASURED_VALUE_UNIT_MM )
     {
         rangeConversion = 1.0/1000.0;
@@ -913,8 +913,16 @@ parseBufferForResponses( const uChar  *buffer,
     response = new LmsResponse;
     response->type = buffer[msgStart+4];
     response->status = buffer[msgStart+telegramLength-3];
-    parseResponse( response->type, &(buffer[msgStart+5]), commandAndDataLength-2, *response );
-    return true;
+
+    try {
+        parseResponse( response->type, &(buffer[msgStart+5]), commandAndDataLength-2, *response );
+        return true;
+    }
+    catch ( const std::exception &e )
+    {
+        cout << __func__ << "(): Error parsing response: " << e.what() << endl;
+        return false;
+    }
 }
 
 void
