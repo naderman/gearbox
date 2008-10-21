@@ -583,7 +583,7 @@ parseLmsMeasurementData( const uChar *buf, int len )
     {
         uChar loByte = buf[pos];
         uChar hiByte = buf[pos+1];
-        d->ranges[i] = ( ((hiByte&0x1f)<<8) + loByte ) * rangeConversion;
+        d->ranges[i] = (float)(( ((hiByte&0x1f)<<8) + loByte ) * rangeConversion);
         d->intensities[i] = (hiByte & 0xe0) >> 5;
 
         pos += sizeof(uint16_t);
@@ -703,8 +703,8 @@ constructTelegram( std::vector<uChar>       &buffer,
     int pos=0;
     buffer[pos++] = STX;
     buffer[pos++] = ADDRESS;
-    buffer[pos++] = commandAndData.size() & 0x00ff;
-    buffer[pos++] = commandAndData.size() >> 8;
+    buffer[pos++] = (unsigned char)(commandAndData.size() & 0x00ff);
+    buffer[pos++] = (unsigned char)(commandAndData.size() >> 8);
 
     memcpy( &(buffer[pos]),
             &(commandAndData[0]),
@@ -712,8 +712,8 @@ constructTelegram( std::vector<uChar>       &buffer,
 
     int checksum = computeSickChecksum( &(buffer[0]),
                                         buffer.size()-CHECKSUM_LENGTH );
-    buffer[ buffer.size()-2 ] = checksum & 0xFF;
-    buffer[ buffer.size()-1 ] = checksum >> 8;
+    buffer[ buffer.size()-2 ] = (unsigned char)(checksum & 0xFF);
+    buffer[ buffer.size()-1 ] = (unsigned char)(checksum >> 8);
 }
 
 void
@@ -989,8 +989,8 @@ void constructConfigurationCommand( const LmsConfigurationData &c,
     int pos=0;
     commandAndData[pos++] = CMD_CONFIGURE_LMS;
 
-    commandAndData[pos++] = c.blanking & 0xff;
-    commandAndData[pos++] = (c.blanking>>8) & 0xff;
+    commandAndData[pos++] = (unsigned char)(c.blanking & 0xff);
+    commandAndData[pos++] = (unsigned char)((c.blanking>>8) & 0xff);
 
     commandAndData[pos++] = 0x70; // not used for lms 211/221/291
     commandAndData[pos++] = c.sensitivity;
@@ -1023,10 +1023,10 @@ void constructConfigurationCommand( const LmsConfigurationData &c,
     commandAndData[pos++] = c.pixelOrientedEvaluation;
     commandAndData[pos++] = c.singleMeasuredValueEvaluation;
 
-    commandAndData[pos++] = c.restartTimeFields & 0xff;
-    commandAndData[pos++] = (c.restartTimeFields>>8) & 0xff;
-    commandAndData[pos++] = c.multipleEvaluationForDazzle & 0xff;
-    commandAndData[pos++] = (c.multipleEvaluationForDazzle>>8) & 0xff;
+    commandAndData[pos++] = (unsigned char)(c.restartTimeFields & 0xff);
+    commandAndData[pos++] = (unsigned char)((c.restartTimeFields>>8) & 0xff);
+    commandAndData[pos++] = (unsigned char)(c.multipleEvaluationForDazzle & 0xff);
+    commandAndData[pos++] = (unsigned char)((c.multipleEvaluationForDazzle>>8) & 0xff);
 
     assert( pos == (int)(commandAndData.size()) );
 }
@@ -1046,10 +1046,10 @@ void constructSwitchVariant( uint16_t scanningAngle,
 
     commandAndData.resize( 5 );
     commandAndData[0] = CMD_SWITCH_VARIANT;
-    commandAndData[1] = scanningAngle & 0xff;
-    commandAndData[2] = (scanningAngle>>8) & 0xff;
-    commandAndData[3] = angularResolution & 0xff;
-    commandAndData[4] = (angularResolution>>8) & 0xff;
+    commandAndData[1] = (unsigned char)(scanningAngle & 0xff);
+    commandAndData[2] = (unsigned char)((scanningAngle>>8) & 0xff);
+    commandAndData[3] = (unsigned char)(angularResolution & 0xff);
+    commandAndData[4] = (unsigned char)((angularResolution>>8) & 0xff);
 }
 
 void constructRequestOperatingDataCounter( std::vector<uChar> &commandAndData )
