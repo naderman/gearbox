@@ -224,6 +224,14 @@ SerialDeviceHandler::processBuffer()
             throw;
         }
 
+        if ( numBytesParsed == 0 )
+        {
+            stringstream ss;
+            ss << "SerialDeviceHandler: Zero bytes were parsed, but buffer contains "<<buffer_.size()<<" bytes! (gotMessage="<<gotMessage<<").  responseParser_ shouldn't do this to us.";
+            tracer_.warning( ss.str() );
+            numBytesParsed = 1;
+        }
+
         removeParsedData( buffer_, numBytesParsed );
 
         if ( gotMessage )
