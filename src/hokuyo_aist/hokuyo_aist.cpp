@@ -649,8 +649,6 @@ string HokuyoData::ErrorCodeToString (uint32_t errorCode)
 	{
 		switch (errorCode)
 		{
-			case -1:
-				return "No error.";
 			case 1:
 				return "No object in the range.";
 			case 2:
@@ -671,8 +669,6 @@ string HokuyoData::ErrorCodeToString (uint32_t errorCode)
 	{
 		switch (errorCode)
 		{
-			case -1:
-				return "No error.";
 			case 0:
 				return "Detected object is possibly at 22m.";
 			case 1:
