@@ -43,6 +43,9 @@ public:
  *  Write new data with Notify::set. The data is delivered to the data handler by
  *  calling NotifyHandler::handleData in the registered NotifyHandler.
  *
+ *  When used with smart pointers (e.g. IceUtil smart pointers), this class will not 
+ *  perform a deep copy.
+ *
  *  @see Buffer, Proxy
  */
 template<class Type>

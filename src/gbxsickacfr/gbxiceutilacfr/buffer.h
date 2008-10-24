@@ -34,7 +34,9 @@ enum BufferType
 /*!
 @brief A thread-safe data pipe with buffer semantics.
 
-For a type-safe buffer, template over the specific object Type you want to put in it. Buffering Ice smart pointers requires a specialized class PtrBuffer.
+For a type-safe buffer, template over the specific object Type you want to put in it. You can use 
+this container for storing smart pointers (e.g. IceUtil smart pointers). In this case the container will
+only store the pointers and will not perform a deep copy.
 
 You should always try to @ref get() data before blocking with @ref getNext() because closely spaced push events may be lost. For example:
 @verbatim
@@ -57,7 +59,7 @@ while (1)
 @endverbatim
 
 @note This implementation uses IceUtil threading classes. See example in sec. 28.9.2 of the Ice manual.
-@see PtrBuffer, Notify, Proxy
+@see Notify, Proxy
 */
 template<class Type>
 class Buffer : public IceUtil::Monitor<IceUtil::Mutex>
@@ -113,7 +115,7 @@ public:
      *  Non-popping and non-blocking read from the front of the buffer.
      *
      *  Calls to @ref get() on an empty buffer raises an gbxutilacfr::Exception exception.
-     *  You can trap these and call @ref getNext() which will block until new data arrives.
+     *  You can catch these and call @ref getNext() which will block until new data arrives.
      */
     void  get( Type & obj ) const;
 

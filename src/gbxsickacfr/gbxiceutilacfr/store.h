@@ -1,6 +1,6 @@
 /*
  * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
- *               http://gearbox.sf.net/
+             http://gearbox.sf.net/
  * Copyright (c) 2004-2008 Alex Brooks, Alexei Makarenko, Tobias Kaupp
  *
  * This distribution is licensed to you under the terms described in
@@ -20,20 +20,23 @@
 namespace gbxiceutilacfr {
 
 /*!
- *  @brief Thread-safe storage for a single data objects.
- *
- *  This container is similar to a circular Buffer of size one but with two
- *  differences:
- *  - a copy of the data is always available, yet the user knows when new
- *    data has arrived by calling isNewData().
- *  - getNext() returns the new data arrives (not when the buffer
- *    is non-empty.
- *
- *  Write to it with set(). Read its contents with get(). Trying to read from
- *  an empty Store raises an gbxutilacfr::Exception.
- * 
- *  @note Replaces the deprecated Proxy class.
- *  @see Buffer, Notify
+@brief Thread-safe storage for a single data objects.
+
+This container is similar to a circular Buffer of size one but with two
+differences:
+- a copy of the data is always available, yet the user knows when new
+  data has arrived by calling isNewData().
+- getNext() returns the new data arrives (not when the buffer
+  is non-empty.
+
+You can use this container for storing smart pointers (e.g. IceUtil smart pointers). 
+In this case the container will only store the pointer and will not perform a deep copy.
+
+Write to it with set(). Read its contents with get(). Trying to read from
+an empty Store raises an gbxutilacfr::Exception.
+
+@note Replaces the deprecated Proxy class.
+@see Buffer, Notify
  */
 template<class Type>
 class Store : public IceUtil::Monitor<IceUtil::Mutex>
@@ -60,14 +63,13 @@ public:
     void get( Type & obj ) const;
 
     /*!
-     *  @brief Waits until the next update and returns the new value.
-     *  If the Store is empty, @ref getNext blocks until the Store is set and returns the new value.
-     *  By default, there is no timeout (negative value). Returns 0 if successful.
-     *
-     *  If timeout is set to a positive value (in milliseconds) and the wait times out, the function returns -1
-     *  and the object argument itself is not touched. In the rare event of spurious wakeup,
-     *  the return value is 1.
-     *
+    @brief Waits until the next update and returns the new value.
+    If the Store is empty, @ref getNext blocks until the Store is set and returns the new value.
+    By default, there is no timeout (negative value). Returns 0 if successful.
+    
+    If timeout is set to a positive value (in milliseconds) and the wait times out, the function returns -1
+    and the object argument itself is not touched. In the rare event of spurious wakeup,
+    the return value is 1.
      */
     int  getNext( Type & obj, int timeoutMs=-1 ) const;
     
