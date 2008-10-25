@@ -83,7 +83,7 @@ FILE_PATTERNS          = *.cpp \
                          *.c \
                          *.cc	
 RECURSIVE              = YES
-EXCLUDE                = ../src/gbxsickacfr/gbxiceutilacfr/
+EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = ../src
