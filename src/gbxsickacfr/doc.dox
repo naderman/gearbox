@@ -80,11 +80,3 @@ This namespace is part of a SICK laser driver
 @see @ref gbx_library_gbxsickacfr
 
 */
-
-/*!
-@brief A set of auxiliary functions using libIceUtil
-@namespace gbxiceutilacfr
-
-The library libGbxIceUtilAcfr is used internally by libraries and drivers developed at ACFR.
-
-*/
