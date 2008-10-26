@@ -223,7 +223,7 @@ SerialDeviceHandler::processBuffer()
             tracer_.warning( ss.str() );
             throw;
         }
-
+/* ALEXM: this is the diff from post-bindoon which broke poly device
         if ( numBytesParsed == 0 )
         {
             stringstream ss;
@@ -231,7 +231,7 @@ SerialDeviceHandler::processBuffer()
             tracer_.warning( ss.str() );
             numBytesParsed = 1;
         }
-
+ALEXM */
         removeParsedData( buffer_, numBytesParsed );
 
         if ( gotMessage )
