@@ -19,13 +19,19 @@ namespace gbxutilacfr {
 //! Possible subsystem status values
 enum SubsystemState
 {
+    //! Subsystem has been created but has not started initialisation process.
     SubsystemIdle,
+    //! Subsystem is preparing to work, e.g. initialising its resources, etc.
     SubsystemInitialising,
+    //! Subsystem is fully initialised and is performing its function.
     SubsystemWorking,
+    //! Subsystem is preparing to shutdown, e.g. releasing its resources, etc.
     SubsystemFinalising,
+    //! Subsystem is not longer functioning.
     SubsystemShutdown
 };
 
+//! Returns string equivalent of state enumerator.
 std::string toString( SubsystemState state );
 
 //! Possible subsystem status values
@@ -41,14 +47,16 @@ enum SubsystemHealth
     SubsystemStalled
 };
 
+//! Returns string equivalent of health enumerator.
 std::string toString( SubsystemHealth health );
 
 //! Status for a single subsystem
 struct SubsystemStatus
 {
-    //! Machine-readable status description
+    //! Current state in the subsystem's state machine. I.e. what is the subsystem doing?
     SubsystemState state;
 
+    //! Subsystem's health. I.e. how is the subsystem doing?
     SubsystemHealth health;
 
     //! Human-readable status description
