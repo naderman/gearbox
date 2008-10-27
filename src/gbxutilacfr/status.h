@@ -17,25 +17,39 @@
 namespace gbxutilacfr {
 
 //! Possible subsystem status values
-enum SubsystemStatusType
+enum SubsystemState
 {
-    //! Subsystem is initialising -- it's not exactly OK yet, but there's also no fault yet.
-    SubsystemStatusInitialising,
-    //! Subsystem is OK
-    SubsystemStatusOk,
-    //! Subsystem has encountered an abnormal but non-fault condition
-    SubsystemStatusWarning,
-    //! Subsystem has declared a fault
-    SubsystemStatusFault,
-    //! Subsystem has not been heard from for an abnormally long time
-    SubsystemStatusStalled
+    SubsystemIdle,
+    SubsystemInitialising,
+    SubsystemWorking,
+    SubsystemFinalising,
+    SubsystemShutdown
 };
+
+std::string toString( SubsystemState state );
+
+//! Possible subsystem status values
+enum SubsystemHealth
+{
+    //! Subsystem is OK
+    SubsystemOk,
+    //! Subsystem has encountered an abnormal but non-fault condition
+    SubsystemWarning,
+    //! Subsystem has declared a fault
+    SubsystemFault,
+    //! Subsystem has not been heard from for an abnormally long time
+    SubsystemStalled
+};
+
+std::string toString( SubsystemHealth health );
 
 //! Status for a single subsystem
 struct SubsystemStatus
 {
     //! Machine-readable status description
-    SubsystemStatusType type;
+    SubsystemState state;
+
+    SubsystemHealth health;
 
     //! Human-readable status description
     std::string message;
@@ -119,29 +133,55 @@ public:
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double intervalSec )=0;
 
-    //! Sets subsystem status to Initialising. Note that empty message is assumed if none is supplied.
+    //
+    // BOTH STATE AND HEALTH CHANGES
+    //
+
+    //! Sets the status of a subsystem (both state and health) in an atomic operation. Use this method
+    //! when both state and health have changed.
+    virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& message="" )=0;
+
+    //
+    // STATE CHANGES
+    //
+
+    //! Sets state of the subsystem to Initialising. Note that empty message is assumed if none is supplied.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void initialising( const std::string& subsystem, const std::string& message="" )=0;
+    virtual void working( const std::string& subsystem, const std::string& message="" )=0;
+    virtual void finalising( const std::string& subsystem, const std::string& message="" )=0;
 
-    //! Sets subsystem status to Ok. Note that empty message is assumed if none is supplied.
+    //
+    // HEALTH CHANGES
+    //
+    
+    //! Sets subsystem health to Ok. Note that empty message is assumed if none is supplied.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void ok( const std::string& subsystem, const std::string& message="" )=0;
 
-    //! Sets subsystem status to Warning.
+    //! Sets subsystem health to Warning.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void warning( const std::string& subsystem, const std::string& message )=0;
 
-    //! Sets subsystem status to Fault.
+    //! Sets subsystem health to Fault.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void fault( const std::string& subsystem, const std::string& message )=0;
+
+    //
+    // NO CHANGE
+    //
 
     //! Record heartbeat from a subsystem: let Status know the subsystem is alive without
     //! modifying its status.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void heartbeat( const std::string& subsystem )=0;
 
-    //! Some thread should call this function periodically in order for
-    //! status publishing to happen.
+    //
+    // Utility
+    //
+
+    //! Some thread must call this function periodically in order for
+    //! status publishing to happen and stalls identified.
     virtual void process()=0;
 };
 

@@ -12,19 +12,20 @@
 #include <sstream>
 #include "trivialstatus.h"
 #include "exceptions.h"
+#include <assert.h>
 
 using namespace std;
 
 namespace gbxutilacfr {
 
 TrivialStatus::TrivialStatus( Tracer& tracer,
-        bool heartbeat, bool ok, bool init, bool warn, bool fault ) : 
+        bool stateChange, bool ok, bool warn, bool fault, bool heartbeat ) :
     tracer_(tracer),
-    heartbeat_(heartbeat),
+    stateChange_(stateChange),
     ok_(ok),
-    init_(init),
     warn_(warn),
-    fault_(fault)
+    fault_(fault),
+    heartbeat_(heartbeat)
 {
 }
 
@@ -62,10 +63,45 @@ TrivialStatus::setMaxHeartbeatInterval( const std::string& subsystem, double max
 }
 
 void 
+TrivialStatus::setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& message )
+{
+    string trace = "TrivialStatus: subsystem "+subsystem+" changed state to "+gbxutilacfr::toString(state)+" with health "+gbxutilacfr::toString(health);
+    if (!message.empty() )
+        trace =+ ": '" + message + "'";
+    tracer_.info( trace );
+}
+
+void 
 TrivialStatus::initialising( const std::string& subsystem, const std::string& message )
 {
-    if ( init_ && !message.empty() )
-        tracer_.info( "TrivialStatus: initialising subsystem "+subsystem+": '"+message+"'" );
+    if ( stateChange_ ) {
+        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Initialising";
+        if (!message.empty() )
+            trace =+ " and message: '" + message + "'";
+        tracer_.info( trace );
+    }
+}
+
+void 
+TrivialStatus::working( const std::string& subsystem, const std::string& message )
+{
+    if ( stateChange_ ) {
+        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Working";
+        if (!message.empty() )
+            trace =+ ": '" + message + "'";
+        tracer_.info( trace );
+    }
+}
+
+void 
+TrivialStatus::finalising( const std::string& subsystem, const std::string& message )
+{
+    if ( stateChange_ ) {
+        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Finalising";
+        if (!message.empty() )
+            trace =+ ": '" + message + "'";
+        tracer_.info( trace );
+    }
 }
 
 void 

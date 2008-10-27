@@ -20,12 +20,7 @@ namespace gbxutilacfr {
 //!
 //! @par Overview
 //!
-//! SubStatus provides a machine-readable interface such that other components can 
-//! monitor this component's status.
-//!
-//! A single SubStatus object is meant to be shared by all threads in the component so the
-//! implementation must be thread-safe.
-//!
+//! Provides a convenient interface for setting status information for one subsystem.
 //!
 //! @sa Status
 //!
@@ -58,6 +53,12 @@ public:
     void initialising( const std::string& message="" ) { status_.initialising( subsysName_, message ); };
 
     //! Passes this information to the system Status.
+    void working( const std::string& message="" ) { status_.working( subsysName_, message ); };
+
+    //! Passes this information to the system Status.
+    void finalising( const std::string& message="" ) { status_.finalising( subsysName_, message ); };
+
+    //! Passes this information to the system Status.
     void ok( const std::string& message="" ) { status_.ok( subsysName_, message ); };
 
     //! Passes this information to the system Status.
@@ -65,6 +66,9 @@ public:
 
     //! Passes this information to the system Status.
     void fault( const std::string& message ) { status_.fault( subsysName_, message ); };
+
+    //! Returns system Status object
+    Status& status() { return status_; };
 
     //! Returns subsystem's name
     std::string name() const { return subsysName_; };
