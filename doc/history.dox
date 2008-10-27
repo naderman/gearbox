@@ -33,6 +33,7 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 - libGbxUtilAcfr
   - Changed interface for Tracer: when querying verbosity, default destination argument is 'ToAny' (AlexB).
   - Changed implementation of TrivialTracer to allow multiple levels of tracing verbosity (AlexB).
+  - Status now describes status of subsystems in two orthogonal dimensions: state and health. (alexm) 
 
 @section gbx_doc_history_807 Changes in Release 8.07
 
