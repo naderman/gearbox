@@ -51,11 +51,11 @@ public:
     //! errors and waits for someone to call stop().
     virtual void run();
 
+private:
     //! Implement this function in the derived class and put here all the stuff which your
     //! thread needs to do.
     virtual void walk()=0;
 
-private:
     gbxutilacfr::Tracer& tracer_;
 };
 //! A smart pointer to the SafeThread class.
