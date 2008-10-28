@@ -148,6 +148,7 @@ public:
 
     //! Modifies maximum expected interval between heartbeats (in seconds).
     //! When time since last heartbeat exceeds this, alarm is raised. 
+    //! Negative interval means infinite interval.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double intervalSec )=0;
 
