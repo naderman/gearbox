@@ -9,6 +9,7 @@
  */
 
 #include "status.h"
+#include <sstream>
 
 namespace gbxutilacfr {
 
@@ -44,6 +45,14 @@ std::string toString( SubsystemHealth health )
         break;
     }
     return "Stalled";
+}
+
+std::string toString( const SubsystemStatus& status )
+{
+    std::stringstream ss;
+    ss << "state="<<toString(status.state)<<" health="<<toString(status.health)
+       << " msg='"<<status.message<<"' since hearbeat="<<status.sinceHeartbeat;
+    return ss.str();
 }
 
 } // namespace

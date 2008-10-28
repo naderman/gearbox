@@ -53,6 +53,13 @@ std::string toString( SubsystemHealth health );
 //! Status for a single subsystem
 struct SubsystemStatus
 {
+    //! Constructor.
+    SubsystemStatus( SubsystemState s=SubsystemIdle, SubsystemHealth h=SubsystemOk, const std::string& msg="", double beat=0.0 ) :
+        state(s),
+        health(h),
+        message(msg),
+        sinceHeartbeat(beat) {};
+
     //! Current state in the subsystem's state machine. I.e. what is the subsystem doing?
     SubsystemState state;
 
@@ -65,8 +72,11 @@ struct SubsystemStatus
     //! Ratio of time since last heartbeat to maximum expected time between heartbeats.
     //! For example, sinceHeartbeat=0.5 means that half of normally expected interval between heartbeats
     //! has elapsed.
-    float sinceHeartbeat;
+    double sinceHeartbeat;
 };
+
+//! Returns human-readable string with subsystem status information.
+std::string toString( const SubsystemStatus& status );
 
 /*!
 @brief Local interface to component status.
@@ -156,7 +166,11 @@ public:
     //! Sets state of the subsystem to Initialising. Note that empty message is assumed if none is supplied.
     //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void initialising( const std::string& subsystem, const std::string& message="" )=0;
+    //! Sets state of the subsystem to Working. Note that empty message is assumed if none is supplied.
+    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void working( const std::string& subsystem, const std::string& message="" )=0;
+    //! Sets state of the subsystem to Finalising. Note that empty message is assumed if none is supplied.
+    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
     virtual void finalising( const std::string& subsystem, const std::string& message="" )=0;
 
     //
