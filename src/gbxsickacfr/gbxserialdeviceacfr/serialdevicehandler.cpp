@@ -223,15 +223,6 @@ SerialDeviceHandler::processBuffer()
             tracer_.warning( ss.str() );
             throw;
         }
-/* ALEXM: this is the diff from post-bindoon which broke poly device
-        if ( numBytesParsed == 0 )
-        {
-            stringstream ss;
-            ss << "SerialDeviceHandler: Zero bytes were parsed, but buffer contains "<<buffer_.size()<<" bytes! (gotMessage="<<gotMessage<<").  responseParser_ shouldn't do this to us.";
-            tracer_.warning( ss.str() );
-            numBytesParsed = 1;
-        }
-ALEXM */
         removeParsedData( buffer_, numBytesParsed );
 
         if ( gotMessage )
