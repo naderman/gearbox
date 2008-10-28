@@ -55,7 +55,6 @@ SerialDeviceHandler::SerialDeviceHandler( const std::string     &subsysName,
       tracer_(tracer),
       subStatus_( status, subsysName )
 {
-    subStatus_.setMaxHeartbeatInterval( 60 );
 }
 
 SerialDeviceHandler::~SerialDeviceHandler()
@@ -64,7 +63,7 @@ SerialDeviceHandler::~SerialDeviceHandler()
     // The component may outlive this subsystem.
     // So tell status that it might not hear from us for a while.
     //
-    subStatus_.setMaxHeartbeatInterval( 1e9 );
+    subStatus_.setMaxHeartbeatInterval( -1 );
 }
 
 void
@@ -88,6 +87,7 @@ SerialDeviceHandler::send( const char *commandBytes, int numCommandBytes )
 void
 SerialDeviceHandler::walk()
 {
+    subStatus_.working();
     double maxIntervalSec = serial_.timeout().sec + 1e6*serial_.timeout().usec;
     subStatus_.setMaxHeartbeatInterval( maxIntervalSec * 5.0 );
 
