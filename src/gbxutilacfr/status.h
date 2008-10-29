@@ -112,6 +112,7 @@ the Status engine know that the subsystem is alive.  The special call
 modifying its status.
 
 @sa Tracer
+@sa SubStatus
 */
 class Status
 {
