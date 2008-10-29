@@ -29,12 +29,12 @@ class SubStatus
 
 public:
     //! Sets a reference to the system Status and this subsystem's name.
-    //! Adds this subsystem to the system with default (infinite) maximum heartbeat interval.
-    SubStatus( Status& status, const std::string& subsystem ) :
+    //! Adds this subsystem to the system.
+    SubStatus( Status& status, const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 ) :
         status_(status),
         subsysName_(subsystem) 
     {
-        status_.addSubsystem( subsysName_ );
+        status_.addSubsystem( subsysName_, maxHeartbeatIntervalSec );
     };
 
     //! Removes this subsystem from the system.
