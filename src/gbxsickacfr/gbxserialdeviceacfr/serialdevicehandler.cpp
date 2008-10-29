@@ -223,6 +223,7 @@ SerialDeviceHandler::processBuffer()
             tracer_.warning( ss.str() );
             throw;
         }
+
         removeParsedData( buffer_, numBytesParsed );
 
         if ( gotMessage )
