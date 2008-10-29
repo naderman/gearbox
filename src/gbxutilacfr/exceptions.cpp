@@ -49,7 +49,7 @@ Exception::setMsg( const char *file, const char *line, const char *message )
     message_ += this->basename(file);
     message_ += ":";
     message_ += line;
-    message_ += "): " + msgString + "\n";
+    message_ += "): " + msgString;
 }
 
 } // namespace
