@@ -84,7 +84,7 @@ std::string toString( const SubsystemStatus& status );
 @par Overview
 
 Status provides a machine-readable interface such that tools external
-to the library can monitor its status. A single Status object is meant
+to the component can monitor its status. A single Status object is meant
 to be shared by all threads in the library, so the implementation must
 be thread-safe. The idea is that Status tracks the state of a number
 of subsystems (most often one per thread).
@@ -93,23 +93,68 @@ Each subsystem should first call addSubsystem(), to make the
 Status engine aware that it exists. If any other function is called before 
 the subsystem is added, a gbxutilacfr::Exception is thrown.
 
-The 'maxHeartbeatIntervalSec' parameter tells the Status engine how often it expects to hear
-from each subsystem.  If the subsystem has not been heard from for
-longer than maxHeartbeatIntervalSec, it is assumed that the 
-subsystem has stalled (hung).
+The default initial status of a subsystem is @c Idle with health @c OK.
 
-The initial default state is Initialising. As soon as initialisation
-of the subsystem is finished, you should call ok(). This maybe used by
-external tools as an indication that your subsystem is in "normal"
-working state.
-
-@par Local Calls
-
-After registering with setMaxHeartbeatInterval, set the subsystems'
-status with the various calls.  Each of the calls is sufficient to let
+After registering a subsystem, a subsystem can report its state and health.
+Each of the calls is sufficient to let
 the Status engine know that the subsystem is alive.  The special call
 'heartbeat' lets Status know that the subsystem is alive without
 modifying its status.
+
+The 'maxHeartbeatIntervalSec' parameter tells the Status engine how often it 
+should expect to hear from the subsystem.  If no message is received from a subsystem for
+longer than @c maxHeartbeatIntervalSec, it is assumed that the subsystem has stalled (hung).
+
+@par State Machine
+
+The state machine of a subsystem is a chain of state transitions with one extra link:
+@verbatim
+Idle --> Initialising --> Working --> Finalising --> Shutdown
+              |___________________________^
+@endverbatim
+The following represents the Subsystem state machine in the format of
+State Machine Compiler (see smc.sf.net) :
+@verbatim
+Idle
+Entry { init(); }
+{
+    init
+    Initialising
+    {}
+}
+
+Initialising
+Entry { initialise(); }
+{
+    [ !isStopping ] finished
+    Working
+    {}
+
+    [ isStopping ] finished
+    Finalising
+    {}
+}
+
+Working
+Entry { work(); }
+{
+    finished
+    Finalising
+    {}
+}
+
+Finalising
+Entry { finalise(); }
+{
+    finished
+    Shutdown
+    {}
+}
+
+Shutdown
+{
+}   
+@endverbatim
 
 @sa Tracer
 @sa SubStatus
