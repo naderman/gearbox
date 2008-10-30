@@ -39,20 +39,24 @@ public:
     virtual SubsystemStatus subsystemStatus( const std::string& subsystem );
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double interval );
 
-    virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& message="" );
+    virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& msg="" );
 
-    virtual void initialising( const std::string& subsystem, const std::string& message="" );
-    virtual void working( const std::string& subsystem, const std::string& message="" );
-    virtual void finalising( const std::string& subsystem, const std::string& message="" );
+    virtual void initialising( const std::string& subsystem, const std::string& msg="" );
+    virtual void working( const std::string& subsystem, const std::string& msg="" );
+    virtual void finalising( const std::string& subsystem, const std::string& msg="" );
 
-    virtual void ok( const std::string& subsystem, const std::string& message="" );
-    virtual void warning( const std::string& subsystem, const std::string& message );
-    virtual void fault( const std::string& subsystem, const std::string& message );
+    virtual void ok( const std::string& subsystem, const std::string& msg="" );
+    virtual void warning( const std::string& subsystem, const std::string& msg );
+    virtual void fault( const std::string& subsystem, const std::string& msg );
     virtual void heartbeat( const std::string& subsystem );
+    virtual void message( const std::string& subsystem, const std::string& msg );
 
     virtual void process();
 
 private:
+
+    void internalSetStatus( const std::string& subsystem, gbxutilacfr::SubsystemState state, 
+                gbxutilacfr::SubsystemHealth health, const std::string& msg="" );
 
     Tracer& tracer_;
 

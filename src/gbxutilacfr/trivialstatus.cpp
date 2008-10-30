@@ -32,17 +32,13 @@ TrivialStatus::TrivialStatus( Tracer& tracer,
 void 
 TrivialStatus::addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec )
 {
-    stringstream ss;
-    ss << "TrivialStatus::setMaxHeartbeatInterval(): Adding new subsystem: '"<<subsystem<<"'";
-    tracer_.debug( ss.str() );
+    tracer_.warning( "TrivialStatus: this implementation of Status does not store status of the subsystems" );
 }
 
 void 
 TrivialStatus::removeSubsystem( const std::string& subsystem )
 {
-    stringstream ss;
-    ss << "TrivialStatus::removeSubsystem(): Removing existing subsystem: '"<<subsystem<<"'";
-    tracer_.debug( ss.str() );
+    tracer_.warning( "TrivialStatus: this implementation of Status does not store status of the subsystems" );
 }
 
 std::vector<std::string> 
@@ -54,87 +50,128 @@ TrivialStatus::subsystems()
 SubsystemStatus 
 TrivialStatus::subsystemStatus( const std::string& subsystem )
 {
-    throw Exception( ERROR_INFO, "This implementation of Status does not store status of the subsystems" );
+    throw Exception( ERROR_INFO, "TrivialStatus: this implementation of Status does not store status of the subsystems" );
 }
 
 void 
 TrivialStatus::setMaxHeartbeatInterval( const std::string& subsystem, double maxHeartbeatIntervalSec )
 {
+    // does nothing
 }
 
 void 
-TrivialStatus::setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& message )
+TrivialStatus::setSubsystemStatus( const std::string& subsystem, gbxutilacfr::SubsystemState state, 
+        gbxutilacfr::SubsystemHealth health, const std::string& msg )
 {
-    string trace = "TrivialStatus: subsystem "+subsystem+" changed state to "+gbxutilacfr::toString(state)+" with health "+gbxutilacfr::toString(health);
-    if (!message.empty() )
-        trace =+ ": '" + message + "'";
-    tracer_.info( trace );
+    internalSetStatus( subsystem, state, health, msg );
 }
 
 void 
-TrivialStatus::initialising( const std::string& subsystem, const std::string& message )
+TrivialStatus::initialising( const std::string& subsystem, const std::string& msg )
 {
-    if ( stateChange_ ) {
-        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Initialising";
-        if (!message.empty() )
-            trace =+ " and message: '" + message + "'";
-        tracer_.info( trace );
-    }
+    internalSetStatus( subsystem, gbxutilacfr::SubsystemInitialising, (gbxutilacfr::SubsystemHealth)-1, msg );
 }
 
 void 
-TrivialStatus::working( const std::string& subsystem, const std::string& message )
+TrivialStatus::working( const std::string& subsystem, const std::string& msg )
 {
-    if ( stateChange_ ) {
-        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Working";
-        if (!message.empty() )
-            trace =+ ": '" + message + "'";
-        tracer_.info( trace );
-    }
+    internalSetStatus( subsystem, gbxutilacfr::SubsystemWorking, (gbxutilacfr::SubsystemHealth)-1, msg );
 }
 
 void 
-TrivialStatus::finalising( const std::string& subsystem, const std::string& message )
+TrivialStatus::finalising( const std::string& subsystem, const std::string& msg )
 {
-    if ( stateChange_ ) {
-        string trace = "TrivialStatus: subsystem "+subsystem+" changed state to Finalising";
-        if (!message.empty() )
-            trace =+ ": '" + message + "'";
-        tracer_.info( trace );
-    }
+    internalSetStatus( subsystem, gbxutilacfr::SubsystemFinalising, (gbxutilacfr::SubsystemHealth)-1, msg );
 }
 
 void 
-TrivialStatus::ok( const std::string& subsystem, const std::string& message )
+TrivialStatus::ok( const std::string& subsystem, const std::string& msg )
 {
-    if ( ok_ && !message.empty() )
-        tracer_.info( "TrivialStatus: "+subsystem+" is ok : '"+message+"'" );
+    internalSetStatus( subsystem, (gbxutilacfr::SubsystemState)-1, gbxutilacfr::SubsystemOk, msg );
 }
 
 void 
-TrivialStatus::warning( const std::string& subsystem, const std::string& message )
+TrivialStatus::warning( const std::string& subsystem, const std::string& msg )
 {
-    if ( warn_ )
-        tracer_.warning( "TrivialStatus: "+subsystem+" issued warning : '"+message+"'" );
+    internalSetStatus( subsystem, (gbxutilacfr::SubsystemState)-1, gbxutilacfr::SubsystemWarning, msg );
 }
 
 void 
-TrivialStatus::fault( const std::string& subsystem, const std::string& message )
+TrivialStatus::fault( const std::string& subsystem, const std::string& msg )
 {
-    if ( fault_ )
-        tracer_.error( "TrivialStatus: "+subsystem+" issued fault : '"+message+"'" );
+    internalSetStatus( subsystem, (gbxutilacfr::SubsystemState)-1, gbxutilacfr::SubsystemFault, msg );
 }
     
 void 
 TrivialStatus::heartbeat( const std::string& subsystem )
 {
-    if ( heartbeat_ )
-        tracer_.info( "TrivialStatus: heartbeat for subsystem "+subsystem );
+    internalSetStatus( subsystem, (gbxutilacfr::SubsystemState)-1, (gbxutilacfr::SubsystemHealth)-1 );
+}
+    
+void 
+TrivialStatus::message( const std::string& subsystem, const std::string& msg )
+{
+    internalSetStatus( subsystem, (gbxutilacfr::SubsystemState)-1, (gbxutilacfr::SubsystemHealth)-1, msg );
+}
+
+void 
+TrivialStatus::internalSetStatus( const std::string& subsystemName, gbxutilacfr::SubsystemState state, 
+                gbxutilacfr::SubsystemHealth health, const std::string& msg )
+{
+    assert( state!=gbxutilacfr::SubsystemIdle && "Idle state should not be reported from within the subsystem" );
+    assert( health!=gbxutilacfr::SubsystemStalled && "Stalled health should not be reported from within the subsystem" );
+
+    // if this is a heartbeat, do nothing else
+    if ( state<0 && health<0 && msg.empty() )
+        return;
+
+    bool traceState = true;
+    // don't trace if we don't know it
+    if ( state < 0 ) 
+        traceState = false;
+    
+    bool traceHealth = true;
+    // don't trace if we don't know it
+    if ( health < 0 ) 
+        traceHealth = false;
+
+//     bool publishStatus = false;
+
+    // give tracer feedback on state
+    if ( traceState )
+        tracer_.info( "Subsystem '"+subsystemName+"' changed state to "+gbxutilacfr::toString(state) );
+
+    // give tracer feedback on status
+    if ( traceHealth )
+    {
+        string trace = "Subsystem '"+subsystemName
+                +"' status="+gbxutilacfr::toString(state)+"/"+gbxutilacfr::toString(health);
+        if ( !msg.empty() )
+            trace =+ ": "+msg;
+        switch ( health )
+        {
+        case gbxutilacfr::SubsystemOk :
+            tracer_.info( trace );
+            break;
+        case gbxutilacfr::SubsystemWarning :
+            tracer_.warning( trace );
+            break;
+        case gbxutilacfr::SubsystemFault :
+        case gbxutilacfr::SubsystemStalled :
+            tracer_.error( trace );
+            break;
+        }
+    }
+
+    // publish updated status
+//     if ( publishStatus )
+//         localPublish();
 }
 
 void 
 TrivialStatus::process()
 {
+    // cannot determine stalls because we are not tracking subsystem status
 }
 
 }

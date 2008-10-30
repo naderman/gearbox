@@ -167,35 +167,34 @@ public:
     virtual ~Status() {};
 
     /*!
-    Adds subsystem to the system status monitor. This command must be called before any
-    other. I.e. all other status commands are ignored unless a subsystem with that name
-    already exists. When trying to add a subsystem with an existing name, the existing
-    subsystem is left unchanged and warning trace is produced.
+    Adds a new subsystem to the system status descriptor. This command must be called before actually
+    modifying the subsystem status, i.e. all other status commands will raise an exception if a subsystem with 
+    that name does not already exists. 
+
+    An Exception is also raised when trying to add a subsystem with an existing name.
     
-    May also specify the maximum expected interval between heartbeats. 
-    When time since last heartbeat exceeds this, an alarm is raised. Heartbeat interval is normally
-    positive, measured in seconds. Negative interval means infinite interval, this is the default behavior.
+    It is also possible to specify the maximum expected interval between heartbeats. See setMaxHeartbeatInterval()
+    for details.
     
-    The initial state of the subsystem is Initialising.
+    The initial status of the new subsystem is the same as produced by the empty constructor of SubsystemStatus.
     */
     virtual void addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 )=0;
 
-    //! Removes subsystem from the status monitor. This should be done for example, if one of
-    //! the thread is shutting down or restarting. 
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Removes a subsystem from the status descriptor.
+    //! Throws Exception if the subsystem does not exist.
     virtual void removeSubsystem( const std::string& subsystem )=0;
 
     //! Returns a list of subsystem names.
     virtual std::vector<std::string> subsystems()=0;
 
-    //! Returns status of subsystem with the given name.
-    //! Throws gbxutilacfr::Exception when the specified subsystem does not exist.
+    //! Returns status of the subsystem with the given name.
+    //! Throws Exception when the specified subsystem does not exist.
     virtual SubsystemStatus subsystemStatus( const std::string& subsystem )=0;
 
     //! Modifies maximum expected interval between heartbeats (in seconds).
-    //! When time since last heartbeat exceeds this, alarm is raised. 
+    //! When time since the last heartbeat exceeds the specified value, the subsystem is considered stalled. 
     //! Negative interval means infinite interval.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Throws Exception if the subsystem does not exist.
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double intervalSec )=0;
 
     //
@@ -204,36 +203,39 @@ public:
 
     //! Sets the status of a subsystem (both state and health) in an atomic operation. Use this method
     //! when both state and health have changed.
+    //! Throws Exception if the subsystem does not exist.
     virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& message="" )=0;
 
     //
     // STATE CHANGES
     //
 
-    //! Sets state of the subsystem to Initialising. Note that empty message is assumed if none is supplied.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Sets state of the subsystem to Initialising. The old message is cleared if a new one is not supplied.
+    //! Throws Exception if the subsystem does not exist.
     virtual void initialising( const std::string& subsystem, const std::string& message="" )=0;
-    //! Sets state of the subsystem to Working. Note that empty message is assumed if none is supplied.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+
+    //! Sets state of the subsystem to Working. The old message is cleared if a new one is not supplied.
+    //! Throws Exception if the subsystem does not exist.
     virtual void working( const std::string& subsystem, const std::string& message="" )=0;
-    //! Sets state of the subsystem to Finalising. Note that empty message is assumed if none is supplied.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+
+    //! Sets state of the subsystem to Finalising. The old message is cleared if a new one is not supplied.
+    //! Throws Exception if the subsystem does not exist.
     virtual void finalising( const std::string& subsystem, const std::string& message="" )=0;
 
     //
     // HEALTH CHANGES
     //
     
-    //! Sets subsystem health to Ok. Note that empty message is assumed if none is supplied.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Sets subsystem health to Ok. The old message is cleared if a new one is not supplied.
+    //! Throws Exception if the subsystem does not exist.
     virtual void ok( const std::string& subsystem, const std::string& message="" )=0;
 
     //! Sets subsystem health to Warning.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Throws Exception if the subsystem does not exist.
     virtual void warning( const std::string& subsystem, const std::string& message )=0;
 
     //! Sets subsystem health to Fault.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Throws Exception if the subsystem does not exist.
     virtual void fault( const std::string& subsystem, const std::string& message )=0;
 
     //
@@ -242,15 +244,19 @@ public:
 
     //! Record heartbeat from a subsystem: let Status know the subsystem is alive without
     //! modifying its status.
-    //! Throws gbxutilacfr::Exception if the subsystem does not exist.
+    //! Throws Exception if the subsystem does not exist.
     virtual void heartbeat( const std::string& subsystem )=0;
+
+    //! Change the human-readable message for a subsystem but keep the previous state and health information.
+    //! Throws Exception if the subsystem does not exist.
+    virtual void message( const std::string& subsystem, const std::string& message )=0;
 
     //
     // Utility
     //
 
-    //! Some thread must call this function periodically in order for
-    //! status publishing to happen and stalls identified.
+    //! This function must be called periodically in order for
+    //! status publishing to happen and stalled susbsystems identified.
     virtual void process()=0;
 };
 
