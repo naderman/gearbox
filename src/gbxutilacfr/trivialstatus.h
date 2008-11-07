@@ -33,10 +33,12 @@ public:
     
     virtual void addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 );
     virtual void removeSubsystem( const std::string& subsystem );
-    //! does not keep track of subsystems, returns empty vector.
+    //! Does not keep track of subsystems, returns empty vector.
     virtual std::vector<std::string> subsystems();
-    //! does not keep track of status, throws Exception on any query
+    //! Does not keep track of status, throws Exception on any query
     virtual SubsystemStatus subsystemStatus( const std::string& subsystem );
+    //! Does not keep track of infrastructure state, throws Exception on any query
+    virtual SubsystemState infrastructureState();
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double interval );
 
     virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& msg="" );
@@ -51,6 +53,9 @@ public:
     virtual void heartbeat( const std::string& subsystem );
     virtual void message( const std::string& subsystem, const std::string& msg );
 
+    virtual void compInitialising();
+    virtual void compWorking();
+    virtual void compFinalising();
     virtual void process();
 
 private:

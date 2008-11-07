@@ -53,6 +53,12 @@ TrivialStatus::subsystemStatus( const std::string& subsystem )
     throw Exception( ERROR_INFO, "TrivialStatus: this implementation of Status does not store status of the subsystems" );
 }
 
+SubsystemState 
+TrivialStatus::infrastructureState()
+{
+    throw Exception( ERROR_INFO, "TrivialStatus: this implementation of Status does not store infrastructure state" );
+}
+
 void 
 TrivialStatus::setMaxHeartbeatInterval( const std::string& subsystem, double maxHeartbeatIntervalSec )
 {
@@ -118,13 +124,13 @@ void
 TrivialStatus::internalSetStatus( const std::string& subsystemName, gbxutilacfr::SubsystemState state, 
                 gbxutilacfr::SubsystemHealth health, const std::string& msg )
 {
+//     cout<<"DEBUG: state="<<state<<" health="<<health<<" msg="<<msg<<endl;
     assert( state!=gbxutilacfr::SubsystemIdle && "Idle state should not be reported from within the subsystem" );
     assert( health!=gbxutilacfr::SubsystemStalled && "Stalled health should not be reported from within the subsystem" );
 
     // if this is a heartbeat, do nothing else
     if ( state<0 && health<0 && msg.empty() )
         return;
-
     bool traceState = true;
     // don't trace if we don't know it
     if ( state < 0 ) 
@@ -144,8 +150,11 @@ TrivialStatus::internalSetStatus( const std::string& subsystemName, gbxutilacfr:
     // give tracer feedback on status
     if ( traceHealth )
     {
+        // ugly stuff because we don't remember our state.
+        string stateString = (state<0) ? "Unchanged" : gbxutilacfr::toString(state);
         string trace = "Subsystem '"+subsystemName
-                +"' status="+gbxutilacfr::toString(state)+"/"+gbxutilacfr::toString(health);
+                +"' status="+stateString+"/"+gbxutilacfr::toString(health);
+
         if ( !msg.empty() )
             trace =+ ": "+msg;
         switch ( health )
@@ -172,6 +181,24 @@ void
 TrivialStatus::process()
 {
     // cannot determine stalls because we are not tracking subsystem status
+}
+
+void 
+TrivialStatus::compInitialising()
+{
+    tracer_.info( "Component infrastructure changed state to Initialising." );
+}
+
+void 
+TrivialStatus::compWorking()
+{
+    tracer_.info( "Component infrastructure changed state to Working." );
+}
+
+void 
+TrivialStatus::compFinalising()
+{
+    tracer_.info( "Component infrastructure changed state to Finalising." );
 }
 
 }

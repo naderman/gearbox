@@ -31,9 +31,14 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - A bit more careful when dealing with chunks of buffer that can't be parsed, should be a bit more robust (AlexB).
 
 - libGbxUtilAcfr
-  - Changed interface for Tracer: when querying verbosity, default destination argument is 'ToAny' (AlexB).
+  - Changed interface for Tracer: 
+    - when querying verbosity, default destination argument is 'ToAny' (AlexB).
+    - moved trace type and destination enums out of the class into the namespace (alexm)
   - Changed implementation of TrivialTracer to allow multiple levels of tracing verbosity (AlexB).
-  - Status now describes status of subsystems in two orthogonal dimensions: state and health. (alexm) 
+  - Changed interface for Status: 
+     - status of subsystems is described in two orthogonal dimensions: state and health. (alexm) 
+     - added infrastructure state to the component status and functions to set it. (alexm)
+     - added message() which only changes the human-readable message (alexm)
 
 @section gbx_doc_history_807 Changes in Release 8.07
 

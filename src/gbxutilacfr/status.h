@@ -191,6 +191,9 @@ public:
     //! Throws Exception when the specified subsystem does not exist.
     virtual SubsystemStatus subsystemStatus( const std::string& subsystem )=0;
 
+    //! Returns state of the component infrastructure.
+    virtual SubsystemState infrastructureState()=0;
+
     //! Modifies maximum expected interval between heartbeats (in seconds).
     //! When time since the last heartbeat exceeds the specified value, the subsystem is considered stalled. 
     //! Negative interval means infinite interval.
@@ -250,6 +253,16 @@ public:
     //! Change the human-readable message for a subsystem but keep the previous state and health information.
     //! Throws Exception if the subsystem does not exist.
     virtual void message( const std::string& subsystem, const std::string& message )=0;
+
+    //
+    // INFRASTRUCTURE STATE CHANGES
+    //
+    //! Sets state of component infrastructure to Initialising.
+    virtual void compInitialising()=0;
+    //! Sets state of component infrastructure to Working.
+    virtual void compWorking()=0;
+    //! Sets state of component infrastructure to Finalising.
+    virtual void compFinalising()=0;
 
     //
     // Utility

@@ -257,7 +257,7 @@ OceanServerParser::parse( vector<string>    &stringList,
     // Debugging output
     //
     const int debugLevel = 10;
-    if (tracer_.verbosity( gbxutilacfr::Tracer::DebugTrace, gbxutilacfr::Tracer::ToAny ) >= debugLevel)
+    if (tracer_.verbosity( gbxutilacfr::DebugTrace, gbxutilacfr::ToAny ) >= debugLevel)
     {
         stringstream ss;
         for (unsigned int i=0; i<stringList.size(); i++)

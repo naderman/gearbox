@@ -15,6 +15,43 @@
 
 namespace gbxutilacfr {
 
+//! Types of traced information
+enum TraceType {
+    //! Information
+    InfoTrace=0,
+    //! Warning
+    WarningTrace,
+    //! Error
+    ErrorTrace,
+    //! Debug statement
+    DebugTrace,
+    //! Use this index to find out the maximum verbosity among all trace types to
+    //! a particular destination.
+    AnyTrace,
+    //! Number of trace types
+    NumberOfTraceTypes,
+};
+
+//! Returns a string corresponding to the enum element.
+std::string toString( TraceType type );
+
+//! Types of destinations for traced information.
+enum DestinationType {
+    //! Write to stardard display
+    ToDisplay=0,
+    //! Send over the network, details specific to Tracer implementation
+    ToNetwork,
+    //! Write to SysLog on Unix, EventLog on windows
+    ToLog,
+    //! Write to a file
+    ToFile,
+    //! Use this index to request the maximum verbosity of a particular type among 
+    //! all destinations
+    ToAny,
+    //! Number of destination types
+    NumberOfDestinationTypes
+};
+
 //! 
 //! @brief Local and remote tracing.
 //! 
@@ -45,8 +82,8 @@ namespace gbxutilacfr {
 //! }
 //! @endverbatim
 //! 
-//! Enum gbxutilacfr::Tracer::TraceType defines types of traced
-//! information. Enum gbxutilacfr::Tracer::DestinationType defines possible
+//! Enum gbxutilacfr::TraceType defines types of traced
+//! information. Enum gbxutilacfr::DestinationType defines possible
 //! tracer destinations are. Verbosity levels range from 0 (nothing) to
 //! 10 (everything). The built-in defaults are as follows:
 //! @verbatim
@@ -63,44 +100,6 @@ class Tracer
 {
 public:
     virtual ~Tracer() {}; 
-
-    //! Types of traced information
-    enum TraceType {
-        //! Information
-        InfoTrace=0,
-        //! Warning
-        WarningTrace,
-        //! Error
-        ErrorTrace,
-        //! Debug statement
-        DebugTrace,
-        //! Use this index to find out the maximum verbosity among all trace types to
-        //! a particular destination.
-        AnyTrace,
-        //! Number of trace types
-        NumberOfTraceTypes,
-        //! Other 
-        //! (not used by orcaice tracers, so it's verbosity level is not stored in
-        //! our matrix, so it's safe to have it larger than NumberOfTraceTypes)
-        OtherTrace
-    };
-
-    //! Types of destinations for traced information.
-    enum DestinationType {
-        //! Write to stardard display
-        ToDisplay=0,
-        //! Send over the network, details specific to Tracer implementation
-        ToNetwork,
-        //! Write to SysLog on Unix, EventLog on windows
-        ToLog,
-        //! Write to a file
-        ToFile,
-        //! Use this index to request the maximum verbosity of a particular type among 
-        //! all destinations
-        ToAny,
-        //! Number of destination types
-        NumberOfDestinationTypes
-    };
 
     struct Config
     {
@@ -134,38 +133,6 @@ public:
     //! in forming the tracing string. See class documentation for an example of such
     //! usage.
     virtual int verbosity( TraceType traceType, DestinationType destType=ToAny ) const = 0;
-
-    static std::string toString( Tracer::TraceType type )
-    {
-        switch ( type ) 
-        {
-        case Tracer::InfoTrace :
-            return "info";
-        case Tracer::WarningTrace :
-            return "warn";
-        case Tracer::ErrorTrace :
-            return "error";
-        case Tracer::DebugTrace :
-            return "debug";
-        default :
-            return "other";
-        }
-    };
-
-    static Tracer::TraceType toTraceType( const std::string& category )
-    {
-        if ( category==std::string("info") )
-            return Tracer::InfoTrace;
-        else if ( category==std::string("warn") )
-            return Tracer::WarningTrace;
-        else if ( category==std::string("error") )
-            return Tracer::ErrorTrace;
-        else if ( category==std::string("debug") )
-            return Tracer::DebugTrace;
-        else
-            return Tracer::OtherTrace;
-    };
-
 
     //! @b EXPERIMENTAL. Sets debug level for an individual subsystem.
     //! Only debug-to-display is supported.
