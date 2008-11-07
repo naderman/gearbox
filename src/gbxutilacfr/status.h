@@ -78,6 +78,14 @@ struct SubsystemStatus
 //! Returns human-readable string with subsystem status information.
 std::string toString( const SubsystemStatus& status );
 
+//! Subsystem type which describes common behavior models of a subsystem.
+enum SubsystemType {
+    //! Standard model: subsystem's life cycle equal to the life cycle of the component.
+    SubsystemStandard,
+    //! Early exit model: subsystem will intentionally shutdown early.
+    SubsystemEarlyExit
+};
+
 /*!
 @brief Local interface to component status.
 
@@ -96,9 +104,8 @@ the subsystem is added, a gbxutilacfr::Exception is thrown.
 The default initial status of a subsystem is @c Idle with health @c OK.
 
 After registering a subsystem, a subsystem can report its state and health.
-Each of the calls is sufficient to let
-the Status engine know that the subsystem is alive.  The special call
-'heartbeat' lets Status know that the subsystem is alive without
+Each of the calls is sufficient to let the Status engine know that the subsystem is alive.  
+The special call heartbeat() lets Status know that the subsystem is alive without
 modifying its status.
 
 The 'maxHeartbeatIntervalSec' parameter tells the Status engine how often it 
@@ -173,12 +180,16 @@ public:
 
     An Exception is also raised when trying to add a subsystem with an existing name.
     
-    It is also possible to specify the maximum expected interval between heartbeats. See setMaxHeartbeatInterval()
+    It is possible to specify the maximum expected interval between heartbeats. See setMaxHeartbeatInterval()
     for details.
+
+    It is also possible to describe the expected behavior of the subsystem by specifying SubsystemType. See
+    setSubsystemType() for details.
     
     The initial status of the new subsystem is the same as produced by the empty constructor of SubsystemStatus.
     */
-    virtual void addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 )=0;
+    virtual void addSubsystem( const std::string& subsystem, 
+            double maxHeartbeatIntervalSec=-1.0, SubsystemType type=SubsystemStandard )=0;
 
     //! Removes a subsystem from the status descriptor.
     //! Throws Exception if the subsystem does not exist.
@@ -194,11 +205,14 @@ public:
     //! Returns state of the component infrastructure.
     virtual SubsystemState infrastructureState()=0;
 
-    //! Modifies maximum expected interval between heartbeats (in seconds).
+    //! Sets the maximum expected interval between heartbeats (in seconds).
     //! When time since the last heartbeat exceeds the specified value, the subsystem is considered stalled. 
     //! Negative interval means infinite interval.
     //! Throws Exception if the subsystem does not exist.
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double intervalSec )=0;
+
+    //! Sets the subsystem type which describes the expected behavior of the subsystem.
+    virtual void setSubsystemType( const std::string& subsystem, SubsystemType type )=0;
 
     //
     // BOTH STATE AND HEALTH CHANGES
@@ -258,11 +272,11 @@ public:
     // INFRASTRUCTURE STATE CHANGES
     //
     //! Sets state of component infrastructure to Initialising.
-    virtual void compInitialising()=0;
+    virtual void infrastructureInitialising()=0;
     //! Sets state of component infrastructure to Working.
-    virtual void compWorking()=0;
+    virtual void infrastructureWorking()=0;
     //! Sets state of component infrastructure to Finalising.
-    virtual void compFinalising()=0;
+    virtual void infrastructureFinalising()=0;
 
     //
     // Utility

@@ -31,7 +31,8 @@ public:
     TrivialStatus( Tracer& tracer, 
         bool stateChange=true, bool ok=false, bool warn=true, bool fault=true, bool heartbeat=false );
     
-    virtual void addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 );
+    virtual void addSubsystem( const std::string& subsystem, 
+            double maxHeartbeatIntervalSec=-1.0, SubsystemType type=SubsystemStandard );
     virtual void removeSubsystem( const std::string& subsystem );
     //! Does not keep track of subsystems, returns empty vector.
     virtual std::vector<std::string> subsystems();
@@ -40,6 +41,7 @@ public:
     //! Does not keep track of infrastructure state, throws Exception on any query
     virtual SubsystemState infrastructureState();
     virtual void setMaxHeartbeatInterval( const std::string& subsystem, double interval );
+    virtual void setSubsystemType( const std::string& subsystem, SubsystemType type );
 
     virtual void setSubsystemStatus( const std::string& subsystem, SubsystemState state, SubsystemHealth health, const std::string& msg="" );
 
@@ -53,9 +55,9 @@ public:
     virtual void heartbeat( const std::string& subsystem );
     virtual void message( const std::string& subsystem, const std::string& msg );
 
-    virtual void compInitialising();
-    virtual void compWorking();
-    virtual void compFinalising();
+    virtual void infrastructureInitialising();
+    virtual void infrastructureWorking();
+    virtual void infrastructureFinalising();
     virtual void process();
 
 private:

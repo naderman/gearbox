@@ -30,7 +30,7 @@ TrivialStatus::TrivialStatus( Tracer& tracer,
 }
 
 void 
-TrivialStatus::addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec )
+TrivialStatus::addSubsystem( const std::string& subsystem, double maxHeartbeatIntervalSec, SubsystemType type )
 {
     tracer_.warning( "TrivialStatus: this implementation of Status does not store status of the subsystems" );
 }
@@ -61,6 +61,12 @@ TrivialStatus::infrastructureState()
 
 void 
 TrivialStatus::setMaxHeartbeatInterval( const std::string& subsystem, double maxHeartbeatIntervalSec )
+{
+    // does nothing
+}
+
+void 
+TrivialStatus::setSubsystemType( const std::string& subsystem, SubsystemType type )
 {
     // does nothing
 }
@@ -184,19 +190,19 @@ TrivialStatus::process()
 }
 
 void 
-TrivialStatus::compInitialising()
+TrivialStatus::infrastructureInitialising()
 {
     tracer_.info( "Component infrastructure changed state to Initialising." );
 }
 
 void 
-TrivialStatus::compWorking()
+TrivialStatus::infrastructureWorking()
 {
     tracer_.info( "Component infrastructure changed state to Working." );
 }
 
 void 
-TrivialStatus::compFinalising()
+TrivialStatus::infrastructureFinalising()
 {
     tracer_.info( "Component infrastructure changed state to Finalising." );
 }
