@@ -14,7 +14,6 @@
 
 using namespace std;
 
-namespace gbxsickacfr {
 namespace gbxserialdeviceacfr {
 
 namespace {
@@ -275,5 +274,4 @@ toHexString( const char *buf, int bufLen )
     return ss.str();
 }
 
-}
 } // namespace

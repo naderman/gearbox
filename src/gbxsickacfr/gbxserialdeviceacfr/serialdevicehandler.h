@@ -16,7 +16,6 @@
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
 #include <IceUtil/IceUtil.h>
 
-namespace gbxsickacfr {
 namespace gbxserialdeviceacfr {
 
 //! @brief A generic Response: a message received from the device
@@ -26,8 +25,10 @@ public:
     ~IResponse() {}
     
     // Does the response indicate a warning condition?
+    // If so, this will be reported to SerialDeviceHandler's status.
     virtual bool isWarn() const=0;
     // Does the response indicate an error condition?
+    // If so, this will be reported to SerialDeviceHandler's status.
     virtual bool isError() const=0;
     
     // Human-readable string
@@ -114,7 +115,8 @@ public:
     // The main thread function, inherited from SubsystemThread
     virtual void walk();
 
-    // Allow external non-const access direct to (thread-safe) responseBuffer
+    // Allow external non-const access direct to (thread-safe) responseBuffer.
+    // This is what you use to hear responses.
     gbxiceutilacfr::Buffer<TimedResponse> &responseBuffer() { return responseBuffer_; }
 
 private: 
@@ -140,6 +142,8 @@ private:
     gbxutilacfr::Tracer& tracer_;
     gbxutilacfr::SubStatus subStatus_;
 };
+//! A smart pointer to the class.
+typedef IceUtil::Handle<SerialDeviceHandler> SerialDeviceHandlerPtr;
 
 //////////////////////////////////////////////////////////////////////
 // Printing Functions
@@ -151,7 +155,6 @@ std::string toHexString( const char *buf, int bufLen );
 inline std::string toHexString( const std::vector<char> &buf )
 {return toHexString( &(buf[0]), buf.size() );}
 
-}
 } // namespace
 
 #endif
