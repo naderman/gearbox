@@ -86,6 +86,9 @@ enum SubsystemType {
     SubsystemEarlyExit
 };
 
+//! Returns string equivalent of subsystem type enumerator.
+std::string toString( SubsystemType type );
+
 /*!
 @brief Local interface to component status.
 

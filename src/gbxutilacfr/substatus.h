@@ -47,6 +47,9 @@ public:
     void setMaxHeartbeatInterval( double interval ) { status_.setMaxHeartbeatInterval( subsysName_, interval ); };
 
     //! Passes this information to the system Status.
+    void setSubsystemType( SubsystemType type ) { status_.setSubsystemType( subsysName_, type ); };
+
+    //! Passes this information to the system Status.
     void heartbeat() { status_.heartbeat( subsysName_ ); };
 
     //! Passes this information to the system Status.

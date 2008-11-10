@@ -60,4 +60,17 @@ std::string toString( const SubsystemStatus& status )
     return ss.str();
 }
 
+std::string toString( SubsystemType type )
+{
+    switch ( type ) 
+    {
+    case SubsystemStandard :
+        return "Standard";
+    case SubsystemEarlyExit :
+        return "EarlyExit";
+    default:
+        assert( !"gbxutilacfr::toString(SubsystemType) should never get to default" );
+    }
+}
+
 } // namespace
