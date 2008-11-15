@@ -16,15 +16,9 @@ using namespace std;
 
 namespace gbxutilacfr {
 
-Exception::Exception( const char *file, const char *line, const char *message )
-{
-    setMsg( file, line, message );
-}
-
 Exception::Exception( const char *file, const char *line, const std::string &message )
-{
-    setMsg( file, line, message.c_str() );
-}
+    : message_(toMessageString(file,line,message))
+{}
 
 Exception::~Exception() throw()
 {
@@ -40,16 +34,16 @@ Exception::basename( const char *s )
 #endif
 };
 
-void
-Exception::setMsg( const char *file, const char *line, const char *message )
+std::string
+Exception::toMessageString( const char *file, const char *line, const std::string &message )
 {
-    std::string msgString(message);
-    message_ =  "\n *** ERROR(";
+    std::string msg = "\n *** ERROR(";
     // not to confuse our local basename() with gbxutilacfr::basename()
-    message_ += this->basename(file);
-    message_ += ":";
-    message_ += line;
-    message_ += "): " + msgString;
+    msg += this->basename(file);
+    msg += ":";
+    msg += line;
+    msg += "): " + message;
+    return msg;
 }
 
 } // namespace

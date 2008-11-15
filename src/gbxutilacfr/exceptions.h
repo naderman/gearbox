@@ -53,7 +53,6 @@ where the ERROR_INFO macro inserts the offending file and line number.
 class Exception : public std::exception
 {
 public:
-    Exception(const char *file, const char *line, const char *message);
     Exception(const char *file, const char *line, const std::string &message);
 
     virtual ~Exception() throw();
@@ -61,7 +60,7 @@ public:
     virtual const char* what() const throw() { return message_.c_str(); }
 
 protected:
-    void setMsg( const char *file, const char *line, const char *message );
+    std::string toMessageString( const char *file, const char *line, const std::string &message );
 
     std::string  message_;
 
@@ -73,8 +72,6 @@ private:
 class HardwareException : public gbxutilacfr::Exception
 {
 public:
-    HardwareException(const char *file, const char *line, const char *message)
-            : Exception( file, line, message ) {};
     HardwareException(const char *file, const char *line, const std::string &message)
             : Exception( file, line, message ) {};
 };
