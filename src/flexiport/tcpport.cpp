@@ -819,13 +819,22 @@ void TCPPort::WaitForConnection (void)
 	}
 
 	// Done with the listening socket so close it
+#if defined (WIN32)
+	if (closesocket (_listenSock) < 0)
+#else
 	if (close (_listenSock) < 0)
+#endif
 	{
 		stringstream ss;
 		ss << "TCPPort::" << __func__ << "() close(_listenSock) error: (" << ErrNo () << ") " <<
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+#if defined (WIN32)
+	_listenSock = INVALID_SOCKET;
+#else
+	_listenSock = -1;
+#endif
 }
 
 // Checks if data is available, waiting for the timeout if none is available immediatly

@@ -730,7 +730,7 @@ void UDPPort::OpenSender (void)
 	sockAddr.sin_port = htons (_destPort);
 
 	if (_debug >= 1)
-		cerr << "UDPPort::" << __func__ << "() Connecting to " << _destIP << ":" << _port << "." << endl;
+		cerr << "UDPPort::" << __func__ << "() Connecting to " << _destIP << ":" << _destPort << "." << endl;
 	if (connect (_sendSock, reinterpret_cast<struct sockaddr*> (&sockAddr), sizeof (sockAddr)) < 0)
 	{
 		CloseSender ();
@@ -872,7 +872,7 @@ void UDPPort::OpenReceiver (void)
 	else
 	{
 		// Listen on the specified interface only
-		if ((hp = gethostbyname (_ip.c_str ())) == NULL)
+		if ((hp = gethostbyname (_recvIP.c_str ())) == NULL)
 		{
 			throw PortException (string ("UDPPort::") + __func__ +
 					string (" gethostbyname() error."));

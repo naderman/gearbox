@@ -1179,7 +1179,7 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 			// Now the fun part: parsing the line. It would be nice if we could use the POSIX regex
 			// functions, but since MS doesn't believe in POSIX we get to do it the hard way.
 			// Start by finding the first (
-			char *valueStart;
+			const char *valueStart;
 			if ((valueStart = strchr (info->firmware.c_str (), '(')) == NULL)
 			{
 				// No bracket? Crud. Fail and use the hard-coded values from the manual.
