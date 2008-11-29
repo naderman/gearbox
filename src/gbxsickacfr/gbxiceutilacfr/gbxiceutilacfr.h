@@ -20,4 +20,12 @@
 #include <gbxsickacfr/gbxiceutilacfr/buffer.h>
 #include <gbxsickacfr/gbxiceutilacfr/store.h>
 
+/*!
+@brief Utility namespace (part of SICK-ACFR driver)
+@namespace gbxiceutilacfr
+
+Compiles into a library libGbxIceUtilAcfr
+
+*/
+
 #endif

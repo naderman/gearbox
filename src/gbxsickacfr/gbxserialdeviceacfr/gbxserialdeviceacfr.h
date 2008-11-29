@@ -12,4 +12,13 @@
 
 #include <gbxsickacfr/gbxserialdeviceacfr/serialdevicehandler.h>
 
+/*!
+@brief Utility namespace (part of SICK-ACFR driver)
+@namespace gbxserialdeviceacf
+
+Compiles into a library libGbxSerialDeviceAcfr
+
+*/
+
+
 #endif
