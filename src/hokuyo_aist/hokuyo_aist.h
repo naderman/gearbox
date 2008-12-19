@@ -306,6 +306,16 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		/// @brief Open the laser scanner and begin scanning.
 		void Open (std::string portOptions);
 
+		/** @brief Open the laser scanner and begin scanning, probing the baud rate as necessary.
+
+		If the port is a serial connection and communication with the laser fails at the given
+		baud rate, the alternative baud rates supported by the device are tried (see @ref SetBaud
+		for these) in order from fastest to slowest.
+
+		@return The baud rate at which connection with the laser succeeded, or 0 for non-serial
+		connections. */
+		unsigned int OpenWithProbing (std::string portOptions);
+
 		/// @brief Close the connection to the laser scanner.
 		void Close (void);
 
@@ -317,7 +327,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 
 		/** @brief Change the baud rate when using a serial connection.
 
-		Valid baud rates are: 19.2Kbps, 57.6Kbps, 115.2Kbps, 250.0Kbps, 500.0Kbps, 750.0Kbps
+		Valid rates are 19.2Kbps, 38.4Kbps, 57.6Kbps, 115.2Kbps, 250.0Kbps, 500.0Kbps, 750.0Kbps
 		(dependent on those available in FlexiPort). */
 		void SetBaud (unsigned int baud);
 

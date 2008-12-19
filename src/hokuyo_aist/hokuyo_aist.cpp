@@ -930,6 +930,91 @@ void HokuyoLaser::Open (string portOptions)
 	GetDefaults ();
 }
 
+unsigned int HokuyoLaser::OpenWithProbing (string portOptions)
+{
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Creating and opening port using options: " <<
+			portOptions << endl;
+	}
+	_port = flexiport::CreatePort (portOptions);
+	_port->Open ();
+
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Connected using " << _port->GetPortType () <<
+			" connection." << endl;
+		cerr << _port->GetStatus ();
+	}
+	_port->Flush ();
+
+	try
+	{
+		// Figure out the SCIP version currently in use and switch to a higher one if possible
+		GetAndSetSCIPVersion ();
+		// Get some values we need for providing default ranges
+		GetDefaults ();
+	}
+	catch (HokuyoError)
+	{
+		if (_verbose)
+		{
+			cerr << "HokuyoLaser::" << __func__ <<
+				"() Failed to connect at the default baud rate." << endl;
+		}
+		if (_port->GetPortType () == "serial")
+		{
+			// Failed at the default baud rate, so try again at the other rates
+			const unsigned int bauds[] = {750000, 500000, 250000, 115200, 57600, 38400, 19200};
+			const unsigned int numBauds = 7;
+			for (unsigned int ii = 0; ii < numBauds; ii++)
+			{
+				reinterpret_cast<SerialPort*> (_port)->SetBaudRate (bauds[ii]);
+				try
+				{
+					GetAndSetSCIPVersion ();
+					GetDefaults ();
+					// If the above two functions succeed, break out of the loop and be happy
+					if (_verbose)
+					{
+						cerr << "HokuyoLaser::" << __func__ << "() Connected at " <<
+							bauds[ii] << endl;
+					}
+					return bauds[ii];
+				}
+				catch (HokuyoError)
+				{
+					if (ii == numBauds - 1)
+					{
+						// Last baud rate, give up and rethrow
+						if (_verbose)
+						{
+							cerr << "HokuyoLaser::" << __func__ <<
+								"() Failed to connect at any baud rate." << endl;
+						}
+						throw;
+					}
+					// Otherwise go around again
+				}
+			}
+		}
+		else
+		{
+			if (_verbose)
+			{
+				cerr << "HokuyoLaser::" << __func__ << "() Port is not serial, cannot probe." <<
+					endl;
+			}
+			throw;
+		}
+	}
+
+	if (_port->GetPortType () == "serial")
+		return reinterpret_cast<SerialPort*> (_port)->GetBaudRate ();
+	else
+		return 0;
+}
+
 void HokuyoLaser::Close (void)
 {
 	if (!_port)
@@ -997,8 +1082,8 @@ void HokuyoLaser::SetBaud (unsigned int baud)
 	char newBaud[13];
 	memset (newBaud, 0, sizeof (char) * 13);
 
-	if (baud != 19200 && baud != 57600 && baud != 115200 &&
-			baud != 250000 && baud != 500000 && baud != 750000)
+	if (baud != 19200 && baud != 38400 && baud != 57600 && baud != 115200 &&
+		baud != 250000 && baud != 500000 && baud != 750000)
 	{
 		stringstream ss;
 		ss << "Bad baud rate: " << baud << endl;
