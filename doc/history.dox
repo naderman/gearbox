@@ -34,6 +34,9 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Changed interface for Tracer: 
     - when querying verbosity, default destination argument is 'ToAny' (AlexB).
     - moved trace type and destination enums out of the class into the namespace (alexm)
+    - added optional 'localOnly' parameter to all Tracer output function, i.e. info(), warn(), error(), debug().
+      This is to allow the use of Tracer for tracing network problems (otherwise a trace of a network problem will
+      lead to another trace, etc) (alexm)
   - Changed implementation of TrivialTracer to allow multiple levels of tracing verbosity (AlexB).
   - Changed interface for Status: 
      - status of subsystems is described in two orthogonal dimensions: state and health. (alexm) 

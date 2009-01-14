@@ -39,7 +39,7 @@ std::string toString( TraceType type );
 enum DestinationType {
     //! Write to stardard display
     ToDisplay=0,
-    //! Send over the network, details specific to Tracer implementation
+    //! Send over the network, details are specific to Tracer implementation
     ToNetwork,
     //! Write to SysLog on Unix, EventLog on windows
     ToLog,
@@ -116,16 +116,24 @@ public:
     virtual void print( const std::string &message ) = 0;
 
     //! Routing is determined by InfoToXxx parameter.
-    virtual void info( const std::string &message, int level=1 ) = 0;
+    //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
+    //! is caused by network errors).
+    virtual void info( const std::string &message, int level=1, bool localOnly=false ) = 0;
     
     //! Routing is determined by WarningToXxx parameter.
-    virtual void warning( const std::string &message, int level=1 ) = 0;
+    //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
+    //! is caused by network errors).
+    virtual void warning( const std::string &message, int level=1, bool localOnly=false ) = 0;
     
     //! Routing is determined by ErrorToXxx parameter.
-    virtual void error( const std::string &message, int level=1 ) = 0;
+    //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
+    //! is caused by network errors).
+    virtual void error( const std::string &message, int level=1, bool localOnly=false ) = 0;
 
     //! Routing is determined by DebugToXxx parameter.
-    virtual void debug( const std::string &message, int level=1 ) = 0;
+    //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
+    //! is caused by network errors).
+    virtual void debug( const std::string &message, int level=1, bool localOnly=false ) = 0;
 
     //! Returns the verbosity level for traceType to destType. This test is performed 
     //! internally by all tracing functions, e.g. error(). You may want to call this 

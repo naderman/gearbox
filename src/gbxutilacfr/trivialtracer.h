@@ -33,10 +33,10 @@ public:
                    int error=9 );
 
     virtual void print( const std::string &message );
-    virtual void info( const std::string &message, int level=1 );
-    virtual void warning( const std::string &message, int level=1 );
-    virtual void error( const std::string &message, int level=1 );
-    virtual void debug( const std::string &message, int level=1 );
+    virtual void info( const std::string &message, int level=1, bool localOnly=false );
+    virtual void warning( const std::string &message, int level=1, bool localOnly=false );
+    virtual void error( const std::string &message, int level=1, bool localOnly=false );
+    virtual void debug( const std::string &message, int level=1, bool localOnly=false );
     virtual int verbosity( TraceType traceType, DestinationType destType=ToAny ) const;
 
 private:
