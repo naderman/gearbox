@@ -19,11 +19,16 @@
 NovatelSPAN is a proprietary Novatel navigation system.
 It minimally consists out of a Novatel OEMV GPS receiver (OEM4 receivers should be compatible).
 If combined with an IMU, a SPAN system can provide an INS navigation solution at high rate (up to 100Hz).
-The driver initialises the hardware and reports navigation data continously.
+The driver initialises the hardware and reports navigation data continuously.
 
 
 for a full list of functions see @ref gbxnovatelacfr
 
+@par Tested Hardware
+
+Specific devices this driver has been tested with:
+- @ref gbxnovatelacfr_hw_reviews_michael
+- @ref gbxnovatelacfr_hw_reviews_alen
 
 @par Header file
 
@@ -44,7 +49,7 @@ for a full list of functions see @ref gbxnovatelacfr
   LGPL
 
 @par Dependencies.
-  @ref gbx_library_gbxserialacfr
+  @ref gbx_library_gbxserialacfr, @ref gbx_library_gbxutilacfr
 
 @par Example
 
@@ -140,7 +145,7 @@ int main(void){
 
 @par References
 
-This driver was programmed based on the protocoll/message descriptions in Novatel's manuals, it does not contain any code from Novatel.
+This driver was programmed based on the protocol/message descriptions in Novatel's manuals, it does not contain any code from Novatel.
 The main source for information was:
 - http://www.novatel.com/Documents/Manuals/om-20000094.pdf (Novatel OEMV reference)
 - http://www.novatel.com/Documents/Manuals/om-20000104.pdf (SPAN-system manual)
@@ -158,7 +163,7 @@ this might change in the future, particularly if there is user-demand)
 - The binary parser currently works on little endian architectures (e.g. x86) only. This is checked at run-time.
 - Driver currently treats the hardware as data-source only, communication _to_ the hardware is possible only during initialization.
 - Driver does limited checking if configuring the receiver was successful/as-intended:
-    - Driver checks for 'acks' for commands, reports 'no-acks' and retries
+    - Driver checks for 'ack' for commands, reports 'no-ack' and retries
     - This detects malformed commands _only_
     - The receiver (and hence the driver) will accept commands to e.g. setup an IMU, even if no IMU is present
 - Driver does not deal with persistent storage:
@@ -167,16 +172,16 @@ this might change in the future, particularly if there is user-demand)
     - There are cases where persistent settings could interfere with normal operation of the driver. This is particularly likely
     to happen when the hardware is shared between projects. There is no easy way to test for this, and the current implementation
     ignores the problem completely (the user is always right).
-    - Workaround: To make sure that there are no lingering persisten settings,
+    - Workaround: To make sure that there are no lingering persistent settings,
     use the receiver's 'freset' command to bring it back to factory-defaults.  The driver itself does not do this,
     on the grounds that it also might delete settings that were made persistent with good reason and purpose.
-    If you are shareing equipment, check with everybody involved, before you use this approach.
+    If you are sharing equipment, check with everybody involved, before you use this approach.
 */
 
 /*!
 @namespace gbxnovatelacfr
 @brief Novatel GPS/INS driver
 
-This namespace contains the public interface of a library to access and run a NovatelSpan system.
+This namespace contains the public interface of a library to access and run a NovatelSPAN system.
 @see @ref gbx_library_gbxnovatelacfr
 */
