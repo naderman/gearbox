@@ -10,6 +10,5 @@ IF( GBX_BUILD_SUBMITTED )
     # When adding new directories, please maintain order of inter-dependencies.
     # Otherwise, maintain alphabetical order.
     # E.g. ADD_SUBDIRECTORY( mydir )
-    ADD_SUBDIRECTORY( gbxnovatelacfr )
 
 ENDIF( GBX_BUILD_SUBMITTED )
