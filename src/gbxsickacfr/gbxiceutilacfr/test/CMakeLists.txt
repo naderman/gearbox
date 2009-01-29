@@ -3,16 +3,16 @@
 LINK_LIBRARIES( GbxIceUtilAcfr )
 
 ADD_EXECUTABLE( buffertest buffertest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrBufferTest buffertest )
+GBX_ADD_TEST( GbxIceUtilAcfr_BufferTest buffertest )
 
 ADD_EXECUTABLE( storetest storetest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrStoreTest storetest )
+GBX_ADD_TEST( GbxIceUtilAcfr_StoreTest storetest )
 
 ADD_EXECUTABLE( notifytest notifytest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrNotifyTest notifytest )
+GBX_ADD_TEST( GbxIceUtilAcfr_NotifyTest notifytest )
 
 ADD_EXECUTABLE( threadtest threadtest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrThreadTest threadtest )
+GBX_ADD_TEST( GbxIceUtilAcfr_ThreadTest threadtest )
 
 ADD_EXECUTABLE( safethreadtest safethreadtest.cpp )
-GBX_ADD_TEST( GbxIceUtilAcfrSafeThreadTest safethreadtest )
+GBX_ADD_TEST( GbxIceUtilAcfr_SafeThreadTest safethreadtest )
