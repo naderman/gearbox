@@ -45,7 +45,7 @@ OceanServer::getData()
         ss << "OceanServer: " << __func__ << ": Caught a parsing exception: "
            << e.what() << endl
            << "This can happen sometimes. Will continue regardless.";
-        tracer_.info( ss.str() );
+        tracer_.debug( ss.str(), 3 );
         
         exceptionCounter_++;
         if (exceptionCounter_ >= MAX_EXCEPTIONS_ROW) 

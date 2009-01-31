@@ -76,7 +76,7 @@ OceanServerReader::OceanServerReader( const string        &serialPort,
 void
 OceanServerReader::checkConnection()
 {   
-    tracer_.info( "OceanServerReader: Checking connection to serial port" );
+    tracer_.debug( "OceanServerReader: Checking connection to serial port", 3 );
 
     // a blank will get us into menu mode
     const char menuMode = ' ';
@@ -88,7 +88,7 @@ OceanServerReader::checkConnection()
     while(true)
     {
         ss.str(""); ss << "OceanServerReader: " << __func__ << ": Trying to read from serial port with timeout of " << TIMEOUT_SEC << "s" << endl;
-        tracer_.info( ss.str() );
+        tracer_.debug( ss.str(), 3 );
         
         // reading from serial port
         string serialData;        
@@ -99,14 +99,14 @@ OceanServerReader::checkConnection()
         
         // checking whether we are connected to an oceanserver system
         if ( isOceanServerSystem(serialData) ) {
-            tracer_.info( "OceanServerReader: We are connected to an Oceanserver system. Good." );
+            tracer_.debug( "OceanServerReader: We are connected to an Oceanserver system. Good.", 3 );
             break;
         }
         
         // count the number of tries
         numTries++;
         ss.str(""); ss << "OceanServerReader: Trying to find out whether this is an oceanserver system. Attempt number " << numTries << "/" << MAX_TRIES << ".";
-        tracer_.info( ss.str() );
+        tracer_.debug( ss.str(), 3 );
         
         if ( numTries >= MAX_TRIES ) {
             throw HardwareReadingException( ERROR_INFO, "Didn't recognize any of the strings. We may be connected to the wrong serial port.");
@@ -198,7 +198,7 @@ OceanServerReader::read( OceanServerSystem &system )
         stringstream ss;
         ss << "OceanServerReader: Caught ParsingException: " << e.what() << ". ";
         ss << "It's not critical, we will try to find the beginning of a new record.";
-        tracer_.info( ss.str() );
+        tracer_.debug( ss.str(), 3 );
         firstTime_ = true;
         
         // we have to rethrow, so that the caller knows that it may receive a corrupt record
