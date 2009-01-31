@@ -581,10 +581,10 @@ Config::Config(const SimpleConfig &simpleCfg) :
     imuToGpsOffset_(simpleCfg.imuToGpsOffset_),
     imuToGpsOffsetUncertainty_(0,0.0),
     enableInsOffset_(false),
-    enableInsPhaseUpdate_(true),
-    enableCDGPS_(true),
-    enableSBAS_(true),
-    enableRTK_(true),
+    enableInsPhaseUpdate_(false),
+    enableCDGPS_(false),
+    enableSBAS_(false),
+    enableRTK_(false),
     enableUseOfOmniStarCarrier_(false),
     enableSetImuOrientation_(false),
     enableVehicleBodyRotation_(false) {
@@ -601,9 +601,9 @@ Config::Config(const GpsOnlyConfig &gpsOnlyCfg) :
     dtGpsPos_(0.05),
     dtGpsVel_(0.05),
     fixInvalidRateSettings_(false),
-    enableCDGPS_(true),
-    enableSBAS_(true),
-    enableRTK_(true),
+    enableCDGPS_(false),
+    enableSBAS_(false),
+    enableRTK_(false),
     enableUseOfOmniStarCarrier_(false) {
 }
 Config::Config() :
