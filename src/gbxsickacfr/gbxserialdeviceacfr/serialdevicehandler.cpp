@@ -80,6 +80,12 @@ SerialDeviceHandler::setBaudRate( int baudRate )
 void
 SerialDeviceHandler::send( const char *commandBytes, int numCommandBytes )
 {
+    if ( SUPER_DEBUG )
+    {
+        stringstream ss;
+        ss << "SerialDeviceHandler::"<<__func__<<"(): Sending "<<numCommandBytes<<" bytes";
+        tracer_.debug( ss.str(), 5 );
+    }
     serial_.write( commandBytes, numCommandBytes );
 }
 
