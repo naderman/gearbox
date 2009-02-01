@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 
 #include <gbxutilacfr/trivialtracer.h>
 #include <gbxutilacfr/exceptions.h>
@@ -26,27 +27,29 @@ using namespace std;
 namespace gna = gbxnovatelacfr;
 
 void usage(char *progName, const char *optString){
-    printf("Usage: %s -m [mode] -p [port] -b [baud] -i [imutype] -d -v -h\n", progName);
-    printf("\t[mode]:\t\"gps\" to set the system up in GPS only mode\n"
-            "\t\t\"ins\" to run INS/GPS mode (default)\n");
-    printf("\t[port]:\tSerial port the receiver is connecteed to (default \"/dev/ttyS0\")\n");
+    printf("Usage: %s -m [mode] -p [port] -b [baud] -i [imutype] -t [time to run] -d -v -h\n", progName);
+    printf("\t[mode]:\t\t\"gps\" to set the system up in GPS only mode\n"
+            "\t\t\t\"ins\" to run INS/GPS mode (default)\n");
+    printf("\t[port]:\t\tSerial port the receiver is connecteed to (default \"/dev/ttyS0\")\n");
+    printf("\t[baud]:\t\tBaud rate to set up the serial port (9600, 19200, 38400, 115200, 230400), default is 115200\n");
     printf("\t[imutype]:\ttype of imu you are using(default \"IMU_HG1700_AG62\")\n");
-    printf("\t[baud]:\tBaud rate to set up the serial port (9600, 19200, 38400, 115200, 230400), default is 115200\n");
-    printf("\t-d:\tshow debug info (default is off)\n");
-    printf("\t-v:\tbe verbose, actually print out the data (default is off)\n");
-    printf("\t-h:\tprint this message\n");
-    printf("Options to decode: \"%s\"\n", optString);
+    printf("\t[time to run]:\trun for so many seconds (after we get data the first time)\n");
+    printf("\t-d:\t\tshow debug info (default is off)\n");
+    printf("\t-v:\t\tbe verbose, actually print out the data (default is off)\n");
+    printf("\t-h:\t\tprint this message\n");
+    printf("Options to decode: \t\"%s\"\n", optString);
     return;
 }
 
 int main(int argc, char *argv[]){
     int opt;
-    const char *optString = ":m:p:b:i:dvh";
+    const char *optString = ":m:p:b:i:t:dvh";
 
     //use sensible defaults
     string mode = "ins";
     string port = "/dev/ttyS0";
     int baud = 115200;
+    double runTime = 10.0;
     string imuType = "IMU_HG1700_AG62";
     bool showDebug = false;
     bool verbose = false;
@@ -67,6 +70,9 @@ int main(int argc, char *argv[]){
                 break;
             case 'i':
                 imuType = optarg;
+                break;
+            case 't':
+                runTime = atof( optarg );
                 break;
             case 'd':
                 showDebug = true;
@@ -95,11 +101,43 @@ int main(int argc, char *argv[]){
     cout << "| Starting with:\n";
     cout << "|\tmode:\t\t" << mode << "\n";
     cout << "|\tport:\t\t" << port << "\n";
-    cout << "|\tbaud:\t\t" << baud << "\n";
+    cout << "|\tbaud:\t\t" << baud << "\t\t[bps]\n";
+    cout << "|\truntime:\t" << runTime << "\t\t[sec]\n";
     cout << "|\tImu:\t\t" << imuType << "\n";
     cout << "|\tverbose:\t" << verbose << "\n";
     cout << "|\tshow debug:\t" << showDebug << "\n";
     cout << "-------------------------------------------------\n";
+
+    //read data from the driver for ~ [runTime] sec
+    int maxGpsPosCnt;
+    int maxGpsVelCnt;
+    int maxInsPvaCnt;
+    int maxRawImuCnt;
+    int maxFaultCnt = 2;
+    // bit dodgy to do this with counters, at least make sure we don't overflow
+    if(20.0*runTime < INT_MAX){
+        maxGpsPosCnt = 20*runTime;
+        maxGpsVelCnt = 20*runTime;
+    }
+    else{
+        maxGpsPosCnt = INT_MAX;
+        maxGpsVelCnt = INT_MAX;
+        cout << "!runtime too high, reset to " << INT_MAX/20 << "sec!\n";
+    }
+    if(100.0*runTime < INT_MAX){
+        maxInsPvaCnt = 100*runTime;
+        maxRawImuCnt = 100*runTime;
+    }
+    else{
+        maxInsPvaCnt = INT_MAX;
+        maxRawImuCnt = INT_MAX;
+        cout << "!runtime too high, reset to " << INT_MAX/100 << "sec!\n";
+    }
+    cout << "\n";
+
+    /**************************************************
+     * This is roughly what user-code should look like
+     **************************************************/
 
     //create a config (the easy way)
     auto_ptr<gna::Config > cfg;
@@ -119,8 +157,9 @@ int main(int argc, char *argv[]){
         cfg.reset( new gna::Config(*gpsOnlyCfg.get()) );
         assert(0 != cfg.get());
         // set up a couple of extra parameters
-        cfg->enableSBAS_ = true;
-        cfg->enableCDGPS_ = true;
+        // some hardware combinations may not support this
+        // cfg->enableSBAS_ = true;
+        // cfg->enableCDGPS_ = true;
     }
     else{
         cout << "invalid mode: " <<  mode << "\n";
@@ -154,13 +193,6 @@ int main(int argc, char *argv[]){
         cout << "failed to set up driver!\n";
         return EXIT_FAILURE;
     }
-
-    //read data from the driver for ~ 10 sec
-    int maxGpsPosCnt = 200;
-    int maxGpsVelCnt = 200;
-    int maxInsPvaCnt = 1000;
-    int maxRawImuCnt = 1000;
-    int maxFaultCnt = 2;
 
     while(0 < maxRawImuCnt
             && 0 < maxInsPvaCnt
