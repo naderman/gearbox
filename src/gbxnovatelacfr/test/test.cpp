@@ -32,8 +32,8 @@ void usage(char *progName, const char *optString){
             "\t\t\t\"ins\" to run INS/GPS mode (default)\n");
     printf("\t[port]:\t\tSerial port the receiver is connecteed to (default \"/dev/ttyS0\")\n");
     printf("\t[baud]:\t\tBaud rate to set up the serial port (9600, 19200, 38400, 115200, 230400), default is 115200\n");
-    printf("\t[imutype]:\ttype of imu you are using(default \"IMU_HG1700_AG62\")\n");
-    printf("\t[time to run]:\trun for so many seconds (after we get data the first time)\n");
+    printf("\t[imutype]:\ttype of imu you are using (default \"IMU_HG1700_AG62\")\n");
+    printf("\t[time to run]:\trun for so many seconds after we get data the first time (default 10)\n");
     printf("\t-d:\t\tshow debug info (default is off)\n");
     printf("\t-v:\t\tbe verbose, actually print out the data (default is off)\n");
     printf("\t-h:\t\tprint this message\n");
