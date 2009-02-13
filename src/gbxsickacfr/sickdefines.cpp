@@ -261,8 +261,10 @@ std::string statusToString( uChar status )
 
 bool generalStatusIsWarn( uChar generalStatus )
 {
-    return ( generalStatus == STATUS_INFO ||
-             generalStatus == STATUS_WARNING );
+// AlexB: don't warn on 'INFO', just warn on 'WARNING'.
+//     return ( generalStatus == STATUS_INFO ||
+//              generalStatus == STATUS_WARNING );
+    return ( generalStatus == STATUS_WARNING );
 }
 
 bool generalStatusIsError( uChar generalStatus )

@@ -150,10 +150,12 @@ typedef IceUtil::Handle<SerialDeviceHandler> SerialDeviceHandlerPtr;
 //////////////////////////////////////////////////////////////////////
 
 std::string toHexString( const char *buf, int bufLen );
-// inline std::string toHexString( char *buf, int bufLen )
-// { return toHexString( (const unsigned char *)buf, bufLen ); }
 inline std::string toHexString( const std::vector<char> &buf )
 {return toHexString( &(buf[0]), buf.size() );}
+
+std::string toAsciiString( const char *buf, int bufLen );
+inline std::string toAsciiString( const std::vector<char> &buf )
+{return toAsciiString( &(buf[0]), buf.size() );}
 
 } // namespace
 

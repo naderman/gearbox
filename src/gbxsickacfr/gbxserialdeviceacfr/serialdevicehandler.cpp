@@ -193,7 +193,7 @@ SerialDeviceHandler::processBuffer()
     if ( SUPER_DEBUG )
     {
         stringstream ssDebug;
-        ssDebug << "SerialDeviceHandler::processSerialBuffer: buffer is: " << toHexString(buffer_);
+        ssDebug << "SerialDeviceHandler::processSerialBuffer: buffer is: " << toAsciiString(buffer_);
         tracer_.debug( ssDebug.str() );
     }
 
@@ -259,6 +259,12 @@ SerialDeviceHandler::processBuffer()
         {
             break;
         }
+
+        // If we've parsed the entire thing we can stop.
+        if ( buffer_.size() == 0 )
+        {
+            break;
+        }
     }
     return statusOK;
 }
@@ -277,6 +283,17 @@ toHexString( const char *buf, int bufLen )
         ss <<hex<<std::setfill('0')<<std::setw(2)<<(int)((unsigned char)buf[i])<<" ";
     }
     ss << "]";
+    return ss.str();
+}
+
+std::string 
+toAsciiString( const char *buf, int bufLen )
+{
+    stringstream ss;
+    ss << "[ ";
+    for ( int i=0; i < bufLen; i++ )
+        ss <<buf[i];
+    ss << " ]";
     return ss.str();
 }
 
