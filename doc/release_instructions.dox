@@ -33,6 +33,7 @@
 $ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/tags/RELEASE_9.02 -m 'Tagging release 9.02'
 @endverbatim
   -# Delete all .svn directories (eg with 'find . -name .svn | xargs rm -rf')
+  -# Delete @c build directory, if exists.
   -# Create tar-ball, named eg. 'gearbox-9.02.tar.gz'
   -# Now the tar-ball is ready to roll. But first test that the original untars and builds cleanly.
   -# Copy the tar-ball to a machine with external access.
@@ -44,6 +45,7 @@ $ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gear
   - Login a project administrator
   - (Go through "'Admin' -> 'File Releases'" from the GearBox project page)
 -# Update the web page
+  - change temporatily the last line of the script to say [USERNAME],gearbox@shell.sourceforge.net
   - Use the script: <distro>/doc/rebuild_docco.sh
 -# Increment the version numbers (eg '9.02' -> '9.02+') in the top-level CMakeLists.txt files.
 
