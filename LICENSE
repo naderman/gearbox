@@ -9,6 +9,8 @@ src/gbxserialacfr                                           LGPL
 src/gbxserialacfr/lockfile                                  LGPL
 src/gbxutilacfr                                             LGPL
 src/gbxgarminacfr                                           LGPL
+src/gbxnovatelacfr                                          LGPL
+src/gbxnovatelacfr/gbxnovatelutilacfr                       LGPL
 src/gbxsickacfr                                             LGPL
 src/gbxsickacfr/gbxiceutilacfr                              LGPL
 src/gbxsickacfr/gbxserialdeviceacfr                         LGPL
