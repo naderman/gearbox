@@ -25,11 +25,16 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @section gbx_doc_history_head Changes in SVN since Last Release
 
+@par New libraries
+
+@par Updated libraries
+
+
 @section gbx_doc_history_902 Changes in Release 9.02
 
 @par New libraries
 
--libGbxNovatelAcfr
+- libGbxNovatelAcfr
   - ACFR driver for a Novatel(SPAN) system. This is the implementation used by Sydney-Berkeley DGC'07 team. 
     (Michael M)
 
