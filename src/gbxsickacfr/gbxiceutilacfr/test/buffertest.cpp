@@ -54,15 +54,15 @@ int main(int argc, char * argv[])
     }
     cout<<"ok"<<endl;
 
-    cout<<"testing getNext() with empty buffer ... ";
-    if ( buffer.getNext( data, 50 )==0 ) {
+    cout<<"testing getWithTimeout() with empty buffer ... ";
+    if ( buffer.getWithTimeout( data, 50 )==0 ) {
         cout<<"failed. not expecting anybody setting the buffer"<<endl;
         return EXIT_FAILURE;
     }
     cout<<"ok"<<endl;
 
-    cout<<"testing getAndPopNext() with empty buffer ... ";
-    if ( buffer.getAndPopNext( data, 50 )==0 ) {
+    cout<<"testing getAndPopWithTimeout() with empty buffer ... ";
+    if ( buffer.getAndPopWithTimeout( data, 50 )==0 ) {
         cout<<"failed. not expecting anybody setting the proxy"<<endl;
         return EXIT_FAILURE;
     }
@@ -188,15 +188,15 @@ int main(int argc, char * argv[])
     // todo: test where the last data actually went.
     cout<<"ok"<<endl;
 
-    cout<<"testing getNext() ... ";
-    if ( buffer.getNext( data, 50 )!=0 ) {
+    cout<<"testing getWithTimeout() ... ";
+    if ( buffer.getWithTimeout( data, 50 )!=0 ) {
         cout<<"failed. expected to get data"<<endl;
         return EXIT_FAILURE;
     }
     cout<<"ok"<<endl;
 
-    cout<<"testing getAndPopNext() ... ";
-    if ( buffer.getAndPopNext( data, 50 )!=0 ) {
+    cout<<"testing getAndPopWithTimeout() ... ";
+    if ( buffer.getAndPopWithTimeout( data, 50 )!=0 ) {
         cout<<"failed. expected to get data"<<endl;
         return EXIT_FAILURE;
     }

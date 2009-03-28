@@ -83,7 +83,7 @@ public:
     int getNextResponse( TimedLmsResponse &timedResponse, int maxWaitMs )
         { 
             gbxserialdeviceacfr::TimedResponse genericTimedResponse;
-            int ret = serialDeviceHandler_->responseBuffer().getAndPopNext( genericTimedResponse, maxWaitMs );
+            int ret = serialDeviceHandler_->responseBuffer().getAndPopWithTimeout( genericTimedResponse, maxWaitMs );
             if ( ret == 0 )
             {
                 timedResponse.timeStampSec = genericTimedResponse.timeStampSec;
