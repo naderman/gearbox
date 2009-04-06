@@ -5,41 +5,41 @@
 
 
 # CMake does not distinguish Linux from other Unices.
-STRING( REGEX MATCH Linux GBX_OS_LINUX ${CMAKE_SYSTEM_NAME})
+string( REGEX MATCH Linux GBX_OS_LINUX ${CMAKE_SYSTEM_NAME})
 
 # Rename CMake's variable to something which makes more sense.
-IF( QNXNTO )
-    SET( GBX_OS_QNX TRUE BOOL INTERNAL )
-ENDIF( QNXNTO )
+if( QNXNTO )
+    set( GBX_OS_QNX TRUE BOOL INTERNAL )
+endif( QNXNTO )
 
 # In windows we just mirror CMake's own variable
-IF( WIN32 )
-    SET( GBX_OS_WIN TRUE BOOL INTERNAL )
-ENDIF( WIN32 )
+if( WIN32 )
+    set( GBX_OS_WIN TRUE BOOL INTERNAL )
+endif( WIN32 )
 
 # In MacOS X we just mirror CMake's own variable
-IF( APPLE )
-    SET( GBX_OS_MAC TRUE BOOL INTERNAL )
-ENDIF( APPLE )
+if( APPLE )
+    set( GBX_OS_MAC TRUE BOOL INTERNAL )
+endif( APPLE )
 
 
 # From now on, use our own OS flags
 
-IF( GBX_OS_LINUX )
-    MESSAGE( STATUS "Running on Linux" )
-ENDIF( GBX_OS_LINUX )
+if( GBX_OS_LINUX )
+    message( STATUS "Running on Linux" )
+endif( GBX_OS_LINUX )
 
-IF( GBX_OS_QNX )
-    MESSAGE( STATUS "Running on QNX" )
-    ADD_DEFINITIONS( -shared -fexceptions )
-ENDIF( GBX_OS_QNX )
+if( GBX_OS_QNX )
+    message( STATUS "Running on QNX" )
+    add_definitions( -shared -fexceptions )
+endif( GBX_OS_QNX )
 
-IF( GBX_OS_WIN )
+if( GBX_OS_WIN )
     # CMake seems not to set this property correctly for some reason
-    SET( GBX_EXE_EXTENSION ".exe" )
-    MESSAGE( STATUS "Running on Windows" )
-ENDIF( GBX_OS_WIN )
+    set( GBX_EXE_EXTENSION ".exe" )
+    message( STATUS "Running on Windows" )
+endif( GBX_OS_WIN )
 
-IF( GBX_OS_MAC )
-    MESSAGE( STATUS "Running on OS-X" )
-ENDIF( GBX_OS_MAC )
+if( GBX_OS_MAC )
+    message( STATUS "Running on OS-X" )
+endif( GBX_OS_MAC )

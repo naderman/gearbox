@@ -1,5 +1,6 @@
 # This script is indended for Gearbox users (not for internal use)
-# Assumes that a variable GEARBOX_HOME is defined.
+# Assumes that a variable GEARBOX_INCLUDE_DIR is defined.
+# Variable GEARBOX_LINK_DIR only needs to be defined if you're using a gearbox installation (as opposed to a local gearbox repository)
 
-INCLUDE_DIRECTORIES( ${GEARBOX_HOME}/include/gearbox )
-LINK_DIRECTORIES( ${GEARBOX_HOME}/lib/gearbox )
+include_directories( ${GEARBOX_INCLUDE_DIR} )
+link_directories( ${GEARBOX_LINK_DIR} )

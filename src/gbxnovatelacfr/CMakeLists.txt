@@ -1,34 +1,32 @@
-SET( lib_name GbxNovatelAcfr )
+set( lib_name GbxNovatelAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET( build TRUE )
+set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
-SET( int_libs GbxUtilAcfr GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
+set( dep_libs GbxUtilAcfr GbxSerialAcfr )
+GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
 
 # built internally
-SET( private_libs GbxNovatelUtilAcfr )
+set( dep_libs ${dep_libs} GbxNovatelUtilAcfr )
 
-IF( build )
+if( build )
 
-    ADD_SUBDIRECTORY( gbxnovatelutilacfr)
+    add_subdirectory( gbxnovatelutilacfr)
 
-    INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+    include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
-    FILE( GLOB hdrs *.h )
-    FILE( GLOB srcs *.cpp )
-    SET( dep_libs ${int_libs} ${private_libs} )
+    file( GLOB hdrs *.h )
+    file( GLOB srcs *.cpp )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
-    TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "Drives NOVATEL hardware, directly connected to the computer." proj_libs int_libs "" "" )
+    target_link_libraries( ${lib_name} ${dep_libs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} "Drives NOVATEL hardware, directly connected to the computer." proj_libs dep_libs "" "" )
 
     GBX_ADD_HEADERS( gbxnovatelacfr ${hdrs} )
 
-    IF( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY( test )
-    ENDIF( GBX_BUILD_TESTS )
+    if( GBX_BUILD_TESTS )
+        add_subdirectory( test )
+    endif( GBX_BUILD_TESTS )
 
-
-ENDIF( build )
+endif( build )

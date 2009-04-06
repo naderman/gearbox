@@ -1,261 +1,344 @@
 #
-# utility macro
+# This is a utility macro for internal use.
 #
-MACRO( GBX_MAKE_OPTION_NAME option_name module_type module_name )
+macro( GBX_MAKE_OPTION_NAME option_name module_type module_name )
+#     message( STATUS "GBX_MAKE_OPTION_NAME [ option_name=${option_name}, MOT_TYPE=${module_type}, MOD_NAME=${module_name} ]" )
 
-    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF( NOT is_exe AND NOT is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( NOT is_exe AND NOT is_lib )
-    IF( is_exe AND is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( is_exe AND is_lib )
+    string( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    string( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    if( NOT is_exe AND NOT is_lib )
+        message( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    endif( NOT is_exe AND NOT is_lib )
+    if( is_exe AND is_lib )
+        message( FATAL_ERROR "In macro GBX_MAKE_OPTION_NAME, module_type must be either 'EXE' or 'LIB'" )
+    endif( is_exe AND is_lib )
 
-    STRING( TOUPPER ${module_name} module_name_upper )
-    IF( is_exe )
-        SET( option_name "ENABLE_${module_name_upper}" )
-    ELSE ( is_exe )
-        SET( option_name "ENABLE_LIB_${module_name_upper}" )
-    ENDIF( is_exe )
+    string( TOUPPER ${module_name} module_name_upper )
+    # dereference the variable name once, so that we are setting the variable in the calling context!
+    if( is_exe )
+        set( ${option_name} "ENABLE_${module_name_upper}" )
+    else( is_exe )
+        set( ${option_name} "ENABLE_LIB_${module_name_upper}" )
+    endif( is_exe )
 
-ENDMACRO( GBX_MAKE_OPTION_NAME option_name module_name )
+#     message( STATUS "GBX_MAKE_OPTION_NAME output: option_name=${${option_name}}" )
+endmacro( GBX_MAKE_OPTION_NAME option_name module_name )
+
+#
+# This is a utility macro for internal use.
+# (there's another copy of this simple macro in TargetUtils.cmake)
+#
+macro( GBX_MAKE_MANIFEST_NAME manifest_name module_name )
+#     message( STATUS "GBX_MAKE_MANIFEST_NAME [ manifest_name=${manifest_name}, MOD_NAME=${module_name} ]" )
+
+    string( TOUPPER ${module_name} module_name_upper )
+    # dereference the variable name once, so that we are setting the variable in the calling context!
+    set( ${manifest_name} ${module_name_upper}_INSTALLED )
+
+#     message( STATUS "GBX_MAKE_MANIFEST_NAME output: manifest_name=${${manifest_name}}" )
+endmacro( GBX_MAKE_MANIFEST_NAME manifest_name module_name )
 
 #
 # GBX_REQUIRE_OPTION( cumulative_var [EXE | LIB] module_name default_option_value [option_name] [OPTION DESCRIPTION] )
 #
 # E.g.
 # Initialize a variable first
-#   SET( BUILD TRUE )
+#   set( build TRUE )
 # Now set up and test option value
-#   GBX_REQUIRE_OPTION ( BUILD EXE localiser ON )
+#   GBX_REQUIRE_OPTION ( build EXE localiser ON )
 # This does the same thing
-#   GBX_REQUIRE_OPTION ( BUILD EXE localiser ON BUILD_LOCALISER )
+#   GBX_REQUIRE_OPTION ( build EXE localiser ON BUILD_LOCALISER )
 #
-MACRO( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
+macro( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
 
-    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF( NOT is_exe AND NOT is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( NOT is_exe AND NOT is_lib )
-    IF( is_exe AND is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( is_exe AND is_lib )
+    string( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    string( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    if( NOT is_exe AND NOT is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+    endif( NOT is_exe AND NOT is_lib )
+    if( is_exe AND is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_OPTION, module_type must be either 'EXE' or 'LIB'" )
+    endif( is_exe AND is_lib )
 
-    IF( ${ARGC} GREATER 5 )
-        SET( option_name ${ARGV6} )
-    ELSE ( ${ARGC} GREATER 5 )
-        STRING( TOUPPER ${module_name} module_name_upper )
-        IF( is_exe )
-            SET( option_name "ENABLE_${module_name_upper}" )
-        ELSE ( is_exe )
-            SET( option_name "ENABLE_LIB_${module_name_upper}" )
-        ENDIF( is_exe )
-    ENDIF( ${ARGC} GREATER 5 )
+    if( ${ARGC} GREATER 5 )
+        set( option_name ${ARGV6} )
+    else( ${ARGC} GREATER 5 )
+        GBX_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
+    endif( ${ARGC} GREATER 5 )
 
-    IF( ${ARGC} GREATER 6 )
-        SET( option_descr ${ARGV7} )
-    ELSE ( ${ARGC} GREATER 6 )
-        SET( option_descr "disabled by user, use ccmake to enable" )
-    ENDIF( ${ARGC} GREATER 6 )
+    if( ${ARGC} GREATER 6 )
+        set( option_descr ${ARGV7} )
+    else( ${ARGC} GREATER 6 )
+        set( option_descr "disabled by user, use ccmake to enable" )
+    endif( ${ARGC} GREATER 6 )
 
     # debug
-#     MESSAGE( STATUS
+#     message( STATUS
 #         "GBX_REQUIRE_OPTION (CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, default_option_value=${default_option_value}, OPT_NAME=${option_name}, OPT_DESC=${option_descr})" )
 
     # set up the option
-    IF( is_exe )
-        OPTION( ${option_name} "Try to build ${module_name}" ${default_option_value} )
-    ELSE ( is_exe )
-        OPTION( ${option_name} "Try to build lib${module_name} library" ${default_option_value} )
-    ENDIF( is_exe )
+    if( is_exe )
+        option( ${option_name} "Try to build ${module_name}" ${default_option_value} )
+    else( is_exe )
+        option( ${option_name} "Try to build lib${module_name} library" ${default_option_value} )
+    endif( is_exe )
 
     # add option to the list: this has nothing to do with the build system.
     # it is useful to have a text list of all options if you want to build a particular
     # configuration from the command line.
-    SET( templist ${OPTION_LIST} )
+    set( templist ${OPTION_LIST} )
     # (escaping \)
-    LIST( APPEND templist "${option_name}=${default_option_value}" )
-    SET( OPTION_LIST ${templist} CACHE INTERNAL "Global list of cmake options" FORCE )
+    list( APPEND templist "${option_name}=${default_option_value}" )
+    set( OPTION_LIST ${templist} CACHE INTERNAL "Global list of cmake options" FORCE )
 
     # must dereference both var and option names once (!) and IF will evaluate their values
-    IF( ${cumulative_var} AND NOT ${option_name}  )
-        SET( ${cumulative_var} FALSE )
-        IF( is_exe )
-            GBX_NOT_ADD_EXECUTABLE( ${module_name} ${option_descr} )
-        ELSE ( is_exe )
-            GBX_NOT_ADD_LIBRARY( ${module_name} ${option_descr} )
-        ENDIF( is_exe )
-    ENDIF( ${cumulative_var} AND NOT ${option_name} )
+    if( ${cumulative_var} AND NOT ${option_name}  )
+        set( ${cumulative_var} FALSE )
+        if( is_exe )
+            GBX_NOT_add_executable( ${module_name} ${option_descr} )
+        else( is_exe )
+            GBX_NOT_add_library( ${module_name} ${option_descr} )
+        endif( is_exe )
+    endif( ${cumulative_var} AND NOT ${option_name} )
 
-ENDMACRO( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
+endmacro( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
 
 #
 # GBX_REQUIRE_VAR ( cumulative_var [EXE | LIB] module_name test_var reason )
 #
 # E.g.
 # Initialize a variable first
-#   SET( BUILD TRUE )
+#   set( build TRUE )
 # Now test the variable value
-#   GBX_REQUIRE_VAR ( BUILD LIB HydroStuff GOOD_TO_GO "good-to-go is no good" )
+#   GBX_REQUIRE_VAR ( build LIB HydroStuff GOOD_TO_GO "good-to-go is no good" )
 #
-MACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
+macro( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
 
     # debug
-#     MESSAGE( STATUS "GBX_REQUIRE_VAR [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, test_var=${${test_var}}, reason=${reason} ]" )
+#     message( STATUS "GBX_REQUIRE_VAR [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, test_var=${${test_var}}, reason=${reason} ]" )
 
-    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF( NOT is_exe AND NOT is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( NOT is_exe AND NOT is_lib )
-    IF( is_exe AND is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( is_exe AND is_lib )
+    string( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    string( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    if( NOT is_exe AND NOT is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
+    endif( NOT is_exe AND NOT is_lib )
+    if( is_exe AND is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_VAR, module_type must be either 'EXE' or 'LIB'" )
+    endif( is_exe AND is_lib )
 
     # must dereference both var names once (!) and IF will evaluate their values
-    IF( ${cumulative_var} AND NOT ${test_var}  )
-        SET( ${cumulative_var} FALSE )
-        IF( is_exe )
-            GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
-        ELSE ( is_exe )
-            GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
-        ENDIF( is_exe )
-    ENDIF( ${cumulative_var} AND NOT ${test_var} )
+    if( ${cumulative_var} AND NOT ${test_var}  )
+        set( ${cumulative_var} FALSE )
+        if( is_exe )
+            GBX_NOT_add_executable( ${module_name} ${reason} )
+        else( is_exe )
+            GBX_NOT_add_library( ${module_name} ${reason} )
+        endif( is_exe )
+    endif( ${cumulative_var} AND NOT ${test_var} )
 
-ENDMACRO( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
+endmacro( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
 
 #
-# GBX_REQUIRE_INSTALL ( cumulative_var [EXE | LIB] module_name installed_module [reason] )
+# GBX_REQUIRE_install( cumulative_var [EXE | LIB] module_name installed_module [reason] )
 #
 # A special case of REQUIRE_VAR. Checks whether a manifest variable is defined 
 # for the module with a name "installed_module".
 # E.g.
 # Initialize a variable first
-#   SET( BUILD TRUE )
+#   set( build TRUE )
 # Now test the variable value
-#   REQUIRE_INSTALL ( build LIB HydroStuff GbxStuff )
+#   REQUIRE_install( build LIB HydroStuff GbxStuff )
 #           will check if GBXSTUFF_INSTALLED is defined.
 #   This example is equivalent to
 #   REQUIRE_VAR( build LIB HydroStuff GBXSTUFF_INSTALLED "GbxStuff was not installed" )
 #
-MACRO( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
+macro( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
 
     # debug
-#     MESSAGE( STATUS "REQUIRE_INSTALL [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, installed_module=${installed_module} ]" )
+#     message( STATUS "GBX_REQUIRE_INSTALL [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, installed_module=${installed_module} ]" )
 
-    STRING( TOUPPER ${installed_module} upper_installed_module )
-    SET( test_var ${upper_installed_module}_INSTALLED )
+    GBX_MAKE_MANIFEST_NAME( test_var ${installed_module} )
 
-    IF( ${ARGC} GREATER 5 )
-        SET( reason ${ARGV6} )
-    ELSE ( ${ARGC} GREATER 5 )
-        SET( reason "${installed_module} was not installed" )
-    ENDIF( ${ARGC} GREATER 5 )
+    if( ${ARGC} GREATER 5 )
+        set( reason ${ARGV6} )
+    else( ${ARGC} GREATER 5 )
+        set( reason "${installed_module} was not installed" )
+    endif( ${ARGC} GREATER 5 )
 
     # must dereference both var names once (!)
     GBX_REQUIRE_VAR( ${cumulative_var} ${module_type} ${module_name} ${test_var} ${reason} )
 
-ENDMACRO( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
+endmacro( GBX_REQUIRE_INSTALL cumulative_var module_type module_name installed_module )
 
 #
 # GBX_REQUIRE_INSTALLS( cumulative_var [EXE | LIB] module_name target0 [targe1 target2 ...] )
 #
-MACRO( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
+macro( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
     
-    IF( ${ARGC} LESS 4 )
-        MESSAGE( FATAL_ERROR "GBX_REQUIRE_INSTALLS macro needs to at least one target name (${ARGC} params were given)." ) 
-    ENDIF( ${ARGC} LESS 4 )
+    if( ${ARGC} LESS 4 )
+        message( FATAL_ERROR "GBX_REQUIRE_INSTALLS macro needs to at least one target name (${ARGC} params were given)." ) 
+    endif( ${ARGC} LESS 4 )
 
-    FOREACH( TRGT ${ARGN} )
-        GBX_REQUIRE_INSTALL( ${cumulative_var} ${module_type} ${module_name} ${TRGT} )
-    ENDFOREACH( TRGT ${ARGN} )
+    foreach( trgt ${ARGN} )
+        GBX_REQUIRE_install( ${cumulative_var} ${module_type} ${module_name} ${trgt} )
+    endforeach( trgt ${ARGN} )
 
-ENDMACRO( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
+endmacro( GBX_REQUIRE_INSTALLS cumulative_var module_type module_name )
 
 #
 # GBX_REQUIRE_TARGET( cumulative_var [EXE | LIB] module_name target_name [reason] )
-#DEPS
+#
 # E.g.
 # Initialize a variable first
-#   SET( BUILD TRUE )
+#   set( build TRUE )
 # Now set up and test option value
-#   GBX_REQUIRE_TARGET ( BUILD EXE localiser HydroStuff )
+#   GBX_REQUIRE_TARGET ( build EXE localiser HydroStuff )
 #
-MACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
+macro( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
 
     # debug
-#     MESSAGE( STATUS "GBX_REQUIRE_TARGET [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_name=${target_name} ]" )
+#     message( STATUS "GBX_REQUIRE_TARGET [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_name=${target_name} ]" )
 
-    STRING( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    STRING( COMPARE EQUAL ${module_type} "LIB" is_lib )
-    IF( NOT is_exe AND NOT is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( NOT is_exe AND NOT is_lib )
-    IF( is_exe AND is_lib )
-        MESSAGE( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
-    ENDIF( is_exe AND is_lib )
+    string( COMPARE EQUAL ${module_type} "EXE" is_exe )
+    string( COMPARE EQUAL ${module_type} "LIB" is_lib )
+    if( NOT is_exe AND NOT is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
+    endif( NOT is_exe AND NOT is_lib )
+    if( is_exe AND is_lib )
+        message( FATAL_ERROR "In macro GBX_REQUIRE_TARGET, module_type must be either 'EXE' or 'LIB'" )
+    endif( is_exe AND is_lib )
 
-    IF( ${ARGC} GREATER 5 )
-        SET( reason ${ARGV6} )
-    ELSE ( ${ARGC} GREATER 5 )
-        SET( reason "lib${target_name} is not being built" )
-    ENDIF( ${ARGC} GREATER 5 )
+    if( ${ARGC} GREATER 5 )
+        set( reason ${ARGV6} )
+    else( ${ARGC} GREATER 5 )
+        set( reason "${target_name} is not being built" )
+    endif( ${ARGC} GREATER 5 )
 
     GET_TARGET_PROPERTY( target_location ${target_name} LOCATION )
 
     # must dereference both var and option names once (!) and IF will evaluate their values
-    IF( ${cumulative_var} AND NOT target_location  )
-        SET( ${cumulative_var} FALSE )
+    if( ${cumulative_var} AND NOT target_location  )
+        set( ${cumulative_var} FALSE )
         GBX_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
-        IF( is_exe )
-            GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
-            SET( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
-        ELSE ( is_exe )
-            GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
-            SET( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
-        ENDIF( is_exe )
-    ENDIF( ${cumulative_var} AND NOT target_location )
+        if( is_exe )
+            GBX_NOT_add_executable( ${module_name} ${reason} )
+            set( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
+        else( is_exe )
+            GBX_NOT_add_library( ${module_name} ${reason} )
+            set( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
+        endif( is_exe )
+    endif( ${cumulative_var} AND NOT target_location )
 
-ENDMACRO( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
-
+endmacro( GBX_REQUIRE_TARGET cumulative_var module_type module_name target_name )
 
 #
 # GBX_REQUIRE_TARGETS( cumulative_var [EXE | LIB] module_name TARGET0 [TARGET1 TARGET2 ...] )
 #
-MACRO( GBX_REQUIRE_TARGETS cumulative_var module_type module_name )
+macro( GBX_REQUIRE_TARGETS cumulative_var module_type module_name )
 
     # debug
-#     MESSAGE( STATUS "GBX_REQUIRE_TARGETS [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_names=${ARGN} ]" )
+#     message( STATUS "GBX_REQUIRE_TARGETS [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_names=${ARGN} ]" )
 
-    IF( ${ARGC} LESS 4 )
-        MESSAGE( FATAL_ERROR "GBX_REQUIRE_TARGETS macro needs to at least one target name (${ARGC} params were given)." )
-    ENDIF( ${ARGC} LESS 4 )
+    if( ${ARGC} LESS 4 )
+        message( FATAL_ERROR "GBX_REQUIRE_TARGETS macro needs to at least one target name (${ARGC} params were given)." )
+    endif( ${ARGC} LESS 4 )
 
-    FOREACH( trgt ${ARGN} )
+    foreach( trgt ${ARGN} )
         GBX_REQUIRE_TARGET( ${cumulative_var} ${module_type} ${module_name} ${trgt} )
-    ENDFOREACH( trgt ${ARGN} )
+    endforeach( trgt ${ARGN} )
 
-ENDMACRO( GBX_REQUIRE_TARGETS cumulative_var module_type module_name )
+endmacro( GBX_REQUIRE_TARGETS cumulative_var module_type module_name )
+
+#
+# GBX_REQUIRE_LIB( cumulative_var [EXE | LIB] module_name depend_name [reason] )
+#
+# This is a convenience macro which combines the functionality of GBX_REQUIRE_INSTALL and GBX_REQUIRE_TARGET.
+# It can be used to require executables despite the name.
+#
+# First checks if a target called ${depend_name} exists, i.e. a library or executable with this name
+# is part of the same project and is enabled. If it exists, sets ${cumulative_var} to TRUE and exits.
+#
+# Otherwise, checks if a library or executable called ${depend_name} is installed, i.e. a manifest 
+# variable is defined.
+#
+# E.g.
+# Initialize a variable first
+#   set( build TRUE )
+# Now set up and test option value
+#   GBX_REQUIRE_TARGET ( build EXE localiser HydroStuff )
+#   GBX_REQUIRE_TARGET ( build LIB MyStuff HydroStuff )
+#
+macro( GBX_REQUIRE_LIB cumulative_var module_type module_name depend_name )
+#     message( STATUS "GBX_REQUIRE_LIB [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, depend_name=${depend_name} ]" )
+
+    if( ${cumulative_var}  )
+
+        string( COMPARE EQUAL ${module_type} "EXE" is_exe )
+        string( COMPARE EQUAL ${module_type} "LIB" is_lib )
+        if( NOT is_exe AND NOT is_lib )
+            message( FATAL_ERROR "In macro GBX_REQUIRE_LIB, module_type must be either 'EXE' or 'LIB'" )
+        endif( NOT is_exe AND NOT is_lib )
+        if( is_exe AND is_lib )
+            message( FATAL_ERROR "In macro GBX_REQUIRE_LIB, module_type must be either 'EXE' or 'LIB'" )
+        endif( is_exe AND is_lib )
+    
+        if( ${ARGC} GREATER 5 )
+            set( reason ${ARGV6} )
+        else( ${ARGC} GREATER 5 )
+            set( reason "${depend_name} is not being built and was not installed" )
+        endif( ${ARGC} GREATER 5 )
+    
+        # first, look for a target
+        GET_TARGET_PROPERTY( target_location ${depend_name} LOCATION )
+    
+        # must dereference both var and option names once (!) and IF will evaluate their values
+        if( NOT target_location  )
+            
+            # target not found, look for an install
+            GBX_MAKE_MANIFEST_NAME( test_var ${depend_name} )
+
+            # must dereference both var names once (!)
+            GBX_REQUIRE_VAR( ${cumulative_var} ${module_type} ${module_name} ${test_var} ${reason} )
+
+        endif( NOT target_location )
+
+    endif( ${cumulative_var}  )
+
+endmacro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
+
+#
+# GBX_REQUIRE_LIBS( cumulative_var [EXE | LIB] module_name LIB0 [LIB1 LIB2 ...] )
+#
+macro( GBX_REQUIRE_LIBS cumulative_var module_type module_name )
+#     message( STATUS "GBX_REQUIRE_LIBS [ CUM_VAR=${${cumulative_var}}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, target_names=${ARGN} ]" )
+
+    if( ${ARGC} LESS 4 )
+        message( FATAL_ERROR "GBX_REQUIRE_LIBS macro needs to at least one library name (${ARGC} params were given)." )
+    endif( ${ARGC} LESS 4 )
+
+    foreach( lib ${ARGN} )
+        GBX_REQUIRE_LIB( ${cumulative_var} ${module_type} ${module_name} ${lib} )
+    endforeach( lib ${ARGN} )
+
+endmacro( GBX_REQUIRE_LIBS cumulative_var module_type module_name )
 
 #
 # This is a utility macro for internal use.
 #
-MACRO( GBX_WRITE_OPTIONS )
-    SET( output_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_options.cmake )
-    WRITE_FILE( ${output_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
+macro( GBX_WRITE_OPTIONS )
+    set( output_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_options.cmake )
+    write_file( ${output_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
 
-    FOREACH( a ${OPTION_LIST} )
-        WRITE_FILE( ${output_file} "-D${a} \\" APPEND )
-    ENDFOREACH( a ${LIB_LIST} )
-ENDMACRO( GBX_WRITE_OPTIONS )
+    foreach( a ${OPTION_LIST} )
+        write_file( ${output_file} "-D${a} \\" APPEND )
+    endforeach( a ${LIB_LIST} )
+endmacro( GBX_WRITE_OPTIONS )
 
 #
 # This is a utility macro for internal use.
 # Reset global lists of components, libraries, etc.
 #
-MACRO( GBX_RESET_ALL_DEPENDENCY_LISTS )
-    # MESSAGE( STATUS "DEBUG: Resetting global dependency lists" )
-    SET( OPTION_LIST    "" CACHE INTERNAL "Global list of cmake options" FORCE )
-ENDMACRO( GBX_RESET_ALL_DEPENDENCY_LISTS )
+macro( GBX_RESET_ALL_DEPENDENCY_LISTS )
+    # message( STATUS "DEBUG: Resetting global dependency lists" )
+    set( OPTION_LIST    "" CACHE INTERNAL "Global list of cmake options" FORCE )
+endmacro( GBX_RESET_ALL_DEPENDENCY_LISTS )

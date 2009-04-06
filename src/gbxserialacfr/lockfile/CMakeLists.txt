@@ -1,26 +1,26 @@
-SET( lib_name GbxLockFileAcfr )
+set( lib_name GbxLockFileAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET( build TRUE )
+set( build TRUE )
 # don't give user an option
 # GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 # this was already tested in the dir above
 # GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
-IF( build )
+if( build )
     
-    INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+    include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
-    FILE( GLOB hdrs *.h )
-    FILE( GLOB srcs *.cpp )
+    file( GLOB hdrs *.h )
+    file( GLOB srcs *.cpp )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
-    TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
+    target_link_libraries( ${lib_name} ${dep_libs} )
 
     GBX_ADD_HEADERS( gbxserialacfr/lockfile ${hdrs} )
 
-    IF( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY( test )
-    ENDIF( GBX_BUILD_TESTS )
+    if( GBX_BUILD_TESTS )
+        add_subdirectory( test )
+    endif( GBX_BUILD_TESTS )
 
-ENDIF( build )
+endif( build )

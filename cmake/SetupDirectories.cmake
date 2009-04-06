@@ -3,7 +3,7 @@
 # later sources overwrite earlier ones:
 # 1. OS-dependent defaults (effective only the first time CMake runs or after CMakeCache is deleted)
 # 2. Enviroment variable whose name is determined as <PROJECT_NAME>_INSTALL
-# 3. CMake variable whose name is determined as <PROJECT_NAME>_INSTALL (same as the environment variable)
+# 3. CMake variable whose name is determined as <PROJECT_NAME>_install(same as the environment variable)
 #
 # E.g. in Linux, for a project called 'fruitcake'
 # $ rm CMakeCache.txt; cmake .
@@ -18,53 +18,65 @@
 # A manually set installation dir (e.i. with ccmake) is not touched until an environment variable or
 # a command line variable is introduced.
 
-# 1. using custom defaults (effective only the very first time CMake runs, or after CMakeCache is deleted)
-IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    MESSAGE( STATUS "Setting default installation directory..." )
-    IF( NOT GBX_OS_WIN )
-        SET( CMAKE_INSTALL_PREFIX /usr/local CACHE PATH "Installation directory" FORCE )
-    ELSE ( NOT GBX_OS_WIN )
-        SET( CMAKE_INSTALL_PREFIX "C:\\Program Files\\${PROJECT_NAME}" CACHE PATH "Installation directory" FORCE )
-    ENDIF( NOT GBX_OS_WIN )
-ENDIF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+# 
+# IS_SUPER_PROJECT is a flag which is defined if Gearbox is built as part of CMake "ueber-project".
+# If it's set don't overwrite CMAKE_INSTALL_PREFIX because the ueber-project has already set it.
+#
+if( DEFINED IS_SUPER_PROJECT )
 
-# the name of the variable controlling install directory for this project
-STRING( TOUPPER ${PROJECT_NAME} project_name_upper )
-SET( project_install_var "${project_name_upper}_INSTALL" )
+    message( STATUS "(This is a super-project, not changing install directory)." )
 
-# 2. check if environment variable is set
-SET( install_dir $ENV{${project_install_var}} )
-STRING( LENGTH "A${install_dir}" is_env_var_defined_plus_one )
-MATH( EXPR is_env_var_defined "${is_env_var_defined_plus_one}-1" )
-IF( is_env_var_defined )
-    # debug
-    MESSAGE( STATUS "Overwriting install dir with enviroment variable ${project_install_var}=${install_dir}" )
+else( DEFINED IS_SUPER_PROJECT )
 
-    SET( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
-ENDIF( is_env_var_defined )
+    # 1. using custom defaults (effective only the very first time CMake runs, or after CMakeCache is deleted)
+    if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        message( STATUS "Setting default installation directory..." )
+        if( NOT GBX_OS_WIN )
+            set( CMAKE_INSTALL_PREFIX /usr/local CACHE PATH "Installation directory" FORCE )
+        else( NOT GBX_OS_WIN )
+            set( CMAKE_INSTALL_PREFIX "C:\\Program Files\\${PROJECT_NAME}" CACHE PATH "Installation directory" FORCE )
+        endif( NOT GBX_OS_WIN )
+    endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+    
+    # the name of the variable controlling install directory for this project
+    string( TOUPPER ${PROJECT_NAME} project_name_upper )
+    set( project_install_var "${project_name_upper}_INSTALL" )
+    
+    # 2. check if environment variable is set
+    set( install_dir $ENV{${project_install_var}} )
+    string( LENGTH "A${install_dir}" is_env_var_defined_plus_one )
+    math( EXPR is_env_var_defined "${is_env_var_defined_plus_one}-1" )
+    if( is_env_var_defined )
+        # debug
+        message( STATUS "(Overwriting install dir with enviroment variable ${project_install_var}=${install_dir})" )
+    
+        set( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
+    endif( is_env_var_defined )
+    
+    # 3. check if CMake variable is set on the command line
+    if( DEFINED ${project_install_var} )
+        set( install_dir ${${project_install_var}} )
+        # debug
+        message( STATUS "(Overwriting install dir with command line variable ${project_install_var}=${install_dir})" )
+    
+        # using user-supplied installation directory
+        set( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
+    endif( DEFINED ${project_install_var} )
 
-# 3. check if CMake variable is set on the command line
-IF( DEFINED ${project_install_var} )
-    SET( install_dir ${${project_install_var}} )
-    # debug
-    MESSAGE( STATUS "Overwriting install dir with command line variable ${project_install_var}=${install_dir}" )
-
-    # using user-supplied installation directory
-    SET( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
-ENDIF( DEFINED ${project_install_var} )
+endif( DEFINED IS_SUPER_PROJECT )
     
 # final result
-MESSAGE( STATUS "Setting installation directory to ${CMAKE_INSTALL_PREFIX}" )
+message( STATUS "Installation directory was set to ${CMAKE_INSTALL_PREFIX}" )
 
 # special installation directories
-SET( GBX_BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin )
-SET( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME} )
-SET( GBX_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/install/${PROJECT_NAME} )
-SET( GBX_SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME} )
+set( GBX_BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin )
+set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME} )
+set( GBX_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/install/${PROJECT_NAME} )
+set( GBX_SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME} )
 
 #
 # It's sometimes useful to refer to the top level of the project.
 # CMake does not make it very easy.
 #
-SET( GBX_PROJECT_SOURCE_DIR ${${PROJECT_NAME}_SOURCE_DIR} )
-SET( GBX_PROJECT_BINARY_DIR ${${PROJECT_NAME}_BINARY_DIR} )
+set( GBX_PROJECT_SOURCE_DIR ${${PROJECT_NAME}_SOURCE_DIR} )
+set( GBX_PROJECT_BINARY_DIR ${${PROJECT_NAME}_BINARY_DIR} )

@@ -25,6 +25,13 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @section gbx_doc_history_head Changes in SVN since Last Release
 
+@par Project wide
+
+- Build system
+  - Added a hook in the CMake setup to allow building Gearbox as part of a bigger "super-project". Default behavior is not modified. (tobie,alexm)
+  - Changed format style of CMake files. Standard functions are low-case. Custom macros are upper case. "Local" variables are low-case. "Global"
+    and cache variables are upper-case. (alexm)
+
 @par New libraries
 
 @par Updated libraries

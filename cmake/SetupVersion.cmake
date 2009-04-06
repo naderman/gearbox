@@ -9,4 +9,4 @@ endif(COMMAND cmake_policy)
 # alexm: for gcc need to produce this in the Makefile: -DGEARBOX_VERSION=\"X.Y.Z\", 
 #        without escaping the quotes the compiler will strip them off.
 # alexb: it seems that you also need to escape the quotes for windoze??
-ADD_DEFINITIONS( "-DGEARBOX_VERSION=\\\"${GBX_PROJECT_VERSION}\\\"" )
+add_definitions( "-DGEARBOX_VERSION=\\\"${GBX_PROJECT_VERSION}\\\"" )

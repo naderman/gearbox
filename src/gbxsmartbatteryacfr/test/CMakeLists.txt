@@ -1,15 +1,15 @@
-INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
 GBX_ADD_EXECUTABLE( gbxsmartbatteryshorttest shorttest.cpp )
-TARGET_LINK_LIBRARIES( gbxsmartbatteryshorttest GbxSmartBatteryAcfr )
+target_link_libraries( gbxsmartbatteryshorttest GbxSmartBatteryAcfr )
 
 GBX_ADD_EXECUTABLE( gbxsmartbatterylongtest longtest.cpp )
-TARGET_LINK_LIBRARIES( gbxsmartbatterylongtest GbxSmartBatteryAcfr )
+target_link_libraries( gbxsmartbatterylongtest GbxSmartBatteryAcfr )
 
 GBX_ADD_EXAMPLE( gbxsmartbatteryshorttest example.cmake.in example.cmake shorttest.cpp example.readme )
 
-IF( GBX_BUILD_TESTS )
-    ADD_SUBDIRECTORY( darttest )
-ENDIF( GBX_BUILD_TESTS )
+if( GBX_BUILD_TESTS )
+    add_subdirectory( darttest )
+endif( GBX_BUILD_TESTS )
 
 

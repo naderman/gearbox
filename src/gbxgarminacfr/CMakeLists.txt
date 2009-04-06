@@ -1,30 +1,28 @@
-SET( lib_name GbxGarminAcfr )
+set( lib_name GbxGarminAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET( build TRUE )
+set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
-SET( int_libs GbxUtilAcfr GbxSerialAcfr ) 
-# SET( int_libs GbxUtilAcfr GbxSerialAcfr GbxGpsUtilAcfr ) 
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
+set( dep_libs GbxUtilAcfr GbxSerialAcfr ) 
+GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
 
-IF( build )
+if( build )
 
-    INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+    include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     
-    FILE( GLOB hdrs *.h )
-    FILE( GLOB srcs *.cpp )
-    SET( dep_libs ${int_libs} )
+    file( GLOB hdrs *.h )
+    file( GLOB srcs *.cpp )
     
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
-    TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
+    target_link_libraries( ${lib_name} ${dep_libs} )
     GBX_ADD_PKGCONFIG( ${lib_name} "Garmin GPS driver" "" dep_libs "" "" )
 
     GBX_ADD_HEADERS( gbxgarminacfr ${hdrs} )
 
-    IF( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY( test )
-    ENDIF( GBX_BUILD_TESTS )
+    if( GBX_BUILD_TESTS )
+        add_subdirectory( test )
+    endif( GBX_BUILD_TESTS )
 
-ENDIF( build )
+endif( build )

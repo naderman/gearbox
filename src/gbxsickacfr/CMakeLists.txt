@@ -1,37 +1,36 @@
-SET( lib_name GbxSickAcfr )
+set( lib_name GbxSickAcfr )
 GBX_ADD_LICENSE( LGPL )
 
-SET( build TRUE )
+set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
-ADD_SUBDIRECTORY( gbxiceutilacfr )
+add_subdirectory( gbxiceutilacfr )
 
-SET( int_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${int_libs} )
+set( dep_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialAcfr )
+GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
 
 # these are built internally
-SET( private_libs GbxSerialDeviceAcfr )
+set( dep_libs ${dep_libs} GbxSerialDeviceAcfr )
 
-IF( build )
+if( build )
 
-    ADD_SUBDIRECTORY( gbxserialdeviceacfr )
+    add_subdirectory( gbxserialdeviceacfr )
     
-    INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
-    INCLUDE( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
+    include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+    include( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
 
-    FILE( GLOB hdrs *.h )
-    FILE( GLOB srcs *.cpp )
-    SET( dep_libs ${int_libs} ${private_libs} )
+    file( GLOB hdrs *.h )
+    file( GLOB srcs *.cpp )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
-    TARGET_LINK_LIBRARIES( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "Drives SICK hardware, directly connected to the computer." proj_libs int_libs "" "" )
+    target_link_libraries( ${lib_name} ${dep_libs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} "Drives SICK hardware, directly connected to the computer." proj_libs dep_libs "" "" )
 
     GBX_ADD_HEADERS( gbxsickacfr ${hdrs} )
 
-    IF( GBX_BUILD_TESTS )
-        ADD_SUBDIRECTORY( test )
-    ENDIF( GBX_BUILD_TESTS )
+    if( GBX_BUILD_TESTS )
+        add_subdirectory( test )
+    endif( GBX_BUILD_TESTS )
 
-ENDIF( build )
+endif( build )

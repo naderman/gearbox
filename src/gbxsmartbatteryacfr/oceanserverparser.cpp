@@ -295,7 +295,7 @@ OceanServerParser::parse( vector<string>    &stringList,
             } else {
                 unsigned int charValue = (unsigned int)line[k];
                 stringstream ss; 
-                ss << "Found a binary character in the following line: " << endl << line;
+                ss << "OceanServerParser: Found a binary character in the following line: " << endl << line;
                 ss << "The character is: " << std::hex << charValue << ". Will remove it.";
                 tracer_.warning( ss.str() );
             }

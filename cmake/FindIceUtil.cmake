@@ -5,9 +5,9 @@
 # ICEUTIL_HOME  : path where to find include, lib, bin, etc.
 
 # start with 'not found'
-SET( ICEUTIL_FOUND 0 CACHE BOOL "Do we have libIceUtil?" )
+set( ICEUTIL_FOUND 0 CACHE BOOL "Do we have libIceUtil?" )
 
-FIND_PATH( ICEUTIL_HOME_INCLUDE_ICEUTIL IceUtil.h
+find_path( iceutil_home_include_iceutil_dir IceUtil.h
   # rational for this search order:
   #    source install w/env.var -> source install
   #    package -> package
@@ -37,25 +37,24 @@ FIND_PATH( ICEUTIL_HOME_INCLUDE_ICEUTIL IceUtil.h
   C:/Ice-3.2.1/include/IceUtil
   C:/Ice-3.2.0-VC80/include/IceUtil
   C:/Ice-3.2.0/include/IceUtil
-  )
-# MESSAGE( STATUS "DEBUG: Ice.h is apparently found in : ${ICEUTIL_HOME_INCLUDE_ICE}" )
+)
 
 # NOTE: if ICEUTIL_HOME_INCLUDE_ICE is set to *-NOTFOUND it will evaluate to FALSE
-IF( ICEUTIL_HOME_INCLUDE_ICEUTIL )
+if( iceutil_home_include_iceutil_dir )
 
-    SET( ICEUTIL_FOUND 1 CACHE BOOL "Do we have Ice?" FORCE )
+    set( ICEUTIL_FOUND 1 CACHE BOOL "Do we have Ice?" FORCE )
 
     # strip 'file' twice to get rid off 'include/IceUtil'
-#     MESSAGE( STATUS "DEBUG: ICEUTIL_HOME_INCLUDE_ICE=" ${ICEUTIL_HOME_INCLUDE_ICE} )
-    GET_FILENAME_COMPONENT( ICEUTIL_HOME_INCLUDE ${ICEUTIL_HOME_INCLUDE_ICEUTIL} PATH )
-#     MESSAGE( STATUS "DEBUG: ICEUTIL_HOME_INCLUDE=" ${ICEUTIL_HOME_INCLUDE} )
-    GET_FILENAME_COMPONENT( ICEUTIL_HOME ${ICEUTIL_HOME_INCLUDE} PATH CACHE )
-#     MESSAGE( STATUS "Setting ICEUTIL_HOME to ${ICEUTIL_HOME}" )
+#     message( STATUS "DEBUG: ICEUTIL_HOME_INCLUDE_ICE=" ${ICEUTIL_HOME_INCLUDE_ICE} )
+    get_filename_component( iceutil_home_include_dir ${iceutil_home_include_iceutil_dir} PATH )
+#     message( STATUS "DEBUG: iceutil_home_include_dir=" ${iceutil_home_include_dir} )
+    get_filename_component( ICEUTIL_HOME ${iceutil_home_include_dir} PATH CACHE )
+#     message( STATUS "Setting ICEUTIL_HOME to ${ICEUTIL_HOME}" )
 
-ENDIF( ICEUTIL_HOME_INCLUDE_ICEUTIL )
+endif( iceutil_home_include_iceutil_dir )
 
-IF( ICEUTIL_FOUND )
-    MESSAGE( STATUS "Looking for libIceUtil - found in ${ICEUTIL_HOME}")
-ELSE ( ICEUTIL_FOUND )
-    MESSAGE( STATUS "Looking for libIceUtil - not found")
-ENDIF( ICEUTIL_FOUND )
+if( ICEUTIL_FOUND )
+    message( STATUS "Looking for libIceUtil - found in ${ICEUTIL_HOME}")
+else( ICEUTIL_FOUND )
+    message( STATUS "Looking for libIceUtil - not found")
+endif( ICEUTIL_FOUND )

@@ -1,4 +1,4 @@
-INCLUDE_DIRECTORIES( ${ICEUTIL_HOME}/include )
-LINK_DIRECTORIES( ${ICEUTIL_HOME}/lib ${ICEUTIL_HOME}/lib64 )
+include_directories( ${ICEUTIL_HOME}/include )
+link_directories( ${ICEUTIL_HOME}/lib ${ICEUTIL_HOME}/lib64 )
 
-LINK_LIBRARIES( IceUtil )
+link_libraries( IceUtil )

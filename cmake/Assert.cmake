@@ -1,32 +1,32 @@
 #
 # GBX_ASSERT( TEST COMMENT_FAIL [COMMENT_PASS=''] [IS_FATAL=FALSE] )
 #
-MACRO( GBX_ASSERT TEST COMMENT_FAIL )
+macro( GBX_ASSERT TEST COMMENT_FAIL )
 
-    IF( ${TEST} )
-#         MESSAGE( STATUS "DEBUG: assertion passed : ${TEST}" )
+    if( ${TEST} )
+#         message( STATUS "DEBUG: assertion passed : ${TEST}" )
 
         # ARG2 holds COMMENT_PASS
-        IF( ${ARGC} GREATER 2 )
-            MESSAGE( STATUS ${ARGV2} )
-        ENDIF( ${ARGC} GREATER 2 )
+        if( ${ARGC} GREATER 2 )
+            message( STATUS ${ARGV2} )
+        endif( ${ARGC} GREATER 2 )
 
-    ELSE ( ${TEST} )
-#         MESSAGE( STATUS "DEBUG: assertion failed : ${TEST}" )
+    else( ${TEST} )
+#         message( STATUS "DEBUG: assertion failed : ${TEST}" )
 
-        SET( IS_FATAL 0 )
-        IF( ${ARGC} GREATER 3 )
-            SET( IS_FATAL ${ARGV3} )
-        ENDIF( ${ARGC} GREATER 3 )
+        set( IS_FATAL 0 )
+        if( ${ARGC} GREATER 3 )
+            set( IS_FATAL ${ARGV3} )
+        endif( ${ARGC} GREATER 3 )
 
-        IF( ${IS_FATAL} )
-#             MESSAGE( STATUS "DEBUG: failure is fatal : ${IS_FATAL}" )
-            MESSAGE( FATAL_ERROR ${COMMENT_FAIL} )
-        ELSE ( ${IS_FATAL} )
-#             MESSAGE( STATUS "DEBUG: failure is NOT fatal : ${IS_FATAL}" )
-            MESSAGE( STATUS ${COMMENT_FAIL} )
-        ENDIF( ${IS_FATAL} )
+        if( ${IS_FATAL} )
+#             message( STATUS "DEBUG: failure is fatal : ${IS_FATAL}" )
+            message( FATAL_ERROR ${COMMENT_FAIL} )
+        else( ${IS_FATAL} )
+#             message( STATUS "DEBUG: failure is NOT fatal : ${IS_FATAL}" )
+            message( STATUS ${COMMENT_FAIL} )
+        endif( ${IS_FATAL} )
 
-    ENDIF( ${TEST} )
+    endif( ${TEST} )
 
-ENDMACRO( GBX_ASSERT )
+endmacro( GBX_ASSERT )

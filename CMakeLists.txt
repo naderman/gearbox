@@ -11,9 +11,9 @@ PROJECT( gearbox )
 #
 # project version string
 #
-SET( GBX_PROJECT_VERSION    9.02+ CACHE STRING "Version of GearBox distribution" )
+set( GBX_PROJECT_VERSION 9.02+ )
 
 #
 # The rest is done by a script
 #
-INCLUDE( cmake/internal/Setup.cmake )
+include( cmake/internal/Setup.cmake )

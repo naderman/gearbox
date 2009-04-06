@@ -3,13 +3,13 @@
 OPTION ( GBX_BUILD_RETIRED "Build retired libraries" OFF )
 MARK_AS_ADVANCED ( FORCE GBX_BUILD_RETIRED )
 
-IF( GBX_BUILD_RETIRED )
+if( GBX_BUILD_RETIRED )
 
-    MESSAGE( STATUS "== RETIRED ==" )
+    message( STATUS "== RETIRED ==" )
 
     # When adding new directories, please maintain order of inter-dependencies.
     # Otherwise, maintain alphabetical order.
 
-    ADD_SUBDIRECTORY( urg_nz )
+    add_subdirectory( urg_nz )
 
-ENDIF( GBX_BUILD_RETIRED )
+endif( GBX_BUILD_RETIRED )

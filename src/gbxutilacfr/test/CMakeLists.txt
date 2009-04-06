@@ -1,15 +1,15 @@
-# INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+# include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
-LINK_LIBRARIES( GbxUtilAcfr )
+link_libraries( GbxUtilAcfr )
 
-ADD_EXECUTABLE( mathtest mathtest.cpp )
+add_executable( mathtest mathtest.cpp )
 GBX_ADD_TEST( GbxUtilAcfr_MathTest mathtest )
 
-ADD_EXECUTABLE( tokenisetest tokenisetest.cpp )
+add_executable( tokenisetest tokenisetest.cpp )
 GBX_ADD_TEST( GbxUtilAcfr_TokeniseTest tokenisetest )
 
-ADD_EXECUTABLE( trivialtracertest trivialtracertest.cpp )
+add_executable( trivialtracertest trivialtracertest.cpp )
 GBX_ADD_TEST( GbxUtilAcfr_TrivialTracerTest trivialtracertest )
 
-ADD_EXECUTABLE( trivialstatustest trivialstatustest.cpp )
+add_executable( trivialstatustest trivialstatustest.cpp )
 GBX_ADD_TEST( GbxUtilAcfr_TrivialStatusTest trivialstatustest )

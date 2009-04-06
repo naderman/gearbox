@@ -1,30 +1,30 @@
 #
 # Default library type (shared or static).
 #
-SET( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or STATIC)" )
-MARK_AS_ADVANCED( GBX_DEFAULT_LIB_TYPE )
+set( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or STATIC)" )
+mark_as_advanced( GBX_DEFAULT_LIB_TYPE )
 
 #
 # Executables should add themselves by calling 'GBX_ADD_EXECUTABLE'
 # instead of 'ADD_EXECUTABLE' in CMakeLists.txt.
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
 #
-MACRO( GBX_ADD_EXECUTABLE name )
-    IF( COMMAND cmake_policy )
-        CMAKE_POLICY( SET CMP0003 NEW )
-    ENDIF( COMMAND cmake_policy )
+macro( GBX_ADD_EXECUTABLE name )
+    if( COMMAND cmake_policy )
+        cmake_policy( SET CMP0003 NEW )
+    endif( COMMAND cmake_policy )
 
-    ADD_EXECUTABLE( ${name} ${ARGN} )
-#     SET_TARGET_PROPERTIES( ${name} PROPERTIES
+    add_executable( ${name} ${ARGN} )
+#     set_target_properties( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    INSTALL( TARGETS ${name} RUNTIME DESTINATION bin )
-    SET( templist ${EXE_LIST} )
-    LIST( APPEND templist ${name} )
-#   MESSAGE( STATUS "DEBUG: ${templist}" )
-    SET( EXE_LIST ${templist} CACHE INTERNAL "Global list of executables to build" FORCE )
-    MESSAGE( STATUS "Planning to build executable:      ${name}" )
-ENDMACRO( GBX_ADD_EXECUTABLE name )
+    install( TARGETS ${name} RUNTIME DESTINATION bin )
+    set( templist ${EXE_LIST} )
+    list( APPEND templist ${name} )
+#   message( STATUS "DEBUG: ${templist}" )
+    set( EXE_LIST ${templist} CACHE INTERNAL "Global list of executables to build" FORCE )
+    message( STATUS "Planning to build executable:      ${name}" )
+endmacro( GBX_ADD_EXECUTABLE name )
 
 #
 # Libraries should add themselves by calling 'GBX_ADD_LIBRARY'
@@ -34,69 +34,69 @@ ENDMACRO( GBX_ADD_EXECUTABLE name )
 # by the user (or SHARED if the user hasn't changed it from the original setting).
 # All extra parameters are passed to ADD_LIBRARY as source files.
 #
-MACRO( GBX_ADD_LIBRARY name type )
-    IF( COMMAND cmake_policy )
-        CMAKE_POLICY( SET CMP0003 NEW )
-    ENDIF( COMMAND cmake_policy )
+macro( GBX_ADD_LIBRARY name type )
+    if( COMMAND cmake_policy )
+        cmake_policy( SET CMP0003 NEW )
+    endif( COMMAND cmake_policy )
 
-    IF( ${type} STREQUAL SHARED )
-        SET( libType SHARED )
+    if( ${type} STREQUAL SHARED )
+        set( libType SHARED )
     ELSEIF( ${type} STREQUAL STATIC )
-        SET( libType STATIC )
-    ELSE( ${type} STREQUAL SHARED )
-        SET( libType ${GBX_DEFAULT_LIB_TYPE} )
-    ENDIF( ${type} STREQUAL SHARED )
+        set( libType STATIC )
+    else( ${type} STREQUAL SHARED )
+        set( libType ${GBX_DEFAULT_LIB_TYPE} )
+    endif( ${type} STREQUAL SHARED )
 
-    ADD_LIBRARY( ${name} ${libType} ${ARGN} )
+    add_library( ${name} ${libType} ${ARGN} )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    INSTALL( TARGETS ${name} DESTINATION lib/${PROJECT_NAME} )
+    install( TARGETS ${name} DESTINATION lib/${PROJECT_NAME} )
 
-    SET( templist ${LIB_LIST} )
-    LIST( APPEND templist ${name} )
-    SET( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
+    set( templist ${LIB_LIST} )
+    list( APPEND templist ${name} )
+    set( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
 
-    IF( libType STREQUAL SHARED )
-        SET( libTypeDesc "shared" )
-    ELSE( libType STREQUAL SHARED )
-        SET( libTypeDesc "static" )
-    ENDIF( libType STREQUAL SHARED )
-    MESSAGE( STATUS "Planning to build ${libTypeDesc} library:  ${name}" )
-ENDMACRO( GBX_ADD_LIBRARY name )
+    if( libType STREQUAL SHARED )
+        set( libTypeDesc "shared" )
+    else( libType STREQUAL SHARED )
+        set( libTypeDesc "static" )
+    endif( libType STREQUAL SHARED )
+    message( STATUS "Planning to build ${libTypeDesc} library:  ${name}" )
+endmacro( GBX_ADD_LIBRARY name )
 
 #
 # GBX_ADD_HEADERS( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
-# Specialization of INSTALL(FILES ...) to install header files.
+# Specialization of install(FILES ...) to install header files.
 # All files are installed into PREFIX/include/${PROJECT_NAME}/${install_subdir}
 #
-MACRO( GBX_ADD_HEADERS install_subdir )
-    INSTALL( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
-ENDMACRO( GBX_ADD_HEADERS install_subdir )
+macro( GBX_ADD_HEADERS install_subdir )
+    install( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
+endmacro( GBX_ADD_HEADERS install_subdir )
 #
 # GBX_ADD_SHARED_FILES( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
-# Specialization of INSTALL(FILES ...) to install shared files.
+# Specialization of install(FILES ...) to install shared files.
 # All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir} directory.
 #
-MACRO( GBX_ADD_SHARED_FILES install_subdir )
-    INSTALL( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
-ENDMACRO( GBX_ADD_SHARED_FILES install_subdir )
+macro( GBX_ADD_SHARED_FILES install_subdir )
+    install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+endmacro( GBX_ADD_SHARED_FILES install_subdir )
 
 #
 # GBX_ADD_EXAMPLE( install_subdir makefile.in makefile.out [FILE0 FILE1 FILE2 ...] )
 #
-# Specialisation of INSTALL(FILES ...) to install examples.
+# Specialisation of install(FILES ...) to install examples.
 # All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir}.
 # makefile is passed through CONFIGURE_FILE to add in correct include and library
 # paths based on the install prefix.
 #
-MACRO( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
-    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
-    INSTALL( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
-ENDMACRO( GBX_ADD_EXAMPLE install_subdir makefile )
+macro( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
+    install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+endmacro( GBX_ADD_EXAMPLE install_subdir makefile )
 
 #
 # GBX_ADD_PKGCONFIG( name cflags libflags [DEPENDENCY0 DEPENDENCY1 ...] )
@@ -109,22 +109,22 @@ ENDMACRO( GBX_ADD_EXAMPLE install_subdir makefile )
 # libflags is appended to the "Libs" value.
 # that should be linked with at the same time as linking to this library.
 #
-MACRO( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
-    SET( PKG_NAME ${name} )
-    SET( PKG_DESC ${desc} )
-    SET( PKG_CFLAGS ${cflags} )
-    SET( PKG_LIBFLAGS ${libflags} )
-    SET( PKG_EXTERNAL_DEPS ${${ext_deps}} )
-    SET( PKG_INTERNAL_DEPS "" )
-    IF( ${int_deps} )
-        FOREACH( A ${${int_deps}} )
-            SET( PKG_INTERNAL_DEPS "${PKG_INTERNAL_DEPS} -l${A}" )
-        ENDFOREACH( A ${${int_deps}} )
-    ENDIF( ${int_deps} )
+macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
+    set( PKG_NAME ${name} )
+    set( PKG_DESC ${desc} )
+    set( PKG_CFLAGS ${cflags} )
+    set( PKG_LIBFLAGS ${libflags} )
+    set( PKG_EXTERNAL_DEPS ${${ext_deps}} )
+    set( PKG_INTERNAL_DEPS "" )
+    if( ${int_deps} )
+        foreach( item ${${int_deps}} )
+            set( PKG_INTERNAL_DEPS "${PKG_INTERNAL_DEPS} -l${item}" )
+        endforeach( item ${${int_deps}} )
+    endif( ${int_deps} )
 
-    CONFIGURE_FILE( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
-    INSTALL( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
-ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
+    configure_file( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
+endmacro( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #
 # This is a mechanism to register special items which are not
@@ -133,73 +133,73 @@ ENDMACRO( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 # to the Dashboard.
 # Usage: GBX_ADD_ITEM( name )
 #
-MACRO( GBX_ADD_ITEM name )
-    SET( templist ${ITEM_LIST} )
-    LIST( APPEND templist ${name} )
-    SET( ITEM_LIST ${templist} CACHE INTERNAL "Global list of special items to build" FORCE )
-    MESSAGE( STATUS "Planning to build item:            ${name}" )
-ENDMACRO( GBX_ADD_ITEM name )
+macro( GBX_ADD_ITEM name )
+    set( templist ${ITEM_LIST} )
+    list( APPEND templist ${name} )
+    set( ITEM_LIST ${templist} CACHE INTERNAL "Global list of special items to build" FORCE )
+    message( STATUS "Planning to build item:            ${name}" )
+endmacro( GBX_ADD_ITEM name )
 
 #
 # This is a mechanism to specify a license for the current source directory.
 # Usage: GBX_ADD_LICENSE( license )
 #
-MACRO( GBX_ADD_LICENSE license )
-    SET( templist ${LICENSE_LIST} )
+macro( GBX_ADD_LICENSE license )
+    set( templist ${LICENSE_LIST} )
 
     # get relative path to the current source dir
-    STRING( LENGTH ${GBX_PROJECT_SOURCE_DIR} proj_src_dir_length )
-    STRING( LENGTH ${CMAKE_CURRENT_SOURCE_DIR} current_src_dir_length )
-    MATH( EXPR relative_path_length "${current_src_dir_length} - ${proj_src_dir_length} - 1" )
-    MATH( EXPR relative_path_start "${proj_src_dir_length} + 1" )
-    STRING( SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR}
+    string( LENGTH ${GBX_PROJECT_SOURCE_DIR} proj_src_dir_length )
+    string( LENGTH ${CMAKE_CURRENT_SOURCE_DIR} current_src_dir_length )
+    math( EXPR relative_path_length "${current_src_dir_length} - ${proj_src_dir_length} - 1" )
+    math( EXPR relative_path_start "${proj_src_dir_length} + 1" )
+    string( SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR}
         ${relative_path_start} ${relative_path_length} current_src_dir_relative )
 
     # format the string to line up properly
-    SET( spaces "A                                                                                       Z" )
-    STRING( LENGTH ${current_src_dir_relative} current_src_dir_relative_length )
-    MATH( EXPR white_space_length "60 - ${current_src_dir_relative_length}" )
-    STRING( SUBSTRING ${spaces} 1 ${white_space_length} white_space )
+    set( spaces "A                                                                                       Z" )
+    string( LENGTH ${current_src_dir_relative} current_src_dir_relative_length )
+    math( EXPR white_space_length "60 - ${current_src_dir_relative_length}" )
+    string( SUBSTRING ${spaces} 1 ${white_space_length} white_space )
 
-    SET( line_item "${current_src_dir_relative}${white_space}${license}" )
-    LIST( APPEND templist ${line_item} )
-    SET( LICENSE_LIST ${templist} CACHE INTERNAL "Global list of directories and their licenses" FORCE )
-#     MESSAGE( STATUS ${line_item} )
-ENDMACRO( GBX_ADD_LICENSE license )
+    set( line_item "${current_src_dir_relative}${white_space}${license}" )
+    list( APPEND templist ${line_item} )
+    set( LICENSE_LIST ${templist} CACHE INTERNAL "Global list of directories and their licenses" FORCE )
+#     message( STATUS ${line_item} )
+endmacro( GBX_ADD_LICENSE license )
 
 #
 # Usage: GBX_ADD_TEST( testname exename [arg1 arg2 ...] )
 # Example:  GBX_ADD_TEST( IntegerTest inttest --verbose )
 #
-MACRO( GBX_ADD_TEST name executable )
-    ADD_TEST( ${name} ${executable} ${ARGN} )
-    SET( templist ${TEST_LIST} )
-    LIST( APPEND templist ${name} )
-    SET( TEST_LIST ${templist} CACHE INTERNAL "Global list of (CTest) tests to build" FORCE )
-#     MESSAGE( STATUS "Planning to build test:          ${name}" )
-ENDMACRO( GBX_ADD_TEST name executable )
+macro( GBX_ADD_TEST name executable )
+    add_test( ${name} ${executable} ${ARGN} )
+    set( templist ${TEST_LIST} )
+    list( APPEND templist ${name} )
+    set( TEST_LIST ${templist} CACHE INTERNAL "Global list of (CTest) tests to build" FORCE )
+#     message( STATUS "Planning to build test:          ${name}" )
+endmacro( GBX_ADD_TEST name executable )
 
 #
-# Usage: GBX_NOT_ADD_EXECUTABLE( name reason )
+# Usage: GBX_NOT_add_executable( name reason )
 #
-MACRO( GBX_NOT_ADD_EXECUTABLE name reason )
-  SET( templist ${EXE_NOT_LIST} )
-  LIST( APPEND templist ${name} )
-#  MESSAGE( STATUS "DEBUG: ${templist}" )
-  SET( EXE_NOT_LIST ${templist} CACHE INTERNAL "Global list of executables NOT to build" FORCE )
-  MESSAGE( STATUS "Not planning to build executable:  ${name} because ${reason}" )
-ENDMACRO( GBX_NOT_ADD_EXECUTABLE name reason )
+macro( GBX_NOT_ADD_EXECUTABLE name reason )
+  set( templist ${EXE_NOT_LIST} )
+  list( APPEND templist ${name} )
+#  message( STATUS "DEBUG: ${templist}" )
+  set( EXE_NOT_LIST ${templist} CACHE INTERNAL "Global list of executables NOT to build" FORCE )
+  message( STATUS "Not planning to build executable:  ${name} because ${reason}" )
+endmacro( GBX_NOT_ADD_EXECUTABLE name reason )
 
 #
-# Usage: GBX_NOT_ADD_LIBRARY( name reason )
+# Usage: GBX_NOT_add_library( name reason )
 #
-MACRO( GBX_NOT_ADD_LIBRARY name reason )
-  SET( templist ${LIB_NOT_LIST} )
-  LIST( APPEND templist ${name} )
-#  MESSAGE( STATUS "DEBUG: ${templist}" )
-  SET( LIB_NOT_LIST ${templist} CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
-  MESSAGE( STATUS "Not planning to build library:     ${name} because ${reason}" )
-ENDMACRO( GBX_NOT_ADD_LIBRARY name reason )
+macro( GBX_NOT_ADD_LIBRARY name reason )
+  set( templist ${LIB_NOT_LIST} )
+  list( APPEND templist ${name} )
+#  message( STATUS "DEBUG: ${templist}" )
+  set( LIB_NOT_LIST ${templist} CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
+  message( STATUS "Not planning to build library:     ${name} because ${reason}" )
+endmacro( GBX_NOT_ADD_LIBRARY name reason )
 
 #
 # This is a utility macro for internal use.
@@ -210,115 +210,125 @@ ENDMACRO( GBX_NOT_ADD_LIBRARY name reason )
 # Tricky list stuff.
 # see http://www.cmake.org/Wiki/CMakeMacroMerge for an example
 #
-MACRO( LIST_REPORT action item_name note L )
-    SET( templist ${L} )
-    LIST( LENGTH templist templist_length )
-    SET( report_file ${GBX_PROJECT_BINARY_DIR}/cmake_config_report.txt )
+macro( LIST_REPORT action item_name note L )
+    set( templist ${L} )
+    list( LENGTH templist templist_length )
+    set( report_file ${GBX_PROJECT_BINARY_DIR}/cmake_config_report.txt )
 
-    IF( templist_length GREATER 0 )
-        LIST( SORT templist )
+    if( templist_length GREATER 0 )
+        list( SORT templist )
 
-        MESSAGE( STATUS "${action} ${templist_length} ${item_name} ${note}:" )
-        MESSAGE( STATUS "    ${templist}" )
+        message( STATUS "${action} ${templist_length} ${item_name} ${note}:" )
+        message( STATUS "    ${templist}" )
 
-        WRITE_FILE( ${report_file} "${action} ${templist_length} ${item_name}:" APPEND )
-        WRITE_FILE( ${report_file} "    ${templist}" APPEND )
-    ENDIF( templist_length GREATER 0 )
-ENDMACRO( LIST_REPORT action item_name note L )
+        write_file( ${report_file} "${action} ${templist_length} ${item_name}:" APPEND )
+        write_file( ${report_file} "    ${templist}" APPEND )
+    endif( templist_length GREATER 0 )
+endmacro( LIST_REPORT action item_name note L )
 
 #
 # This is a utility macro for internal use.
 # Puts messages on the screen.
 # Writes to a text file.
 #
-MACRO( GBX_CONFIG_REPORT )
+macro( GBX_CONFIG_REPORT )
 
-    MESSAGE( STATUS "== SUMMARY ==" )
+    message( STATUS "== SUMMARY ==" )
 
     # write configuration results to file (this line clears existing contents)
-    SET( report_file ${GBX_PROJECT_BINARY_DIR}/cmake_config_report.txt )
-    WRITE_FILE( ${report_file} "Autogenerated by CMake for ${PROJECT_NAME} project" )
-#     WRITE_FILE( ${report_file} "Using Ice version ${ICE_VERSION}" )
+    set( report_file ${GBX_PROJECT_BINARY_DIR}/cmake_config_report.txt )
+    write_file( ${report_file} "Autogenerated by CMake for ${PROJECT_NAME} project" )
+#     write_file( ${report_file} "Using Ice version ${ICE_VERSION}" )
 
     #
     # Print some results
     #
-    MESSAGE( STATUS "Project name      ${PROJECT_NAME}")
-    MESSAGE( STATUS "Project version   ${GBX_PROJECT_VERSION}")
+    message( STATUS "Project name      ${PROJECT_NAME}")
+    message( STATUS "Project version   ${GBX_PROJECT_VERSION}")
     # would be nice to print out Orca version for satellite projects
     # for this we need an executable which is guaranteed to be installed.
     # then we can run it with --version flag.
-    # IF( NOT ORCA_MOTHERSHIP )
-    #     MESSAGE( STATUS "Using Orca version ${ORCA_VERSION}")
-    # ENDIF( NOT ORCA_MOTHERSHIP )
-    MESSAGE( STATUS "Platform              ${CMAKE_SYSTEM}")
-    MESSAGE( STATUS "CMake version         ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}-patch ${CMAKE_PATCH_VERSION}")
-    MESSAGE( STATUS "Install dir           ${CMAKE_INSTALL_PREFIX}")
-    MESSAGE( STATUS "Default library type  ${GBX_DEFAULT_LIB_TYPE}")
+    # if( NOT ORCA_MOTHERSHIP )
+    #     message( STATUS "Using Orca version ${ORCA_VERSION}")
+    # endif( NOT ORCA_MOTHERSHIP )
+    message( STATUS "Platform              ${CMAKE_SYSTEM}")
+    message( STATUS "CMake version         ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}-patch ${CMAKE_PATCH_VERSION}")
+    message( STATUS "Install dir           ${CMAKE_INSTALL_PREFIX}")
+    message( STATUS "Default library type  ${GBX_DEFAULT_LIB_TYPE}")
 
-    SET( note " " )
+    set( note " " )
     LIST_REPORT( "Will build" "executables" ${note} "${EXE_LIST}" )
     LIST_REPORT( "Will build" "libraries" ${note} "${LIB_LIST}" )
     LIST_REPORT( "Will build" "CTest tests" ${note} "${TEST_LIST}" )
     LIST_REPORT( "Will build" "special items" ${note} "${ITEM_LIST}" )
 
-    SET( note "(see above for reasons)" )
+    set( note "(see above for reasons)" )
     LIST_REPORT( "Will NOT build" "executables" ${note} "${EXE_NOT_LIST}" )
     LIST_REPORT( "Will NOT build" "libraries" ${note} "${LIB_NOT_LIST}" )
 
-ENDMACRO( GBX_CONFIG_REPORT )
+endmacro( GBX_CONFIG_REPORT )
+
+#
+# This is a utility macro for internal use.
+# (there's another copy of this simple macro in DependencyUtils.cmake)
+#
+macro( GBX_MAKE_MANIFEST_NAME manifest_name module_name )
+    string( TOUPPER ${module_name} upper_module_name )
+    # dereference the variable name once, so that we are setting the variable in the calling context!
+    set( ${manifest_name} ${module_name_upper}_INSTALLED )
+endmacro( GBX_MAKE_MANIFEST_NAME manifest_name module_name )
 
 #
 # This is a utility macro for internal use.
 #
-MACRO( GBX_WRITE_MANIFEST )
-    SET( output_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_manifest.cmake )
-    WRITE_FILE( ${output_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
+macro( GBX_WRITE_MANIFEST )
+    set( output_file ${GBX_PROJECT_BINARY_DIR}/${PROJECT_NAME}_manifest.cmake )
+    write_file( ${output_file} "\# Autogenerated by CMake for ${PROJECT_NAME} project" )
 
-    FOREACH( A ${LIB_LIST} )
-        STRING( TOUPPER ${A} UPPERA )
-        WRITE_FILE( ${output_file} "SET( ${UPPERA}_INSTALLED 1)" APPEND )
-    ENDFOREACH( A ${LIB_LIST} )
+    foreach( item ${LIB_LIST} )
+        GBX_MAKE_MANIFEST_NAME( manifest_name ${item} )
+        write_file( ${output_file} "set( ${manifest_name} 1)" APPEND )
+    endforeach( item ${LIB_LIST} )
 
-    FOREACH( A ${LIB_NOT_LIST} )
-        STRING( TOUPPER ${A} UPPERA )
-        WRITE_FILE( ${output_file} "SET( ${UPPERA}_INSTALLED 0)" APPEND )
-    ENDFOREACH( A ${LIB_NOT_LIST} )
+    foreach( item ${LIB_NOT_LIST} )
+        GBX_MAKE_MANIFEST_NAME( manifest_name ${item} )
+        write_file( ${output_file} "set( ${manifest_name} 0)" APPEND )
+    endforeach( item ${LIB_NOT_LIST} )
 
-    WRITE_FILE( ${output_file} " " APPEND )
+    write_file( ${output_file} " " APPEND )
 
-    STRING( TOUPPER ${PROJECT_NAME} upper_project_name )
-    WRITE_FILE( ${output_file} "SET( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
+    string( TOUPPER ${PROJECT_NAME} upper_project_name )
+    write_file( ${output_file} "set( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
 
-    INSTALL( FILES ${output_file} DESTINATION . )
-ENDMACRO( GBX_WRITE_MANIFEST )
+    install( FILES ${output_file} DESTINATION . )
+endmacro( GBX_WRITE_MANIFEST )
 
-MACRO( GBX_WRITE_LICENSE )
-    SET( license_file ${GBX_PROJECT_SOURCE_DIR}/LICENSE )
-    WRITE_FILE( ${license_file} "Autogenerated by CMake for ${PROJECT_NAME} project" )
-    WRITE_FILE( ${license_file} "----------------------------------------------------------------------" APPEND )
-    WRITE_FILE( ${license_file} "DIRECTORY                                                   license" APPEND )
-    WRITE_FILE( ${license_file} "----------------------------------------------------------------------" APPEND )
+macro( GBX_WRITE_LICENSE )
+    set( license_file ${GBX_PROJECT_SOURCE_DIR}/LICENSE )
+    write_file( ${license_file} "Autogenerated by CMake for ${PROJECT_NAME} project" )
+    write_file( ${license_file} "----------------------------------------------------------------------" APPEND )
+    write_file( ${license_file} "DIRECTORY                                                   license" APPEND )
+    write_file( ${license_file} "----------------------------------------------------------------------" APPEND )
 
-    FOREACH( A ${LICENSE_LIST} )
-        WRITE_FILE( ${license_file} ${A} APPEND )
-    ENDFOREACH( A ${LICENSE_LIST} )
+    foreach( item ${LICENSE_LIST} )
+        write_file( ${license_file} ${item} APPEND )
+    endforeach( item ${LICENSE_LIST} )
 
-ENDMACRO( GBX_WRITE_LICENSE )
+endmacro( GBX_WRITE_LICENSE )
 
 #
 # This is a utility macro for internal use.
 # Reset global lists of components, libraries, etc.
 #
-MACRO( GBX_RESET_ALL_TARGET_LISTS )
-    # MESSAGE( STATUS "DEBUG: Resetting global target lists" )
-    SET( EXE_LIST    "" CACHE INTERNAL "Global list of executables to build" FORCE )
-    SET( LIB_LIST    "" CACHE INTERNAL "Global list of libraries to build" FORCE )
-    SET( TEST_LIST   "" CACHE INTERNAL "Global list of CTest tests to build" FORCE )
-    SET( ITEM_LIST   "" CACHE INTERNAL "Global list of special items to build" FORCE )
+macro( GBX_RESET_ALL_TARGET_LISTS )
+    # message( STATUS "DEBUG: Resetting global target lists" )
+    set( EXE_LIST    "" CACHE INTERNAL "Global list of executables to build" FORCE )
+    set( LIB_LIST    "" CACHE INTERNAL "Global list of libraries to build" FORCE )
+    set( TEST_LIST   "" CACHE INTERNAL "Global list of CTest tests to build" FORCE )
+    set( ITEM_LIST   "" CACHE INTERNAL "Global list of special items to build" FORCE )
 
-    SET( EXE_NOT_LIST  "" CACHE INTERNAL "Global list of executables NOT to build" FORCE )
-    SET( LIB_NOT_LIST  "" CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
+    set( EXE_NOT_LIST  "" CACHE INTERNAL "Global list of executables NOT to build" FORCE )
+    set( LIB_NOT_LIST  "" CACHE INTERNAL "Global list of libraries NOT to build" FORCE )
 
-    SET( LICENSE_LIST  "" CACHE INTERNAL "Global list of directories and their licenses" FORCE )
-ENDMACRO( GBX_RESET_ALL_TARGET_LISTS )
+    set( LICENSE_LIST  "" CACHE INTERNAL "Global list of directories and their licenses" FORCE )
+endmacro( GBX_RESET_ALL_TARGET_LISTS )

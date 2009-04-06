@@ -1,5 +1,5 @@
-INCLUDE( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
+include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
-ADD_EXECUTABLE( locktest locktest.cpp )
-TARGET_LINK_LIBRARIES( locktest GbxLockFileAcfr )
+add_executable( locktest locktest.cpp )
+target_link_libraries( locktest GbxLockFileAcfr )
 GBX_ADD_TEST( GbxLockFileAcfr_Test locktest )
