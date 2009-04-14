@@ -20,8 +20,6 @@ if(CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION EQUAL 6)
 			GET_FILENAME_COMPONENT (boostPythonLib ${Boost_PYTHON_LIBRARY} NAME_WE CACHE)
 			# Chop off the lib at the front, too, if present
 			STRING (REGEX REPLACE "^lib" "" boostPythonLib ${boostPythonLib})
-			MESSAGE (STATUS
-					"PlayerC++ client library will be built with Boost::Thread support.")
 		else(Boost_PYTHON_FOUND)
 			MESSAGE (STATUS
 				"Boost::Python library was not found. Cannot build Python bindings for Flexiport.")

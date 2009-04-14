@@ -114,6 +114,8 @@ V  Version info
  - Data rows are broken after a maximum of 64 bytes, each one having a checksum and a line feed.
  - Status codes 00 and 99 are OK, anything else is an error.
  - Checksum is calculated by... well, see the code.
+ - BIG NOTE: The URG-30LX has a probable bug in its response to the II code whereby it does not
+   include anything after and including "<-" in the checksum calculation.
 
 VV    Version info
       V|V|LF
@@ -447,7 +449,7 @@ void NumberToString (unsigned int num, char *dest, int length)
 // HokuyoError class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string HokuyoError::AsString (void) const throw ()
+string HokuyoError::AsString () const throw ()
 {
 	switch (_errorCode)
 	{
@@ -487,7 +489,7 @@ string HokuyoError::AsString (void) const throw ()
 // HokuyoSensorInfo class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HokuyoSensorInfo::HokuyoSensorInfo (void)
+HokuyoSensorInfo::HokuyoSensorInfo ()
 	: minRange (0), maxRange (0), steps (0), firstStep (0), lastStep (0), frontStep (0),
 	standardSpeed (0), power (false), speed (0), speedLevel (0), baud (0), time (0), minAngle (0.0),
 	maxAngle (0.0),	resolution (0.0), scanableSteps (0)
@@ -495,7 +497,7 @@ HokuyoSensorInfo::HokuyoSensorInfo (void)
 }
 
 // Set various known values based on what the manual says
-void HokuyoSensorInfo::SetDefaults (void)
+void HokuyoSensorInfo::SetDefaults ()
 {
 	minRange = 20;
 	maxRange = 4095;
@@ -505,7 +507,7 @@ void HokuyoSensorInfo::SetDefaults (void)
 	frontStep = 384;
 }
 
-void HokuyoSensorInfo::CalculateValues (void)
+void HokuyoSensorInfo::CalculateValues ()
 {
 	resolution = DTOR (360.0) / steps;
 	// If any of the steps are beyond INT_MAX, we have problems.
@@ -515,7 +517,7 @@ void HokuyoSensorInfo::CalculateValues (void)
 	scanableSteps = lastStep - firstStep + 1;
 }
 
-string HokuyoSensorInfo::AsString (void)
+string HokuyoSensorInfo::AsString ()
 {
 	stringstream ss;
 
@@ -549,7 +551,7 @@ string HokuyoSensorInfo::AsString (void)
 // HokuyoData class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HokuyoData::HokuyoData (void)
+HokuyoData::HokuyoData ()
 	: _ranges (NULL), _intensities (NULL), _length (0),
 	_error (false), _time (0), _sensorIsUTM30LX (false)
 {
@@ -637,7 +639,7 @@ HokuyoData::HokuyoData (const HokuyoData &rhs)
 	_time = rhs.TimeStamp ();
 }
 
-HokuyoData::~HokuyoData (void)
+HokuyoData::~HokuyoData ()
 {
 	if (_ranges != NULL)
 		delete[] _ranges;
@@ -788,7 +790,7 @@ uint32_t HokuyoData::operator[] (unsigned int index)
 	return _ranges[index];
 }
 
-string HokuyoData::AsString (void)
+string HokuyoData::AsString ()
 {
 	stringstream ss;
 
@@ -818,7 +820,7 @@ string HokuyoData::AsString (void)
 	return ss.str ();
 }
 
-void HokuyoData::CleanUp (void)
+void HokuyoData::CleanUp ()
 {
 	if (_ranges != NULL)
 		delete[] _ranges;
@@ -894,13 +896,14 @@ void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 // Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HokuyoLaser::HokuyoLaser (void)
-	: _port (NULL), _scipVersion (1), _verbose (false), _sensorIsUTM30LX (false),_minAngle (0.0),
-	_maxAngle (0.0), _resolution (0.0), _firstStep (0), _lastStep (0), _frontStep (0)
+HokuyoLaser::HokuyoLaser ()
+	: _port (NULL), _scipVersion (2), _verbose (false), _sensorIsUTM30LX (false),
+	_enableCheckSumWorkaround (false), _minAngle (0.0), _maxAngle (0.0), _resolution (0.0),
+	_firstStep (0), _lastStep (0), _frontStep (0)
 {
 }
 
-HokuyoLaser::~HokuyoLaser (void)
+HokuyoLaser::~HokuyoLaser ()
 {
 	if (_port != NULL)
 		delete _port;
@@ -1015,7 +1018,7 @@ unsigned int HokuyoLaser::OpenWithProbing (string portOptions)
 		return 0;
 }
 
-void HokuyoLaser::Close (void)
+void HokuyoLaser::Close ()
 {
 	if (!_port)
 		throw HokuyoError (HOKUYO_ERR_CLOSE_FAILED, "Port is not open.");
@@ -1025,7 +1028,7 @@ void HokuyoLaser::Close (void)
 	_port = NULL;
 }
 
-bool HokuyoLaser::IsOpen (void) const
+bool HokuyoLaser::IsOpen () const
 {
 	if (_port != NULL)
 		return _port->IsOpen ();
@@ -1111,7 +1114,7 @@ void HokuyoLaser::SetBaud (unsigned int baud)
 		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void HokuyoLaser::Reset (void)
+void HokuyoLaser::Reset ()
 {
 	if (_scipVersion == 1)
 	{
@@ -1235,6 +1238,12 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		// Get the product info line
 		ReadLine (buffer);
 		info->product = &buffer[5];
+		// Also do a check to see if this is a UTM-30LX, because we need to work around a checksum
+		// problem and the error messages for data change if this is the case
+		if (strstr (buffer, "UTM-30LX") != NULL)
+			_sensorIsUTM30LX = true;
+		else
+			_sensorIsUTM30LX = false;
 		// Get the firmware line
 		ReadLine (buffer);
 		info->firmware = &buffer[5];
@@ -1323,6 +1332,9 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 			cerr << "HokuyoLaser::" << __func__ <<
 				"() Getting sensor information using SCIP version 2." << endl;
 		}
+
+		if (_sensorIsUTM30LX)
+			_enableCheckSumWorkaround = true;
 
 		char buffer[SCIP2_LINE_LENGTH];
 		memset (buffer, 0, sizeof (char) * SCIP2_LINE_LENGTH);
@@ -1434,6 +1446,9 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		// Skip the end-of-message
 		SkipLines (1);
 
+		if (_sensorIsUTM30LX)
+			_enableCheckSumWorkaround = false;
+
 		info->CalculateValues ();
 		if (_verbose)
 		{
@@ -1445,7 +1460,7 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-unsigned int HokuyoLaser::GetTime (void)
+unsigned int HokuyoLaser::GetTime ()
 {
 	if (_scipVersion == 1)
 	{
@@ -1821,7 +1836,7 @@ unsigned int HokuyoLaser::AngleToStep (double angle)
 // To get around this, keep flushing until the port reports there is no data left after a timeout.
 // This shouldn't be called too much, as it introduces a delay as big as the timeout (which may be
 // infinite).
-void HokuyoLaser::ClearReadBuffer (void)
+void HokuyoLaser::ClearReadBuffer ()
 {
 	while (_port->BytesAvailableWait () > 0)
 		_port->Flush ();
@@ -1891,6 +1906,11 @@ int HokuyoLaser::ReadLine (char *buffer, int expectedLength)
 // Empty lines (i.e. a line that is just the line feed, as at the end of the message) will result in
 // a return value of zero and no checksum check will be performed. Otherwise the number of actual
 // data bytes (i.e. excluding the checksum and semicolon) will be returned.
+// BIG NOTE: The URG-30LX has a probable bug in its response to the II code whereby it does not
+// include anything after and including "<-" in the checksum calculation. A workaround is enabled
+// in this function when _sensorIsUTM30LX is true. In this case, if the checksum fails normally, it
+// scans the line for "<-" and recalculates the checksum on the bytes up to that point. This only
+// happens in SCIP v2.
 int HokuyoLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSemicolon)
 {
 	int lineLength = ReadLine (buffer, expectedLength);
@@ -1923,27 +1943,44 @@ int HokuyoLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSe
 	}
 
 	int checkSum = 0;
-	// Start by adding the byte values
-	for (int ii = 0; ii < bytesToConsider; ii++)
-		checkSum += buffer[ii];
-	// Take the lowest 6 bits
-	checkSum &= 0x3F;
-	// Add 0x30
-	checkSum += 0x30;
-
-	if (_verbose)
+	try
 	{
-		cerr << "HokuyoLaser::" << __func__ << "() Calculated checksum = " << checkSum << " (" <<
-			static_cast<char> (checkSum) << "), given checksum = " <<
-			static_cast<int> (buffer[checksumIndex]) << " (" << buffer[checksumIndex] <<
-			")" << endl;
+		checkSum = ConfirmCheckSum (buffer, bytesToConsider,
+									static_cast<int> (buffer[checksumIndex]));
 	}
-	if (checkSum != static_cast<int> (buffer[checksumIndex]))
+	catch (HokuyoError &e)
 	{
-		stringstream ss;
-		ss << "Invalid checksum -  given: " << static_cast<int> (buffer[checksumIndex]) <<
-			", calculated: " << checkSum;
-		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		if (e.Code () == HOKUYO_ERR_PROTOCOL && _sensorIsUTM30LX && _enableCheckSumWorkaround)
+		{
+			// Here comes the UTM-30LX workaround
+			char* hasComment = strstr (buffer, "<-");
+			if (hasComment != NULL)
+			{
+				int newBytesToConsider = hasComment - buffer;
+				if (_verbose)
+				{
+					cerr << "HokuyoLaser::" << __func__ << "() Performing UTM-30LX II response "
+						"checksum workaround: trying with " << newBytesToConsider <<
+						" bytes." << endl;
+				}
+				if (newBytesToConsider < 1)
+				{
+					stringstream ss;
+					ss << "Not enough bytes to calculate checksum with: " << newBytesToConsider <<
+						" bytes (line length is " << lineLength << " bytes).";
+					throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+				}
+
+				checkSum = ConfirmCheckSum (buffer, bytesToConsider,
+											static_cast<int> (buffer[checksumIndex]));
+			}
+			else
+				// Workaround is disabled - rethrow
+				throw;
+		}
+		else
+			// Not a workaround-compatible error - rethrow
+			throw;
 	}
 
 	// Null out the semi-colon (if there) and checksum
@@ -2128,94 +2165,47 @@ int HokuyoLaser::SendCommand (const char *cmd, const char *param,
 	return statusCode;
 }
 
-void HokuyoLaser::GetAndSetSCIPVersion (void)
+void HokuyoLaser::GetAndSetSCIPVersion ()
 {
-	bool scip1Failed = false;
+	bool scip2Failed = false;
 
 
 	if (_verbose)
 		cerr << "HokuyoLaser::" << __func__ << "() Testing SCIP protocol version." << endl;
-	// Try SCIP version 1 first by sending an info command
+	// Try SCIP version 2 first by sending an info command
 	try
 	{
-		SendCommand ("V", NULL, 0, NULL);
+		SendCommand ("VV", NULL, 0, NULL);
 	}
 	catch (HokuyoError)
 	{
 		// That didn't work too well...
 		if (_verbose)
-			cerr << "HokuyoLaser::" << __func__ << "() Initial SCIP version 1 test failed." << endl;
-		scip1Failed = true;
+			cerr << "HokuyoLaser::" << __func__ << "() Initial SCIP version 2 test failed." << endl;
+		scip2Failed = true;
 	}
 
-	if (scip1Failed)
-	{
-		// Currently using SCIP version 2
-		_scipVersion = 2;
-
-		_port->Flush ();
-		// Make sure by sending a VV command
-		try
-		{
-			SendCommand ("VV", NULL, 0, NULL);
-		}
-		catch (HokuyoError)
-		{
-			throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
-		}
-
-		// Otherwise all OK, dump the rest of the result
-		SkipLines (6);
-		if (_verbose)
-			cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
-		return;
-	}
-	else
+	if (scip2Failed)
 	{
 		// Currently using SCIP version 1
 		// Get the firmware version and check if we can move to SCIP version 2
 		_scipVersion = 1;
 
+		_port->Flush ();
+		try
+		{
+			SendCommand ("V", NULL, 0, NULL);
+		}
+		catch (HokuyoError)
+		{
+			throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
+		}
 		// Skip the vendor and product info
 		SkipLines (2);
 		// Get the firmware line
 		char buffer[SCIP1_LINE_LENGTH];
 		memset (buffer, 0, sizeof (char) * SCIP1_LINE_LENGTH);
-		try
-		{
-			// If the laser is already in SCIP2 mode this has a tendency to time out (rather than
-			// the laser doing what the manual says and giving us an error code to the command
-			// that we sent to get the info).
-			ReadLine (buffer);
-		}
-		catch (HokuyoError e)
-		{
-			if (e.Code () != HOKUYO_ERR_READ) // We're only interested in timeouts
-				throw;
-			if (_verbose)
-			{
-				cerr << "HokuyoLaser::" << __func__ <<
-					"() Timed out trying SCIP version 1, trying SCIP version 2." << endl;
-			}
-			// Already in SCIP version 2 mode.
-			_scipVersion = 2;
-			_port->Flush ();
-			// Make sure by sending a VV command
-			try
-			{
-				SendCommand ("VV", NULL, 0, NULL);
-			}
-			catch (HokuyoError &e)
-			{
-				cout << "error: " << e.Code() << " " << e.what() << endl;
-				throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "SCIP versions 1 and 2 failed.");
-			}
-			// Otherwise all OK, dump the rest of the result
-			SkipLines (6);
-			if (_verbose)
-				cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
-			return;
-		}
+		ReadLine (buffer);
 
 		if (strncmp (buffer, "FIRM:", 5) != 0)
 		{
@@ -2223,6 +2213,9 @@ void HokuyoLaser::GetAndSetSCIPVersion (void)
 				"'FIRM:' was not found when checking firmware version.");
 		}
 		// Pull out the major version number
+		// Note that although lasers such as the UTM-30LX appear to use a different firmware
+		// version format, that doesn't matter because they don't support SCIP v1 and so
+		// shouldn't get to this point anyway - if they do, it's an uncaught error.
 		int majorVer = strtol (&buffer[5], NULL, 10);
 		if (errno == ERANGE)
 			throw HokuyoError (HOKUYO_ERR_BADFIRMWARE, "Out-of-range firmware version.");
@@ -2271,12 +2264,23 @@ void HokuyoLaser::GetAndSetSCIPVersion (void)
 			return;
 		}
 	}
+	else
+	{
+		// Currently using SCIP version 2
+		_scipVersion = 2;
+
+		// Dump the rest of the result
+		SkipLines (6);
+		if (_verbose)
+			cerr << "HokuyoLaser::" << __func__ << "() Using SCIP version 2." << endl;
+		return;
+	}
 
 	// Fallback case if didn't find a good SCIP version and return above
 	throw HokuyoError (HOKUYO_ERR_SCIPVERSION, "Unknown SCIP version.");
 }
 
-void HokuyoLaser::GetDefaults (void)
+void HokuyoLaser::GetDefaults ()
 {
 	if (_verbose)
 		cerr << "HokuyoLaser::" << __func__ << "() Getting default values." << endl;
@@ -2534,6 +2538,33 @@ void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int
 		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
 			"Read a  different number of range and intensity readings than were asked for.");
 	}
+}
+
+int HokuyoLaser::ConfirmCheckSum (char *buffer, int length, int expectedSum)
+{
+	int checkSum = 0;
+	// Start by adding the byte values
+	for (int ii = 0; ii < length; ii++)
+		checkSum += buffer[ii];
+	// Take the lowest 6 bits
+	checkSum &= 0x3F;
+	// Add 0x30
+	checkSum += 0x30;
+
+	if (_verbose)
+	{
+		cerr << "HokuyoLaser::" << __func__ << "() Calculated checksum = " << checkSum << " (" <<
+			static_cast<char> (checkSum) << "), given checksum = " <<
+			static_cast<int> (expectedSum) << " (" << expectedSum << ")" << endl;
+	}
+	if (checkSum != expectedSum)
+	{
+		stringstream ss;
+		ss << "Invalid checksum -  given: " << expectedSum << ", calculated: " << checkSum;
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+	}
+
+	return checkSum;
 }
 
 } // namespace hokuyo_aist

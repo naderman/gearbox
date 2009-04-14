@@ -64,19 +64,19 @@ class HOKUYO_AIST_EXPORT HokuyoError : public std::exception
 		HokuyoError (unsigned int code, std::string desc)
 			: _errorCode (code), _errorDesc (desc)
 		{}
-		virtual ~HokuyoError (void) throw () {};
+		virtual ~HokuyoError () throw () {};
 
-		virtual unsigned int Code (void) const throw ()
+		virtual unsigned int Code () const throw ()
 		{
 			return _errorCode;
 		}
 
-		virtual const char* what (void) const throw ()
+		virtual const char* what () const throw ()
 		{
 			return _errorDesc.c_str ();
 		}
 
-		virtual std::string AsString (void) const throw();
+		virtual std::string AsString () const throw();
 
 	private:
 		/** Error code. */
@@ -155,14 +155,14 @@ class HOKUYO_AIST_EXPORT HokuyoSensorInfo
 	public:
 		friend class HokuyoLaser;
 
-		HokuyoSensorInfo (void);
+		HokuyoSensorInfo ();
 		HokuyoSensorInfo (const HokuyoSensorInfo &rhs);
 
 		/// @brief Assignment operator.
 		HokuyoSensorInfo& operator= (const HokuyoSensorInfo &rhs);
 
 		/// @brief Format the entire object into a string.
-		std::string AsString (void);
+		std::string AsString ();
 
 		// Version details.
 		/// Vendor name.
@@ -223,8 +223,8 @@ class HOKUYO_AIST_EXPORT HokuyoSensorInfo
 		unsigned int scanableSteps;
 
 	private:
-		void SetDefaults (void);
-		void CalculateValues (void);
+		void SetDefaults ();
+		void CalculateValues ();
 };
 
 /** @brief Structure to store data returned from the laser scanner. */
@@ -234,7 +234,7 @@ class HOKUYO_AIST_EXPORT HokuyoData
 		friend class HokuyoLaser;
 
 		/// This constructor creates an empty HokuyoData with no data currently allocated.
-		HokuyoData (void);
+		HokuyoData ();
 		/// This constructor performs a deep copy of range data.
 		HokuyoData (uint32_t *ranges, unsigned int length, bool error, unsigned int time);
 		/// This constructor performs a deep copy of range and intensity data.
@@ -242,27 +242,27 @@ class HOKUYO_AIST_EXPORT HokuyoData
 					bool error, unsigned int time);
 		/// This copy constructor performs a deep copy of present data.
 		HokuyoData (const HokuyoData &rhs);
-		~HokuyoData (void);
+		~HokuyoData ();
 
 		/** @brief Return a pointer to an array of range readings in millimetres.
 
 		Values less than 20mm indicate an error. Check the error value for the data to see a
 		probable cause for the error. Most of the time, it will just be an out-of-range reading. */
-		const uint32_t* Ranges (void) const                 { return _ranges; }
+		const uint32_t* Ranges () const                 { return _ranges; }
 		/// @brief Return a pointer to an array of intensity readings.
-		const uint32_t* Intensities (void) const            { return _intensities; }
+		const uint32_t* Intensities () const            { return _intensities; }
 		/// @brief Get the number of samples in the data.
-		unsigned int Length (void) const                    { return _length; }
+		unsigned int Length () const                    { return _length; }
 		/** @brief Indicates if one or more steps had an error.
 
 		A step's value will be less than 20 if it had an error. Use @ref ErrorCodeToString to get
 		a textual representation of the error. */
-		bool GetErrorStatus (void) const                    { return _error; }
+		bool GetErrorStatus () const                    { return _error; }
 		/// @brief Return a string representing the error for the given error code.
 		std::string ErrorCodeToString (uint32_t errorCode);
 		/** @brief Get the time stamp of the data in milliseconds (only available using SCIP
 		version 2). */
-		unsigned int TimeStamp (void) const                 { return _time; }
+		unsigned int TimeStamp () const                 { return _time; }
 
 		/// @brief Assignment operator.
 		HokuyoData& operator= (const HokuyoData &rhs);
@@ -270,10 +270,10 @@ class HOKUYO_AIST_EXPORT HokuyoData
 		uint32_t operator[] (unsigned int index);
 
 		/// @brief Format the entire object into a string.
-		std::string AsString (void);
+		std::string AsString ();
 
 		/// @brief Force the data to clean up.
-		void CleanUp (void);
+		void CleanUp ();
 
 	protected:
 		uint32_t *_ranges;
@@ -300,8 +300,8 @@ All functions may throw instances of @ref HokuyoError or its children. Exception
 class HOKUYO_AIST_EXPORT HokuyoLaser
 {
 	public:
-		HokuyoLaser (void);
-		~HokuyoLaser (void);
+		HokuyoLaser ();
+		~HokuyoLaser ();
 
 		/// @brief Open the laser scanner and begin scanning.
 		void Open (std::string portOptions);
@@ -317,10 +317,10 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		unsigned int OpenWithProbing (std::string portOptions);
 
 		/// @brief Close the connection to the laser scanner.
-		void Close (void);
+		void Close ();
 
 		/// @brief Checks if the connection to the laser scanner is open.
-		bool IsOpen (void) const;
+		bool IsOpen () const;
 
 		/// @brief Switch the laser scanner on or off.
 		void SetPower (bool on);
@@ -334,7 +334,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		/** @brief Reset the laser scanner to its default settings.
 
 		Not available with the SCIP v1 protocol. */
-		void Reset (void);
+		void Reset ();
 
 		/** @brief Set the speed at which the scanner's sensor spins.
 
@@ -358,7 +358,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		/** @brief Get the current value of the scanner's clock in milliseconds.
 
 		Not available with the SCIP v1 protocol. */
-		unsigned int GetTime (void);
+		unsigned int GetTime ();
 
 		/** @brief Get the latest scan data from the scanner.
 
@@ -470,11 +470,11 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 												double endAngle, unsigned int clusterCount = 1);
 
 		/// @brief Return the major version of the SCIP protocol in use.
-		uint8_t SCIPVersion (void) const            { return _scipVersion; }
+		uint8_t SCIPVersion () const            { return _scipVersion; }
 
 		/** @brief Turns on and off printing of verbose operating information to stderr. Default is
 		off. */
-		void SetVerbose (bool verbose)              { _verbose = verbose; }
+		void SetVerbose (bool verbose)          { _verbose = verbose; }
 
 		/// @brief A convenience function to convert a step index to an angle.
 		double StepToAngle (unsigned int step);
@@ -485,22 +485,24 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		flexiport::Port *_port;
 
 		uint8_t _scipVersion;
-		bool _verbose, _sensorIsUTM30LX;
+		bool _verbose, _sensorIsUTM30LX, _enableCheckSumWorkaround;
 		double _minAngle, _maxAngle, _resolution;
 		int _firstStep, _lastStep, _frontStep;
 		unsigned int _maxRange;
 
-		void ClearReadBuffer (void);
+		void ClearReadBuffer ();
 		int ReadLine (char *buffer, int expectedLength = -1);
 		int ReadLineWithCheck (char *buffer, int expectedLength = -1, bool hasSemicolon = false);
 		void SkipLines (int count);
 		int SendCommand (const char *cmd, const char *param, int paramLength, const char *extraOK);
 
-		void GetAndSetSCIPVersion (void);
-		void GetDefaults (void);
+		void GetAndSetSCIPVersion ();
+		void GetDefaults ();
 		void Read2ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int numSteps);
+
+		int ConfirmCheckSum (char *buffer, int length, int expectedSum);
 };
 
 } // namespace hokuyo_aist
