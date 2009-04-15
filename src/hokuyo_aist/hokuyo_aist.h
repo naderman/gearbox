@@ -502,7 +502,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		void Read3ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int numSteps);
 
-		int ConfirmCheckSum (char *buffer, int length, int expectedSum);
+		int ConfirmCheckSum (const char *buffer, int length, int expectedSum);
 };
 
 } // namespace hokuyo_aist

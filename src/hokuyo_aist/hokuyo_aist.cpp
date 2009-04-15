@@ -1238,12 +1238,6 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		// Get the product info line
 		ReadLine (buffer);
 		info->product = &buffer[5];
-		// Also do a check to see if this is a UTM-30LX, because we need to work around a checksum
-		// problem and the error messages for data change if this is the case
-		if (strstr (buffer, "UTM-30LX") != NULL)
-			_sensorIsUTM30LX = true;
-		else
-			_sensorIsUTM30LX = false;
 		// Get the firmware line
 		ReadLine (buffer);
 		info->firmware = &buffer[5];
@@ -1333,8 +1327,7 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 				"() Getting sensor information using SCIP version 2." << endl;
 		}
 
-		if (_sensorIsUTM30LX)
-			_enableCheckSumWorkaround = true;
+		info->SetDefaults ();
 
 		char buffer[SCIP2_LINE_LENGTH];
 		memset (buffer, 0, sizeof (char) * SCIP2_LINE_LENGTH);
@@ -1347,6 +1340,15 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 		// Get the product info line
 		ReadLineWithCheck (buffer, -1, true);
 		info->product = &buffer[5];
+		// Also do a check to see if this is a UTM-30LX, because we need to work around a checksum
+		// problem and the error messages for data change if this is the case
+		if (strstr (buffer, "UTM-30LX") != NULL)
+		{
+			_sensorIsUTM30LX = true;
+			_enableCheckSumWorkaround = true;
+		}
+		else
+			_sensorIsUTM30LX = false;
 		// Get the firmware line
 		ReadLineWithCheck (buffer, -1, true);
 		info->firmware = &buffer[5];
@@ -1971,7 +1973,7 @@ int HokuyoLaser::ReadLineWithCheck (char *buffer, int expectedLength, bool hasSe
 					throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 				}
 
-				checkSum = ConfirmCheckSum (buffer, bytesToConsider,
+				checkSum = ConfirmCheckSum (buffer, newBytesToConsider,
 											static_cast<int> (buffer[checksumIndex]));
 			}
 			else
@@ -2540,7 +2542,7 @@ void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int
 	}
 }
 
-int HokuyoLaser::ConfirmCheckSum (char *buffer, int length, int expectedSum)
+int HokuyoLaser::ConfirmCheckSum (const char *buffer, int length, int expectedSum)
 {
 	int checkSum = 0;
 	// Start by adding the byte values
@@ -2554,8 +2556,8 @@ int HokuyoLaser::ConfirmCheckSum (char *buffer, int length, int expectedSum)
 	if (_verbose)
 	{
 		cerr << "HokuyoLaser::" << __func__ << "() Calculated checksum = " << checkSum << " (" <<
-			static_cast<char> (checkSum) << "), given checksum = " <<
-			static_cast<int> (expectedSum) << " (" << expectedSum << ")" << endl;
+			static_cast<char> (checkSum) << "), given checksum = " << expectedSum << " (" <<
+			static_cast<char> (expectedSum) << ")" << endl;
 	}
 	if (checkSum != expectedSum)
 	{
