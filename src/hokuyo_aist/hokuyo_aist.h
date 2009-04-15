@@ -476,6 +476,10 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		off. */
 		void SetVerbose (bool verbose)          { _verbose = verbose; }
 
+		/** @brief Enables/disables ignoring unknown lines in sensor info messages. Default is
+		off. */
+		void IgnoreUnknowns (bool ignore)       { _ignoreUnknowns = ignore; }
+
 		/// @brief A convenience function to convert a step index to an angle.
 		double StepToAngle (unsigned int step);
 		/// @brief A convenience function to convert an angle to a step (rounded towards the front).
@@ -485,7 +489,7 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 		flexiport::Port *_port;
 
 		uint8_t _scipVersion;
-		bool _verbose, _sensorIsUTM30LX, _enableCheckSumWorkaround;
+		bool _verbose, _sensorIsUTM30LX, _enableCheckSumWorkaround, _ignoreUnknowns;
 		double _minAngle, _maxAngle, _resolution;
 		int _firstStep, _lastStep, _frontStep;
 		unsigned int _maxRange;
@@ -498,6 +502,9 @@ class HOKUYO_AIST_EXPORT HokuyoLaser
 
 		void GetAndSetSCIPVersion ();
 		void GetDefaults ();
+		void ProcessVVLine (const char *buffer, HokuyoSensorInfo *info);
+		void ProcessPPLine (const char *buffer, HokuyoSensorInfo *info);
+		void ProcessIILine (const char *buffer, HokuyoSensorInfo *info);
 		void Read2ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeData (HokuyoData *data, unsigned int numSteps);
 		void Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int numSteps);

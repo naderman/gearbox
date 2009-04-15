@@ -898,8 +898,8 @@ void HokuyoData::AllocateData (unsigned int length, bool includeIntensities)
 
 HokuyoLaser::HokuyoLaser ()
 	: _port (NULL), _scipVersion (2), _verbose (false), _sensorIsUTM30LX (false),
-	_enableCheckSumWorkaround (false), _minAngle (0.0), _maxAngle (0.0), _resolution (0.0),
-	_firstStep (0), _lastStep (0), _frontStep (0)
+	_enableCheckSumWorkaround (false), _ignoreUnknowns (false), _minAngle (0.0), _maxAngle (0.0),
+	_resolution (0.0), _firstStep (0), _lastStep (0), _frontStep (0)
 {
 }
 
@@ -1334,122 +1334,20 @@ void HokuyoLaser::GetSensorInfo (HokuyoSensorInfo *info)
 
 		// We need to send three commands to get all the info we want: VV, PP and II
 		SendCommand ("VV", NULL, 0, NULL);
-		// Get the vendor info line
-		ReadLineWithCheck (buffer, -1, true);
-		info->vendor = &buffer[5]; // Chop off the "VEND:" tag
-		// Get the product info line
-		ReadLineWithCheck (buffer, -1, true);
-		info->product = &buffer[5];
-		// Also do a check to see if this is a UTM-30LX, because we need to work around a checksum
-		// problem and the error messages for data change if this is the case
-		if (strstr (buffer, "UTM-30LX") != NULL)
-		{
-			_sensorIsUTM30LX = true;
-			_enableCheckSumWorkaround = true;
-		}
-		else
-			_sensorIsUTM30LX = false;
-		// Get the firmware line
-		ReadLineWithCheck (buffer, -1, true);
-		info->firmware = &buffer[5];
-		// Get the protocol version line
-		ReadLineWithCheck (buffer, -1, true);
-		info->protocol = &buffer[5];
-		// Get the serial number
-		ReadLineWithCheck (buffer, -1, true);
-		info->serial = &buffer[5];
-		// Skip the end-of-message
-		SkipLines (1);
+		while (ReadLineWithCheck (buffer, -1, true) != 0)
+			ProcessVVLine (buffer, info);
 
 		// Next up, PP
 		SendCommand ("PP", NULL, 0, NULL);
-		// Get the model line
-		ReadLineWithCheck (buffer, -1, true);
-		info->model = &buffer[5];
-		// On to the fun ones that require parsing
-		ReadLineWithCheck (buffer, -1, true);
-		info->minRange = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->maxRange = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->steps = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->firstStep = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->lastStep = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->frontStep = atoi (&buffer[5]);
-		ReadLineWithCheck (buffer, -1, true);
-		info->standardSpeed = atoi (&buffer[5]);
-		// Skip the end-of-message
-		SkipLines (1);
+		while (ReadLineWithCheck (buffer, -1, true) != 0)
+			ProcessPPLine (buffer, info);
 
 		// Command II: Revenge of the Commands.
 		SendCommand ("II", NULL, 0, NULL);
-		// Skip the model line (we already have it from PP)
-		SkipLines (1);
-		// Get and parse the power state
-		ReadLineWithCheck (buffer, -1, true);
-		if (strncmp (&buffer[5], "OFF", 3) == 0)
-			info->power = false;
-		else
-			info->power = true;
-		// Motor speed
-		ReadLineWithCheck (buffer, -1, true);
-		if (strncmp (&buffer[5], "Initial", 7) == 0)
-		{
-			// Unchanged motor speed
-			if (sscanf (buffer, "SCSP:%*7s(%d[rpm]", &info->speed) != 1)
-			{
-				stringstream ss;
-				ss << "Motor speed line parse failed: " << buffer;
-				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
-			}
-			info->speedLevel = 0;
-		}
-		else
-		{
-			// Changed motor speed, format is:
-			// <level>%<ignored string>(<speed>[rpm])
-			if (sscanf (buffer, "SCSP:%hd%%%*4s(%d[rpm]", &info->speedLevel, &info->speed) != 2)
-			{
-				stringstream ss;
-				ss << "Motor speed line parse failed: " << buffer;
-				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
-			}
-		}
-		// Measuring state
-		ReadLineWithCheck (buffer, -1, true);
-		info->measureState = &buffer[5];
-		// Baud rate
-		ReadLineWithCheck (buffer, -1, true);
-		if (strncmp (&buffer[5], "USB only", 8) == 0)
-		{
-			// No baud rate for USB-only devices such as the UHG-08LX
-			info->baud = 0;
-		}
-		else if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
-		{
-			stringstream ss;
-			ss << "Baud rate line parse failed: " << buffer;
-			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
-		}
-		// Time stamp
-		ReadLineWithCheck (buffer, -1, true);
-		if (sscanf (buffer, "TIME:%x", &info->time) != 1)
-		{
-			stringstream ss;
-			ss << "Timestamp line parse failed: " << buffer;
-			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
-		}
-		// Diagnostic
-		ReadLineWithCheck (buffer, -1, true);
-		info->sensorDiagnostic = &buffer[5];
-		// Skip the end-of-message
-		SkipLines (1);
+		while (ReadLineWithCheck (buffer, -1, true) != 0)
+			ProcessIILine (buffer, info);
 
-		if (_sensorIsUTM30LX)
-			_enableCheckSumWorkaround = false;
+		_enableCheckSumWorkaround = false;
 
 		info->CalculateValues ();
 		if (_verbose)
@@ -2303,6 +2201,136 @@ void HokuyoLaser::GetDefaults ()
 		cerr << "HokuyoLaser::" << __func__ <<
 			"() Got default values: " << _minAngle << " " << _maxAngle << " " << _resolution <<
 			" " << _firstStep << " " << _lastStep << " " << _frontStep << " " << _maxRange << endl;
+	}
+}
+
+void HokuyoLaser::ProcessVVLine (const char *buffer, HokuyoSensorInfo *info)
+{
+	if (strncmp (buffer, "VEND", 4) == 0)
+		info->vendor = &buffer[5]; // Vendor info, minus the "VEND:" tag
+	else if (strncmp (buffer, "PROD", 4) == 0)
+	{
+		info->product = &buffer[5]; // Product info
+		// Also do a check to see if this is a UTM-30LX, because we need to work around a checksum
+		// problem and the error messages for data change if this is the case
+		if (strstr (buffer, "UTM-30LX") != NULL)
+		{
+			_sensorIsUTM30LX = true;
+			_enableCheckSumWorkaround = true;
+		}
+		else
+			_sensorIsUTM30LX = false;
+	}
+	else if (strncmp (buffer, "FIRM", 4) == 0)
+		info->firmware = &buffer[5]; // Firmware version
+	else if (strncmp (buffer, "PROT", 4) == 0)
+		info->protocol = &buffer[5]; // Protocol version
+	else if (strncmp (buffer, "SERI", 4) == 0)
+		info->serial = &buffer[5]; // Serial number
+	else if (!_ignoreUnknowns)
+	{
+		stringstream ss;
+		ss << "HokuyoLaser::" << __func__ << "() Unknown line: " << buffer;
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+	}
+}
+
+void HokuyoLaser::ProcessPPLine (const char *buffer, HokuyoSensorInfo *info)
+{
+	if (strncmp (buffer, "MODL", 4) == 0)
+		info->model = &buffer[5];   // Model
+	// On to the fun ones that require parsing
+	else if (strncmp (buffer, "DMIN", 4) == 0)
+		info->minRange = atoi (&buffer[5]);
+	else if (strncmp (buffer, "DMAX", 4) == 0)
+		info->maxRange = atoi (&buffer[5]);
+	else if (strncmp (buffer, "ARES", 4) == 0)
+		info->steps = atoi (&buffer[5]);
+	else if (strncmp (buffer, "AMIN", 4) == 0)
+		info->firstStep = atoi (&buffer[5]);
+	else if (strncmp (buffer, "AMAX", 4) == 0)
+		info->lastStep = atoi (&buffer[5]);
+	else if (strncmp (buffer, "AFRT", 4) == 0)
+		info->frontStep = atoi (&buffer[5]);
+	else if (strncmp (buffer, "SCAN", 4) == 0)
+		info->standardSpeed = atoi (&buffer[5]);
+	else if (!_ignoreUnknowns)
+	{
+		stringstream ss;
+		ss << "HokuyoLaser::" << __func__ << "() Unknown line: " << buffer;
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+	}
+}
+
+void HokuyoLaser::ProcessIILine (const char *buffer, HokuyoSensorInfo *info)
+{
+	if (strncmp (buffer, "MODL", 4) == 0)
+		// Do nothing here - we already know this value from PP
+		return;
+	else if (strncmp (buffer, "LASR", 4) == 0)
+	{
+		if (strncmp (&buffer[5], "OFF", 3) == 0)
+			info->power = false;
+		else
+			info->power = true;
+	}
+	else if (strncmp (buffer, "SCSP", 4) == 0)
+	{
+		if (strncmp (&buffer[5], "Initial", 7) == 0)
+		{
+			// Unchanged motor speed
+			if (sscanf (buffer, "SCSP:%*7s(%d[rpm]", &info->speed) != 1)
+			{
+				stringstream ss;
+				ss << "Motor speed line parse failed: " << buffer;
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+			}
+			info->speedLevel = 0;
+		}
+		else
+		{
+			// Changed motor speed, format is:
+			// <level>%<ignored string>(<speed>[rpm])
+			if (sscanf (buffer, "SCSP:%hd%%%*4s(%d[rpm]", &info->speedLevel, &info->speed) != 2)
+			{
+				stringstream ss;
+				ss << "Motor speed line parse failed: " << buffer;
+				throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+			}
+		}
+	}
+	else if (strncmp (buffer, "MESM", 4) == 0)
+		info->measureState = &buffer[5];
+	else if (strncmp (buffer, "SBPS", 4) == 0)
+	{
+		if (strncmp (&buffer[5], "USB only", 8) == 0)
+		{
+			// No baud rate for USB-only devices such as the UHG-08LX
+			info->baud = 0;
+		}
+		else if (sscanf (buffer, "SBPS:%d[bps]", &info->baud) != 1)
+		{
+			stringstream ss;
+			ss << "Baud rate line parse failed: " << buffer;
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+	}
+	else if (strncmp (buffer, "TIME", 4) == 0)
+	{
+		if (sscanf (buffer, "TIME:%x", &info->time) != 1)
+		{
+			stringstream ss;
+			ss << "Timestamp line parse failed: " << buffer;
+			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
+		}
+	}
+	else if (strncmp (buffer, "STAT", 4) == 0)
+		info->sensorDiagnostic = &buffer[5];
+	else if (!_ignoreUnknowns)
+	{
+		stringstream ss;
+		ss << "HokuyoLaser::" << __func__ << "() Unknown line: " << buffer;
+		throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 	}
 }
 
