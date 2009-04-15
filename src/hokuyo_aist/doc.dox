@@ -7,9 +7,8 @@
 @brief Hokuyo URG laser scanner driver.
 
 This library provides a driver for Hokuyo laser scanner devices using the SCIP protocol version 1 or
-2. It has been tested with the Hokuyo URG-04LX, UBG-04LX and UHG-08LX, but it should work with any
-scanner that conforms to these protocol versions, including the URG-04LX-F01 and UTM-30LX. For a
-full list of functions and classes, see @ref hokuyo_aist.
+2. It has been tested with the Hokuyo URG-04LX, UBG-04LX, UHG-08LX and UTM-30LX but it should work
+with any scanner that conforms to these protocol versions, including the URG-04LX-F01.
 
 For a full list of classes and functions, see @ref hokuyo_aist.
 
