@@ -58,9 +58,9 @@ class FLEXIPORT_EXPORT PortException : public std::exception
 			: _errorStr (errorStr)	{};
 		PortException (const std::string &errorStr)
 			: _errorStr (errorStr)	{};
-		~PortException (void) throw () {};
+		~PortException () throw () {};
 
-		virtual const char* what (void) const throw ()
+		virtual const char* what () const throw ()
 		{
 			return _errorStr.c_str ();
 		}

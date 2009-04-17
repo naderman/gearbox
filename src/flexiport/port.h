@@ -78,14 +78,14 @@ All functions may throw exceptions of type @ref PortException.
 class FLEXIPORT_EXPORT Port
 {
 	public:
-		virtual ~Port (void);
+		virtual ~Port ();
 
 		// API common to all ports
 		/// @brief Open the port.
-		virtual void Open (void) = 0;
+		virtual void Open () = 0;
 
 		/// @brief Close the port.
-		virtual void Close (void) = 0;
+		virtual void Close () = 0;
 
 		/** @brief Read from the port.
 
@@ -207,7 +207,7 @@ class FLEXIPORT_EXPORT Port
 		/** @brief Get the number of bytes waiting to be read at the port. Returns immediatly.
 
 		@return The number of bytes available. Will not return less than zero. */
-		virtual ssize_t BytesAvailable (void) = 0;
+		virtual ssize_t BytesAvailable () = 0;
 
 		/** @brief Get the number of bytes waiting after blocking for the timeout.
 
@@ -215,7 +215,7 @@ class FLEXIPORT_EXPORT Port
 		available straight away.
 
 		@return The number of bytes waiting to be read, or -1 if a timeout occured. */
-		virtual ssize_t BytesAvailableWait (void) = 0;
+		virtual ssize_t BytesAvailableWait () = 0;
 
 		/** @brief Write data to the port.
 
@@ -250,23 +250,23 @@ class FLEXIPORT_EXPORT Port
 			{ return WriteString (buffer.c_str ()); }
 
 		/// @brief Flush the port's input and output buffers, discarding all data.
-		virtual void Flush (void) = 0;
+		virtual void Flush () = 0;
 
 		/** @brief Drain the port's output buffers.
 
 		Waits until timeout for the port to finish transmitting data in its output buffer. */
-		virtual void Drain (void) = 0;
+		virtual void Drain () = 0;
 
 		/// @brief Get the status of the port (type, device, etc).
-		virtual std::string GetStatus (void) const;
+		virtual std::string GetStatus () const;
 
 		// Accessor methods.
 		/// @brief Get the port type.
-		std::string GetPortType (void) const        { return _type; }
+		std::string GetPortType () const        { return _type; }
 		/// @brief Set the debug level.
-		void SetDebug (int debug)                   { _debug = debug; }
+		void SetDebug (int debug)               { _debug = debug; }
 		/// @brief Get the debug level.
-		int GetDebug (void) const                   { return _debug; }
+		int GetDebug () const                   { return _debug; }
 		/** @brief Set the timeout value. Set seconds to -1 to disable timeouts and block forever.
 
 		@note On Mac OS X, the timer is reset each time data is received, making the timeout an
@@ -275,21 +275,21 @@ class FLEXIPORT_EXPORT Port
 		slightly faster than the timeout. */
 		virtual void SetTimeout (Timeout timeout) = 0;
 		/// @brief Get the timeout.
-		virtual Timeout GetTimeout (void) const     { return _timeout; }
+		virtual Timeout GetTimeout () const     { return _timeout; }
 		/// @brief Get the blocking property of the port. If the timeout is non-zero, the port will
 		/// block.
-		virtual bool IsBlocking (void) const        { return (_timeout._sec != 0 ||
-				                                              _timeout._usec != 0); }
+		virtual bool IsBlocking () const        { return (_timeout._sec != 0 ||
+                                                          _timeout._usec != 0); }
 		/// @brief Set the read permissions of the port.
 		virtual void SetCanRead (bool canRead) = 0;
 		/// @brief Get the read permissions of the port.
-		virtual bool CanRead (void) const           { return _canRead; }
+		virtual bool CanRead () const           { return _canRead; }
 		/// @brief Set the write permissions of the port.
 		virtual void SetCanWrite (bool canWrite) = 0;
 		/// @brief Get the write permissions of the port.
-		virtual bool CanWrite (void) const          { return _canWrite; }
+		virtual bool CanWrite () const          { return _canWrite; }
 		/// @brief Check if the port is open
-		virtual bool IsOpen (void) const = 0;
+		virtual bool IsOpen () const = 0;
 
 	protected:
 		std::string _type;  // Port type string (e.g. "tcp" or "serial" or "usb")
@@ -301,7 +301,7 @@ class FLEXIPORT_EXPORT Port
 		                    // reopening it if necessary).
 
 		// Protected constructor to prevent direct creation of this class.
-		Port (void);
+		Port ();
 		// Constructor for more-direct creation.
 		Port (unsigned int debug, Timeout timeout, bool canRead, bool canWrite, bool alwaysOpen);
 

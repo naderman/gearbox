@@ -74,14 +74,14 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 {
 	public:
 		UDPPort (std::map<std::string, std::string> options);
-		~UDPPort (void);
+		~UDPPort ();
 
 		/** @brief Open the port.
 
 		This will create a listening socket and a sending socket. */
-		void Open (void);
+		void Open ();
 		/// @brief Close the port.
-		void Close (void);
+		void Close ();
 		/// @brief Read from the port.
 		ssize_t Read (void * const buffer, size_t count);
 		/// @brief Read the requested quantity of data from the port.
@@ -96,17 +96,17 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 		count times. */
 		ssize_t SkipUntil (uint8_t terminator, unsigned int count);
 		/// @brief Get the number of bytes waiting to be read at the port. Returns immediatly.
-		ssize_t BytesAvailable (void);
+		ssize_t BytesAvailable ();
 		/// @brief Get the number of bytes waiting after blocking for the timeout.
-		ssize_t BytesAvailableWait (void);
+		ssize_t BytesAvailableWait ();
 		/// @brief Write data to the port.
 		ssize_t Write (const void * const buffer, size_t count);
 		/// @brief Flush the port's input and output buffers, discarding all data.
-		void Flush (void);
+		void Flush ();
 		/// @brief Drain the port's input and output buffers.
-		void Drain (void);
+		void Drain ();
 		/// @brief Get the status of the port (type, device, etc).
-		std::string GetStatus (void) const;
+		std::string GetStatus () const;
 		/// @brief Set the timeout value in milliseconds.
 		void SetTimeout (Timeout timeout);
 		/// @brief Set the read permissions of the port.
@@ -114,7 +114,7 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 		/// @brief Set the write permissions of the port.
 		void SetCanWrite (bool canWrite);
 		/// @brief Check if the port is open
-		bool IsOpen (void) const                        { return _open; }
+		bool IsOpen () const                        { return _open; }
 
 	private:
 		int _sendSock;      // Socket to send data from.
@@ -130,15 +130,15 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 
 		bool ProcessOption (const std::string &option, const std::string &value);
 
-		void OpenSender (void);
-		void CloseSender (void);
-		void OpenReceiver (void);
-		void CloseReceiver (void);
+		void OpenSender ();
+		void CloseSender ();
+		void OpenReceiver ();
+		void CloseReceiver ();
 		typedef enum {TIMED_OUT, DATA_AVAILABLE, CAN_WRITE} WaitStatus;
-		WaitStatus WaitForDataOrTimeout (void);
-		bool IsDataAvailable (void);
-		WaitStatus WaitForWritableOrTimeout (void);
-		void SetSocketBlockingFlag (void);
+		WaitStatus WaitForDataOrTimeout ();
+		bool IsDataAvailable ();
+		WaitStatus WaitForWritableOrTimeout ();
+		void SetSocketBlockingFlag ();
 };
 
 } // namespace flexiport

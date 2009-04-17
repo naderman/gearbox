@@ -71,7 +71,7 @@ using namespace std;
 namespace flexiport
 {
 
-inline int ErrNo (void)
+inline int ErrNo ()
 {
 #if defined (WIN32)
 	return WSAGetLastError ();
@@ -111,7 +111,7 @@ LogFile::LogFile (unsigned int debug)
 	timerclear (&_openTime);
 }
 
-LogFile::~LogFile (void)
+LogFile::~LogFile ()
 {
 	Close ();
 }
@@ -179,7 +179,7 @@ void LogFile::Open (string fileName, bool read, bool ignoreTimes)
 	}
 }
 
-void LogFile::Close (void)
+void LogFile::Close ()
 {
 	if (_readFile != NULL)
 	{
@@ -221,7 +221,7 @@ void LogFile::Close (void)
 		cerr << "LogFile::" << __func__ << "() Closed file." << endl;
 }
 
-bool LogFile::IsOpen (void) const
+bool LogFile::IsOpen () const
 {
 	if (_readFile == NULL || _writeFile == NULL)
 		return false;
@@ -250,7 +250,7 @@ bool LogFile::IsOpen (void) const
 	return true;
 }
 
-void LogFile::ResetFile (void)
+void LogFile::ResetFile ()
 {
 	// Rewind file positions
 	if (fseek (_readFile, 0, SEEK_SET) < 0)
@@ -817,7 +817,7 @@ bool LogFile::CheckWrite (const void * const data, const size_t count, size_t * 
 	return result;
 }
 
-void LogFile::Flush (void)
+void LogFile::Flush ()
 {
 	// Dump the read overflow buffer
 	DeallocateWriteBuffer();
@@ -852,7 +852,7 @@ void LogFile::Flush (void)
 	Drain ();
 }
 
-void LogFile::Drain (void)
+void LogFile::Drain ()
 {
 	// Dump the write overflow buffer
 	DeallocateWriteBuffer();
@@ -1012,7 +1012,7 @@ void LogFile::AllocateWriteBuffer (unsigned int size)
 	}
 }
 
-void LogFile::DeallocateReadBuffer (void)
+void LogFile::DeallocateReadBuffer ()
 {
 	if (_readBuffer != NULL)
 	{
@@ -1025,7 +1025,7 @@ void LogFile::DeallocateReadBuffer (void)
 	}
 }
 
-void LogFile::DeallocateWriteBuffer (void)
+void LogFile::DeallocateWriteBuffer ()
 {
 	if (_writeBuffer != NULL)
 	{

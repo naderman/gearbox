@@ -69,12 +69,12 @@ class FLEXIPORT_EXPORT LogWriterPort : public Port
 {
 	public:
 		LogWriterPort (std::map<std::string, std::string> options);
-		~LogWriterPort (void);
+		~LogWriterPort ();
 
 		/// @brief Open the port.
-		void Open (void);
+		void Open ();
 		/// @brief Close the port.
-		void Close (void);
+		void Close ();
 		/// @brief Read from the port.
 		ssize_t Read (void * const buffer, size_t count);
 		/// @brief Read the requested quantity of data from the port.
@@ -85,17 +85,17 @@ class FLEXIPORT_EXPORT LogWriterPort : public Port
 		count times. */
 		ssize_t SkipUntil (uint8_t terminator, unsigned int count);
 		/// @brief Get the number of bytes waiting to be read at the port. Returns immediatly.
-		ssize_t BytesAvailable (void);
+		ssize_t BytesAvailable ();
 		/// @brief Get the number of bytes waiting after blocking for the timeout.
-		ssize_t BytesAvailableWait (void);
+		ssize_t BytesAvailableWait ();
 		/// @brief Write data to the port.
 		ssize_t Write (const void * const buffer, size_t count);
 		/// @brief Flush the port's input and output buffers, discarding all data.
-		void Flush (void);
+		void Flush ();
 		/// @brief Drain the port's input and output buffers.
-		void Drain (void);
+		void Drain ();
 		/// @brief Get the status of the port (type, device, etc).
-		std::string GetStatus (void) const;
+		std::string GetStatus () const;
 		/// @brief Set the timeout value in milliseconds.
 		void SetTimeout (Timeout timeout);
 		/// @brief Set the read permissions of the port.
@@ -103,7 +103,7 @@ class FLEXIPORT_EXPORT LogWriterPort : public Port
 		/// @brief Set the write permissions of the port.
 		void SetCanWrite (bool canWrite);
 		/// @brief Check if the port is open
-		bool IsOpen (void) const;
+		bool IsOpen () const;
 
 	private:
 		Port *_port;

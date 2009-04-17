@@ -59,7 +59,7 @@ using namespace std;
 namespace flexiport
 {
 
-inline int ErrNo (void)
+inline int ErrNo ()
 {
 #if defined (WIN32)
 	return WSAGetLastError ();
@@ -119,7 +119,7 @@ UDPPort::UDPPort (map<string, string> options)
 		Open ();
 }
 
-UDPPort::~UDPPort (void)
+UDPPort::~UDPPort ()
 {
 	Close ();
 
@@ -138,7 +138,7 @@ UDPPort::~UDPPort (void)
 // Port management
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void UDPPort::Open (void)
+void UDPPort::Open ()
 {
 	if (_open)
 		throw PortException ("Attempt to open already-opened port.");
@@ -152,7 +152,7 @@ void UDPPort::Open (void)
 		cerr << "UDPPort::" << __func__ << "() Port is open" << endl;
 }
 
-void UDPPort::Close (void)
+void UDPPort::Close ()
 {
 	if (_debug >= 2)
 		cerr << "UDPPort::" << __func__ << "() Closing port" << endl;
@@ -397,7 +397,7 @@ ssize_t UDPPort::SkipUntil (uint8_t terminator, unsigned int count)
 	return 0;
 }
 
-ssize_t UDPPort::BytesAvailable (void)
+ssize_t UDPPort::BytesAvailable ()
 {
 	// TODO:
 	// MSG_PEEK is apparently bad on Windows so we should drain what we can into a local buffer
@@ -427,7 +427,7 @@ ssize_t UDPPort::BytesAvailable (void)
 	return bytesAvailable;
 }
 
-ssize_t UDPPort::BytesAvailableWait (void)
+ssize_t UDPPort::BytesAvailableWait ()
 {
 	CheckPort (true);
 
@@ -518,7 +518,7 @@ ssize_t UDPPort::Write (const void * const buffer, size_t count)
 	return numSent;
 }
 
-void UDPPort::Flush (void)
+void UDPPort::Flush ()
 {
 	int numRead = 0;
 	char dump[128];
@@ -549,7 +549,7 @@ void UDPPort::Flush (void)
 	// We can't do anything about the write buffers.
 }
 
-void UDPPort::Drain (void)
+void UDPPort::Drain ()
 {
 	// Since we can't force the write buffer to send, we can't do anything here.
 	if (_debug >= 1)
@@ -560,7 +560,7 @@ void UDPPort::Drain (void)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string UDPPort::GetStatus (void) const
+std::string UDPPort::GetStatus () const
 {
 	stringstream status;
 
@@ -644,7 +644,7 @@ bool UDPPort::ProcessOption (const std::string &option, const std::string &value
 }
 
 // Open the socket for sending data
-void UDPPort::OpenSender (void)
+void UDPPort::OpenSender ()
 {
 	CloseSender ();    // To make sure
 
@@ -742,7 +742,7 @@ void UDPPort::OpenSender (void)
 }
 
 // Close the socket for sending data
-void UDPPort::CloseSender (void)
+void UDPPort::CloseSender ()
 {
 #if defined (WIN32)
 	if (_sendSock != INVALID_SOCKET)
@@ -760,7 +760,7 @@ void UDPPort::CloseSender (void)
 }
 
 // Open the socket for receiving data
-void UDPPort::OpenReceiver (void)
+void UDPPort::OpenReceiver ()
 {
 	CloseReceiver ();    // To make sure
 
@@ -896,7 +896,7 @@ void UDPPort::OpenReceiver (void)
 }
 
 // Close the socket for receiving data
-void UDPPort::CloseReceiver (void)
+void UDPPort::CloseReceiver ()
 {
 #if defined (WIN32)
 	if (_recvSock != INVALID_SOCKET)
@@ -914,7 +914,7 @@ void UDPPort::CloseReceiver (void)
 }
 
 // Checks if data is available, waiting for the timeout if none is available immediatly
-UDPPort::WaitStatus UDPPort::WaitForDataOrTimeout (void)
+UDPPort::WaitStatus UDPPort::WaitForDataOrTimeout ()
 {
 	if (IsDataAvailable ())
 	{
@@ -957,7 +957,7 @@ UDPPort::WaitStatus UDPPort::WaitForDataOrTimeout (void)
 }
 
 // Checks if data is available right now
-bool UDPPort::IsDataAvailable (void)
+bool UDPPort::IsDataAvailable ()
 {
 	if (_debug >= 3)
 		cerr << "UDPPort::" << __func__ << "() Checking if data is available immediately." << endl;
@@ -1008,7 +1008,7 @@ bool UDPPort::IsDataAvailable (void)
 }
 
 // Checks it he port can be written to, waiting for the timeout if it can't be written immediatly
-UDPPort::WaitStatus UDPPort::WaitForWritableOrTimeout (void)
+UDPPort::WaitStatus UDPPort::WaitForWritableOrTimeout ()
 {
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
@@ -1054,7 +1054,7 @@ void UDPPort::CheckPort (bool read)
 		throw PortException ("Cannot write to read-only port.");
 }
 
-void UDPPort::SetSocketBlockingFlag (void)
+void UDPPort::SetSocketBlockingFlag ()
 {
 	if (_timeout._sec == -1)
 	{

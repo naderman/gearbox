@@ -48,7 +48,7 @@ namespace flexiport
 // Constructor/destructor
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Port::Port (void)
+Port::Port ()
 	: _type ("none"), _debug (0), _timeout (-1, 0), _canRead (true),
 	_canWrite (true), _alwaysOpen (false)
 {
@@ -61,7 +61,7 @@ Port::Port (unsigned int debug, Timeout timeout,
 {
 }
 
-Port::~Port (void)
+Port::~Port ()
 {
 }
 
@@ -349,7 +349,7 @@ ssize_t Port::WriteString (const char * const buffer)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string Port::GetStatus (void) const
+string Port::GetStatus () const
 {
 	stringstream status;
 

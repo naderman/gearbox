@@ -75,7 +75,7 @@ LogWriterPort::LogWriterPort (map<string, string> options)
 	_logFile->Open (_logFileName, false);
 }
 
-LogWriterPort::~LogWriterPort (void)
+LogWriterPort::~LogWriterPort ()
 {
 	// _logFile should never be NULL because it's allocated in the constructor and never deleted.
 	_logFile->Close ();
@@ -89,7 +89,7 @@ LogWriterPort::~LogWriterPort (void)
 // Port management
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void LogWriterPort::Open (void)
+void LogWriterPort::Open ()
 {
 	if (_port->IsOpen ())
 		throw PortException ("Attempt to open already-opened port.");
@@ -101,7 +101,7 @@ void LogWriterPort::Open (void)
 		cerr << "LogWriterPort::" << __func__ << "() Port is open" << endl;
 }
 
-void LogWriterPort::Close (void)
+void LogWriterPort::Close ()
 {
 	if (_debug >= 2)
 		cerr << "LogWriterPort::" << __func__ << "() Closing port" << endl;
@@ -233,12 +233,12 @@ ssize_t LogWriterPort::SkipUntil (uint8_t terminator, unsigned int count)
 	return numRead;
 }
 
-ssize_t LogWriterPort::BytesAvailable (void)
+ssize_t LogWriterPort::BytesAvailable ()
 {
 	return _port->BytesAvailable ();
 }
 
-ssize_t LogWriterPort::BytesAvailableWait (void)
+ssize_t LogWriterPort::BytesAvailableWait ()
 {
 	return _port->BytesAvailableWait ();
 }
@@ -262,12 +262,12 @@ ssize_t LogWriterPort::Write (const void * const buffer, size_t count)
 	return numSent;
 }
 
-void LogWriterPort::Flush (void)
+void LogWriterPort::Flush ()
 {
 	_port->Flush ();
 }
 
-void LogWriterPort::Drain (void)
+void LogWriterPort::Drain ()
 {
 	_port->Drain ();
 }
@@ -276,7 +276,7 @@ void LogWriterPort::Drain (void)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string LogWriterPort::GetStatus (void) const
+std::string LogWriterPort::GetStatus () const
 {
 	stringstream status;
 
@@ -303,7 +303,7 @@ void LogWriterPort::SetCanWrite (bool canWrite)
 //	_logFile->WritePermissionsChunk (_port->GetCanRead (), canWrite);
 }
 
-bool LogWriterPort::IsOpen (void) const
+bool LogWriterPort::IsOpen () const
 {
 	if (_port == NULL)
 		return false;

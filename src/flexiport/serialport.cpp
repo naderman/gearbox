@@ -48,7 +48,7 @@ using namespace std;
 namespace flexiport
 {
 
-inline int ErrNo (void)
+inline int ErrNo ()
 {
 #if defined (WIN32)
 	return GetLastError ();
@@ -252,7 +252,7 @@ SerialPort::SerialPort (map<string, string> options)
 		Open ();
 }
 
-SerialPort::~SerialPort (void)
+SerialPort::~SerialPort ()
 {
 	Close ();
 }
@@ -261,7 +261,7 @@ SerialPort::~SerialPort (void)
 // Port management
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SerialPort::Open (void)
+void SerialPort::Open ()
 {
 	if (_open)
 		throw PortException ("Attempt to open already-opened port.");
@@ -326,7 +326,7 @@ void SerialPort::Open (void)
 	_open = true;
 }
 
-void SerialPort::Close (void)
+void SerialPort::Close ()
 {
 	if (_debug >= 2)
 		cerr << "SerialPort::" << __func__ << "() Closing port" << endl;
@@ -494,7 +494,7 @@ ssize_t SerialPort::ReadFull (void * const buffer, size_t count)
 	return receivedBytes;
 }
 
-ssize_t SerialPort::BytesAvailable (void)
+ssize_t SerialPort::BytesAvailable ()
 {
 	ssize_t bytesAvailable = 0;
 
@@ -529,7 +529,7 @@ ssize_t SerialPort::BytesAvailable (void)
 	return bytesAvailable;
 }
 
-ssize_t SerialPort::BytesAvailableWait (void)
+ssize_t SerialPort::BytesAvailableWait ()
 {
 	ssize_t bytesAvailable = 0;
 
@@ -646,7 +646,7 @@ ssize_t SerialPort::Write (const void * const buffer, size_t count)
 	return numWritten;
 }
 
-void SerialPort::Flush (void)
+void SerialPort::Flush ()
 {
 #if defined (WIN32)
 	if (!PurgeComm (_fd, PURGE_RXCLEAR | PURGE_TXCLEAR))
@@ -667,7 +667,7 @@ void SerialPort::Flush (void)
 #endif
 }
 
-void SerialPort::Drain (void)
+void SerialPort::Drain ()
 {
 #if defined (WIN32)
 	if (!FlushFileBuffers (_fd))
@@ -692,7 +692,7 @@ void SerialPort::Drain (void)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string SerialPort::GetStatus (void) const
+std::string SerialPort::GetStatus () const
 {
 	stringstream status;
 
@@ -874,7 +874,7 @@ bool SerialPort::ProcessOption (const std::string &option, const std::string &va
 
 #if !defined (WIN32)
 // Checks if data is available, waiting for the timeout if none is available immediately
-SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout (void)
+SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout ()
 {
 	// Check if there is data available immediately before spending time on a select() call
 	if (BytesAvailable () > 0)
@@ -912,7 +912,7 @@ SerialPort::WaitStatus SerialPort::WaitForDataOrTimeout (void)
 }
 
 // Checks if the port can be written to, waiting for the timeout if it can't be written immediately
-SerialPort::WaitStatus SerialPort::WaitForWritableOrTimeout (void)
+SerialPort::WaitStatus SerialPort::WaitForWritableOrTimeout ()
 {
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
@@ -959,7 +959,7 @@ void SerialPort::CheckPort (bool read)
 		throw PortException ("Cannot write to read-only port.");
 }
 
-void SerialPort::SetPortSettings (void)
+void SerialPort::SetPortSettings ()
 {
 #if defined (WIN32)
 	DCB dcb = {0};
@@ -1111,7 +1111,7 @@ void SerialPort::SetPortSettings (void)
 	SetBaudRate (_baud);
 }
 
-void SerialPort::SetPortTimeout (void)
+void SerialPort::SetPortTimeout ()
 {
 #if defined (WIN32)
 	COMMTIMEOUTS timeouts;

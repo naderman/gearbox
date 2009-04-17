@@ -73,32 +73,32 @@ class FLEXIPORT_EXPORT SerialPort : public Port
 {
 	public:
 		SerialPort (std::map<std::string, std::string> options);
-		~SerialPort (void);
+		~SerialPort ();
 
 		/// @brief Open the port.
-		void Open (void);
+		void Open ();
 		/// @brief Close the port.
-		void Close (void);
+		void Close ();
 		/// @brief Read from the port.
 		ssize_t Read (void * const buffer, size_t count);
 		/// @brief Read the requested quantity of data from the port.
 		ssize_t ReadFull (void * const buffer, size_t count);
 		/// @brief Get the number of bytes waiting to be read at the port. Returns immediatly.
-		ssize_t BytesAvailable (void);
+		ssize_t BytesAvailable ();
 		/** @brief Get the number of bytes waiting after blocking for the timeout.
 
 		@note Currently this function performs differently under Win32. It will block for the
 		entire length of the timeout if data is not immediatly available. This will be fixed in the
 		future. */
-		ssize_t BytesAvailableWait (void);
+		ssize_t BytesAvailableWait ();
 		/// @brief Write data to the port.
 		ssize_t Write (const void * const buffer, size_t count);
 		/// @brief Flush the port's input and output buffers, discarding all data.
-		void Flush (void);
+		void Flush ();
 		/// @brief Drain the port's input and output buffers.
-		void Drain (void);
+		void Drain ();
 		/// @brief Get the status of the port (type, device, etc).
-		std::string GetStatus (void) const;
+		std::string GetStatus () const;
 		/// @brief Set the timeout value in milliseconds.
 		void SetTimeout (Timeout timeout);
 		/// @brief Set the read permissions of the port.
@@ -106,12 +106,12 @@ class FLEXIPORT_EXPORT SerialPort : public Port
 		/// @brief Set the write permissions of the port.
 		void SetCanWrite (bool canWrite);
 		/// @brief Check if the port is open.
-		bool IsOpen (void) const                        { return _open; }
+		bool IsOpen () const                        { return _open; }
 
 		/// @brief Change the baud rate.
 		void SetBaudRate (unsigned int baud);
 		/// @brief Get the current baud rate.
-		unsigned int GetBaudRate (void) const           { return _baud; }
+		unsigned int GetBaudRate () const           { return _baud; }
 
 	private:
 #if defined (WIN32)
@@ -132,14 +132,14 @@ class FLEXIPORT_EXPORT SerialPort : public Port
 		void CheckPort (bool read);
 		bool ProcessOption (const std::string &option, const std::string &value);
 
-		bool IsDataAvailable (void);
+		bool IsDataAvailable ();
 #if !defined (WIN32)
 		typedef enum {TIMED_OUT, DATA_AVAILABLE, CAN_WRITE} WaitStatus;
-		WaitStatus WaitForDataOrTimeout (void);
-		WaitStatus WaitForWritableOrTimeout (void);
+		WaitStatus WaitForDataOrTimeout ();
+		WaitStatus WaitForWritableOrTimeout ();
 #endif
-		void SetPortSettings (void);
-		void SetPortTimeout (void);
+		void SetPortSettings ();
+		void SetPortTimeout ();
 };
 
 } // namespace flexiport

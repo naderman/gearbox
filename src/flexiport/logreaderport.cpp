@@ -59,7 +59,7 @@ LogReaderPort::LogReaderPort (map<string, string> options)
 		Open ();
 }
 
-LogReaderPort::~LogReaderPort (void)
+LogReaderPort::~LogReaderPort ()
 {
 	Close ();
 }
@@ -68,7 +68,7 @@ LogReaderPort::~LogReaderPort (void)
 // Port management
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void LogReaderPort::Open (void)
+void LogReaderPort::Open ()
 {
 	if (_open)
 		throw PortException ("Attempt to open already-opened port.");
@@ -81,7 +81,7 @@ void LogReaderPort::Open (void)
 		cerr << "LogReaderPort::" << __func__ << "() Port is open" << endl;
 }
 
-void LogReaderPort::Close (void)
+void LogReaderPort::Close ()
 {
 	if (_debug >= 2)
 		cerr << "LogReaderPort::" << __func__ << "() Closing port" << endl;
@@ -166,7 +166,7 @@ ssize_t LogReaderPort::ReadFull (void * const buffer, size_t count)
 	return receivedBytes;
 }
 
-ssize_t LogReaderPort::BytesAvailable (void)
+ssize_t LogReaderPort::BytesAvailable ()
 {
 	// Use a zero timeout.
 	Timeout timeout (0, 0);
@@ -179,7 +179,7 @@ ssize_t LogReaderPort::BytesAvailable (void)
 	return bytesAvailable;
 }
 
-ssize_t LogReaderPort::BytesAvailableWait (void)
+ssize_t LogReaderPort::BytesAvailableWait ()
 {
 	// The time limit is now + the timeout
 	ssize_t bytesAvailable = _logFile->BytesAvailable (_timeout);
@@ -239,7 +239,7 @@ ssize_t LogReaderPort::Write (const void * const buffer, size_t count)
 	return numWritten;
 }
 
-void LogReaderPort::Flush (void)
+void LogReaderPort::Flush ()
 {
 //	_logFile->Flush ();
 	// Actually shouldn't do anything here because any calls to flush on LogWriterPort didn't write
@@ -247,7 +247,7 @@ void LogReaderPort::Flush (void)
 	// log file, but not return that data, until there's no data left to read.
 }
 
-void LogReaderPort::Drain (void)
+void LogReaderPort::Drain ()
 {
 //	_logFile->Drain ();
 	// Actually shouldn't do anything here because any calls to drain on LogWriterPort didn't write
@@ -258,7 +258,7 @@ void LogReaderPort::Drain (void)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string LogReaderPort::GetStatus (void) const
+std::string LogReaderPort::GetStatus () const
 {
 	stringstream status;
 
@@ -286,7 +286,7 @@ void LogReaderPort::SetCanWrite (bool canWrite)
 	_canWrite = canWrite;
 }
 
-bool LogReaderPort::IsOpen (void) const
+bool LogReaderPort::IsOpen () const
 {
 	return _open;
 }

@@ -59,7 +59,7 @@ using namespace std;
 namespace flexiport
 {
 
-inline int ErrNo (void)
+inline int ErrNo ()
 {
 #if defined (WIN32)
 	return WSAGetLastError ();
@@ -119,7 +119,7 @@ TCPPort::TCPPort (map<string, string> options)
 		Open ();
 }
 
-TCPPort::~TCPPort (void)
+TCPPort::~TCPPort ()
 {
 	Close ();
 
@@ -138,7 +138,7 @@ TCPPort::~TCPPort (void)
 // Port management
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TCPPort::Open (void)
+void TCPPort::Open ()
 {
 	if (_open)
 		throw PortException ("Attempt to open already-opened port.");
@@ -165,7 +165,7 @@ void TCPPort::Open (void)
 		cerr << "TCPPort::" << __func__ << "() Port is open" << endl;
 }
 
-void TCPPort::Close (void)
+void TCPPort::Close ()
 {
 	if (_debug >= 2)
 		cerr << "TCPPort::" << __func__ << "() Closing port" << endl;
@@ -346,7 +346,7 @@ ssize_t TCPPort::ReadFull (void * const buffer, size_t count)
 	return receivedBytes;
 }
 
-ssize_t TCPPort::BytesAvailable (void)
+ssize_t TCPPort::BytesAvailable ()
 {
 	// TODO:
 	// MSG_PEEK is apparently bad on Windows so we should drain what we can into a local buffer
@@ -377,7 +377,7 @@ ssize_t TCPPort::BytesAvailable (void)
 	return bytesAvailable;
 }
 
-ssize_t TCPPort::BytesAvailableWait (void)
+ssize_t TCPPort::BytesAvailableWait ()
 {
 	CheckPort (true);
 
@@ -469,7 +469,7 @@ ssize_t TCPPort::Write (const void * const buffer, size_t count)
 	return numSent;
 }
 
-void TCPPort::Flush (void)
+void TCPPort::Flush ()
 {
 	int numRead = 0;
 	char dump[128];
@@ -500,7 +500,7 @@ void TCPPort::Flush (void)
 	// We can't do anything about the write buffers.
 }
 
-void TCPPort::Drain (void)
+void TCPPort::Drain ()
 {
 	// Since we can't force the write buffer to send, we can't do anything here.
 	if (_debug >= 1)
@@ -511,7 +511,7 @@ void TCPPort::Drain (void)
 // Other public API functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string TCPPort::GetStatus (void) const
+std::string TCPPort::GetStatus () const
 {
 	stringstream status;
 
@@ -573,7 +573,7 @@ bool TCPPort::ProcessOption (const std::string &option, const std::string &value
 }
 
 // Connect to a remote server: used when not in listen mode
-void TCPPort::Connect (void)
+void TCPPort::Connect ()
 {
 	Close ();    // To make sure
 
@@ -668,7 +668,7 @@ void TCPPort::Connect (void)
 }
 
 // Wait for a connection: used in listen mode
-void TCPPort::WaitForConnection (void)
+void TCPPort::WaitForConnection ()
 {
 	Close ();    // To make sure
 
@@ -838,7 +838,7 @@ void TCPPort::WaitForConnection (void)
 }
 
 // Checks if data is available, waiting for the timeout if none is available immediatly
-TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
+TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout ()
 {
 	if (IsDataAvailable ())
 	{
@@ -881,7 +881,7 @@ TCPPort::WaitStatus TCPPort::WaitForDataOrTimeout (void)
 }
 
 // Checks if data is available right now
-bool TCPPort::IsDataAvailable (void)
+bool TCPPort::IsDataAvailable ()
 {
 	if (_debug >= 3)
 		cerr << "TCPPort::" << __func__ << "() Checking if data is available immediately." << endl;
@@ -933,7 +933,7 @@ bool TCPPort::IsDataAvailable (void)
 }
 
 // Checks it he port can be written to, waiting for the timeout if it can't be written immediatly
-TCPPort::WaitStatus TCPPort::WaitForWritableOrTimeout (void)
+TCPPort::WaitStatus TCPPort::WaitForWritableOrTimeout ()
 {
 	fd_set fdSet;
 	struct timeval tv, *tvPtr = NULL;
@@ -979,7 +979,7 @@ void TCPPort::CheckPort (bool read)
 		throw PortException ("Cannot write to read-only port.");
 }
 
-void TCPPort::SetSocketBlockingFlag (void)
+void TCPPort::SetSocketBlockingFlag ()
 {
 	if (_timeout._sec == -1)
 	{

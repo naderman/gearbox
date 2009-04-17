@@ -47,20 +47,20 @@ class LogFile
 {
 	public:
 		LogFile (unsigned int debug);
-		~LogFile (void);
+		~LogFile ();
 
 		void Open (std::string fileName, bool read, bool ignoreTimes = false);
-		void Close (void);
-		bool IsOpen (void) const;
-		void ResetFile (void);
+		void Close ();
+		bool IsOpen () const;
+		void ResetFile ();
 
 		// File reading
 		ssize_t Read (void *data, size_t count, Timeout &timeout);
 		ssize_t BytesAvailable (const Timeout &timeout);
 		bool CheckWrite (const void * const data, const size_t count, size_t * const numWritten,
 				const Timeout * const timeout = NULL);
-		void Flush (void);
-		void Drain (void);
+		void Flush ();
+		void Drain ();
 
 		// File writing
 		void WriteRead (const void * const data, size_t count);
@@ -81,8 +81,8 @@ class LogFile
 
 		void AllocateReadBuffer (unsigned int size = 0);
 		void AllocateWriteBuffer (unsigned int size = 0);
-		void DeallocateReadBuffer (void);
-		void DeallocateWriteBuffer (void);
+		void DeallocateReadBuffer ();
+		void DeallocateWriteBuffer ();
 
 		void GetCurrentFileTime (struct timeval &dest);
 		bool DataAvailableWithinLimit (FILE * const file, const struct timeval &limit);
