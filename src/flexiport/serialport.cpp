@@ -143,8 +143,34 @@ int BaudToConstant (int baud)
 			return B57600;
 		case 115200:
 			return B115200;
+#if defined (__linux)
 		case 230400:
 			return B230400;
+		case 460800:
+			return B460800;
+		case 500000:
+			return B500000;
+		case 576000:
+			return B576000;
+		case 921600:
+			return B921600;
+		case 1000000:
+			return B1000000;
+		case 1152000:
+			return B1152000;
+		case 1500000:
+			return B1500000;
+		case 2000000:
+			return B2000000;
+		case 2500000:
+			return B2500000;
+		case 3000000:
+			return B3000000;
+		case 3500000:
+			return B3500000;
+		case 4000000:
+			return B4000000;
+#endif // __linux
 #endif
 		default:
 			stringstream ss;
@@ -221,8 +247,34 @@ int ConstantToBaud (int constant)
 			return 57600;
 		case B115200:
 			return 115200;
+#if defined (__linux)
 		case B230400:
 			return 230400;
+		case B460800:
+			return 460800;
+		case B500000:
+			return 500000;
+		case B576000:
+			return 576000;
+		case B921600:
+			return 921600;
+		case B1000000:
+			return 1000000;
+		case B1152000:
+			return 1152000;
+		case B1500000:
+			return 1500000;
+		case B2000000:
+			return 2000000;
+		case B2500000:
+			return 2500000;
+		case B3000000:
+			return 3000000;
+		case B3500000:
+			return 3500000;
+		case B4000000:
+			return 4000000;
+#endif // __linux
 #endif
 		default:
 			stringstream ss;
