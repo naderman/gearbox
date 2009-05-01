@@ -32,19 +32,22 @@ class Timer
 {
 public:
 
-    //! Sets internal clock to current time
+    //! Sets elapsed time to zero.
     Timer();
 
-    //! Resets internal clock to current time
+    //! Sets elapased time to the specified time, which can be positive or negative.
+    Timer( const IceUtil::Time& elapsedTime );
+
+    //! Resets elapsed time to zero.
     void restart();
 
-    //! Returns time elapsed from last restart
+    //! Returns time elapsed from last restart.
     IceUtil::Time elapsed() const;
 
-    //! returns elapsed milliseconds as a double
+    //! Returns elapsed milliseconds as a double.
     double elapsedMs() const;
 
-    //! returns elapsed seconds as a double
+    //! Returns elapsed seconds as a double.
     double elapsedSec() const;
 
 private:

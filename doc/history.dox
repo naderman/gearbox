@@ -31,14 +31,30 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Added a hook in the CMake setup to allow building Gearbox as part of a bigger "super-project". Default behavior is not modified. (tobie,alexm)
   - Changed format style of CMake files. Standard functions are low-case. Custom macros are upper case. "Local" variables are low-case. "Global"
     and cache variables are upper-case. (alexm)
+  - Added 4 advanced CMake variables to let user control what gets installed and what not. All are set to TRUE by default.
+    To disable installation, set a variable to FALSE on the command line: 'cmake -DGBX_INSTALL_HEADERS=false'. The
+    variables are:
+    - GBX_INSTALL_HEADERS
+    - GBX_INSTALL_SHARED_FILES
+    - GBX_INSTALL_EXAMPLES
+    - GBX_INSTALL_PKGCONFIGS
 
 @par New libraries
 
 @par Updated libraries
 
+- libGbxUtilAcfr:
+  - Status class: removed SubsystemStalled from the list of health types for a subsystem. The stall condition
+    now needs to be defined as part of the state of the monitor. (alexm)
+  - Added SubHealth class: a delegator which has access to health function of one subsystem. (alexm)
+  - Added Stoppable class: a light interface class representing stoppable activities. (alexm)
+
 - libGbxIceUtilAcfr:
   - Changed names in buffer.h to make it more intuitive, fixed comments (AlexB).
-
+  - Timer class: added constructor with non-zero elapsed time (alexm)
+  - Thread class: now derives from gbxutilacfr::Stoppable. No changes in user code are requried. (alexm)
+  - Function checkedSleep() is defined in terms of the new light interface class gbxutilacfr::Stoppable.
+    No changes in user code are required. (alexm)
 
 @section gbx_doc_history_902 Changes in Release 9.02
 

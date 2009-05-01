@@ -132,7 +132,6 @@ TrivialStatus::internalSetStatus( const std::string& subsystemName, gbxutilacfr:
 {
 //     cout<<"DEBUG: state="<<state<<" health="<<health<<" msg="<<msg<<endl;
     assert( state!=gbxutilacfr::SubsystemIdle && "Idle state should not be reported from within the subsystem" );
-    assert( health!=gbxutilacfr::SubsystemStalled && "Stalled health should not be reported from within the subsystem" );
 
     // if this is a heartbeat, do nothing else
     if ( state<0 && health<0 && msg.empty() )
@@ -172,7 +171,6 @@ TrivialStatus::internalSetStatus( const std::string& subsystemName, gbxutilacfr:
             tracer_.warning( trace );
             break;
         case gbxutilacfr::SubsystemFault :
-        case gbxutilacfr::SubsystemStalled :
             tracer_.error( trace );
             break;
         }

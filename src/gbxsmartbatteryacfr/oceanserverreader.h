@@ -37,6 +37,7 @@ public:
     OceanServerReader( const std::string   &serialPort,
                        gbxutilacfr::Tracer &tracer );
     
+    //! Reads an OceanServerSystem record
     //! May throw HardwareReadingExceptions and ParsingExceptions
     void read( OceanServerSystem &system );
 

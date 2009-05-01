@@ -42,9 +42,7 @@ enum SubsystemHealth
     //! Subsystem has encountered an abnormal but non-fault condition
     SubsystemWarning,
     //! Subsystem has declared a fault
-    SubsystemFault,
-    //! Subsystem has not been heard from for an abnormally long time
-    SubsystemStalled
+    SubsystemFault
 };
 
 //! Returns string equivalent of health enumerator.
@@ -54,10 +52,12 @@ std::string toString( SubsystemHealth health );
 struct SubsystemStatus
 {
     //! Constructor.
-    SubsystemStatus( SubsystemState s=SubsystemIdle, SubsystemHealth h=SubsystemOk, const std::string& msg="", double beat=0.0 ) :
+    SubsystemStatus( SubsystemState s=SubsystemIdle, SubsystemHealth h=SubsystemOk, const std::string& msg="", 
+                     bool stall=false, double beat=0.0 ) :
         state(s),
         health(h),
         message(msg),
+        isStalled(stall),
         sinceHeartbeat(beat) {};
 
     //! Current state in the subsystem's state machine. I.e. what is the subsystem doing?
@@ -69,6 +69,10 @@ struct SubsystemStatus
     //! Human-readable status description
     std::string message;
 
+    //! If true, the subsystem has not been heard from for an abnormally long time.
+    bool isStalled;
+
+    //! OBSOLETE !?
     //! Ratio of time since last heartbeat to maximum expected time between heartbeats.
     //! For example, sinceHeartbeat=0.5 means that half of normally expected interval between heartbeats
     //! has elapsed.

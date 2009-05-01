@@ -17,6 +17,11 @@ endif( COMMAND cmake_policy )
 set( GBX_CMAKE_DIR ${${PROJECT_NAME}_SOURCE_DIR}/cmake CACHE INTERNAL "Location of CMake scripts" )
 
 #
+# Process project name
+#
+include( ${GBX_CMAKE_DIR}/SetupProjectName.cmake )
+
+#
 # Process version number
 #
 include( ${GBX_CMAKE_DIR}/SetupVersion.cmake )
@@ -86,7 +91,7 @@ set( CMAKE_INSTALL_RPATH ${GBX_LIB_INSTALL_DIR} )
 # Enable testing by including the Dart module
 # (must be done *before* entering source directories )
 include(${CMAKE_ROOT}/Modules/Dart.cmake)
-ENABLE_TESTING()
+enable_testing()
 
 #
 # Enter the source tree
@@ -99,10 +104,15 @@ add_subdirectory( retired )
 add_subdirectory( cmake )
 
 #
+# Experimental
+#
+include( ${GBX_CMAKE_DIR}/WritePackageConfig.cmake )
+
+#
 # Write results of CMake activity to file
 #
-GBX_WRITE_MANIFEST()
-GBX_WRITE_OPTIONS()
+# GBX_WRITE_MANIFEST()
+# GBX_WRITE_OPTIONS()
 
 #
 # Print license information to a file

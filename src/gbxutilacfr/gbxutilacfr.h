@@ -19,7 +19,5 @@
 #include <gbxutilacfr/status.h>
 #include <gbxutilacfr/exceptions.h>
 #include <gbxutilacfr/mathdefs.h>
-// #include <gbxutilacfr/stringutils.h>
-// #include <gbxutilacfr/sysutils.h>
 
 #endif

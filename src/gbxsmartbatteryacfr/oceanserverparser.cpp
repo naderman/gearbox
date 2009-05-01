@@ -252,7 +252,10 @@ void
 OceanServerParser::parse( vector<string>    &stringList, 
                           OceanServerSystem &batterySystem )
 {
-    
+    // put the raw record into the batterySystem representation
+    // useful for "higher-level" debugging: the caller can choose how to make use of this information
+    batterySystem.rawRecord = stringList;
+        
     //
     // Debugging output
     //
@@ -273,8 +276,7 @@ OceanServerParser::parse( vector<string>    &stringList,
         }
         ss << endl;
         tracer_.debug( ss.str(), debugLevel );
-    } 
-    
+    }
     
     //
     // Parsing

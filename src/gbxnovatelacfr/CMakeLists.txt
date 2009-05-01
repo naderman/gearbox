@@ -5,7 +5,7 @@ set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
 set( dep_libs GbxUtilAcfr GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
+GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
 # built internally
 set( dep_libs ${dep_libs} GbxNovatelUtilAcfr )

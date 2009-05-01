@@ -8,7 +8,7 @@ GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported"
 add_subdirectory( gbxiceutilacfr )
 
 set( dep_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
+GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
 # these are built internally
 set( dep_libs ${dep_libs} GbxSerialDeviceAcfr )

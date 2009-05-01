@@ -13,6 +13,7 @@
 #include <IceUtil/Time.h>
 
 #include <gbxsickacfr/gbxiceutilacfr/thread.h>
+#include <gbxsickacfr/gbxiceutilacfr/threadutils.h>
 #include <gbxutilacfr/exceptions.h>
 
 using namespace std;

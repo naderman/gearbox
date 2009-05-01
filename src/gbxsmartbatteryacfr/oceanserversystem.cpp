@@ -97,6 +97,8 @@ string toLogString( const OceanServerSystem &system )
 void updateWithNewData( const OceanServerSystem &from, 
                         OceanServerSystem       &to )
 {
+    to.rawRecord = from.rawRecord;
+    
     typedef map<int,SmartBattery>::const_iterator BatIt;
     
     to.availableBatteries = from.availableBatteries;

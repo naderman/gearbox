@@ -13,7 +13,7 @@ set( build TRUE )
 # GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
 
 set( dep_libs GbxUtilAcfr GbxSerialAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
+GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
 if( build )
     

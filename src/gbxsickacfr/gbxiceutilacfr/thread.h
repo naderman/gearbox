@@ -12,6 +12,10 @@
 #define GBXICEUTILACFR_THREAD_H
 
 #include <IceUtil/Thread.h>
+#include <gbxutilacfr/stoppable.h>
+// this is not needed for implementation of this class.
+// it's included for convenience of users of Thread class.
+#include <gbxsickacfr/gbxiceutilacfr/threadutils.h>
 
 namespace gbxiceutilacfr {
 
@@ -65,7 +69,7 @@ Otherwise, you'll see "uncaught exception" printed out and the component will ha
 
 @see SafeThread
  */
-class Thread : public IceUtil::Thread
+class Thread : public IceUtil::Thread, public gbxutilacfr::Stoppable
 {
 public:
 
@@ -75,11 +79,12 @@ public:
     //! from inside or outside this thread.
     void stop();
 
+    // from gbxutilacfr::Stoppable
+    //! Returns TRUE if the thread is in Stopping state, FALSE otherwise.
+    virtual bool isStopping();
+
     //! Returns TRUE if the thread is in Started state, FALSE otherwise.
     bool isStarted();
-
-    //! Returns TRUE if the thread is in Stopping state, FALSE otherwise.
-    bool isStopping();
 
     //! @b Depricated function! Use isStopping() instead (note that it returns the opposite).
     //! 
@@ -107,12 +112,6 @@ void stopAndJoin( gbxiceutilacfr::Thread* thread );
 //! A convenience function which first stops the @p thread and then waits for it to
 //! terminate. If the smart pointer is 0, this function quietly returns.
 void stopAndJoin( const gbxiceutilacfr::ThreadPtr& thread );
-
-//! Sleeps for @ref duration waking up every @ref checkIntervalMs [ms] to check if the @c thread 
-//! was told to stop. This implementation is very simple so the error in total sleep duration 
-//! can be as large as checkIntervalMs. In particular, if @ref duration is shorter than @ref checkIntervalMs,
-//! this function will sleep for @ref checkIntervalMs.
-void checkedSleep( const gbxiceutilacfr::ThreadPtr& thread, IceUtil::Time duration, int checkIntervalMs=250 );
 
 } // end namespace
 

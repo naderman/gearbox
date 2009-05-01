@@ -6,7 +6,7 @@ SET (build TRUE)
 GBX_REQUIRE_OPTION (build LIB ${libName} ON)
 
 SET (reqLibs flexiport)
-GBX_REQUIRE_TARGETS (build LIB ${libName} ${reqLibs})
+GBX_REQUIRE_LIBS (build LIB ${libName} ${reqLibs})
 
 if(build)
 	INCLUDE (${GBX_CMAKE_DIR}/UseBasicRules.cmake)

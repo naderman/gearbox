@@ -5,6 +5,31 @@ set( GBX_DEFAULT_LIB_TYPE "SHARED" CACHE STRING "Default library type (SHARED or
 mark_as_advanced( GBX_DEFAULT_LIB_TYPE )
 
 #
+# Default preference for installing header files.
+#
+set( GBX_INSTALL_HEADERS TRUE CACHE BOOLEAN "Do you want to install header files?" )
+mark_as_advanced( GBX_INSTALL_HEADERS )
+
+#
+# Default preference for installing shared files.
+#
+set( GBX_INSTALL_SHARED_FILES TRUE CACHE BOOLEAN "Do you want to install shared files?" )
+mark_as_advanced( GBX_INSTALL_SHARED_FILES )
+
+#
+# Default preference for installing examples.
+#
+set( GBX_INSTALL_EXAMPLES TRUE CACHE BOOLEAN "Do you want to install example files?" )
+mark_as_advanced( GBX_INSTALL_EXAMPLES )
+
+#
+# Default preference for installing PKGCONFIG's.
+#
+set( GBX_INSTALL_PKGCONFIGS TRUE CACHE BOOLEAN "Do you want to install PKGCONFIG's files?" )
+mark_as_advanced( GBX_INSTALL_PKGCONFIGS )
+
+
+#
 # Executables should add themselves by calling 'GBX_ADD_EXECUTABLE'
 # instead of 'ADD_EXECUTABLE' in CMakeLists.txt.
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
@@ -51,7 +76,9 @@ macro( GBX_ADD_LIBRARY name type )
 #     SET_TARGET_PROPERTIES( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    install( TARGETS ${name} DESTINATION lib/${PROJECT_NAME} )
+    install( TARGETS ${name}
+             DESTINATION lib/${PROJECT_NAME}
+             EXPORT ${PROJECT_NAME}-targets )
 
     set( templist ${LIB_LIST} )
     list( APPEND templist ${name} )
@@ -72,7 +99,9 @@ endmacro( GBX_ADD_LIBRARY name )
 # All files are installed into PREFIX/include/${PROJECT_NAME}/${install_subdir}
 #
 macro( GBX_ADD_HEADERS install_subdir )
-    install( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
+    if( GBX_INSTALL_HEADERS )
+        install( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
+    endif()
 endmacro( GBX_ADD_HEADERS install_subdir )
 #
 # GBX_ADD_SHARED_FILES( install_subdir FILE0 [FILE1 FILE2 ...] )
@@ -81,7 +110,9 @@ endmacro( GBX_ADD_HEADERS install_subdir )
 # All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir} directory.
 #
 macro( GBX_ADD_SHARED_FILES install_subdir )
-    install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+    if( GBX_INSTALL_SHARED_FILES )
+        install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+    endif()
 endmacro( GBX_ADD_SHARED_FILES install_subdir )
 
 #
@@ -94,8 +125,10 @@ endmacro( GBX_ADD_SHARED_FILES install_subdir )
 #
 macro( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
-    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
-    install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+    if( GBX_INSTALL_EXAMPLES )
+        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
+        install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+    endif()
 endmacro( GBX_ADD_EXAMPLE install_subdir makefile )
 
 #
@@ -123,7 +156,10 @@ macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
     endif( ${int_deps} )
 
     configure_file( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
-    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
+
+    if( GBX_INSTALL_PKGCONFIGS )
+        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
+    endif()
 endmacro( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
 #

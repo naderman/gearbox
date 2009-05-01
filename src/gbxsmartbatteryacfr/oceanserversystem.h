@@ -55,6 +55,9 @@ class OceanServerSystem
         std::vector<bool> chargePowerPresentStates;
         std::vector<bool> powerNoGoodStates;
         std::vector<bool> chargeInhibitedStates;
+        
+        //! the latest raw record, useful for debugging
+        std::vector<std::string> rawRecord;
  
     private:
         
@@ -70,6 +73,7 @@ std::string toLogString( const OceanServerSystem &system );
     
 //! Updates all fields in 'to' with data from 'from'. Also reaps batteries in 'to' if they are not in 'from'.
 //! Has persistence capabilities: if fields in 'from' are not set and corresponding fields in 'to' are set, the ones in 'to' are kept.
+//! There's one exception: the rawRecord field is always updated
 //! Use case: a class stores 'to' as a member variable, receives the latest records into 'from', calls this function to update 'to'.
 //! The reaping capability makes sure that battery modules which are no longer connected don't persist.
 void updateWithNewData( const OceanServerSystem &from, 

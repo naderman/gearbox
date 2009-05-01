@@ -80,15 +80,4 @@ void stopAndJoin( const gbxiceutilacfr::ThreadPtr& thread )
     }
 }
 
-void checkedSleep( const gbxiceutilacfr::ThreadPtr& thread, IceUtil::Time duration, int checkIntervalMs  )
-{
-    IceUtil::Time wakeupTime = IceUtil::Time::now() + duration;
-    IceUtil::Time checkInterval = IceUtil::Time::milliSeconds( checkIntervalMs );
-
-    while ( !thread->isStopping() && IceUtil::Time::now() < wakeupTime )
-    {
-        IceUtil::ThreadControl::sleep( checkInterval );
-    }
-}
-
 } // namespace

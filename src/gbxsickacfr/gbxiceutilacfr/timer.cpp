@@ -12,9 +12,14 @@
 
 namespace gbxiceutilacfr {
 
-Timer::Timer()   
+Timer::Timer() :
+    time_( IceUtil::Time::now() )
 {
-    restart();
+}
+
+Timer::Timer( const IceUtil::Time& elapsedTime ) :
+    time_( IceUtil::Time::now()-elapsedTime )
+{
 }
 
 void Timer::restart()

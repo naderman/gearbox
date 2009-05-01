@@ -38,7 +38,7 @@ Detailed instructions are available for these platforms/distributions:
 The instructions below are quite general, follow them if your platform/distribution combination is not described above:
 
     -# Download and install <a href="http://www.cmake.org/">CMake: Cross-Platform Make</a> which is used to build the GearBox distribution.
-    - Minimum version required 2.4-patch 4 (latest tested: 2.4-patch 7).
+    - Minimum version required 2.4-patch 4 (latest tested: 2.6-patch 3).
         - Full instructions are available from the <a href="http://www.cmake.org/HTML/Download.html">download page</a>.
     -# Download and install any optional dependencies you'd like. Or just skip this step and do it later.
         - You may want to take a look at our notes on @ref gbx_doc_depends.

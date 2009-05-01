@@ -186,11 +186,22 @@ ENDIF ( build )
 @endverbatim
 Don't forget to close the IF structure. Notice that CMake is quite strict with @c IF statements: the signature of the closing @c ENDIF must be identical.
 
-@section gbx_doc_buildsys_varlist A list of useful CMake variables defined by GearBox
+@section gbx_doc_buildsys_varlist A comprehensive list of CMake variables defined by GearBox
 
 Build system configuration:
 @verbatim
 GBX_DEFAULT_LIB_TYPE    # Valid options {SHARED, STATIC}. Defaults to SHARED.
+@endverbatim
+
+Project description:
+@verbatim
+GBX_PROJECT_VERSION_MAJOR
+GBX_PROJECT_VERSION_MINOR
+GBX_PROJECT_VERSION_PATCH
+GBX_PROJECT_VERSION         (=MAJOR.MINOR.PATCH)
+GBX_PROJECT_NAME_LOWER      (e.g. 'gearbox' )
+GBX_PROJECT_NAME_UPPER      (e.g. 'GEARBOX' )
+GBX_PROJECT_NAME_CAP        (e.g. 'Gearbox' )
 @endverbatim
 
 OS variables: evaluate to TRUE when running on the corresponding OS, otherwise to FALSE. We define our own because the standard CMake ones are inconsistently named and the one for Linux is not defined.
@@ -201,7 +212,7 @@ GBX_OS_QNX
 GBX_OS_WIN
 @endverbatim
 
-Path variables:
+Path variables for the current project:
 @verbatim
 GBX_BIN_INSTALL_DIR
 GBX_LIB_INSTALL_DIR

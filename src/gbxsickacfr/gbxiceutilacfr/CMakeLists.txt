@@ -9,7 +9,7 @@ include( ${GBX_CMAKE_DIR}/FindIceUtil.cmake )
 GBX_REQUIRE_VAR( build LIB ${lib_name} ICEUTIL_FOUND "libIceUtil not found" )
 
 set( proj_libs GbxUtilAcfr )
-GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
+GBX_REQUIRE_LIBS( build LIB ${lib_name} ${proj_libs} )
 
 if( build )
     

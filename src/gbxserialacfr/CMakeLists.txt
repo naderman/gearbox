@@ -7,7 +7,7 @@ GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported"
 
 set( dep_libs GbxLockFileAcfr )
 # this is currently internal, so we don't have to check it
-# GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${dep_libs} )
+# GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
 if( build )
 

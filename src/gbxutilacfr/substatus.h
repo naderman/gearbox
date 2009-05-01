@@ -16,13 +16,13 @@
 namespace gbxutilacfr {
 
 //!
-//! @brief Convenience class which represents the status of a subsystem.
+//! @brief Convenience class which maniupulates the status of a subsystem.
 //!
 //! @par Overview
 //!
 //! Provides a convenient interface for setting status information for one subsystem.
 //!
-//! @sa Status
+//! @sa Status, @sa SubHealth
 //!
 class SubStatus
 {
@@ -30,9 +30,9 @@ class SubStatus
 public:
     //! Sets a reference to the system Status and this subsystem's name.
     //! Adds this subsystem to the system.
-    SubStatus( Status& status, const std::string& subsystem, double maxHeartbeatIntervalSec=-1.0 ) :
+    SubStatus( Status& status, const std::string& subsysName, double maxHeartbeatIntervalSec=-1.0 ) :
         status_(status),
-        subsysName_(subsystem) 
+        subsysName_(subsysName) 
     {
         status_.addSubsystem( subsysName_, maxHeartbeatIntervalSec );
     };
@@ -43,23 +43,25 @@ public:
         status_.removeSubsystem( subsysName_ );
     }
 
+    //
+    // set expectations about ourselves
+    //
+
     //! Passes this information to the system Status.
     void setMaxHeartbeatInterval( double interval ) { status_.setMaxHeartbeatInterval( subsysName_, interval ); };
 
     //! Passes this information to the system Status.
     void setSubsystemType( SubsystemType type ) { status_.setSubsystemType( subsysName_, type ); };
 
+    //
+    // set health
+    //
+
     //! Passes this information to the system Status.
     void heartbeat() { status_.heartbeat( subsysName_ ); };
 
     //! Passes this information to the system Status.
-    void initialising( const std::string& message="" ) { status_.initialising( subsysName_, message ); };
-
-    //! Passes this information to the system Status.
-    void working( const std::string& message="" ) { status_.working( subsysName_, message ); };
-
-    //! Passes this information to the system Status.
-    void finalising( const std::string& message="" ) { status_.finalising( subsysName_, message ); };
+    void message( const std::string& message ) { status_.message( subsysName_, message ); };
 
     //! Passes this information to the system Status.
     void ok( const std::string& message="" ) { status_.ok( subsysName_, message ); };
@@ -70,11 +72,26 @@ public:
     //! Passes this information to the system Status.
     void fault( const std::string& message ) { status_.fault( subsysName_, message ); };
 
+    //
+    // Set state machine states
+    //
+
+    //! Passes this information to the system Status.
+    void initialising( const std::string& message="" ) { status_.initialising( subsysName_, message ); };
+
+    //! Passes this information to the system Status.
+    void working( const std::string& message="" ) { status_.working( subsysName_, message ); };
+
+    //! Passes this information to the system Status.
+    void finalising( const std::string& message="" ) { status_.finalising( subsysName_, message ); };
+
+
     //! Returns system Status object
     Status& status() { return status_; };
 
     //! Returns subsystem's name
     std::string name() const { return subsysName_; };
+
 private:
 
     Status& status_;

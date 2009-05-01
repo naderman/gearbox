@@ -7,7 +7,7 @@ set( build TRUE )
 
 # this was already tested in the dir above
 set( dep_libs GbxSerialAcfr GbxIceUtilAcfr )
-# GBX_REQUIRE_TARGETS( build LIB ${lib_name} ${proj_libs} )
+# GBX_REQUIRE_LIBS( build LIB ${lib_name} ${proj_libs} )
 
 if( build )
     

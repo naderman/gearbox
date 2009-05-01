@@ -43,8 +43,6 @@ std::string toString( SubsystemHealth health )
         return "Warning";
     case SubsystemFault :
         return "Fault";
-    case SubsystemStalled :
-        return "Stalled";
     default:
         assert( !"gbxutilacfr::toString(SubsystemHealth) should never get to default" );
     }

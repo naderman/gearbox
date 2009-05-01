@@ -1,8 +1,21 @@
 #include <iostream>
+#include <sstream>
 #include <gbxutilacfr/trivialtracer.h>
 #include <gbxsmartbatteryacfr/gbxsmartbatteryacfr.h>
 
 using namespace std;
+
+string toString( const vector<string> &stringList )
+{
+    stringstream ss;
+    for (unsigned int i=0; i<stringList.size(); ++i)
+    {
+        ss << stringList[i];
+    }
+    return ss.str();
+    
+}
+
 
 int main( int argc, char **argv )
 {
@@ -33,14 +46,39 @@ int main( int argc, char **argv )
     
     try 
     {
+        gbxsmartbatteryacfr::BatteryHealthWarningConfig config;
+        config.expectedNumBatteries = 2;
+        config.numCyclesThreshhold = 0; //300
+        config.chargeTempThreshhold = 10.0; // 54.0
+        config.dischargeTempThreshhold = 10.0; // 70.0
+        config.chargeWarnThreshhold = 60; // 10
+        config.chargeDeviationThreshold = 1; // 10
+        
         gbxsmartbatteryacfr::OceanServer oceanserver( port, tracer );
         
         while (true)    
-        {            
-            gbxsmartbatteryacfr::OceanServerSystem data = oceanserver.getData();
-            
+        {   
             cout << "TRACE(test): Reading record " << numRecords << endl;
-            numRecords++;
+            numRecords++;         
+            
+            gbxsmartbatteryacfr::OceanServerSystem data = oceanserver.getData();
+            vector<string> shortWarning;
+            vector<string> verboseWarning;
+            const bool printRawRecord = true;
+            bool haveWarnings = conductAllHealthChecks( data, config, shortWarning, verboseWarning, printRawRecord );
+            
+            if (haveWarnings)
+            {
+                cout << "Short warning messages: " << endl;
+                cout << toString(shortWarning) << endl << endl;
+                cout << "Verbose warning messages:" << endl;
+                cout << toString(verboseWarning) << endl;
+            }
+            else
+            {
+                cout << "All systems normal." << endl;
+            }
+            
         }
     }
     catch ( gbxsmartbatteryacfr::HardwareReadingException &e )

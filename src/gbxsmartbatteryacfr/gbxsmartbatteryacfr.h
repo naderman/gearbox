@@ -17,6 +17,7 @@
 #include <gbxsmartbatteryacfr/exceptions.h>
 #include <gbxsmartbatteryacfr/smartbattery.h>
 #include <gbxsmartbatteryacfr/smartbatteryparsing.h>
+#include <gbxsmartbatteryacfr/oceanserverhealthchecks.h>
 
 
 #endif

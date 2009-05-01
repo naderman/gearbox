@@ -95,7 +95,7 @@ public:
      *  Non-popping and non-blocking read from the front of the buffer.
      *
      *  Calls to @ref get() on an empty buffer raises an gbxutilacfr::Exception exception.
-     *  You can catch these and call @ref getNext() which will block until new data arrives.
+     *  You can catch these and call @ref getWithTimeout() which will block until new data arrives.
      */
     void  get( Type & obj ) const;
 
