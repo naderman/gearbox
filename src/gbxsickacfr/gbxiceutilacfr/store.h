@@ -98,11 +98,11 @@ private:
 
     bool isEmpty_;
     
-    // flag to keep track of new data. Make it mutable so that get() functions can be const.
-    mutable bool isNewData_;
+    // flag to keep track of new data.
+    bool isNewData_;
 
     // internal implementation of front( obj, -1 ); returns 0.
-    int  getNextNoWait( Type & obj ) const;
+    int  getNextNoWait( Type & obj );
 
 };
 
@@ -208,7 +208,7 @@ int Store<Type>::getNext( Type & obj, int timeoutMs )
 }
 
 template<class Type>
-int Store<Type>::getNextNoWait( Type & obj ) const
+int Store<Type>::getNextNoWait( Type & obj )
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
 
