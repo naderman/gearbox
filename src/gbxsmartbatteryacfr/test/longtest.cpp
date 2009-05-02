@@ -48,11 +48,11 @@ int main( int argc, char **argv )
     {
         gbxsmartbatteryacfr::BatteryHealthWarningConfig config;
         config.expectedNumBatteries = 2;
-        config.numCyclesThreshhold = 0; //300
-        config.chargeTempThreshhold = 10.0; // 54.0
-        config.dischargeTempThreshhold = 10.0; // 70.0
-        config.chargeWarnThreshhold = 60; // 10
-        config.chargeDeviationThreshold = 1; // 10
+        config.numCyclesThreshhold = 300;
+        config.chargeTempThreshhold = 54.0;
+        config.dischargeTempThreshhold = 70.0;
+        config.chargeWarnThreshhold = 10;
+        config.chargeDeviationThreshold = 10;
         
         gbxsmartbatteryacfr::OceanServer oceanserver( port, tracer );
         
