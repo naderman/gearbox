@@ -55,6 +55,7 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Thread class: now derives from gbxutilacfr::Stoppable. No changes in user code are requried. (alexm)
   - Function checkedSleep() is defined in terms of the new light interface class gbxutilacfr::Stoppable.
     No changes in user code are required. (alexm)
+  - Implemented store::peek() (AlexB)
 
 @section gbx_doc_history_902 Changes in Release 9.02
 
