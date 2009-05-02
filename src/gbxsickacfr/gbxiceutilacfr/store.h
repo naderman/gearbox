@@ -60,7 +60,7 @@ public:
     //! Returns the contents of the Store. This operation makes the data in the Store
     //! "not new", i.e. @ref isNewData returns FALSE. Calls to get() when the Store is empty
     //! raises an gbxutilacfr::Exception exception.
-    void get( Type & obj ) const;
+    void get( Type & obj );
 
     //! Returns the contents of the Store. This operation does not modify anything, i.e. the 
     //! contents of the store remain "new" (unlike get()). Calls to peek() when the Store is empty
@@ -76,7 +76,7 @@ public:
     and the object argument itself is not touched. In the rare event of spurious wakeup,
     the return value is 1.
      */
-    int  getNext( Type & obj, int timeoutMs=-1 ) const;
+    int  getNext( Type & obj, int timeoutMs=-1 );
     
     //! Makes the Store empty.
     //! @see isEmpty
@@ -136,7 +136,7 @@ bool Store<Type>::isNewData() const
 }
 
 template<class Type>
-void Store<Type>::get( Type & obj ) const
+void Store<Type>::get( Type & obj )
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
     if ( !isEmpty_ )
@@ -166,7 +166,7 @@ void Store<Type>::peek( Type & obj ) const
 }
 
 template<class Type>
-int Store<Type>::getNext( Type & obj, int timeoutMs ) const
+int Store<Type>::getNext( Type & obj, int timeoutMs )
 {
     // special case: infinite wait time
     if ( timeoutMs == -1 ) {
