@@ -62,6 +62,11 @@ public:
     //! raises an gbxutilacfr::Exception exception.
     void get( Type & obj ) const;
 
+    //! Returns the contents of the Store. This operation does not modify anything, i.e. the 
+    //! contents of the store remain "new" (unlike get()). Calls to peek() when the Store is empty
+    //! raises an gbxutilacfr::Exception exception.
+    void peek( Type & obj ) const;
+
     /*!
     @brief Waits until the next update and returns the new value.
     If the Store is empty, @ref getNext blocks until the Store is set and returns the new value.
@@ -138,6 +143,21 @@ void Store<Type>::get( Type & obj ) const
     {
         internalGet( obj );
         isNewData_ = false;
+    }
+    else
+    {
+        throw gbxutilacfr::Exception( ERROR_INFO, "trying to read from an empty Store." );
+    }
+}
+
+template<class Type>
+void Store<Type>::peek( Type & obj ) const
+{
+    IceUtil::Monitor<IceUtil::Mutex>::Lock lock(*this);
+    if ( !isEmpty_ )
+    {
+        internalGet( obj );
+        // do NOT set isNewData_ to false
     }
     else
     {
