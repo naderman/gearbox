@@ -1,7 +1,7 @@
 #
 # Test CMake version
 #
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.4 FATAL_ERROR )
 
 #
 # project name
