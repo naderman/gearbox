@@ -6,10 +6,12 @@ set( GEARBOX_FOUND 1 )
 
 # this is the installed location of <package>-config.cmake file
 get_filename_component( _found_dir "${CMAKE_CURRENT_LIST_FILE}" PATH )
+
+# load all exported Gearbox targets
 include( ${_found_dir}/gearbox-targets.cmake )
 
-# assume that <package>-config.cmake was installed into
-# <install-root>/lib/<package>/ 
+# assume that gearbox-config.cmake was installed into
+# <install-root>/lib/gearbox/ 
 set( _install_dir "${_found_dir}/../../" )
 
 get_filename_component( 
