@@ -217,6 +217,8 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
             set( ${cumulative_var} FALSE )
             # force ENABLE_* variables to off in ccmake UI if dependencies aren't met.
             GBX_UTIL_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
+            string( COMPARE EQUAL ${type} "EXE" is_exe )
+            string( COMPARE EQUAL ${type} "LIB" is_lib )
             if( is_exe )
                 GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
                 set( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
