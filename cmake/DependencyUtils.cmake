@@ -2,7 +2,8 @@
 # This is a utility macro for internal use.
 # If module_type is not equal "EXE" or "LIB", prints error message and quits.
 #
-macro( GBX_UTIL_CHECK_MODULE_TYPE type )
+# Have not tested this macro when the variables is_* are not same in the calling context.
+macro( GBX_UTIL_CHECK_MODULE_TYPE type is_exe is_lib )
 #     message( STATUS "GBX_UTIL_CHECK_MODULE_TYPE type=${type}" )
 
     string( COMPARE EQUAL ${type} "EXE" is_exe )
@@ -14,7 +15,7 @@ macro( GBX_UTIL_CHECK_MODULE_TYPE type )
         message( FATAL_ERROR "In GBX_REQUIRE_* macros, module_type must be either 'EXE' or 'LIB'" )
     endif( is_exe AND is_lib )
 
-endmacro( GBX_UTIL_CHECK_MODULE_TYPE type )
+endmacro( GBX_UTIL_CHECK_MODULE_TYPE type is_exe is_lib )
 
 #
 # This is a utility macro for internal use.
@@ -22,10 +23,8 @@ endmacro( GBX_UTIL_CHECK_MODULE_TYPE type )
 macro( GBX_UTIL_MAKE_OPTION_NAME option_name module_type module_name )
 #     message( STATUS "GBX_UTIL_MAKE_OPTION_NAME [ option_name=${option_name}, MOT_TYPE=${module_type}, MOD_NAME=${module_name} ]" )
 
-    GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} )
+    GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
 
-    string( COMPARE EQUAL ${module_type} "EXE" is_exe )
-    string( COMPARE EQUAL ${module_type} "LIB" is_lib )
     string( TOUPPER ${module_name} module_name_upper )
     # dereference the variable name once, so that we are setting the variable in the calling context!
     if( is_exe )
@@ -65,6 +64,8 @@ endmacro( GBX_UTIL_MAKE_OPTION_NAME option_name module_name )
 #
 macro( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
 
+    GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
+
     if( ${ARGC} GREATER 5 )
         set( option_name ${ARGV6} )
     else( ${ARGC} GREATER 5 )
@@ -102,7 +103,7 @@ macro( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_
         if( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${option_descr} )
         else( is_exe )
-            GBX_NOT_add_library( ${module_name} ${option_descr} )
+            GBX_NOT_ADD_LIBRARY( ${module_name} ${option_descr} )
         endif( is_exe )
     endif( ${cumulative_var} AND NOT ${option_name} )
 
@@ -122,7 +123,7 @@ macro( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
     # debug
 #     message( STATUS "GBX_REQUIRE_VAR [ CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, test_var=${${test_var}}, reason=${reason} ]" )
 
-    GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} )
+    GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
 
     # must dereference both var names once (!) and IF will evaluate their values
     if( ${cumulative_var} AND NOT ${test_var}  )
@@ -130,7 +131,7 @@ macro( GBX_REQUIRE_VAR cumulative_var module_type module_name test_var reason )
         if( is_exe )
             GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
         else( is_exe )
-            GBX_NOT_add_library( ${module_name} ${reason} )
+            GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
         endif( is_exe )
     endif( ${cumulative_var} AND NOT ${test_var} )
 
@@ -202,7 +203,7 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
 
     if( ${cumulative_var} )
 
-        GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} )
+        GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
     
         if( ${ARGC} GREATER 5 )
             set( reason ${ARGV6} )
@@ -217,13 +218,12 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
             set( ${cumulative_var} FALSE )
             # force ENABLE_* variables to off in ccmake UI if dependencies aren't met.
             GBX_UTIL_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
-            string( COMPARE EQUAL ${type} "EXE" is_exe )
-            string( COMPARE EQUAL ${type} "LIB" is_lib )
+
             if( is_exe )
                 GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
                 set( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
             else( is_exe )
-                GBX_NOT_add_library( ${module_name} ${reason} )
+                GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
                 set( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
             endif( is_exe )
         endif( NOT target_location )
@@ -276,7 +276,7 @@ endmacro( GBX_REQUIRE_LIBS cumulative_var module_type module_name )
 # 
 #     if( ${cumulative_var}  )
 # 
-#         GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} )
+#         GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
 #     
 #         if( ${ARGC} GREATER 5 )
 #             set( reason ${ARGV6} )
