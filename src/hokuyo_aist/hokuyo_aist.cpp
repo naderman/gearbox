@@ -970,7 +970,7 @@ unsigned int HokuyoLaser::OpenWithProbing (string portOptions)
 			// Failed at the default baud rate, so try again at the other rates
 			// Note that a baud rate of 750000 or 250000 doesn't appear to be supported on any common OS
 			const unsigned int bauds[] = {500000, 115200, 57600, 38400, 19200};
-			const unsigned int numBauds = 7;
+			const unsigned int numBauds = 5;
 			for (unsigned int ii = 0; ii < numBauds; ii++)
 			{
 				reinterpret_cast<SerialPort*> (_port)->SetBaudRate (bauds[ii]);
