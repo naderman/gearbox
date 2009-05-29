@@ -1,1 +1,1 @@
-install(FILES hokuyo_aist_example.py DESTINATION share/${PROJECT_NAME}/hokuyo_aist/example)
+GBX_ADD_SHARED_FILES(hokuyo_aist hokuyo_aist_example.py)

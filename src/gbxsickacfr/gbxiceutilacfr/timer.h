@@ -51,7 +51,7 @@ public:
     double elapsedSec() const;
 
 private:
-    IceUtil::Time time_;
+    IceUtil::Time startTime_;
 
 };
 

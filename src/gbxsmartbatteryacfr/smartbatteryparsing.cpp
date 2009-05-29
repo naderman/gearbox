@@ -47,6 +47,11 @@ int readUnsignedInt16( const string &str )
 {    
     if (str.size()!=4) 
         throw ParsingException( ERROR_INFO, "readUnsignedInt16 called with string size != 4" );
+    
+    // There's a known bug in the Oceanserver system which sometimes produces an FFFF record
+    // According to Kevin Ludlam (ludlam@ocean-server.com), "caused by a collision on the SMBus"
+    if (str=="FFFF")
+        throw ParsingException( ERROR_INFO, "Read FFFF as a value. May be caused by a collision on the SMBus" );
 
     return readUnsignedInt( str );
 }
@@ -55,6 +60,11 @@ int readUnsignedInt8( const string &str )
 {    
     if (str.size()!=2) 
         throw ParsingException( ERROR_INFO, "readUnsignedInt8 called with string size != 2" );
+    
+    // There's a known bug in the Oceanserver system which sometimes produces an FF record
+    // According to Kevin Ludlam (ludlam@ocean-server.com), "caused by a collision on the SMBus"
+    if (str=="FF")
+        throw ParsingException( ERROR_INFO, "Read FF as a value. May be caused by a collision on the SMBus" );
 
     return readUnsignedInt( str );
 }
@@ -63,6 +73,11 @@ int16_t readSignedInt16( const string &str )
 {
     if (str.size()!=4) 
         throw ParsingException( ERROR_INFO, "readSignedInt16 called with string size != 4" );
+    
+    // There's a known bug in the Oceanserver system which sometimes produces an FFFF record
+    // According to Kevin Ludlam (ludlam@ocean-server.com), "caused by a collision on the SMBus"
+    if (str=="FFFF")
+        throw ParsingException( ERROR_INFO, "Read FFFF as a value. May be caused by a collision on the SMBus" );
    
     stringstream ss(str);
     int value;

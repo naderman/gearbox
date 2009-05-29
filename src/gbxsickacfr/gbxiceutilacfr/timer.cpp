@@ -13,33 +13,33 @@
 namespace gbxiceutilacfr {
 
 Timer::Timer() :
-    time_( IceUtil::Time::now() )
+    startTime_( IceUtil::Time::now() )
 {
 }
 
 Timer::Timer( const IceUtil::Time& elapsedTime ) :
-    time_( IceUtil::Time::now()-elapsedTime )
+    startTime_( IceUtil::Time::now()-elapsedTime )
 {
 }
 
 void Timer::restart()
 {
-    time_ = IceUtil::Time::now();
+    startTime_ = IceUtil::Time::now();
 }
 
 IceUtil::Time Timer::elapsed() const
 {
-    return IceUtil::Time::now() - time_;
+    return IceUtil::Time::now() - startTime_;
 }
 
 double Timer::elapsedMs() const
 {
-    return ( (IceUtil::Time::now() - time_).toMilliSecondsDouble() );
+    return ( (IceUtil::Time::now() - startTime_).toMilliSecondsDouble() );
 }
 
 double Timer::elapsedSec() const
 {
-    return ( (IceUtil::Time::now() - time_).toSecondsDouble() );
+    return ( (IceUtil::Time::now() - startTime_).toSecondsDouble() );
 }
 
 } // namespace

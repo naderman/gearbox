@@ -41,9 +41,9 @@ int main( int argc, char **argv )
 
     gbxserialacfr::Serial serial( argv[1], atoi(argv[2]), gbxserialacfr::Serial::Timeout(1,0) );
 
-    const int NUM_CHARS = 1000;
+    const int NUM_TIMES = 10;
     std::vector<std::string> stringList = getStringList();
-    for ( int i=0; i < NUM_CHARS; i++ )
+    for ( int i=0; i < NUM_TIMES; i++ )
     {
         int stringI = i % (stringList.size());
         std::string sendString = stringList[stringI]+"\n";

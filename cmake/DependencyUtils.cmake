@@ -216,15 +216,14 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
         # must dereference both var and option names once (!) and IF will evaluate their values
         if( NOT target_location  )
             set( ${cumulative_var} FALSE )
-            # force ENABLE_* variables to off in ccmake UI if dependencies aren't met.
             GBX_UTIL_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
-
+            # alexm: disabling dependency caching
             if( is_exe )
                 GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
-                set( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
+#                set( ${option_name} OFF CACHE BOOL "Try to build ${module_name}" FORCE )
             else( is_exe )
-                GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
-                set( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
+                GBX_NOT_add_library( ${module_name} ${reason} )
+#                set( ${option_name} OFF CACHE BOOL "Try to build lib${module_name} library" FORCE )
             endif( is_exe )
         endif( NOT target_location )
 

@@ -99,9 +99,7 @@ bool checkNumCycles( const OceanServerSystem &batteryData,
     
         int numCycles = bat.cycleCount();
         
-        // There's a bug in the Oceanserver system which sometimes produces an FFFF record for this field.
-        // According to Kevin Ludlam (ludlam@ocean-server.com), "caused by a collision on the SMBus"
-        if ( (numCycles > numCyclesThreshhold) && (numCycles!=65535) )
+        if ( numCycles > numCyclesThreshhold )
         {
             haveWarning = true;
             stringstream ssWarnShort;
