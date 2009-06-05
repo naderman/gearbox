@@ -528,7 +528,7 @@ string HokuyoSensorInfo::AsString ()
 	ss << "Serial: " << serial << endl;
 	ss << "Model: " << model << endl;
 
-	ss << "Mininum range: " << minRange << "mm\tMaximum range: " << maxRange << "mm" << endl;
+	ss << "Minimum range: " << minRange << "mm\tMaximum range: " << maxRange << "mm" << endl;
 	ss << "Steps in 360 degrees: " << steps << "\tScanable steps: " << scanableSteps << endl;
 	ss << "First step: " << firstStep << "\tFront step: " << frontStep << "\tLast step: " <<
 		lastStep << endl;
