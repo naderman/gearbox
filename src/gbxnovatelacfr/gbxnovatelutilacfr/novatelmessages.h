@@ -9,6 +9,9 @@
  */
 #ifndef GBX_NOVATEL_MESSAGES_H
 #define GBX_NOVATEL_MESSAGES_H
+
+#include <stdint.h> // for uint8_t and friends
+
 namespace gbxnovatelutilacfr{
 enum BinaryLogType{
     RawImuSBLogType = 325,

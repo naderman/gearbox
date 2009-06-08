@@ -31,6 +31,7 @@
 #include <math.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdio.h>
 
 #include <sys/time.h>
 #include <time.h>

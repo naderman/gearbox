@@ -11,6 +11,8 @@
 #ifndef GBX_SMARTBATTERY_H
 #define GBX_SMARTBATTERY_H
 
+#include <stdint.h>
+
 #include <vector>
 #include <string>
 #include <assert.h>

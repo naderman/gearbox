@@ -11,6 +11,8 @@
 #ifndef GBX_SMARTBATTERY_PARSING_H
 #define GBX_SMARTBATTERY_PARSING_H
 
+#include <stdint.h>
+
 #include <vector>
 #include <map>
 

@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <sstream>
 #include <libgen.h>
+#include <stdio.h>
 
 using namespace std;
 

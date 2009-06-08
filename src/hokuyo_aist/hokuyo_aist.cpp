@@ -35,6 +35,7 @@ using namespace hokuyo_aist;
 #include <cstring>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 #include <math.h>
 #include <sstream>

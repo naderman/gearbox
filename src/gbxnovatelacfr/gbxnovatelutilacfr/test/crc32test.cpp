@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 #include <gbxnovatelacfr/gbxnovatelutilacfr/crc32.h>
 using namespace std;
 
