@@ -1,4 +1,5 @@
 set( lib_name GbxUtilAcfr )
+set( lib_version 1.0.0 )
 GBX_ADD_LICENSE( LGPL )
 
 set( build TRUE )
@@ -14,7 +15,7 @@ if( build )
     # for config.h
     include_directories( ${PROJECT_BINARY_DIR} )
 
-    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
 
     GBX_ADD_HEADERS( gbxutilacfr ${hdrs} )
 

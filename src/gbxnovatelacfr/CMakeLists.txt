@@ -1,4 +1,5 @@
 set( lib_name GbxNovatelAcfr )
+set( lib_version 1.0.0 )
 GBX_ADD_LICENSE( LGPL )
 
 set( build TRUE )
@@ -19,9 +20,9 @@ if( build )
     file( GLOB hdrs *.h )
     file( GLOB srcs *.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
     target_link_libraries( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "Drives NOVATEL hardware, directly connected to the computer." proj_libs dep_libs "" "" )
+    GBX_ADD_PKGCONFIG( ${lib_name} "Drives NOVATEL hardware, directly connected to the computer." proj_libs dep_libs "" "" ${lib_version} )
 
     GBX_ADD_HEADERS( gbxnovatelacfr ${hdrs} )
 

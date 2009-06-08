@@ -57,9 +57,12 @@ endmacro( GBX_ADD_EXECUTABLE name )
 # The second parameter specifies the library type to build: SHARED, STATIC, or DEFAULT.
 # If the default is used, the library type will depend on the gearbox-wide value as set
 # by the user (or SHARED if the user hasn't changed it from the original setting).
+# The soversion parameter sets the library's API version. This will typically be
+# distinct from the Gearbox distribution version, as each library will change its
+# API independently.
 # All extra parameters are passed to ADD_LIBRARY as source files.
 #
-macro( GBX_ADD_LIBRARY name type )
+macro( GBX_ADD_LIBRARY name type soversion )
     if( COMMAND cmake_policy )
         cmake_policy( SET CMP0003 NEW )
     endif( COMMAND cmake_policy )
@@ -73,7 +76,9 @@ macro( GBX_ADD_LIBRARY name type )
     endif( ${type} STREQUAL SHARED )
 
     add_library( ${name} ${libType} ${ARGN} )
-#     SET_TARGET_PROPERTIES( ${name} PROPERTIES
+    SET_TARGET_PROPERTIES( ${name} PROPERTIES
+        VERSION ${soversion}
+        SOVERSION ${soversion} )
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
     install( TARGETS ${name}
@@ -81,7 +86,7 @@ macro( GBX_ADD_LIBRARY name type )
              EXPORT ${PROJECT_NAME}-targets )
 
     set( templist ${LIB_LIST} )
-    list( APPEND templist ${name} )
+    list( APPEND templist ${name}-${soversion} )
     set( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
 
     if( libType STREQUAL SHARED )
@@ -89,7 +94,7 @@ macro( GBX_ADD_LIBRARY name type )
     else( libType STREQUAL SHARED )
         set( libTypeDesc "static" )
     endif( libType STREQUAL SHARED )
-    message( STATUS "Planning to build ${libTypeDesc} library:  ${name}" )
+    message( STATUS "Planning to build ${libTypeDesc} library:  ${name}-${soversion}" )
 endmacro( GBX_ADD_LIBRARY name )
 
 #
@@ -140,15 +145,17 @@ endmacro( GBX_ADD_EXAMPLE install_subdir makefile )
 # int_deps is a list containing all the internal libraries this library depends on (pass by reference).
 # cflags is appended to the "Cflags" value.
 # libflags is appended to the "Libs" value.
+# version is the soversion of the library.
 # that should be linked with at the same time as linking to this library.
 #
-macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags )
+macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags version )
     set( PKG_NAME ${name} )
     set( PKG_DESC ${desc} )
     set( PKG_CFLAGS ${cflags} )
     set( PKG_LIBFLAGS ${libflags} )
     set( PKG_EXTERNAL_DEPS ${${ext_deps}} )
     set( PKG_INTERNAL_DEPS "" )
+    set( PKG_VERSION ${version} )
     if( ${int_deps} )
         foreach( item ${${int_deps}} )
             set( PKG_INTERNAL_DEPS "${PKG_INTERNAL_DEPS} -l${item}" )

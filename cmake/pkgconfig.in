@@ -2,7 +2,7 @@
 
 Name: @PKG_NAME@
 Description: @PKG_DESC@
-Version: @GBX_PROJECT_VERSION@
+Version: @PKG_VERSION@
 Requires: @PKG_EXTERNAL_DEPS@
 Libs: -L@CMAKE_INSTALL_PREFIX@/lib/gearbox @PKG_LIBFLAGS@ -l@PKG_NAME@ @PKG_INTERNAL_DEPS@
 Cflags: -I@CMAKE_INSTALL_PREFIX@/include/gearbox @PKG_CFLAGS@

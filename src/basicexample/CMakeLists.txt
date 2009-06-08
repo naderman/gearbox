@@ -1,4 +1,5 @@
 set( lib_name basicexample )
+set( libVersion 1.0.0 )
 GBX_ADD_LICENSE( LGPL )
 
 set( build TRUE )
@@ -11,7 +12,7 @@ if( build )
     file( GLOB hdrs *.h )
     file( GLOB srcs *.cpp )
 
-    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${srcs} )
+    GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${libVersion} ${srcs} )
 
     GBX_ADD_HEADERS( basicexample ${hdrs} )
     # the custom command above is equivalent to this
