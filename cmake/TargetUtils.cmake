@@ -69,11 +69,14 @@ macro( GBX_ADD_LIBRARY name type soversion )
 
     if( ${type} STREQUAL SHARED )
         set( libType SHARED )
-    ELSEIF( ${type} STREQUAL STATIC )
+    elseif( ${type} STREQUAL STATIC )
         set( libType STATIC )
     else( ${type} STREQUAL SHARED )
         set( libType ${GBX_DEFAULT_LIB_TYPE} )
     endif( ${type} STREQUAL SHARED )
+
+#     message( STATUS "DEBUG: adding library '${name}' of type '${type}' (resolved to '${libType}') with version '${soversion}'" )
+#     message( STATUS "DEBUG: from source files: ${ARGN}" )
 
     add_library( ${name} ${libType} ${ARGN} )
     SET_TARGET_PROPERTIES( ${name} PROPERTIES
