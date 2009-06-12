@@ -27,7 +27,6 @@
 
 #include "flexiport.h"
 #include "udpport.h"
-#include "flexiport_config.h"
 
 #if defined (FLEXIPORT_HAVE_GETADDRINFO)
 	#include <sys/socket.h>
@@ -82,10 +81,31 @@ inline string StrError (int errNo)
 #endif
 }
 
+// Yay Beej's!
+inline void* GetInAddr (struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET)
+		return &(reinterpret_cast<struct sockaddr_in*>(sa)->sin_addr);
+	else
+		return &(reinterpret_cast<struct sockaddr_in6*>(sa)->sin6_addr);
+}
+
 #if defined (WIN32)
 	const int ERRNO_EAGAIN = WSAEWOULDBLOCK;
 #else
 	const int ERRNO_EAGAIN = EAGAIN;
+#endif
+
+#if defined (WIN32)
+	// Unfortunately, Windows has a fit if these are made class variables due to the inclusion
+	// of winsock2.h in udpport.h. No idea why, but it somehow drags in winsock.h, which really
+	// doesn't play nice with winsock2.h (despite guards that supposedly prevent it being included
+	// at the same time).
+	#if defined (FLEXIPORT_HAVE_GETADDRINFO)
+		struct sockaddr _destSockAddr;
+	#else
+		struct sockaddr_in _destSockAddr;
+	#endif
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,6 +192,12 @@ void UDPPort::Close ()
 ssize_t UDPPort::Read (void * const buffer, size_t count)
 {
 	ssize_t receivedBytes = 0;
+	struct sockaddr_storage from;
+#if defined (WIN32)
+	int fromLen = 0;
+#else
+	socklen_t fromLen = 0;
+#endif
 
 	CheckPort (true);
 
@@ -182,9 +208,11 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 	{
 		// Socket is blocking, so just read
 #if defined (WIN32)
-		receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+		receivedBytes = recvfrom (_recvSock, reinterpret_cast<char*> (buffer), count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #else
-		receivedBytes = recv (_recvSock, buffer, count, 0);
+		receivedBytes = recvfrom (_recvSock, buffer, count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #endif
 	}
 	else
@@ -192,9 +220,11 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 		// Socket is non-blocking, so try to read, see if we get any data (if there is none, this
 		// will return immediately, and is much faster than ioctl() and select() calls)
 #if defined (WIN32)
-		receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+		receivedBytes = recvfrom (_recvSock, reinterpret_cast<char*> (buffer), count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #else
-		receivedBytes = recv (_recvSock, buffer, count, 0);
+		receivedBytes = recvfrom (_recvSock, buffer, count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #endif
 		// Check if that call "timed out"
 		if (receivedBytes < 0 && ErrNo () == ERRNO_EAGAIN)
@@ -203,16 +233,31 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 			if (WaitForDataOrTimeout () == TIMED_OUT)
 				return -1;
 #if defined (WIN32)
-			receivedBytes = recv (_recvSock, reinterpret_cast<char*> (buffer), count, 0);
+			receivedBytes = recvfrom (_recvSock, reinterpret_cast<char*> (buffer), count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #else
-			receivedBytes = recv (_recvSock, buffer, count, 0);
+			receivedBytes = recvfrom (_recvSock, buffer, count, 0,
+									reinterpret_cast<struct sockaddr*> (&from), &fromLen);
 #endif
 		}
 		// If first call doesn't return a timeout, fall through to the result/error checking below
 	}
 
 	if (_debug >= 2)
-		cerr << "UDPPort::" << __func__ << "() Read " << receivedBytes << " bytes" << endl;
+	{
+#if defined (WIN32)
+		// This will probably go boom and print a weird source IP if IPv6 is used on Windows,
+		// but since there's no inet_ntop() on Windows, we have no choice but to use inet_ntoa().
+		cerr << "UDPPort::" << __func__ << "() Read " << receivedBytes << " bytes from " <<
+			inet_ntoa (reinterpret_cast<struct sockaddr_in*>(&from)->sin_addr) << endl;
+#else
+		char s[INET6_ADDRSTRLEN];
+		cerr << "UDPPort::" << __func__ << "() Read " << receivedBytes << " bytes from " <<
+			inet_ntop (from.ss_family, GetInAddr (reinterpret_cast<struct sockaddr*> (&from)),
+						s, sizeof (s))
+			<< endl;
+#endif
+	}
 
 	if (receivedBytes < 0)
 	{
@@ -261,11 +306,11 @@ ssize_t UDPPort::ReadFull (void * const buffer, size_t count)
 	while (receivedBytes < count)
 	{
 #if defined (WIN32)
-		numReceived = recv (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
-				count - receivedBytes, 0); // No MSG_WAITALL on older versions of visual c, it seems
+		numReceived = recvfrom (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
+				count - receivedBytes, 0, NULL, 0); // No MSG_WAITALL on older versions of visual c, it seems
 #else
-		numReceived = recv (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
-				count - receivedBytes, MSG_WAITALL);
+		numReceived = recvfrom (_recvSock, &(reinterpret_cast<char*> (buffer)[receivedBytes]),
+				count - receivedBytes, MSG_WAITALL, NULL, 0);
 #endif
 		if (_debug >= 2)
 			cerr << "UDPPort::" << __func__ << "() Received " << numReceived << " bytes" << endl;
@@ -491,9 +536,11 @@ ssize_t UDPPort::Write (const void * const buffer, size_t count)
 		}
 	}
 #if defined (WIN32)
-	if ((numSent = send (_sendSock, reinterpret_cast<const char*> (buffer), count, 0)) < 0)
+	if ((numSent = sendto (_sendSock, reinterpret_cast<const char*> (buffer), count, 0,
+							reinterpret_cast<struct sockaddr*> (&_destSockAddr), sizeof (_destSockAddr))) < 0)
 #else
-	if ((numSent = send (_sendSock, buffer, count, 0)) < 0)
+	if ((numSent = sendto (_sendSock, buffer, count, 0,
+							reinterpret_cast<struct sockaddr*> (&_destSockAddr), sizeof (_destSockAddr))) < 0)
 #endif
 	{
 		if (ErrNo () == ERRNO_EAGAIN)
@@ -533,9 +580,9 @@ void UDPPort::Flush ()
 #if defined (WIN32)
 		if (!IsDataAvailable ())
 			break;
-		numRead = recv (_sendSock, dump, 128, 0);
+		numRead = recvfrom (_sendSock, dump, 128, 0, NULL, 0);
 #else
-		numRead = recv (_sendSock, dump, 128, MSG_DONTWAIT);
+		numRead = recvfrom (_sendSock, dump, 128, MSG_DONTWAIT, NULL, 0);
 #endif
 		if (numRead < 0 && ErrNo () != ERRNO_EAGAIN)
 		{
@@ -553,7 +600,7 @@ void UDPPort::Drain ()
 {
 	// Since we can't force the write buffer to send, we can't do anything here.
 	if (_debug >= 1)
-		cerr << "UDPPort::" << __func__ << "() Can't drain output buffer of TCP port." << endl;
+		cerr << "UDPPort::" << __func__ << "() Can't drain output buffer of UDP port." << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,24 +736,18 @@ void UDPPort::OpenSender ()
 
 	if (_debug >= 1)
 	{
-		cerr << "UDPPort::" << __func__ << "() Connecting to " << _destIP << ":" << _destPort <<
-			"." << endl;
-	}
-	if (connect (_sendSock, res->ai_addr, res->ai_addrlen) < 0)
-	{
-		CloseSender ();
-		stringstream ss;
-		ss << "Failed to connect to " << _destIP << ": (" << ErrNo () << ") " << StrError (ErrNo ());
-		throw PortException (ss.str ());
+		cerr << "UDPPort::" << __func__ << "() Socket created, will send to " << _destIP << ":" <<
+			_destPort << "." << endl;
 	}
 
+	memcpy (&_destSockAddr, res, sizeof (*res));
 	freeaddrinfo (res);
 #else // defined (FLEXIPORT_HAVE_GETADDRINFO)
 	// Do it the ugly old way.
 	sockaddr_in sockAddr;
 	memset (&sockAddr, 0, sizeof (sockAddr));
 
-	_sendSock = socket (PF_INET, SOCK_DGRAM, 0);
+	_sendSock = socket (AF_UNSPEC, SOCK_DGRAM, IPPROTO_UDP);
 #if defined (WIN32)
 	if (_sendSock == INVALID_SOCKET)
 #else
@@ -730,14 +771,11 @@ void UDPPort::OpenSender ()
 	sockAddr.sin_port = htons (_destPort);
 
 	if (_debug >= 1)
-		cerr << "UDPPort::" << __func__ << "() Connecting to " << _destIP << ":" << _destPort << "." << endl;
-	if (connect (_sendSock, reinterpret_cast<struct sockaddr*> (&sockAddr), sizeof (sockAddr)) < 0)
 	{
-		CloseSender ();
-		stringstream ss;
-		ss << "Failed to connect to " << _destIP << ": (" << ErrNo () << ") " << StrError (ErrNo ());
-		throw PortException (ss.str ());
+		cerr << "UDPPort::" << __func__ << "() Socket created, will send to " << _destIP << ":" <<
+			_destPort << "." << endl;
 	}
+	memcpy (&_destSockAddr, &sockAddr, sizeof (sockAddr));
 #endif // defined (FLEXIPORT_HAVE_GETADDRINFO)
 }
 
@@ -834,7 +872,7 @@ void UDPPort::OpenReceiver ()
 	char hostName[HOST_NAME_MAX + 1] = {'\0'};
 	struct hostent *hp = NULL;
 
-	_recvSock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	_recvSock = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 #if defined (WIN32)
 	if (_recvSock == INVALID_SOCKET)
 #else
@@ -966,14 +1004,14 @@ bool UDPPort::IsDataAvailable ()
 	char buffer;
 	ssize_t receivedBytes = 0;
 #if defined (WIN32)
-	receivedBytes = recv (_recvSock, &buffer, 1, MSG_PEEK);
+	receivedBytes = recvfrom (_recvSock, &buffer, 1, MSG_PEEK, NULL, 0);
 #else
-	receivedBytes = recv (_recvSock, reinterpret_cast<void*> (&buffer), 1, MSG_PEEK);
+	receivedBytes = recvfrom (_recvSock, reinterpret_cast<void*> (&buffer), 1, MSG_PEEK, NULL, 0);
 #endif
 	if (receivedBytes > 0)
 	{
 		if (_debug >= 3)
-			cerr << "TCPPort::" << __func__ << "() Found data waiting." << endl;
+			cerr << "UDPPort::" << __func__ << "() Found data waiting." << endl;
 		return DATA_AVAILABLE;
 	}
 	else if (receivedBytes < 0)
@@ -982,7 +1020,7 @@ bool UDPPort::IsDataAvailable ()
 		{
 			// General error
 			stringstream ss;
-			ss << "TCPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -992,18 +1030,18 @@ bool UDPPort::IsDataAvailable ()
 	{
 		// Peer disconnected cleanly, do the same at this end
 		if (_debug >= 1)
-			cerr << "TCPPort::" << __func__ << "() Peer disconnected cleanly." << endl;
+			cerr << "UDPPort::" << __func__ << "() Peer disconnected cleanly." << endl;
 		Close ();
 		if (_alwaysOpen)
 		{
 			if (_debug >= 1)
-				cerr << "TCPPort::" << __func__ << "() Trying to reconnect." << endl;
+				cerr << "UDPPort::" << __func__ << "() Trying to reconnect." << endl;
 			Open ();
 		}
 		// Fall through to return no data
 	}
 	if (_debug >= 3)
-		cerr << "TCPPort::" << __func__ << "() Found no data waiting." << endl;
+		cerr << "UDPPort::" << __func__ << "() Found no data waiting." << endl;
 	return false;
 }
 

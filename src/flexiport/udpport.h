@@ -29,6 +29,7 @@
 #define __UDPPORT_H
 
 #include "port.h"
+#include "flexiport_config.h"
 
 #include <map>
 #include <string>
@@ -117,6 +118,13 @@ class FLEXIPORT_EXPORT UDPPort : public Port
 		bool IsOpen () const                        { return _open; }
 
 	private:
+#if !defined (WIN32)
+	#if defined (FLEXIPORT_HAVE_GETADDRINFO)
+		struct sockaddr _destSockAddr;
+	#else
+		struct sockaddr_in _destSockAddr;
+	#endif
+#endif // !defined (WIN32)
 		int _sendSock;      // Socket to send data from.
 		int _recvSock;      // Socket to receive data on.
 
