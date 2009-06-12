@@ -24,5 +24,8 @@ if( NOT GBX_OS_WIN )
 #
 #    add_definitions( "-Wall -Wconversion" )
 else( NOT GBX_OS_WIN )
-    add_definitions( "-Wall -D_CRT_SECURE_NO_DEPRECATE" )
+    # With Visual C++, -Wall causes the compiler to spew thousands upon
+    # thousands (I'm not kidding here) of warnings in the standard lib
+    # headers that are supplied with the compiler. Woo.
+    add_definitions( "-D_CRT_SECURE_NO_DEPRECATE" )
 endif( NOT GBX_OS_WIN )
