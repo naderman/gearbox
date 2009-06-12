@@ -33,6 +33,7 @@
 	#include <netdb.h>
 #endif
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sstream>

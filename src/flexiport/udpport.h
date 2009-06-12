@@ -33,6 +33,7 @@
 
 #include <map>
 #include <string>
+#include <netinet/in.h>
 
 /** @ingroup gbx_library_flexiport
 @{
