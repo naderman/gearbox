@@ -109,6 +109,19 @@ inline void* GetInAddr (struct sockaddr *sa)
 	#endif
 #endif
 
+void SetBroadcastFlag (int sock)
+{
+	int broadcastFlag = 1;
+	if (setsockopt (sock, SOL_SOCKET, SO_BROADCAST,
+					&broadcastFlag, sizeof (broadcastFlag)) < 0)
+	{
+		stringstream ss;
+		ss << __func__ << "() setsockopt() error: (" << ErrNo () << ") " <<
+			StrError (ErrNo ());
+		throw PortException (ss.str ());
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constructor/destructor
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,9 +208,9 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 	ssize_t receivedBytes = 0;
 	struct sockaddr_storage from;
 #if defined (WIN32)
-	int fromLen = 0;
+	int fromLen = sizeof (from);
 #else
-	socklen_t fromLen = 0;
+	socklen_t fromLen = sizeof (from);
 #endif
 
 	CheckPort (true);
@@ -268,7 +281,7 @@ ssize_t UDPPort::Read (void * const buffer, size_t count)
 		{
 			// General error
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() recvfrom() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -321,13 +334,13 @@ ssize_t UDPPort::ReadFull (void * const buffer, size_t count)
 			{
 				// Timed out (which probably shouldn't happen)
 				throw PortException (string ("UDPPort::") + __func__ +
-						string ("() recv() timed out, probably shouldn't happen."));
+						string ("() recvfrom() timed out, probably shouldn't happen."));
 			}
 			else
 			{
 				// General error
 				stringstream ss;
-				ss << "UDPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+				ss << "UDPPort::" << __func__ << "() recvfrom() error: (" << ErrNo () << ") " <<
 					StrError (ErrNo ());
 				throw PortException (ss.str ());
 			}
@@ -536,25 +549,28 @@ ssize_t UDPPort::Write (const void * const buffer, size_t count)
 			return -1;
 		}
 	}
+
 #if defined (WIN32)
 	if ((numSent = sendto (_sendSock, reinterpret_cast<const char*> (buffer), count, 0,
-							reinterpret_cast<struct sockaddr*> (&_destSockAddr), sizeof (_destSockAddr))) < 0)
+							reinterpret_cast<struct sockaddr*> (&_destSockAddr),
+							sizeof (_destSockAddr))) < 0)
 #else
 	if ((numSent = sendto (_sendSock, buffer, count, 0,
-							reinterpret_cast<struct sockaddr*> (&_destSockAddr), sizeof (_destSockAddr))) < 0)
+							reinterpret_cast<struct sockaddr*> (&_destSockAddr),
+							sizeof (_destSockAddr))) < 0)
 #endif
 	{
 		if (ErrNo () == ERRNO_EAGAIN)
 		{
 			if (_debug >= 2)
-				cerr << "UDPPort::" << __func__ << "() Timed out while in send()" << endl;
+				cerr << "UDPPort::" << __func__ << "() Timed out while in sendto()" << endl;
 			return -1; // Timed out
 		}
 		else
 		{
 			// General error
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() send() error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() sendto() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -588,7 +604,7 @@ void UDPPort::Flush ()
 		if (numRead < 0 && ErrNo () != ERRNO_EAGAIN)
 		{
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() recvfrom() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
@@ -698,7 +714,7 @@ void UDPPort::OpenSender ()
 
 	// If getaddrinfo() is available, much less stuff needs to be hard-coded or copied around.
 #if defined (FLEXIPORT_HAVE_GETADDRINFO)
-	struct addrinfo *res = NULL, hints;
+	struct addrinfo *res = NULL, *goodAI = NULL, hints;
 
 	memset (&hints, 0, sizeof (hints));
 	hints.ai_family = AF_UNSPEC;
@@ -722,18 +738,29 @@ void UDPPort::OpenSender ()
 		throw PortException (ss.str ());
 	}
 
-	_sendSock = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-#if defined (WIN32)
-	if (_sendSock == INVALID_SOCKET)
-#else
-	if (_sendSock < 0)
-#endif
+	stringstream ss;
+	ss << "UDPPort::" << __func__ << "() socket() errors on all interfaces:";
+	for (goodAI = res; goodAI != NULL; goodAI = goodAI->ai_next)
 	{
-		stringstream ss;
-		ss << "UDPPort::" << __func__ << "() socket() error: (" << ErrNo () << ") " <<
-			StrError (ErrNo ());
+		_sendSock = socket (goodAI->ai_family, goodAI->ai_socktype, goodAI->ai_protocol);
+#if defined (WIN32)
+		if (_sendSock == INVALID_SOCKET)
+#else
+		if (_sendSock < 0)
+#endif
+		{
+			ss << " (" << ErrNo () << ") " << StrError (ErrNo ()) << ";";
+		}
+		else
+			break;
+	}
+	if (goodAI == NULL)
+	{
+		freeaddrinfo (res);
 		throw PortException (ss.str ());
 	}
+
+	SetBroadcastFlag (_sendSock);
 
 	if (_debug >= 1)
 	{
@@ -741,7 +768,7 @@ void UDPPort::OpenSender ()
 			_destPort << "." << endl;
 	}
 
-	memcpy (&_destSockAddr, res, sizeof (*res));
+	memcpy (&_destSockAddr, goodAI->ai_addr, goodAI->ai_addrlen);
 	freeaddrinfo (res);
 #else // defined (FLEXIPORT_HAVE_GETADDRINFO)
 	// Do it the ugly old way.
@@ -760,6 +787,8 @@ void UDPPort::OpenSender ()
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+
+	SetBroadcastFlag (_sendSock);
 
 	struct hostent *hp = NULL;
 	if ((hp = gethostbyname (_destIP.c_str ())) == NULL)
@@ -804,7 +833,7 @@ void UDPPort::OpenReceiver ()
 	CloseReceiver ();    // To make sure
 
 #if defined (FLEXIPORT_HAVE_GETADDRINFO)
-	struct addrinfo *res = NULL, hints;
+	struct addrinfo *res = NULL, *goodAI = NULL, hints;
 	memset (&hints, 0, sizeof (hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -846,27 +875,38 @@ void UDPPort::OpenReceiver ()
 		}
 	}
 
-	_recvSock = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-#if defined (WIN32)
-	if (_recvSock == INVALID_SOCKET)
-#else
-	if (_recvSock < 0)
-#endif
+	stringstream ss;
+	ss << "UDPPort::" << __func__ << "() Errors on all interfaces:";
+	for (goodAI = res; goodAI != NULL; goodAI = goodAI->ai_next)
 	{
-		stringstream ss;
-		ss << "UDPPort::" << __func__ << "() socket() error: (" << ErrNo () << ") " <<
-			StrError (ErrNo ());
+		_recvSock = socket (goodAI->ai_family, goodAI->ai_socktype, goodAI->ai_protocol);
+#if defined (WIN32)
+		if (_sendSock == INVALID_SOCKET)
+#else
+		if (_sendSock < 0)
+#endif
+		{
+			ss << "socket(): (" << ErrNo () << ") " << StrError (ErrNo ()) << ";";
+			continue;
+		}
+
+		if (bind (_recvSock, goodAI->ai_addr, goodAI->ai_addrlen) < 0)
+		{
+			CloseReceiver ();
+			stringstream ss;
+			ss << "bind(): (" << ErrNo () << ") " << StrError (ErrNo ()) << ";";
+			continue;
+		}
+
+		break;
+	}
+	if (goodAI == NULL)
+	{
+		freeaddrinfo (res);
 		throw PortException (ss.str ());
 	}
 
-	if (bind (_recvSock, res->ai_addr, res->ai_addrlen) < 0)
-	{
-		CloseReceiver ();
-		stringstream ss;
-		ss << "UDPPort::" << __func__ << "() bind() error: (" << ErrNo () << ") " <<
-			StrError (ErrNo ());
-		throw PortException (ss.str ());
-	}
+	SetBroadcastFlag (_recvSock);
 
 	freeaddrinfo (res);
 #else // defined (FLEXIPORT_HAVE_GETADDRINFO)
@@ -928,6 +968,8 @@ void UDPPort::OpenReceiver ()
 			StrError (ErrNo ());
 		throw PortException (ss.str ());
 	}
+
+	SetBroadcastFlag (_recvSock);
 #endif // defined (FLEXIPORT_HAVE_GETADDRINFO)
 
 	if (_debug >= 1)
@@ -1021,7 +1063,7 @@ bool UDPPort::IsDataAvailable ()
 		{
 			// General error
 			stringstream ss;
-			ss << "UDPPort::" << __func__ << "() recv() error: (" << ErrNo () << ") " <<
+			ss << "UDPPort::" << __func__ << "() recvfrom() error: (" << ErrNo () << ") " <<
 				StrError (ErrNo ());
 			throw PortException (ss.str ());
 		}
