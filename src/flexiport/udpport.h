@@ -33,7 +33,9 @@
 
 #include <map>
 #include <string>
-#include <netinet/in.h>
+#if !defined (WIN32)
+	#include <netinet/in.h>
+#endif
 
 /** @ingroup gbx_library_flexiport
 @{

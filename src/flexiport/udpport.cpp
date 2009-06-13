@@ -33,7 +33,6 @@
 	#include <netdb.h>
 #endif
 #include <sys/types.h>
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sstream>
@@ -50,6 +49,7 @@ using namespace std;
 	#include <sys/socket.h>
 	#include <sys/ioctl.h>
 	#include <netdb.h>
+	#include <arpa/inet.h>
 #endif
 
 #if !defined (HOST_NAME_MAX)
@@ -113,7 +113,11 @@ void SetBroadcastFlag (int sock)
 {
 	int broadcastFlag = 1;
 	if (setsockopt (sock, SOL_SOCKET, SO_BROADCAST,
+#if defined (WIN32)
+					reinterpret_cast<const char*> (&broadcastFlag), sizeof (broadcastFlag)) < 0)
+#else
 					&broadcastFlag, sizeof (broadcastFlag)) < 0)
+#endif
 	{
 		stringstream ss;
 		ss << __func__ << "() setsockopt() error: (" << ErrNo () << ") " <<
