@@ -31,31 +31,51 @@ TrivialTracer::print( const std::string &message )
 }
 
 void
-TrivialTracer::info( const std::string &message, int level, bool localOnly )
+TrivialTracer::info( const std::string &subsystem, const std::string &message, int level, bool localOnly )
 {
     if ( traceLevels_[InfoTrace] >= level )
-        cout << "info: " << message << endl;
+    {
+        cout << "info: ";
+        if ( subsystem != "" )
+            cout << subsystem << ": ";
+        cout << message << endl;
+    }
 }
 
 void
-TrivialTracer::warning( const std::string &message, int level, bool localOnly )
+TrivialTracer::warning( const std::string &subsystem, const std::string &message, int level, bool localOnly )
 {
     if ( traceLevels_[WarningTrace] >= level )
-        cout << "warn: " << message << endl;
+    {
+        cout << "warn: ";
+        if ( subsystem != "" )
+            cout << subsystem << ": ";
+        cout << message << endl;
+    }
 }
     
 void
-TrivialTracer::error( const std::string &message, int level, bool localOnly )
+TrivialTracer::error( const std::string &subsystem, const std::string &message, int level, bool localOnly )
 {
     if ( traceLevels_[ErrorTrace] >= level )
-        cout << "error: " << message << endl;
+    {
+        cout << "error: ";
+        if ( subsystem != "" )
+            cout << subsystem << ": ";
+        cout << message << endl;
+    }
 }
 
 void
-TrivialTracer::debug( const std::string &message, int level, bool localOnly )
+TrivialTracer::debug( const std::string &subsystem, const std::string &message, int level, bool localOnly )
 {
     if ( traceLevels_[DebugTrace] >= level )
-        cout << "debug: " << message << endl;
+    {
+        cout << "debug: ";
+        if ( subsystem != "" )
+            cout << subsystem << ": ";
+        cout << message << endl;
+    }
 }
 
 int 

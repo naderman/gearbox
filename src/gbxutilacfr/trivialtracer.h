@@ -33,11 +33,20 @@ public:
                    int error=9 );
 
     virtual void print( const std::string &message );
-    virtual void info( const std::string &message, int level=1, bool localOnly=false );
-    virtual void warning( const std::string &message, int level=1, bool localOnly=false );
-    virtual void error( const std::string &message, int level=1, bool localOnly=false );
-    virtual void debug( const std::string &message, int level=1, bool localOnly=false );
+    virtual void info( const std::string &message, int level=1, bool localOnly=false )
+        { info("",message,level,localOnly); }
+    virtual void warning( const std::string &message, int level=1, bool localOnly=false )
+        { warning("",message,level,localOnly); }
+    virtual void error( const std::string &message, int level=1, bool localOnly=false )
+        { error("",message,level,localOnly); }
+    virtual void debug( const std::string &message, int level=1, bool localOnly=false )
+        { debug("",message,level,localOnly); }
     virtual int verbosity( TraceType traceType, DestinationType destType=ToAny ) const;
+
+    virtual void info( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false );
+    virtual void warning( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false );
+    virtual void error( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false );
+    virtual void debug( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false );
 
 private:
 

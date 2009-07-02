@@ -49,8 +49,8 @@ int main( int argc, char **argv )
         gbxsmartbatteryacfr::BatteryHealthWarningConfig config;
         config.expectedNumBatteries = 2;
         config.numCyclesThreshhold = 300;
-        config.chargeTempThreshhold = 54.0;
-        config.dischargeTempThreshhold = 70.0;
+        config.chargeTempThreshhold = 40.0;
+        config.dischargeTempThreshhold = 45.0;
         config.chargeWarnThreshhold = 10;
         config.chargeDeviationThreshold = 10;
         

@@ -11,6 +11,7 @@
 #define SICK_ACFR_DRIVER_SICKDEFINES_H
 
 #include <string>
+#include <stdint.h>
 
 namespace gbxsickacfr {
 

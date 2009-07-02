@@ -13,13 +13,15 @@
 #include "oceanserver.h"
 
 namespace gbxsmartbatteryacfr {
-    
-static const int MAX_EXCEPTIONS_ROW = 10;
+
+static const int MAX_EXCEPTIONS_BEFORE_RESET = 10;
+static const int MAX_EXCEPTIONS_BEFORE_CRITICAL = 20;
 
 OceanServer::OceanServer( const std::string   &port, 
                           gbxutilacfr::Tracer &tracer)
     : tracer_(tracer),
-      exceptionCounter_(0)
+      exceptionCounter_(0),
+      exceptionString_("")
 {
     reader_.reset(new gbxsmartbatteryacfr::OceanServerReader( port, tracer_ ));
 }
@@ -27,14 +29,16 @@ OceanServer::OceanServer( const std::string   &port,
 const gbxsmartbatteryacfr::OceanServerSystem&
 OceanServer::getData()
 {
+    gbxsmartbatteryacfr::OceanServerSystem data;
+
     try
     {
         // read new data, this may throw
-        gbxsmartbatteryacfr::OceanServerSystem data;
         reader_->read(data);
         
-        // if successful, reset counter
+        // if successful, reset counter and string
         exceptionCounter_ = 0;
+        exceptionString_ = "";
         
         // update internal (full) record
         gbxsmartbatteryacfr::updateWithNewData( data, data_ );
@@ -48,11 +52,28 @@ OceanServer::getData()
         tracer_.debug( ss.str(), 3 );
         
         exceptionCounter_++;
-        if (exceptionCounter_ >= MAX_EXCEPTIONS_ROW) 
+        stringstream ssEx;
+        ssEx << e.what() << endl;
+        for (unsigned int i=0; i<data.rawRecord.size(); i++)
+            ssEx << data.rawRecord[i] << endl;
+        ssEx << endl;
+        exceptionString_ = exceptionString_ + ssEx.str();
+
+        if (exceptionCounter_ >= MAX_EXCEPTIONS_BEFORE_RESET)
+        {
+            stringstream ss;
+            ss << "OceanServer: " << __func__ << ": Caught " << MAX_EXCEPTIONS_BEFORE_RESET
+               << " ParsingExceptions in a row. Resetting the reader now...";
+            tracer_.warning( ss.str() );
+            reader_->reset();
+        }
+        
+        if (exceptionCounter_ >= MAX_EXCEPTIONS_BEFORE_CRITICAL) 
         {
             ss.str(""); 
-            ss << "OceanServer: " << __func__ << ": Caught " << MAX_EXCEPTIONS_ROW 
-               << " ParsingExceptions in a row. Something must be wrong";
+            ss << "OceanServer: " << __func__ << ": Caught " << MAX_EXCEPTIONS_BEFORE_CRITICAL 
+               << " ParsingExceptions in a row. Something must be wrong. Here's the history: " << endl
+               << exceptionString_;
             throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
         }
     }

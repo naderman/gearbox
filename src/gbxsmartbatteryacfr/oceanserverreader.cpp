@@ -64,13 +64,25 @@ OceanServerReader::OceanServerReader( const string        &serialPort,
       tracer_(tracer),
       parser_(tracer),
       firstTime_(true)
-{   
+{
     checkConnection();
+    reset();
+}
 
-    // send the command to start reading data
+void
+OceanServerReader::reset()
+{
     serial_.flush();
-    const char startReading = 'X';
-    serial_.write(&startReading, 1);
+
+    // send the command to get into menu mode
+    const char menuMode = ' ';
+    serial_.write(&menuMode, 1);
+
+    // send the command to start sending hex data
+    const char startSendingHex = 'X';
+    serial_.write(&startSendingHex, 1);
+
+    firstTime_ = true;
 }
 
 void

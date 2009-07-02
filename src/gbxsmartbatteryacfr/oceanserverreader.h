@@ -41,6 +41,12 @@ public:
     //! May throw HardwareReadingExceptions and ParsingExceptions
     void read( OceanServerSystem &system );
 
+    //! Resets the reader:
+    //!  - tells the OceanServer system to spit out hex data
+    //!  - tries to find the beginning of a new record
+    void reset();
+    
+
 private:   
     
     gbxserialacfr::Serial serial_;

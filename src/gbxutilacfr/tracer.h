@@ -118,22 +118,34 @@ public:
     //! Routing is determined by InfoToXxx parameter.
     //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
     //! is caused by network errors).
-    virtual void info( const std::string &message, int level=1, bool localOnly=false ) = 0;
+    virtual void info( const std::string &message, int level=1, bool localOnly=false )
+        { info("",message,level,localOnly); }
+    //! This version gives the Tracer some hints about a specific subsytem which generated the message
+    virtual void info( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false ) = 0;
     
     //! Routing is determined by WarningToXxx parameter.
     //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
     //! is caused by network errors).
-    virtual void warning( const std::string &message, int level=1, bool localOnly=false ) = 0;
+    virtual void warning( const std::string &message, int level=1, bool localOnly=false )
+        { warning("",message,level,localOnly); }
+    //! This version gives the Tracer some hints about a specific subsytem which generated the message
+    virtual void warning( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false ) = 0;
     
     //! Routing is determined by ErrorToXxx parameter.
     //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
     //! is caused by network errors).
-    virtual void error( const std::string &message, int level=1, bool localOnly=false ) = 0;
+    virtual void error( const std::string &message, int level=1, bool localOnly=false )
+        { error("",message,level,localOnly); }
+    //! This version gives the Tracer some hints about a specific subsytem which generated the message
+    virtual void error( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false ) = 0;
 
     //! Routing is determined by DebugToXxx parameter.
     //! If localOnly is set to TRUE, messages are not sent over the network (useful when traces
     //! is caused by network errors).
-    virtual void debug( const std::string &message, int level=1, bool localOnly=false ) = 0;
+    virtual void debug( const std::string &message, int level=1, bool localOnly=false )
+        { debug("",message,level,localOnly); }
+    //! This version gives the Tracer some hints about a specific subsytem which generated the message
+    virtual void debug( const std::string &subsystem, const std::string &message, int level=1, bool localOnly=false ) = 0;
 
     //! Returns the verbosity level for traceType to destType. This test is performed 
     //! internally by all tracing functions, e.g. error(). You may want to call this 
@@ -144,12 +156,12 @@ public:
 
     //! @b EXPERIMENTAL. Sets debug level for an individual subsystem.
     //! Only debug-to-display is supported.
-    virtual void setLevel( const std::string &subsystem, int level=0 ) {};
+    virtual void setSubsystemDebugLevel( const std::string &subsystem, int level=0 ) {};
 
     //! @b EXPERIMENTAL. Debug tracing for an individual subsystem.
     //! Only debug-to-display is supported.
     //! The maximum traceable level is set per-subsystem with setLevel().
-    virtual void debug( const std::string &subsystem, const std::string &message, int level=1 ) 
+    virtual void subsystemDebug( const std::string &subsystem, const std::string &message, int level=1 ) 
     {
         debug( message, level );
     };

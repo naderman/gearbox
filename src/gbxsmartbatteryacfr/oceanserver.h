@@ -47,6 +47,7 @@ private:
     auto_ptr<gbxsmartbatteryacfr::OceanServerReader> reader_;
     
     int exceptionCounter_;
+    std::string exceptionString_;
     
 };
 
