@@ -45,6 +45,7 @@ Note: The documentation on this web page matches the latest release. A web page 
 
 @section gbx_doc_index_news News
 
+- 10-Jul-09 Release 9.07. Several bug fixes in the libraries, and the new ability for the flexiport library's UDP port type to handle broadcast data. (@ref gbx_doc_history_907)
 - 18-Feb-09 Release 9.02. One new driver and a few updates in other libraries. (@ref gbx_doc_history_902)
 - 25-Jul-08 Release 8.07. Includes 5 new libraries and a re-write of the Hokuyo driver. (@ref gbx_doc_history_807)
 - 21-Apr-08 First release, version 1.0 (@ref gbx_doc_history_100)

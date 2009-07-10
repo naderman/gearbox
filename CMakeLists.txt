@@ -12,7 +12,7 @@ project( gearbox )
 # project version
 #
 set( GBX_PROJECT_VERSION_MAJOR "9" )
-set( GBX_PROJECT_VERSION_MINOR "02" )
+set( GBX_PROJECT_VERSION_MINOR "07" )
 set( GBX_PROJECT_VERSION_PATCH "+" )
 
 set( GBX_PROJECT_VERSION 

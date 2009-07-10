@@ -57,6 +57,35 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
     No changes in user code are required. (alexm)
   - Implemented store::peek() (AlexB)
 
+@section gbx_doc_history_907 Changes in Release 9.07
+
+@par Updated libraries
+
+- libflexiport
+  - The UDP port type now properly supports sending and receiving broadcast packets on all operating systems.
+    (GeoffB)
+
+- libGbxSmartBatteryAcfr
+  - Now produces a pkg-config file.
+
+- libGbxSickAcfr
+  - Added a peek function.
+
+- libhokuyo_aist
+  - New known-to-work models. The full list is now: URG-04LX, UBG-04LX, UHG-08LX and UTM-30LX. As usual, other
+    models that conform to the protocol should also work. (GeoffB)
+  - Improvements to the SCIP protocol version checks, giving faster and more reliable startups. (GeoffB)
+  - Implemented a workaround for a bug in the UTM-30LX firmware. (GeoffB)
+  - Better baud rate support.
+
+@par Project-wide updates
+
+- New versioning scheme for libraries. Each individual library has its own so version, which can be incremented
+  independently of other libraries at the project as a whole. This allows users to check the API version of the
+  library they are interested in, improving dependency checks for users of Gearbox.
+- Monolithic builds are now possible.
+- Compiles with GCC 4.4.
+
 @section gbx_doc_history_902 Changes in Release 9.02
 
 @par New libraries
