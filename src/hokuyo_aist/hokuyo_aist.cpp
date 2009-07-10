@@ -1808,7 +1808,7 @@ int HokuyoLaser::ReadLine (char *buffer, int expectedLength)
 // Empty lines (i.e. a line that is just the line feed, as at the end of the message) will result in
 // a return value of zero and no checksum check will be performed. Otherwise the number of actual
 // data bytes (i.e. excluding the checksum and semicolon) will be returned.
-// BIG NOTE: The URG-30LX has a probable bug in its response to the II code whereby it does not
+// BIG NOTE: The UTM-30LX has a probable bug in its response to the II code whereby it does not
 // include anything after and including "<-" in the checksum calculation. A workaround is enabled
 // in this function when _sensorIsUTM30LX is true. In this case, if the checksum fails normally, it
 // scans the line for "<-" and recalculates the checksum on the bytes up to that point. This only
