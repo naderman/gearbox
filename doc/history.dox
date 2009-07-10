@@ -27,6 +27,41 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par Project wide
 
+@par New libraries
+
+@par Updated libraries
+
+@section gbx_doc_history_907 Changes in Release 9.07
+
+@par Updated libraries
+
+- libflexiport
+  - The UDP port type now properly supports sending and receiving broadcast packets on all operating systems.
+    (GeoffB)
+
+- libGbxIceUtilAcfr:
+  - Changed names in buffer.h to make it more intuitive, fixed comments (AlexB).
+  - Timer class: added constructor with non-zero elapsed time (alexm)
+  - Thread class: now derives from gbxutilacfr::Stoppable. No changes in user code are requried. (alexm)
+  - Function checkedSleep() is defined in terms of the new light interface class gbxutilacfr::Stoppable.
+    No changes in user code are required. (alexm)
+  - Implemented store::peek() (AlexB)
+
+- libGbxUtilAcfr:
+  - Status class: removed SubsystemStalled from the list of health types for a subsystem. The stall condition
+    now needs to be defined as part of the state of the monitor. (alexm)
+  - Added SubHealth class: a delegator which has access to health function of one subsystem. (alexm)
+  - Added Stoppable class: a light interface class representing stoppable activities. (alexm)
+
+- libhokuyo_aist
+  - New known-to-work models. The full list is now: URG-04LX, UBG-04LX, UHG-08LX and UTM-30LX. As usual, other
+    models that conform to the protocol should also work. (GeoffB)
+  - Improvements to the SCIP protocol version checks, giving faster and more reliable startups. (GeoffB)
+  - Implemented a workaround for a bug in the UTM-30LX firmware. (GeoffB)
+  - Better baud rate support. (GeoffB)
+
+@par Project Wide
+
 - Build system
   - Added a hook in the CMake setup to allow building Gearbox as part of a bigger "super-project". Default behavior is not modified. (tobie,alexm)
   - Changed format style of CMake files. Standard functions are low-case. Custom macros are upper case. "Local" variables are low-case. "Global"
@@ -38,53 +73,9 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
     - GBX_INSTALL_SHARED_FILES
     - GBX_INSTALL_EXAMPLES
     - GBX_INSTALL_PKGCONFIGS
-
-@par New libraries
-
-@par Updated libraries
-
-- libGbxUtilAcfr:
-  - Status class: removed SubsystemStalled from the list of health types for a subsystem. The stall condition
-    now needs to be defined as part of the state of the monitor. (alexm)
-  - Added SubHealth class: a delegator which has access to health function of one subsystem. (alexm)
-  - Added Stoppable class: a light interface class representing stoppable activities. (alexm)
-
-- libGbxIceUtilAcfr:
-  - Changed names in buffer.h to make it more intuitive, fixed comments (AlexB).
-  - Timer class: added constructor with non-zero elapsed time (alexm)
-  - Thread class: now derives from gbxutilacfr::Stoppable. No changes in user code are requried. (alexm)
-  - Function checkedSleep() is defined in terms of the new light interface class gbxutilacfr::Stoppable.
-    No changes in user code are required. (alexm)
-  - Implemented store::peek() (AlexB)
-
-@section gbx_doc_history_907 Changes in Release 9.07
-
-@par Updated libraries
-
-- libflexiport
-  - The UDP port type now properly supports sending and receiving broadcast packets on all operating systems.
-    (GeoffB)
-
-- libGbxSmartBatteryAcfr
-  - Now produces a pkg-config file.
-
-- libGbxSickAcfr
-  - Added a peek function.
-
-- libhokuyo_aist
-  - New known-to-work models. The full list is now: URG-04LX, UBG-04LX, UHG-08LX and UTM-30LX. As usual, other
-    models that conform to the protocol should also work. (GeoffB)
-  - Improvements to the SCIP protocol version checks, giving faster and more reliable startups. (GeoffB)
-  - Implemented a workaround for a bug in the UTM-30LX firmware. (GeoffB)
-  - Better baud rate support.
-
-@par Project-wide updates
-
-- New versioning scheme for libraries. Each individual library has its own so version, which can be incremented
-  independently of other libraries at the project as a whole. This allows users to check the API version of the
-  library they are interested in, improving dependency checks for users of Gearbox.
-- Monolithic builds are now possible.
-- Compiles with GCC 4.4.
+  - New versioning scheme for libraries. Each individual library has its own so version, which can be incremented
+    independently of other libraries at the project as a whole. This allows users to check the API version of the
+    library they are interested in, improving dependency checks for users of Gearbox.
 
 @section gbx_doc_history_902 Changes in Release 9.02
 
