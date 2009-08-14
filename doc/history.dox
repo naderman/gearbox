@@ -31,6 +31,10 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par Updated libraries
 
+- libGbxNovatelAcfr:
+  - Bugfix: matched GPS status/solution enums to Novatel's internal types, there were gaps due to reserved values before.
+  Note: this will create mismatches with old log-files (not data, status/solution-type only)! (MichaelM, patch by Ian Mahon)
+
 @section gbx_doc_history_907 Changes in Release 9.07
 
 @par Updated libraries
