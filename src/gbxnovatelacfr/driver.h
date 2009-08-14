@@ -52,7 +52,7 @@ public:
     //! - offset has size 3
     bool isValid() const;
     //! Dumps the config in human readable form
-    std::string toString();
+    std::string toString() const;
 
     std::string serialDevice_;
     int baudRate_;
@@ -73,7 +73,7 @@ public:
     //! - a non-empty device name
     //! - baud rate is supported by device (9600, 19200, 38400, 115200, 230400)
     bool isValid() const;
-    std::string toString();
+    std::string toString() const;
 
     std::string serialDevice_;
     int baudRate_;
@@ -108,7 +108,7 @@ public:
     //! - not const, since it has limited self-fixing capabilities (for incorrect message-rates)
     bool isValid();
     //! Dumps the config in human readable form
-    std::string toString();
+    std::string toString() const;
 
     //!@name Serial settings
     //
@@ -196,68 +196,96 @@ enum StatusMessageType {
     Fault        //!< Problem, probably fatal
 };
 
+//! Convert a StatusMessageType into a string
+std::string toString( StatusMessageType type );
+
+
 //! Novatel's different solution status types.
 //
 //! Explanations from the manual.
 enum GpsSolutionStatusType{
-    SolComputed,       //!< Solution computed
-    InsufficientObs,   //!< Insufficient observations
-    NoConvergence,     //!< No convergence
-    Singularity,       //!< Singularity at parameters matrix
-    CovTrace,          //!< Covariance trace exceeds maximum (trace > 1000 m)
-    TestDist,          //!< Test distance exceeded (maximum of 3 rejections if distance > 10 km)
-    ColdStart,         //!< Not yet converged from cold start
-    VHLimit,           //!< Height or velocity limits exceeded (in accordance with COCOM export licensing restrictions)
-    Variance,          //!< Variance exceeds limits
-    Residuals,         //!< Residuals are too large
-    DeltaPos,          //!< Delta position is too large
-    NegativeVar,       //!< Negative variance
-    IntegrityWarning,  //!< Large residuals make position unreliable
-    InsInactive,       //!< INS has not started yet
-    InsAligning,       //!< INS doing its coarse alignment
-    InsBad,            //!< INS position is bad
-    ImuUnplugged,      //!< No IMU detected
-    Pending,           //!< When a FIX POSITION command is entered, the receiver computes its own position and determines if the fixed position is valid
-    InvalidFix,        //!< The fixed position, entered using the FIX POSITION command, is not valid
-    ReservedGpsSolutionStatusType,
+    SolComputed=0,                      //!< Solution computed
+    InsufficientObs=1,                  //!< Insufficient observations
+    NoConvergence=2,                    //!< No convergence
+    Singularity=3,                      //!< Singularity at parameters matrix
+    CovTrace=4,                         //!< Covariance trace exceeds maximum (trace > 1000 m)
+    TestDist=5,                         //!< Test distance exceeded (maximum of 3 rejections if distance > 10 km)
+    ColdStart=6,                        //!< Not yet converged from cold start
+    VHLimit=7,                          //!< Height or velocity limits exceeded (in accordance with COCOM export licensing restrictions)
+    Variance=8,                         //!< Variance exceeds limits
+    Residuals=9,                        //!< Residuals are too large
+    DeltaPos=10,                        //!< Delta position is too large
+    NegativeVar=11,                     //!< Negative variance
+    ReservedGpsSolutionStatusType12=12, //!< Value Reserved for future use
+    IntegrityWarning=13,                //!< Large residuals make position unreliable
+    InsInactive=14,                     //!< INS has not started yet
+    InsAligning=15,                     //!< INS doing its coarse alignment
+    InsBad=16,                          //!< INS position is bad
+    ImuUnplugged=17,                    //!< No IMU detected
+    Pending=18,                         //!< When a FIX POSITION command is entered, the receiver computes its own position and determines if the fixed position is valid
+    InvalidFix=19,                      //!< The fixed position, entered using the FIX POSITION command, is not valid
     UnknownGpsSolutionStatusType
 };
+
+//! Convert a GpsSolutionStatusType into a string
+std::string toString( GpsSolutionStatusType type );
 
 //! Novatel's different fix types.
 //
 //! Sadly mixed for position/velocity with some INS gear thrown in; explanations from the manual.
 enum GpsPosVelType{
-    None,             //!< No solution
-    FixedPos,         //!< Position has been fixed by the FIX POSITION command or by position averaging
-    FixedHeight,      //!< Position has been fixed by the FIX HEIGHT, or FIX AUTO, command or by position averaging
-    FloatConv,        //!< Solution from floating point carrier phase ambiguities
-    WideLane,         //!< Solution from wide-lane ambiguities
-    NarrowLane,       //!< Solution from narrow-lane ambiguities
-    DopplerVelocity,  //!< Velocity computed using instantaneous Doppler
-    Single,           //!< Single point position
-    PsrDiff,          //!< Pseudorange differential solution
-    Waas,             //!< Solution calculated using corrections from an SBAS
-    Propagated,       //!< Propagated by a Kalman filter without new observations
-    Omnistar,         //!< OmniSTAR VBS position (L1 sub-meter) a
-    L1Float,          //!< Floating L1 ambiguity solution
-    IonoFreeFloat,    //!< Floating ionospheric-free ambiguity solution
-    NarrowFloat,      //!< Floating narrow-lane ambiguity solution
-    L1Int,            //!< Integer L1 ambiguity solution
-    WideInt,          //!< Integer wide-lane ambiguity solution
-    NarrowInt,        //!< Integer narrow-lane ambiguity solution
-    RtkDirectIns,     //!< RTK status where the RTK filter is directly initialized from the INS filter. b
-    Ins,              //!< INS calculated position corrected for the antenna b
-    InsPsrSp,         //!< INS pseudorange single point solution - no DGPS corrections b
-    InsPsrDiff,       //!< INS pseudorange differential solution b
-    InsRtkFloat,      //!< INS RTK floating point ambiguities solution b
-    InsRtkFixed,      //!< INS RTK fixed ambiguities solution b
-    OmniStarHp,       //!< OmniSTAR high precision a
-    OmniStarXp,       //!< OmniSTAR extra precision a
-    CdGps,            //!< Position solution using CDGPS corrections
-    ReservedGpsPosVelType,
+    None=0,                     //!< No solution
+    FixedPos=1,                 //!< Position has been fixed by the FIX POSITION command or by position averaging
+    FixedHeight=2,              //!< Position has been fixed by the FIX HEIGHT, or FIX AUTO, command or by position averaging
+    ReservedGpsPosVelType3=3,   //!< Value Reserved for future use
+    FloatConv=4,                //!< Solution from floating point carrier phase ambiguities
+    WideLane=5,                 //!< Solution from wide-lane ambiguities
+    NarrowLane=6,               //!< Solution from narrow-lane ambiguities
+    ReservedGpsPosVelType7=7,   //!< Value Reserved for future use
+    DopplerVelocity=8,          //!< Velocity computed using instantaneous Doppler
+    ReservedGpsPosVelType9=9,   //!< Value Reserved for future use
+    ReservedGpsPosVelType10=10, //!< Value Reserved for future use
+    ReservedGpsPosVelType11=11, //!< Value Reserved for future use
+    ReservedGpsPosVelType12=12, //!< Value Reserved for future use
+    ReservedGpsPosVelType13=13, //!< Value Reserved for future use
+    ReservedGpsPosVelType14=14, //!< Value Reserved for future use
+    ReservedGpsPosVelType15=15, //!< Value Reserved for future use
+    Single=16,                  //!< Single point position
+    PsrDiff=17,                 //!< Pseudorange differential solution
+    Waas=18,                    //!< Solution calculated using corrections from an SBAS
+    Propagated=19,              //!< Propagated by a Kalman filter without new observations
+    Omnistar=20,                //!< OmniSTAR VBS position (L1 sub-meter) a
+    ReservedGpsPosVelType21=21, //!< Value Reserved for future use
+    ReservedGpsPosVelType22=22, //!< Value Reserved for future use
+    ReservedGpsPosVelType23=23, //!< Value Reserved for future use
+    ReservedGpsPosVelType24=24, //!< Value Reserved for future use
+    ReservedGpsPosVelType25=25, //!< Value Reserved for future use
+    ReservedGpsPosVelType26=26, //!< Value Reserved for future use
+    ReservedGpsPosVelType27=27, //!< Value Reserved for future use
+    ReservedGpsPosVelType28=28, //!< Value Reserved for future use
+    ReservedGpsPosVelType29=29, //!< Value Reserved for future use
+    ReservedGpsPosVelType30=30, //!< Value Reserved for future use
+    ReservedGpsPosVelType31=31, //!< Value Reserved for future use
+    L1Float=32,                 //!< Floating L1 ambiguity solution
+    IonoFreeFloat=33,           //!< Floating ionospheric-free ambiguity solution
+    NarrowFloat=34,             //!< Floating narrow-lane ambiguity solution
+    L1Int=48,                   //!< Integer L1 ambiguity solution
+    WideInt=49,                 //!< Integer wide-lane ambiguity solution
+    NarrowInt=50,               //!< Integer narrow-lane ambiguity solution
+    RtkDirectIns=51,            //!< RTK status where the RTK filter is directly initialized from the INS filter. b
+    Ins=52,                     //!< INS calculated position corrected for the antenna b
+    InsPsrSp=53,                //!< INS pseudorange single point solution - no DGPS corrections b
+    InsPsrDiff=54,              //!< INS pseudorange differential solution b
+    InsRtkFloat=55,             //!< INS RTK floating point ambiguities solution b
+    InsRtkFixed=56,             //!< INS RTK fixed ambiguities solution b
+    OmniStarHp=64,              //!< OmniSTAR high precision a
+    OmniStarXp=65,              //!< OmniSTAR extra precision a
+    CdGps=66,                   //!< Position solution using CDGPS corrections
     UnknownGpsPosVelType
 };
 
+//! Convert a GpsPosVelType into a string
+std::string toString( GpsPosVelType type );
 
 //! possible types GenericData can contain
 enum DataType {
@@ -276,7 +304,7 @@ class GenericData {
     public:
         virtual ~GenericData(){};
         virtual DataType type() const=0;
-        virtual std::string toString()=0;
+        virtual std::string toString() const=0;
     private:
 };
 
@@ -286,7 +314,7 @@ class InsPvaData : public GenericData {
         DataType type() const {
             return InsPva;
         }
-        std::string toString();
+        std::string toString() const;
         int      gpsWeekNr;         //!< number of full weeks since midnight 05/Jan/1980 (UTC)
         double   secIntoWeek;       //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         double   latitude;          //!< [deg] north positive WGS84
@@ -326,7 +354,7 @@ class BestGpsPosData : public GenericData {
         DataType type() const {
             return BestGpsPos;
         }
-        std::string toString();
+        std::string toString() const;
         int gpsWeekNr;                          //!< number of full weeks since midnight 05/Jan/1980 (UTC)
         unsigned int msIntoWeek;                //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         GpsSolutionStatusType  solutionStatus;  //
@@ -360,7 +388,7 @@ class BestGpsVelData : public GenericData {
         DataType type() const {
             return BestGpsVel;
         }
-        std::string toString();
+        std::string toString() const;
         int          gpsWeekNr;                 //!< number of full weeks since midnight 05/Jan/1980 (UTC)
         unsigned int msIntoWeek;                //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         GpsSolutionStatusType  solutionStatus;  //
@@ -384,7 +412,7 @@ class RawImuData : public GenericData {
         DataType type() const {
             return RawImu;
         }
-        std::string toString();
+        std::string toString() const;
         int    gpsWeekNr;   //!< number of full weeks since midnight 05/Jan/1980 (UTC)
         double secIntoWeek; //!< yields GPS-time (together with @ref gpsWeekNr); continous (contrary to UTC which uses leapseconds)
         //!@name Change in speed

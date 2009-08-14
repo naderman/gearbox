@@ -89,7 +89,7 @@ namespace {
 
     // helper functions for the toString() gear
     std::string statusToString(gna::StatusMessageType statusMessageType, std::string statusMessage);
-    std::string doubleVectorToString(vector<double > &vec, std::string seperator = std::string(" "));
+    std::string doubleVectorToString(const vector<double > &vec, const std::string seperator = std::string(" "));
 }
 
 namespace gbxnovatelacfr
@@ -741,7 +741,7 @@ Config::isValid() {
 }
 
 std::string
-Config::toString(){
+Config::toString() const{
     std::stringstream ss;
     ss << "serialDevice_: " << serialDevice_ << " ";
     ss << "baudRate_: " << baudRate_ << " ";
@@ -787,7 +787,7 @@ SimpleConfig::isValid() const {
 }
 
 std::string
-SimpleConfig::toString(){
+SimpleConfig::toString() const{
     std::stringstream ss;
     ss << "serialDevice_: " << serialDevice_ << " ";
     ss << "baudRate_: " << baudRate_ << " ";
@@ -808,7 +808,7 @@ GpsOnlyConfig::isValid() const {
 }
 
 std::string
-GpsOnlyConfig::toString(){
+GpsOnlyConfig::toString() const{
     std::stringstream ss;
     ss << "serialDevice_: " << serialDevice_ << " ";
     ss << "baudRate_: " << baudRate_;
@@ -816,7 +816,7 @@ GpsOnlyConfig::toString(){
 }
 
 std::string
-InsPvaData::toString(){
+InsPvaData::toString() const{
     std::stringstream ss;
     ss << "InsPvaData ";
     ss << "timeStampSec " << timeStampSec << " ";
@@ -837,7 +837,7 @@ InsPvaData::toString(){
 };
 
 std::string
-BestGpsPosData::toString(){
+BestGpsPosData::toString() const{
     std::stringstream ss;
     ss << "BestGpsPosData ";
     ss << "timeStampSec " << timeStampSec << " ";
@@ -871,7 +871,7 @@ BestGpsPosData::toString(){
 };
 
 std::string
-BestGpsVelData::toString(){
+BestGpsVelData::toString() const{
     std::stringstream ss;
     ss << "BestGpsVelData ";
     ss << "timeStampSec " << timeStampSec << " ";
@@ -890,7 +890,7 @@ BestGpsVelData::toString(){
 };
 
 std::string
-RawImuData::toString(){
+RawImuData::toString() const{
     std::stringstream ss;
     ss << "RawImuData ";
     ss << "timeStampSec " << timeStampSec << " ";
@@ -906,6 +906,100 @@ RawImuData::toString(){
     ss << statusToString(statusMessageType, statusMessage);
     return ss.str();
 };
+
+std::string 
+toString( StatusMessageType type ){
+    switch( type )
+    {
+        case NoMsg       : return "None";
+        case Initialising: return "Initialising";
+        case Ok          : return "Ok";
+        case Warning     : return "Warning";
+        case Fault       : return "Fault";
+        default: return "Unknown";
+    }
+}
+
+std::string 
+toString( GpsSolutionStatusType type ){
+    switch( type ){
+        case SolComputed                    : return "SolComputed";
+        case InsufficientObs                : return "InsufficientObs";
+        case NoConvergence                  : return "NoConvergence";
+        case Singularity                    : return "Singularity";
+        case CovTrace                       : return "CovTrace";
+        case TestDist                       : return "TestDist";
+        case ColdStart                      : return "ColdStart";
+        case VHLimit                        : return "VHLimit";
+        case Variance                       : return "Variance";
+        case Residuals                      : return "Residuals";
+        case DeltaPos                       : return "DeltaPos";
+        case NegativeVar                    : return "NegativeVar";
+        case ReservedGpsSolutionStatusType12: return "Reserved";
+        case IntegrityWarning               : return "IntegrityWarning";
+        case InsInactive                    : return "InsInactive";
+        case InsAligning                    : return "InsAligning";
+        case InsBad                         : return "InsBad";
+        case ImuUnplugged                   : return "ImuUnplugged";
+        case Pending                        : return "Pending";
+        case InvalidFix                     : return "InvalidFix";
+        default: return "Unknown";
+    }
+}
+
+std::string 
+toString( GpsPosVelType type ){
+    switch( type ){
+        case None                   : return "None";
+        case FixedPos               : return "FixedPos";
+        case FixedHeight            : return "FixedHeight";
+        case ReservedGpsPosVelType3 : return "Reserved";
+        case FloatConv              : return "FloatConv";
+        case WideLane               : return "WideLane";
+        case NarrowLane             : return "NarrowLane";
+        case ReservedGpsPosVelType7 : return "Reserved";
+        case DopplerVelocity        : return "DopplerVelocity";
+        case ReservedGpsPosVelType9 : return "Reserved";
+        case ReservedGpsPosVelType10: return "Reserved";
+        case ReservedGpsPosVelType11: return "Reserved";
+        case ReservedGpsPosVelType12: return "Reserved";
+        case ReservedGpsPosVelType13: return "Reserved";
+        case ReservedGpsPosVelType14: return "Reserved";
+        case ReservedGpsPosVelType15: return "Reserved";
+        case Single                 : return "Single";
+        case PsrDiff                : return "PsrDiff";
+        case Waas                   : return "Waas";
+        case Propagated             : return "Propagated";
+        case Omnistar               : return "Omnistar";
+        case ReservedGpsPosVelType21: return "Reserved";
+        case ReservedGpsPosVelType22: return "Reserved";
+        case ReservedGpsPosVelType23: return "Reserved";
+        case ReservedGpsPosVelType24: return "Reserved";
+        case ReservedGpsPosVelType25: return "Reserved";
+        case ReservedGpsPosVelType26: return "Reserved";
+        case ReservedGpsPosVelType27: return "Reserved";
+        case ReservedGpsPosVelType28: return "Reserved";
+        case ReservedGpsPosVelType29: return "Reserved";
+        case ReservedGpsPosVelType30: return "Reserved";
+        case ReservedGpsPosVelType31: return "Reserved";
+        case L1Float                : return "L1Float";
+        case IonoFreeFloat          : return "IonoFreeFloat";
+        case NarrowFloat            : return "NarrowFloat";
+        case L1Int                  : return "L1Int";
+        case WideInt                : return "WideInt";
+        case NarrowInt              : return "NarrowInt";
+        case RtkDirectIns           : return "RtkDirectIns";
+        case Ins                    : return "Ins";
+        case InsPsrSp               : return "InsPsrSp";
+        case InsPsrDiff             : return "InsPsrDiff";
+        case InsRtkFloat            : return "InsRtkFloat";
+        case InsRtkFixed            : return "InsRtkFixed";
+        case OmniStarHp             : return "OmniStarHp";
+        case OmniStarXp             : return "OmniStarXp";
+        case CdGps                  : return "CdGps";
+        default: return "Unknown";
+    }
+}
 
 } //namespace
 
@@ -1285,77 +1379,23 @@ namespace{
     }
 
     enum gna::GpsSolutionStatusType externalGpsSolutionStatus(uint32_t novatelGpsSolutionStatus){
-        enum gna::GpsSolutionStatusType external;
-        switch(novatelGpsSolutionStatus){
-            case 0: external = gna::SolComputed; break;
-            case 1: external = gna::InsufficientObs; break;
-            case 2: external = gna::NoConvergence; break;
-            case 3: external = gna::Singularity; break;
-            case 4: external = gna::CovTrace; break;
-            case 5: external = gna::TestDist; break;
-            case 6: external = gna::ColdStart; break;
-            case 7: external = gna::VHLimit; break;
-            case 8: external = gna::Variance; break;
-            case 9: external = gna::Residuals; break;
-            case 10: external = gna::DeltaPos; break;
-            case 11: external = gna::NegativeVar; break;
-            case 13: external = gna::IntegrityWarning; break;
-            case 14: external = gna::InsInactive; break;
-            case 15: external = gna::InsAligning; break;
-            case 16: external = gna::InsBad; break;
-            case 17: external = gna::ImuUnplugged; break;
-            case 18: external = gna::Pending; break;
-            case 19: external = gna::InvalidFix; break;
-
-            case 12: external = gna::ReservedGpsSolutionStatusType; break;
-            default: external = gna::UnknownGpsSolutionStatusType; break;
-        }
-        return external;
+        if( novatelGpsSolutionStatus>=0 && novatelGpsSolutionStatus<=19  )
+           return static_cast<gna::GpsSolutionStatusType>(novatelGpsSolutionStatus);
+        else
+           return gna::UnknownGpsSolutionStatusType;
     }
 
     enum gna::GpsPosVelType externalGpsPosVelType(uint32_t novatelGpsPosVelType){
-        enum gna::GpsPosVelType external;
-        switch(novatelGpsPosVelType){
-            case 0: external = gna::None; break;
-            case 1: external = gna::FixedPos; break;
-            case 2: external = gna::FixedHeight; break;
-            case 4: external = gna::FloatConv; break;
-            case 5: external = gna::WideLane; break;
-            case 6: external = gna::NarrowLane; break;
-            case 8: external = gna::DopplerVelocity; break;
-            case 16: external = gna::Single; break;
-            case 17: external = gna::PsrDiff; break;
-            case 18: external = gna::Waas; break;
-            case 19: external = gna::Propagated; break;
-            case 20: external = gna::Omnistar; break;
-            case 32: external = gna::L1Float; break;
-            case 33: external = gna::IonoFreeFloat; break;
-            case 34: external = gna::NarrowFloat; break;
-            case 48: external = gna::L1Int; break;
-            case 49: external = gna::WideInt; break;
-            case 50: external = gna::NarrowInt; break;
-            case 51: external = gna::RtkDirectIns; break;
-            case 52: external = gna::Ins; break;
-            case 53: external = gna::InsPsrSp; break;
-            case 54: external = gna::InsPsrDiff; break;
-            case 55: external = gna::InsRtkFloat; break;
-            case 56: external = gna::InsRtkFixed; break;
-            case 64: external = gna::OmniStarHp; break;
-            case 65: external = gna::OmniStarXp; break;
-            case 66: external = gna::CdGps; break;
-
-            case 3: //fallthrough
-            case 7: //fallthrough
-            case 9: case 10: case 11: case 12: case 13: case 14: case 15: //fallthrough
-            case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:  case 30: case 31: //fallthrough
-            // these guys are _not_ named as reserved in the manual case 34: case 35: case 36: case 37: case 38: case 38:  case 39: case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47:
-                     external = gna::ReservedGpsPosVelType; break;
-            default: external = gna::UnknownGpsPosVelType; break;
-        }
-        return external;
+        // There are unused values between (and including) 35 to 47 and 57 to 63
+        if( (novatelGpsPosVelType>=0  && novatelGpsPosVelType<=34 ) ||
+            (novatelGpsPosVelType>=48 && novatelGpsPosVelType<=56 ) ||
+            (novatelGpsPosVelType>=64 && novatelGpsPosVelType<=66 ) )
+           return static_cast<gna::GpsPosVelType>(novatelGpsPosVelType);
+        else
+           return gna::UnknownGpsPosVelType;
     }
 
-    std::string doubleVectorToString(vector<double > &vec, std::string seperator){
+    std::string doubleVectorToString(const vector<double > &vec, const std::string seperator){
         std::stringstream ss;
         int max = vec.size();
         ss << "[";

@@ -19,7 +19,7 @@
 NovatelSPAN is a proprietary Novatel navigation system.
 It minimally consists out of a Novatel OEMV GPS receiver (OEM4 receivers should be compatible).
 If combined with an IMU, a SPAN system can provide an INS navigation solution at high rate (up to 100Hz).
-The driver initialises the hardware and reports navigation data continuously.
+The driver initializes the hardware and reports navigation data continuously.
 
 
 for a full list of functions see @ref gbxnovatelacfr
@@ -176,6 +176,17 @@ this might change in the future, particularly if there is user-demand)
     use the receiver's 'freset' command to bring it back to factory-defaults.  The driver itself does not do this,
     on the grounds that it also might delete settings that were made persistent with good reason and purpose.
     If you are sharing equipment, check with everybody involved, before you use this approach.
+
+@par History
+
+- August 2009: Bugfix (patch by Ian Mahon), driver's GPS status/solution-type enums matched to Novatel's.
+Note: This will create mismatches with old log-files (not data, status/solution-type only)!
+- January 2009: Accepted into distribution after second hardware review.
+- January 2009: Second hardware review, @ref gbxnovatelacfr_hw_reviews_alen
+- August 2008: First hardware review, @ref gbxnovatelacfr_hw_reviews_michael
+- July/August 2008: Code reviews by AlexB and GeoffB (see developer mailing-list archives)
+- June 2008: Started moving functionality from Orca/Hydro's insgps component to gearbox.
+
 */
 
 /*!
