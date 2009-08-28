@@ -235,9 +235,9 @@ class HOKUYO_AIST_EXPORT HokuyoData
 
 		/// This constructor creates an empty HokuyoData with no data currently allocated.
 		HokuyoData ();
-		/// This constructor performs a deep copy of range data.
+		/// This constructor performs a deep copy of existing range data.
 		HokuyoData (uint32_t *ranges, unsigned int length, bool error, unsigned int time);
-		/// This constructor performs a deep copy of range and intensity data.
+		/// This constructor performs a deep copy of existing range and intensity data.
 		HokuyoData (uint32_t *ranges, uint32_t *intensities, unsigned int length,
 					bool error, unsigned int time);
 		/// This copy constructor performs a deep copy of present data.
