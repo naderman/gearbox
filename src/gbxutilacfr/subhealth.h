@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_SUBSYSTEM_HEALTH_H
 #define GBXUTILACFR_SUBSYSTEM_HEALTH_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 #include <gbxutilacfr/status.h>
 
 namespace gbxutilacfr {
@@ -24,7 +36,7 @@ namespace gbxutilacfr {
 //!
 //! @sa Status, SubsystemStatus
 //!
-class SubHealth
+class GBXUTILACFR_STATUS SubHealth
 {
 
 public:

@@ -17,6 +17,18 @@
 #ifndef GBXUTILACFR_MATH_DEFINITIONS_H
 #define GBXUTILACFR_MATH_DEFINITIONS_H	
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 #include <assert.h>
 
 /*****************************************************************************
@@ -66,7 +78,7 @@
 //dox Normalises the angle [rad] to the range [-pi,pi)
 //dox Don't return the normalised angle, because it's easy to make the
 //dox mistake of doing: 'NORMALISE_ANGLE( myAngle )', ignoring the return value.
-inline void NORMALISE_ANGLE( double &theta )
+GBXUTILACFR_EXPORT inline void NORMALISE_ANGLE( double &theta )
 {
     double multiplier;
 
@@ -84,7 +96,7 @@ inline void NORMALISE_ANGLE( double &theta )
 //dox Normalises the angle [rad] to the range [-pi,pi)
 //dox Don't return the normalised angle, because it's easy to make the
 //dox mistake of doing: 'NORMALISE_ANGLE( myAngle )', ignoring the return value.
-inline void NORMALISE_ANGLE( float &theta )
+GBXUTILACFR_EXPORT inline void NORMALISE_ANGLE( float &theta )
 {
     double thDouble = theta;
     NORMALISE_ANGLE( thDouble );
@@ -169,7 +181,7 @@ inline void NORMALISE_ANGLE( float &theta )
 //dox Modifies x to lie within [x_min,x_max]
 //dox
 template<typename T>
-void
+GBXUTILACFR_EXPORT void
 CLIP_TO_LIMITS( const T &min_x, T &x, const T &max_x )
 {
     assert( min_x <= max_x );

@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_STOPPABLE_H
 #define GBXUTILACFR_STOPPABLE_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 namespace gbxutilacfr {
 
 /*!
@@ -45,7 +57,7 @@ public:
 
 @author Alex Makarenko
 */
-class Stoppable
+class GBXUTILACFR_EXPORT Stoppable
 {
 public:
     virtual ~Stoppable() {};

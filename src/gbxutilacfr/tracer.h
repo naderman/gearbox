@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_TRACER_H
 #define GBXUTILACFR_TRACER_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 #include <string>
 
 namespace gbxutilacfr {
@@ -33,7 +45,7 @@ enum TraceType {
 };
 
 //! Returns a string corresponding to the enum element.
-std::string toString( TraceType type );
+GBXUTILACFR_EXPORT std::string toString( TraceType type );
 
 //! Types of destinations for traced information.
 enum DestinationType {
@@ -96,7 +108,7 @@ enum DestinationType {
 //! 
 //! @see Status
 //!
-class Tracer
+class GBXUTILACFR_EXPORT Tracer
 {
 public:
     virtual ~Tracer() {}; 

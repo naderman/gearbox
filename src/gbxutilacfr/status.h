@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_STATUS_H
 #define GBXUTILACFR_STATUS_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 #include <string>
 #include <vector>
 
@@ -32,7 +44,7 @@ enum SubsystemState
 };
 
 //! Returns string equivalent of state enumerator.
-std::string toString( SubsystemState state );
+GBXUTILACFR_EXPORT std::string toString( SubsystemState state );
 
 //! Possible subsystem status values
 enum SubsystemHealth
@@ -46,10 +58,10 @@ enum SubsystemHealth
 };
 
 //! Returns string equivalent of health enumerator.
-std::string toString( SubsystemHealth health );
+GBXUTILACFR_EXPORT std::string toString( SubsystemHealth health );
 
 //! Status for a single subsystem
-struct SubsystemStatus
+struct GBXUTILACFR_EXPORT SubsystemStatus
 {
     //! Constructor.
     SubsystemStatus( SubsystemState s=SubsystemIdle, SubsystemHealth h=SubsystemOk, const std::string& msg="", 
@@ -80,7 +92,7 @@ struct SubsystemStatus
 };
 
 //! Returns human-readable string with subsystem status information.
-std::string toString( const SubsystemStatus& status );
+GBXUTILACFR_EXPORT std::string toString( const SubsystemStatus& status );
 
 //! Subsystem type which describes common behavior models of a subsystem.
 enum SubsystemType {
@@ -91,7 +103,7 @@ enum SubsystemType {
 };
 
 //! Returns string equivalent of subsystem type enumerator.
-std::string toString( SubsystemType type );
+GBXUTILACFR_EXPORT std::string toString( SubsystemType type );
 
 /*!
 @brief Local interface to component status.
@@ -173,7 +185,7 @@ Shutdown
 @sa Tracer
 @sa SubStatus
 */
-class Status
+class GBXUTILACFR_EXPORT Status
 {
 
 public:

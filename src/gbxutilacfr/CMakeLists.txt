@@ -6,7 +6,14 @@ set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
 
 if( build )
-    
+    if (WIN32)
+        if (GBX_DEFAULT_LIB_TYPE STREQUAL SHARED)
+            add_definitions (-DGBXUTILACFR_EXPORTS)
+        else (GBX_DEFAULT_LIB_TYPE STREQUAL SHARED)
+            add_definitions (-DGBXUTILACFR_STATIC -DFLEXIPORT_STATIC)
+        endif (GBX_DEFAULT_LIB_TYPE STREQUAL SHARED)
+    endif (WIN32)
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
     file( GLOB hdrs *.h )

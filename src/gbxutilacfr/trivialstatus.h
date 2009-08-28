@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_TRIVIAL_STATUS_H
 #define GBXUTILACFR_TRIVIAL_STATUS_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 #include <gbxutilacfr/status.h>
 #include <gbxutilacfr/tracer.h>
 
@@ -24,7 +36,7 @@ namespace gbxutilacfr {
 //!
 //! @see Status
 //!
-class TrivialStatus : public Status
+class GBXUTILACFR_EXPORT TrivialStatus : public Status
 {
 public:
 

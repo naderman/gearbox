@@ -11,6 +11,18 @@
 #ifndef GBXUTILACFR_EXCEPTIONS_H
 #define GBXUTILACFR_EXCEPTIONS_H
 
+#if defined (WIN32)
+    #if defined (GBXUTILACFR_STATIC)
+        #define GBXUTILACFR_EXPORT
+    #elif defined (GBXUTILACFR_EXPORTS)
+        #define GBXUTILACFR_EXPORT       __declspec (dllexport)
+    #else
+        #define GBXUTILACFR_EXPORT       __declspec (dllimport)
+    #endif
+#else
+    #define GBXUTILACFR_EXPORT
+#endif
+
 /*
  * STRINGIZE macro converts an expression into a string-literal.
  * ERROR_INFO macro permits file-name and line-number data to be added to an error message.
@@ -50,7 +62,7 @@ throw gbxutilacfr::Exception( ERROR_INFO, "description of error" );
 
 where the ERROR_INFO macro inserts the offending file and line number.
 */
-class Exception : public std::exception
+class GBXUTILACFR_EXPORT Exception : public std::exception
 {
 public:
     Exception(const char *file, const char *line, const std::string &message);
@@ -69,7 +81,7 @@ private:
 };
 
 //! This exception is raised when something is wrong with the hardware.
-class HardwareException : public gbxutilacfr::Exception
+class GBXUTILACFR_EXPORT HardwareException : public gbxutilacfr::Exception
 {
 public:
     HardwareException(const char *file, const char *line, const std::string &message)
