@@ -36,7 +36,7 @@ namespace gbxutilacfr {
 //!
 //! @sa Status, SubsystemStatus
 //!
-class GBXUTILACFR_STATUS SubHealth
+class GBXUTILACFR_EXPORT SubHealth
 {
 
 public:
