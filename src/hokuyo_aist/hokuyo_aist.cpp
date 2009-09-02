@@ -1639,7 +1639,6 @@ unsigned int HokuyoLaser::GetNewRangesAndIntensities (HokuyoData *data, int star
 			throw HokuyoError (HOKUYO_ERR_PROTOCOL, ss.str ());
 		}
 		// Then compare the parameters
-		buffer[12] = '0'; // There will be zero scans remaining after this one
 		if (memcmp (&response[2], buffer, 13) != 0)
 		{
 			throw HokuyoError (HOKUYO_ERR_PROTOCOL, "Incorrect paramaters prefix for ME data.");
