@@ -150,7 +150,11 @@ MDMS  Get new data
       M|D/S|Start(4)|End(4)|Cluster(2)|Interval(1)|Number(2)|LF
       M|D/S|Start(4)|End(4)|Cluster(2)|Interval(1)|Number(2)|LF|Status(2)|Sum|LF|Data...|LF|LF
       16 byte command block
-      See also ME command featured only on UTM-30LX for getting intensity data.
+ME    Get new data, including intensity data
+      M|E|Start(4)|End(4)|Cluster(2)|Interval(1)|Number(2)|LF
+      M|E|Start(4)|End(4)|Cluster(2)|Interval(1)|Number(2)|LF|Status(2)|Sum|LF|Data...|LF|LF
+      16 byte command block
+      Featured only on UTM-30LX for getting intensity data.
 GDGS  Get latest data
       G|D/S|Start(4)|End(4)|Cluster(2)|LF
       G|D/S|Start(4)|End(4)|Cluster(2)|LF|Status(2)|Sum|LF|Data...|LF|LF
