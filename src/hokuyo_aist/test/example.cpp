@@ -38,14 +38,14 @@ int main(int argc, char **argv)
 	double startAngle = 0.0, endAngle = 0.0;
 	int firstStep = -1, lastStep = -1;
 	unsigned int baud = 19200, speed = 0, clusterCount = 1;
-	bool getNew = false, verbose = false;
+	bool getIntensities = false, getNew = false, verbose = false;
 
 #if defined (WIN32)
 	portOptions = "type=serial,device=COM3,timeout=1";
 #else
 	int opt;
 	// Get some options from the command line
-	while ((opt = getopt(argc, argv, "b:c:e:f:l:m:no:s:vh")) != -1)
+	while ((opt = getopt(argc, argv, "b:c:e:f:il:m:no:s:vh")) != -1)
 	{
 		switch (opt)
 		{
@@ -60,6 +60,9 @@ int main(int argc, char **argv)
 				break;
 			case 'f':
 				sscanf (optarg, "%d", &firstStep);
+				break;
+			case 'i':
+				getIntensities = true;
 				break;
 			case 'l':
 				sscanf (optarg, "%d", &lastStep);
@@ -87,6 +90,7 @@ int main(int argc, char **argv)
 				cout << "-c count\tCluster count." << endl;
 				cout << "-e angle\tEnd angle to get ranges to." << endl;
 				cout << "-f step\t\tFirst step to get ranges from." << endl;
+				cout << "-i\t\tGet intensity data along with ranges." << endl;
 				cout << "-l step\t\tLast step to get ranges to." << endl;
 				cout << "-m speed\tMotor speed." << endl;
 				cout << "-n\t\tGet new ranges instead of latest ranges." << endl;
@@ -142,6 +146,8 @@ int main(int argc, char **argv)
 			// Get all ranges
 			if (getNew)
 				laser.GetNewRanges (&data, -1, -1, clusterCount);
+			else if (getIntensities)
+				laser.GetNewRangesAndIntensities (&data, -1, -1, clusterCount);
 			else
 				laser.GetRanges (&data, -1, -1, clusterCount);
 		}
@@ -150,6 +156,8 @@ int main(int argc, char **argv)
 			// Get by step
 			if (getNew)
 				laser.GetNewRanges (&data, firstStep, lastStep, clusterCount);
+			else if (getIntensities)
+				laser.GetNewRangesAndIntensities (&data, firstStep, lastStep, clusterCount);
 			else
 				laser.GetRanges (&data, firstStep, lastStep, clusterCount);
 		}
@@ -158,6 +166,8 @@ int main(int argc, char **argv)
 			// Get by angle
 			if (getNew)
 				laser.GetNewRangesByAngle (&data, startAngle, endAngle, clusterCount);
+			else if (getIntensities)
+				laser.GetNewRangesAndIntensitiesByAngle (&data, startAngle, endAngle, clusterCount);
 			else
 				laser.GetRangesByAngle (&data, startAngle, endAngle, clusterCount);
 		}

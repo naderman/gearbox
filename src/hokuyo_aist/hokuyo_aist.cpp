@@ -2467,7 +2467,7 @@ void HokuyoLaser::Read3ByteRangeData (HokuyoData *data, unsigned int numSteps)
 	if (currentStep != numSteps)
 	{
 		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
-			"Read a  different number of range readings than were asked for.");
+			"Read a different number of range readings than were asked for.");
 	}
 }
 
@@ -2485,7 +2485,7 @@ void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int
 
 	// 3 byte data is a pain because it crosses the line boundary, it may overlap by 0, 1 or 2 bytes
 	char buffer[SCIP2_LINE_LENGTH];
-	unsigned int currentStep = 0;
+	unsigned int currentRange = 0, currentIntensity = 0;
 	int numBytesInLine = 0, splitCount = 0;
 	char splitValue[3];
 	bool nextIsIntensity = false;
@@ -2523,40 +2523,43 @@ void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int
 				{
 					splitValue[2] = buffer[ii++];
 					if (nextIsIntensity)
-						data->_intensities[currentStep] = Decode3ByteValue (splitValue);
+						data->_intensities[currentIntensity] = Decode3ByteValue (splitValue);
 					else
-						data->_ranges[currentStep] = Decode3ByteValue (splitValue);
+						data->_ranges[currentRange] = Decode3ByteValue (splitValue);
 				}
 				else if (splitCount == 2)
 				{
 					splitValue[1] = buffer[ii++];
 					splitValue[2] = buffer[ii++];
 					if (nextIsIntensity)
-						data->_intensities[currentStep] = Decode3ByteValue (splitValue);
+						data->_intensities[currentIntensity] = Decode3ByteValue (splitValue);
 					else
-						data->_ranges[currentStep] = Decode3ByteValue (splitValue);
+						data->_ranges[currentRange] = Decode3ByteValue (splitValue);
 				}
 				else
 				{
 					if (nextIsIntensity)
-						data->_intensities[currentStep] = Decode3ByteValue (&buffer[ii]);
+						data->_intensities[currentIntensity] = Decode3ByteValue (&buffer[ii]);
 					else
-						data->_ranges[currentStep] = Decode3ByteValue (&buffer[ii]);
+						data->_ranges[currentRange] = Decode3ByteValue (&buffer[ii]);
 					ii += 3;
 				}
-				if (data->_ranges[currentStep] > _maxRange && !nextIsIntensity)
+				if (data->_ranges[currentRange] > _maxRange && !nextIsIntensity)
 				{
 					cerr << "WARNING: HokuyoLaser::" << __func__ <<
-						"() Value at step " << currentStep << " beyond maximum range: " <<
-						data->_ranges[currentStep] << " (raw bytes: ";
+						"() Value at step " << currentRange << " beyond maximum range: " <<
+						data->_ranges[currentRange] << " (raw bytes: ";
 					if (splitCount != 0)
 						cerr << splitValue[0] << splitValue[1] << splitValue[2] << ")" << endl;
 					else
 						cerr << buffer[0] << buffer[1] << buffer[2] << ")" << endl;
 				}
-				else if (data->_ranges[currentStep] < 20)
+				else if (data->_ranges[currentRange] < 20)
 					data->_error = true;
-				currentStep++;
+				if (nextIsIntensity)
+					currentIntensity++;
+				else
+					currentRange++;
 				splitCount = 0;     // Reset this here now that it's been used
 				nextIsIntensity = !nextIsIntensity; // Alternate between range and intensity values
 			}
@@ -2566,13 +2569,13 @@ void HokuyoLaser::Read3ByteRangeAndIntensityData (HokuyoData *data, unsigned int
 
 	if (_verbose)
 	{
-		cerr << "HokuyoLaser::" << __func__ << "() Read " << currentStep <<
-			" ranges and intensities." << endl;
+		cerr << "HokuyoLaser::" << __func__ << "() Read " << currentRange << " ranges and "
+			<< currentIntensity << " intensities (expected " << numSteps << ")." << endl;
 	}
-	if (currentStep != numSteps)
+	if (currentRange != numSteps || currentIntensity != numSteps)
 	{
 		throw HokuyoError (HOKUYO_ERR_PROTOCOL,
-			"Read a  different number of range and intensity readings than were asked for.");
+			"Read a different number of range or intensity readings than were asked for.");
 	}
 }
 

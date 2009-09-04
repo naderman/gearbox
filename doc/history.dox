@@ -35,6 +35,10 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Bugfix: matched GPS status/solution enums to Novatel's internal types, there were gaps due to reserved values before.
   Note: this will create mismatches with old log-files (not data, status/solution-type only)! (MichaelM, patch by Ian Mahon)
 
+- libhokuyo_aist
+  - Bugfix: Errors in the way intensity data is retrieved have been fixed. (gbiggs, bug report by martimorta)
+  - New feature: The example now has an option, -i, to get intensity data.
+
 @section gbx_doc_history_907 Changes in Release 9.07
 
 @par Updated libraries
