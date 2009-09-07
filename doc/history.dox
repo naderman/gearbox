@@ -39,6 +39,9 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Bugfix: Errors in the way intensity data is retrieved have been fixed. (gbiggs, bug report by martimorta)
   - New feature: The example now has an option, -i, to get intensity data.
 
+- libflexiport
+  - Bugfix: Don't redeclare timespec if it already has been on Windows. (gbiggs)
+
 @section gbx_doc_history_907 Changes in Release 9.07
 
 @par Updated libraries

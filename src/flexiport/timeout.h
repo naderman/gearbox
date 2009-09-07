@@ -36,12 +36,14 @@
 	#else
 		#define FLEXIPORT_EXPORT    __declspec (dllimport)
 	#endif
-	// No timespec on Windows
-	typedef struct timespec
-	{
-		int tv_sec;
-		int tv_nsec;
-	} timespec;
+	#if !defined (timespec)
+		// No timespec on Windows
+		typedef struct timespec
+		{
+			int tv_sec;
+			int tv_nsec;
+		} timespec;
+	#endif
 #else
 	#define FLEXIPORT_EXPORT
 #endif
