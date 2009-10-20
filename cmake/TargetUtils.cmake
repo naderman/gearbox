@@ -17,6 +17,12 @@ set( GBX_INSTALL_SHARED_FILES TRUE CACHE BOOLEAN "Do you want to install shared 
 mark_as_advanced( GBX_INSTALL_SHARED_FILES )
 
 #
+# Default preference for installing CMake scripts.
+#
+set( GBX_INSTALL_CMAKE_SCRIPTS TRUE CACHE BOOLEAN "Do you want to install CMake scripts?" )
+mark_as_advanced( GBX_INSTALL_CMAKE_SCRIPTS )
+
+#
 # Default preference for installing examples.
 #
 set( GBX_INSTALL_EXAMPLES TRUE CACHE BOOLEAN "Do you want to install example files?" )
@@ -111,6 +117,7 @@ macro( GBX_ADD_HEADERS install_subdir )
         install( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
     endif()
 endmacro( GBX_ADD_HEADERS install_subdir )
+
 #
 # GBX_ADD_SHARED_FILES( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
@@ -122,6 +129,18 @@ macro( GBX_ADD_SHARED_FILES install_subdir )
         install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
     endif()
 endmacro( GBX_ADD_SHARED_FILES install_subdir )
+
+#
+# GBX_ADD_CMAKE_SCRIPTS( FILE0 [FILE1 FILE2 ...] )
+#
+# Specialization of install(FILES ...) to install CMake scripts.
+# All files are installed into PREFIX/share/cmake/Modules directory.
+#
+macro( GBX_ADD_CMAKE_SCRIPTS )
+    if( GBX_INSTALL_CMAKE_SCRIPTS )
+        install( FILES ${ARGN} DESTINATION share/cmake/Modules )
+    endif()
+endmacro( GBX_ADD_CMAKE_SCRIPTS )
 
 #
 # GBX_ADD_EXAMPLE( install_subdir makefile.in makefile.out [FILE0 FILE1 FILE2 ...] )
