@@ -1,7 +1,7 @@
 set (libName hokuyo_aist)
 set (libDesc "Hokuyo laser scanner driver")
 set (libVersion 1.0.0)
-GBX_ADD_LICENSE (LGPL)
+GBX_ADD_LICENSE (LGPL3)
 
 set (build TRUE)
 GBX_REQUIRE_OPTION (build LIB ${libName} ON)
