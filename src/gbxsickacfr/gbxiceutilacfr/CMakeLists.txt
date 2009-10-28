@@ -1,6 +1,6 @@
 set( lib_name GbxIceUtilAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 
@@ -13,7 +13,7 @@ set( proj_libs GbxUtilAcfr )
 GBX_REQUIRE_LIBS( build LIB ${lib_name} ${proj_libs} )
 
 if( build )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     include( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
 

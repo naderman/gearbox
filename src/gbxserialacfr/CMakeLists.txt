@@ -1,6 +1,6 @@
 set( lib_name GbxSerialAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
@@ -13,7 +13,7 @@ set( dep_libs GbxLockFileAcfr )
 if( build )
 
     add_subdirectory( lockfile )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
     # for config.h

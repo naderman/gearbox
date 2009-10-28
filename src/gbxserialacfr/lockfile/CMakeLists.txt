@@ -1,6 +1,6 @@
 set( lib_name GbxLockFileAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 # don't give user an option
@@ -9,7 +9,7 @@ set( build TRUE )
 # GBX_REQUIRE_VAR( build LIB ${lib_name} GBX_OS_LINUX "only Linux OS is supported" )
 
 if( build )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
     file( GLOB hdrs *.h )

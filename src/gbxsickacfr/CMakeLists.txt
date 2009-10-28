@@ -1,6 +1,6 @@
 set( lib_name GbxSickAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} ON )
@@ -17,7 +17,7 @@ set( dep_libs ${dep_libs} GbxSerialDeviceAcfr )
 if( build )
 
     add_subdirectory( gbxserialdeviceacfr )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     include( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
 

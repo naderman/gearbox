@@ -1,12 +1,12 @@
 set( lib_name basicexample )
 set( libVersion 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 GBX_REQUIRE_OPTION( build LIB ${lib_name} OFF )
 
 if( build )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
     file( GLOB hdrs *.h )

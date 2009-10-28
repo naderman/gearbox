@@ -1,6 +1,6 @@
 set( lib_name GbxNovatelUtilAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 # don't give user an option
@@ -17,7 +17,7 @@ set( dep_libs GbxUtilAcfr GbxSerialAcfr )
 GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
 if( build )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
 
     file( GLOB hdrs *.h )

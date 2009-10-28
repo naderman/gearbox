@@ -1,6 +1,6 @@
 set( lib_name GbxSerialDeviceAcfr )
 set( lib_version 1.0.0 )
-GBX_ADD_LICENSE( LGPL )
+GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
 # don't give user an option
@@ -11,7 +11,7 @@ set( dep_libs GbxSerialAcfr GbxIceUtilAcfr )
 # GBX_REQUIRE_LIBS( build LIB ${lib_name} ${proj_libs} )
 
 if( build )
-    
+
     include( ${GBX_CMAKE_DIR}/UseBasicRules.cmake )
     include( ${GBX_CMAKE_DIR}/UseIceUtil.cmake )
 
