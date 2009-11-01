@@ -154,10 +154,10 @@ namespace {
         FILE *fd;
         char  lbuf[260];
         int   pidOfLocker = 0;
-        char *p;
 
-        if ((p = strrchr(dev, '/')))
-            dev = p + 1;
+        const char *lastSlashPos = strrchr(dev, '/');
+        if ( lastSlashPos )
+            dev = lastSlashPos + 1;
         sprintf(lbuf, "%s/LCK..%s", LOCK_DIR, dev);
 
         fd = fopen(lbuf, "r");
