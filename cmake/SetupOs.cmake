@@ -27,6 +27,16 @@ endif( APPLE )
 
 if( GBX_OS_LINUX )
     message( STATUS "Running on Linux" )
+
+    # 32 or 64 bit Linux
+    # Set the library directory suffix accordingly
+    IF (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+        SET (GBX_PROC_64BIT TRUE BOOL INTERNAL)
+       MESSAGE (STATUS "Linux x86_64 Target Detected")
+    ELSEIF (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "ppc64")
+        MESSAGE (STATUS "Linux ppc64 Target Detected")
+        SET (GBX_PROC_64BIT TRUE BOOL INTERNAL)
+    ENDIF (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 endif( GBX_OS_LINUX )
 
 if( GBX_OS_QNX )
