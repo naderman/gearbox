@@ -90,9 +90,16 @@ macro( GBX_ADD_LIBRARY name type soversion )
         SOVERSION ${soversion} )
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
+    
+    if (GBX_PROC_64BIT)
+    install( TARGETS ${name}
+             DESTINATION lib64/${PROJECT_NAME}
+             EXPORT ${PROJECT_NAME}-targets )
+    else (GBX_PROC_64BIT)
     install( TARGETS ${name}
              DESTINATION lib/${PROJECT_NAME}
              EXPORT ${PROJECT_NAME}-targets )
+    ENDIF (GBX_PROC_64BIT)
 
     set( templist ${LIB_LIST} )
     list( APPEND templist ${name}-${soversion} )
@@ -187,7 +194,11 @@ macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags version )
     configure_file( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
 
     if( GBX_INSTALL_PKGCONFIGS )
-        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
+        IF (GBX_PROC_64BIT)
+            install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib64/pkgconfig/ )
+        ELSE (GBX_PROC_64BIT)
+            install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
+        ENDIF(GBX_PROC_64BIT)
     endif()
 endmacro( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
