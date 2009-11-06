@@ -18,7 +18,7 @@
 # A manually set installation dir (e.i. with ccmake) is not touched until an environment variable or
 # a command line variable is introduced.
 
-# 
+#
 # IS_SUPER_PROJECT is a flag which is defined if Gearbox is built as part of CMake "ueber-project".
 # If it's set don't overwrite CMAKE_INSTALL_PREFIX because the ueber-project has already set it.
 #
@@ -37,11 +37,11 @@ else( DEFINED IS_SUPER_PROJECT )
             set( CMAKE_INSTALL_PREFIX "C:\\Program Files\\${PROJECT_NAME}" CACHE PATH "Installation directory" FORCE )
         endif( NOT GBX_OS_WIN )
     endif( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
-    
+
     # the name of the variable controlling install directory for this project
     string( TOUPPER ${PROJECT_NAME} project_name_upper )
     set( project_install_var "${project_name_upper}_INSTALL" )
-    
+
     # 2. check if environment variable is set
     set( install_dir $ENV{${project_install_var}} )
     string( LENGTH "A${install_dir}" is_env_var_defined_plus_one )
@@ -49,22 +49,22 @@ else( DEFINED IS_SUPER_PROJECT )
     if( is_env_var_defined )
         # debug
         message( STATUS "(Overwriting install dir with enviroment variable ${project_install_var}=${install_dir})" )
-    
+
         set( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
     endif( is_env_var_defined )
-    
+
     # 3. check if CMake variable is set on the command line
     if( DEFINED ${project_install_var} )
         set( install_dir ${${project_install_var}} )
         # debug
         message( STATUS "(Overwriting install dir with command line variable ${project_install_var}=${install_dir})" )
-    
+
         # using user-supplied installation directory
         set( CMAKE_INSTALL_PREFIX ${install_dir} CACHE PATH "Installation directory" FORCE )
     endif( DEFINED ${project_install_var} )
 
 endif( DEFINED IS_SUPER_PROJECT )
-    
+
 # final result
 message( STATUS "Installation directory was set to ${CMAKE_INSTALL_PREFIX}" )
 
@@ -76,7 +76,7 @@ set( GBX_SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME} )
 IF (GBX_PROC_64BIT)
     set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib64/${PROJECT_NAME} )
 ELSE (GBX_PROC_64BIT)
-    set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${PROJECT_NAME} )
+    set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME} )
 ENDIF(GBX_PROC_64BIT)
 
 #
