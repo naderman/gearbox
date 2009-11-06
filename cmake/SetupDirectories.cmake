@@ -70,9 +70,14 @@ message( STATUS "Installation directory was set to ${CMAKE_INSTALL_PREFIX}" )
 
 # special installation directories
 set( GBX_BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin )
-set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME} )
-set( GBX_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/install/${PROJECT_NAME} )
+set( GBX_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME} )
 set( GBX_SHARE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME} )
+
+IF (GBX_PROC_64BIT)
+    set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib64/${PROJECT_NAME} )
+ELSE (GBX_PROC_64BIT)
+    set( GBX_LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${PROJECT_NAME} )
+ENDIF(GBX_PROC_64BIT)
 
 #
 # It's sometimes useful to refer to the top level of the project.
