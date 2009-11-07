@@ -39,6 +39,7 @@ mark_as_advanced( GBX_INSTALL_PKGCONFIGS )
 # Executables should add themselves by calling 'GBX_ADD_EXECUTABLE'
 # instead of 'ADD_EXECUTABLE' in CMakeLists.txt.
 # Usage is the same as ADD_EXECUTABLE, all parameters are passed to ADD_EXECUTABLE.
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_EXECUTABLE name )
     if( COMMAND cmake_policy )
@@ -49,7 +50,8 @@ macro( GBX_ADD_EXECUTABLE name )
 #     set_target_properties( ${name} PROPERTIES
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    install( TARGETS ${name} RUNTIME DESTINATION bin )
+    install( TARGETS ${name} RUNTIME
+             DESTINATION ${GBX_BIN_INSTALL_SUFFIX} )
     set( templist ${EXE_LIST} )
     list( APPEND templist ${name} )
 #   message( STATUS "DEBUG: ${templist}" )
@@ -67,6 +69,7 @@ endmacro( GBX_ADD_EXECUTABLE name )
 # distinct from the Gearbox distribution version, as each library will change its
 # API independently.
 # All extra parameters are passed to ADD_LIBRARY as source files.
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_LIBRARY name type soversion )
     if( COMMAND cmake_policy )
@@ -90,16 +93,10 @@ macro( GBX_ADD_LIBRARY name type soversion )
         SOVERSION ${soversion} )
 #         INSTALL_RPATH "${INSTALL_RPATH};${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}"
 #         BUILD_WITH_INSTALL_RPATH TRUE )
-    
-    if (GBX_PROC_64BIT)
+
     install( TARGETS ${name}
-             DESTINATION lib64/${PROJECT_NAME}
+             DESTINATION ${GBX_LIB_INSTALL_SUFFIX}
              EXPORT ${PROJECT_NAME}-targets )
-    else (GBX_PROC_64BIT)
-    install( TARGETS ${name}
-             DESTINATION lib/${PROJECT_NAME}
-             EXPORT ${PROJECT_NAME}-targets )
-    ENDIF (GBX_PROC_64BIT)
 
     set( templist ${LIB_LIST} )
     list( APPEND templist ${name}-${soversion} )
@@ -117,11 +114,12 @@ endmacro( GBX_ADD_LIBRARY name )
 # GBX_ADD_HEADERS( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
 # Specialization of install(FILES ...) to install header files.
-# All files are installed into PREFIX/include/${PROJECT_NAME}/${install_subdir}
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_HEADERS install_subdir )
     if( GBX_INSTALL_HEADERS )
-        install( FILES ${ARGN} DESTINATION include/${PROJECT_NAME}/${install_subdir} )
+        install( FILES ${ARGN}
+                 DESTINATION ${GBX_INCLUDE_INSTALL_SUFFIX}/${install_subdir} )
     endif()
 endmacro( GBX_ADD_HEADERS install_subdir )
 
@@ -129,11 +127,12 @@ endmacro( GBX_ADD_HEADERS install_subdir )
 # GBX_ADD_SHARED_FILES( install_subdir FILE0 [FILE1 FILE2 ...] )
 #
 # Specialization of install(FILES ...) to install shared files.
-# All files are installed into PREFIX/share/${PROJECT_NAME}/${install_subdir} directory.
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_SHARED_FILES install_subdir )
     if( GBX_INSTALL_SHARED_FILES )
-        install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+        install( FILES ${ARGN}
+                 DESTINATION ${GBX_SHARE_INSTALL_SUFFIX}/${install_subdir} )
     endif()
 endmacro( GBX_ADD_SHARED_FILES install_subdir )
 
@@ -141,11 +140,12 @@ endmacro( GBX_ADD_SHARED_FILES install_subdir )
 # GBX_ADD_CMAKE_SCRIPTS( FILE0 [FILE1 FILE2 ...] )
 #
 # Specialization of install(FILES ...) to install CMake scripts.
-# All files are installed into PREFIX/share/cmake/Modules directory.
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_CMAKE_SCRIPTS )
     if( GBX_INSTALL_CMAKE_SCRIPTS )
-        install( FILES ${ARGN} DESTINATION share/cmake/Modules )
+        install( FILES ${ARGN}
+                 DESTINATION ${GBX_CMAKE_INSTALL_SUFFIX} )
     endif()
 endmacro( GBX_ADD_CMAKE_SCRIPTS )
 
@@ -160,8 +160,11 @@ endmacro( GBX_ADD_CMAKE_SCRIPTS )
 macro( GBX_ADD_EXAMPLE install_subdir makefile.in makefile.out )
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${makefile.in} ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} @ONLY)
     if( GBX_INSTALL_EXAMPLES )
-        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out} DESTINATION share/${PROJECT_NAME}/${install_subdir} RENAME CMakeLists.txt )
-        install( FILES ${ARGN} DESTINATION share/${PROJECT_NAME}/${install_subdir} )
+        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${makefile.out}
+                 DESTINATION ${GBX_SHARE_INSTALL_SUFFIX}/${install_subdir}
+                 RENAME CMakeLists.txt )
+        install( FILES ${ARGN}
+                 DESTINATION ${GBX_SHARE_INSTALL_SUFFIX}/${install_subdir} )
     endif()
 endmacro( GBX_ADD_EXAMPLE install_subdir makefile )
 
@@ -176,6 +179,7 @@ endmacro( GBX_ADD_EXAMPLE install_subdir makefile )
 # libflags is appended to the "Libs" value.
 # version is the soversion of the library.
 # that should be linked with at the same time as linking to this library.
+# See SetupDirectories.cmake for definition of the install directory.
 #
 macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags version )
     set( PKG_NAME ${name} )
@@ -191,14 +195,13 @@ macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags version )
         endforeach( item ${${int_deps}} )
     endif( ${int_deps} )
 
-    configure_file( ${GBX_CMAKE_DIR}/pkgconfig.in ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc @ONLY)
+    configure_file( ${GBX_CMAKE_DIR}/pkgconfig.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc
+                    @ONLY)
 
     if( GBX_INSTALL_PKGCONFIGS )
-        IF (GBX_PROC_64BIT)
-            install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib64/pkgconfig/ )
-        ELSE (GBX_PROC_64BIT)
-            install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc DESTINATION lib/pkgconfig/ )
-        ENDIF(GBX_PROC_64BIT)
+        install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}.pc
+                 DESTINATION ${GBX_PKGCONFIG_INSTALL_SUFFIX} )
     endif()
 endmacro( GBX_ADD_PKGCONFIG name desc cflags deps libflags libs )
 
@@ -376,7 +379,8 @@ macro( GBX_WRITE_MANIFEST )
     string( TOUPPER ${PROJECT_NAME} upper_project_name )
     write_file( ${output_file} "set( ${upper_project_name}_MANIFEST_LOADED 1)" APPEND )
 
-    install( FILES ${output_file} DESTINATION . )
+    install( FILES ${output_file}
+             DESTINATION . )
 endmacro( GBX_WRITE_MANIFEST )
 
 macro( GBX_WRITE_LICENSE )

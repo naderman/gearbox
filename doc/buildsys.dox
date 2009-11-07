@@ -217,14 +217,31 @@ Under Linux, an additional variable if defined
 GBX_PROC_64BIT
 @endverbatim
 
-Path variables for the current project:
+Source and binary directories can be distinguished as so
 @verbatim
-GBX_BIN_INSTALL_DIR
-GBX_LIB_INSTALL_DIR
-GBX_INCLUDE_INSTALL_DIR
 GBX_PROJECT_BINARY_DIR
 GBX_PROJECT_SOURCE_DIR
+@endverbatim
+
+Install directories can be referenced with absolute paths
+@verbatim
+GBX_BIN_INSTALL_DIR
+GBX_CMAKE_INSTALL_DIR
+GBX_CMAKE_PKGCONFIG_INSTALL_DIR
+GBX_INCLUDE_INSTALL_DIR
+GBX_LIB_INSTALL_DIR
+GBX_PKGCONFIG_INSTALL_DIR
 GBX_SHARE_INSTALL_DIR
+@endverbatim
+.. or path relative to the install directory
+@verbatim
+GBX_BIN_INSTALL_SUFFIX
+GBX_CMAKE_INSTALL_SUFFIX
+GBX_CMAKEPKGCONFIG_INSTALL_SUFFIX
+GBX_INCLUDE_INSTALL_SUFFIX
+GBX_LIB_INSTALL_SUFFIX
+GBX_PKGCONFIG_INSTALL_SUFFIX
+GBX_SHARE_INSTALL_SUFFIX
 @endverbatim
 
 */
