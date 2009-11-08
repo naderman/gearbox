@@ -23,16 +23,17 @@
 #include "driver.h"
 
 using namespace std;
-using namespace gbxgarminacfr;
 
 ///////////////////////////////////////
+
+namespace gbxgarminacfr {
 
 namespace {
 
 // Get the useful bits from a GGA message
-GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
+GenericData* extractGgaData( const gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
 {
-    GgaData* data = new GgaData;
+    std::auto_ptr<GgaData> data( new GgaData );
 
     data->timeStampSec = timeSec;
     data->timeStampUsec = timeUsec;
@@ -58,7 +59,7 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
         data->longitude = 0.0;
         data->altitude = 0.0;
         data->geoidalSeparation = 0.0;
-        return data;
+        return data.release();
     case '1': 
         data->fixType = Autonomous;
         break;
@@ -84,18 +85,20 @@ GenericData* extractGgaData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     data->longitude=dir*(deg+(min/60.0));
     
     //altitude
-    data->altitude=atof(msg.getDataToken(Hgt).c_str());
+    data->isAltitudeKnown = !msg.isDataTokenEmpty(Hgt);
+    if ( data->isAltitudeKnown )
+        data->altitude=atof(msg.getDataToken(Hgt).c_str());
     
     //geoidal Separation
     data->geoidalSeparation=atof(msg.getDataToken(GeoidHgt).c_str());
 
-    return data;
+    return data.release();
 }
 
 // VTG provides velocity and heading information
-GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
+GenericData* extractVtgData( const gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
 {
-    VtgData* data = new VtgData;
+    std::auto_ptr<VtgData> data( new VtgData );
 
     data->timeStampSec = timeSec;
     data->timeStampUsec = timeUsec;
@@ -104,15 +107,16 @@ GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     enum VtgTokens{MsgType=0,HeadingTrue,T,HeadingMag,M,SpeedKnots,
                    N,SpeedKPH,K,ModeInd};
 
-    //Check for an empty string. Means that we are not moving
-    //When the message has empty fields tokeniser skips so we get the next field inline.
-    if( msg.getDataToken(HeadingTrue)[0] == 'T' ) {
-        data->headingTrue=0.0;
-        data->headingMagnetic=0.0;
-        data->speed=0.0;
-        // NOTE: not processing the rest!
-        return data;
+    //Check for an empty string. Means that we can't tell anything useful.
+    if ( msg.isDataTokenEmpty(HeadingTrue) )
+    {
+        data->isValid = false;
+        data->headingTrue = 0.0;
+        data->headingMagnetic = 0.0;
+        data->speed = 0.0;
+        return data.release();
     }
+    data->isValid = true;
 
     // true heading
     double headingRad = DEG2RAD(atof(msg.getDataToken(HeadingTrue).c_str()));
@@ -128,16 +132,16 @@ GenericData* extractVtgData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     data->speed=atof(msg.getDataToken(SpeedKPH).c_str());
     data->speed*=(1000/3600.0);
 
-    return data;
+    return data.release();
 }
 
 // RME message. This one is garmin specific... Give position error estimates
 // See doc.dox for a discussion of the position errors as reported here. 
 // Essentially the EPE reported by the garmin is a 1 sigma error (RMS) or a
 // 68% confidence bounds.
-GenericData* extractRmeData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
+GenericData* extractRmeData( const gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
 {
-    RmeData* data = new RmeData;
+    std::auto_ptr<RmeData> data( new RmeData );
 
     data->timeStampSec = timeSec;
     data->timeStampUsec = timeUsec;
@@ -145,11 +149,33 @@ GenericData* extractRmeData( gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int 
     //Names for the RME message items
     enum RmeTokens{MsgType=0,HError,M1,VError,M2,EPE,M3};
     
+    if ( msg.isDataTokenEmpty(HError) )
+    {
+        // No valid information
+        data->isValid                      = false;
+        data->isVerticalPositionErrorValid = false;
+        data->horizontalPositionError      = 0.0;
+        data->verticalPositionError        = 0.0;
+        data->estimatedPositionError       = 0.0;
+        return data.release();
+    }
+    data->isValid = true;
+
     data->horizontalPositionError = atof(msg.getDataToken(HError).c_str());
-    data->verticalPositionError = atof(msg.getDataToken(VError).c_str());
+
+    if ( msg.isDataTokenEmpty(VError) )
+    {
+        data->isVerticalPositionErrorValid = false;
+        data->verticalPositionError = -1;
+    }
+    else
+    {
+        data->isVerticalPositionErrorValid = true;
+        data->verticalPositionError = atof(msg.getDataToken(VError).c_str());
+    }
 
     data->estimatedPositionError = atof(msg.getDataToken(EPE).c_str());
-    return data;
+    return data.release();
 }
 
 }
@@ -172,9 +198,9 @@ std::string
 Config::toString() const
 {
     std::stringstream ss;
-    ss << "Garmin driver config: " <<
-          "\tdevice="<<device <<
-          "\twill read sentences: GPGGA="<<readGga<<" GPVTG="<<readVtg<<" PGRME="<<readRme;
+    ss << "Garmin driver config: " << endl 
+       << "\tdevice="<<device << endl
+       << "\twill read sentences: GPGGA="<<readGga<<" GPVTG="<<readVtg<<" PGRME="<<readRme;
     return ss.str();
 }
 
@@ -209,7 +235,15 @@ Driver::Driver( const Config &config,
 
 Driver::~Driver()
 {
-    disableDevice();
+    // Don't throw from destructors...
+    try {
+        disableDevice();
+    }
+    catch ( const std::exception &e )
+    {
+        cout << "Driver::~Driver: exception while disabling: " << e.what() << endl;
+    }
+    catch ( ... ) {}
 }
 
 void
@@ -240,13 +274,13 @@ Driver::enableDevice()
     gbxgpsutilacfr::NmeaMessage disableAllMsg( "$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum );
     serial_->writeString( disableAllMsg.sentence() );
 
+    // alexb: what is this sleep for?
     sleep(1);
     
     if ( config_.readGga ) {
         gbxgpsutilacfr::NmeaMessage enableGgaMsg( "$PGRMO,GPGGA,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableGgaMsg.sentence() );
     }
-
 
     if ( config_.readVtg ) {
         gbxgpsutilacfr::NmeaMessage enableVtgMsg( "$PGRMO,GPVTG,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
@@ -258,6 +292,7 @@ Driver::enableDevice()
         serial_->writeString( enableRmeMsg.sentence() );
     }
 
+    // alexb: what is this sleep for?
     sleep(1);
 }
 
@@ -273,11 +308,7 @@ std::auto_ptr<GenericData>
 Driver::read()
 {  
     std::auto_ptr<GenericData> genericData;
-
     gbxgpsutilacfr::NmeaMessage nmeaMessage;
-    // Make sure that we clear our internal data structures
-    // alexm: is this necessary? should NmeaMessage do it for itself?
-    memset((void*)(&nmeaMessage) , 0 , sizeof(nmeaMessage));
 
     int nmeaExceptionCount = 0;
     int nmeaFailChecksumCount = 0;
@@ -330,7 +361,7 @@ Driver::read()
         //Put it into the message object and checksum the data
         try {
             // This throws if it cannot find the * to deliminate the checksum field
-            nmeaMessage.setSentence( serialData.c_str(), gbxgpsutilacfr::TestChecksum );
+            nmeaMessage.setSentence( serialData, gbxgpsutilacfr::TestChecksum );
         }
         catch ( const gbxgpsutilacfr::NmeaException& e ) {
             //Don't throw on isolated checksum problems
@@ -384,7 +415,10 @@ Driver::read()
             else
                 throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPGGA message" );
             genericData.reset( extractGgaData( nmeaMessage, now.tv_sec, now.tv_usec ) );
-            break;
+            if ( genericData.get() )
+                break;
+            else
+                continue;
         }
         else if ( MsgType == "$GPVTG" ) {
             if ( config_.readVtg )
@@ -392,7 +426,10 @@ Driver::read()
             else
                 throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPVTG message" );
             genericData.reset( extractVtgData( nmeaMessage, now.tv_sec, now.tv_usec ) );
-            break;
+            if ( genericData.get() )
+                break;
+            else
+                continue;
         }
         else if ( MsgType == "$PGRME" ) {
             if ( config_.readRme )
@@ -400,7 +437,10 @@ Driver::read()
             else
                 throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRME message" );
             genericData.reset( extractRmeData( nmeaMessage, now.tv_sec, now.tv_usec ) );
-            break;
+            if ( genericData.get() )
+                break;
+            else
+                continue;
         }
         else if ( MsgType == "$PGRMO" ) {
             //This message is sent by us to control msg transmission and then echoed by GPS
@@ -415,8 +455,64 @@ Driver::read()
             else
                 throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
         } 
-
     }
-
     return genericData;
+}
+
+std::string toString( const FixType &f )
+{
+    switch ( f )
+    {
+    case Invalid: return "Invalid";
+    case Autonomous: return "Autonomous";
+    case Differential: return "Differential";
+    default: return "??";        
+    }
+}
+
+std::string toString( const GgaData &d )
+{
+    stringstream ss;
+    ss << endl;
+    ss << "  timeStampSec                 : " << d.timeStampSec << endl
+       << "  timeStampUsec                : " << d.timeStampUsec << endl
+       << "  utcTimeHrs                   : " << d.utcTimeHrs << endl
+       << "  utcTimeMin                   : " << d.utcTimeMin << endl
+       << "  utcTimeSec                   : " << d.utcTimeSec << endl
+       << "  latitude                     : " << d.latitude << endl
+       << "  longitude                    : " << d.longitude << endl
+       << "  isAltitudeKnown              : " << d.isAltitudeKnown << endl
+       << "  altitude                     : " << d.altitude << endl
+       << "  fixType                      : " << d.fixType << endl
+       << "  satellites                   : " << d.satellites << endl
+       << "  horizontalDilutionOfPosition : " << d.horizontalDilutionOfPosition << endl
+       << "  geoidalSeparation            : " << d.geoidalSeparation;
+    return ss.str();
+}
+std::string toString( const VtgData &d )
+{
+    stringstream ss;
+    ss << endl;
+    ss << "  timeStampSec    : " << d.timeStampSec << endl
+       << "  timeStampUsec   : " << d.timeStampUsec << endl
+       << "  isValid         : " << d.isValid << endl
+       << "  headingTrue     : " << d.headingTrue << endl 
+       << "  headingMagnetic : " << d.headingMagnetic << endl 
+       << "  speed           : " << d.speed;
+    return ss.str();
+}
+std::string toString( const RmeData &d )
+{
+    stringstream ss;
+    ss << endl;
+    ss << "  timeStampSec                 : " << d.timeStampSec << endl
+       << "  timeStampUsec                : " << d.timeStampUsec << endl
+       << "  isValid                      : " << d.isValid << endl
+       << "  horizontalPositionError      : " << d.horizontalPositionError << endl
+       << "  isVerticalPositionErrorValid : " << d.isVerticalPositionErrorValid << endl
+       << "  verticalPositionError        : " << d.verticalPositionError << endl
+       << "  estimatedPositionError       : " << d.estimatedPositionError;
+    return ss.str();
+}
+
 }

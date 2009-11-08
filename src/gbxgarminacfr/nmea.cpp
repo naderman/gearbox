@@ -12,33 +12,34 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
+#include <sstream>
 #include <gbxutilacfr/tokenise.h>
 
-//////////////////////////////
+// //////////////////////////////
 
-// Ensure we have strnlen 
-// eg. Solaris doesn't define strnlen in string.h, so define it here.
-#if !HAVE_STRNLEN
+// // Ensure we have strnlen 
+// // eg. Solaris doesn't define strnlen in string.h, so define it here.
+// #if !HAVE_STRNLEN
 
-#include <cstring>
+// #include <cstring>
 
-// inline the fucker to guard against multiple inclusion, without the
-// hassle of a special lib.
-inline size_t strnlen(const char *s, size_t maxlen) 
-{
-    char *p;
-    if (s == NULL) {
-        return maxlen;
-    }
-    p = (char *)memchr(s, 0, maxlen);
-    if (p == NULL) {
-        return maxlen;
-    }
-    return ((p - s) + 1);
-}
-#endif
+// // inline the fucker to guard against multiple inclusion, without the
+// // hassle of a special lib.
+// inline size_t strnlen(const char *s, size_t maxlen) 
+// {
+//     char *p;
+//     if (s == NULL) {
+//         return maxlen;
+//     }
+//     p = (char *)memchr(s, 0, maxlen);
+//     if (p == NULL) {
+//         return maxlen;
+//     }
+//     return ((p - s) + 1);
+// }
+// #endif
 
-//////////////////////////////
+// //////////////////////////////
 
 #include "nmea.h"
 
@@ -57,39 +58,30 @@ NmeaMessage::NmeaMessage()
 
 void NmeaMessage::init()
 {
-    haveSentence_ = false;
-    haveTokens_   = false;
     haveCheckSum_ = false;
     checkSumOK_   = false;
 
     // Now clear the internal data store
-    sentence_[0]   = 0;
+    sentence_.clear();
     dataTokens_.clear();
 }
 
-
-NmeaMessage::NmeaMessage(const char *sentence, int testCheckSum)
+NmeaMessage::NmeaMessage(const std::string &sentence, NmeaMessageOptions addOrTestCheckSum)
 {
     init();
-    setSentence(sentence,testCheckSum);
+    setSentence(sentence,addOrTestCheckSum);
 }
 
 
 //Load the data as requested and test the checksum if we are asked to.
 void 
-NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
+NmeaMessage::setSentence(const std::string &data, NmeaMessageOptions addOrTestCheckSum)
 {
     init();
-    
-    strncpy(sentence_,data, MAX_SENTENCE_LEN);
 
-    //terminate just in case, Note that we have a buffer which is
-    //MAX_SENTENCE_LEN + 1 long!
-    
-    sentence_[MAX_SENTENCE_LEN] = '\0';
-    haveSentence_             = true;
+    sentence_ = data;
 
-    switch ( AddOrTestCheckSum )
+    switch ( addOrTestCheckSum )
     {
         case TestChecksum:  { 
             // This is for Rx'd data that we need to test for correct reception
@@ -106,7 +98,7 @@ NmeaMessage::setSentence(const char *data, int AddOrTestCheckSum)
         case DontTestOrAddChecksum: 
             break;
         default:
-            assert( true && "unrecognized message option" );
+            assert( false && "unrecognized message option" );
     }
 }
 
@@ -116,34 +108,36 @@ NmeaMessage::testChecksumOk()
     haveCheckSum_ = true;
     checkSumOK_   = false;
 
-    //First save the checksum chars from the existing message
-    char* ptr;
-    char  chksum_HIB,chksum_LOB;
-   
     //First save the existing two checksum chars from the message
     //These are straight after the '*' character
-    ptr = strchr(sentence_, NMEAChecksumDelim);
-    if ( !ptr ) {
-//         cout<<"device: no checksum delimiter"<<endl;
+    const size_t starPos = sentence_.find( NMEAChecksumDelim );
+    if ( starPos == std::string::npos )
+    {
+        // cout<<"device: no checksum delimiter"<<endl;
+        return false;
+    }
+
+    if ( starPos+2 >= sentence_.size() )
+    {
+        // cout<<"device: no checksum after delimiter"<<endl;
         return false;
     }
    
     //save the high and low bytes of the checksum
     //Make sure they are in upper case!
-    chksum_HIB = (char)toupper(*(++ptr));  
-    chksum_LOB = (char)toupper(*(ptr + 1));
-   
+    const int checksumPos = starPos+1;
+    const char chksum_HIB = (char)toupper(sentence_[checksumPos]);
+    const char chksum_LOB = (char)toupper(sentence_[checksumPos+1]);   
 
     //invalidate the existing checksum
-    *ptr = *(ptr+1) = 'x';
-        
-    //****NOTE** We leave the ptr pointing at the first chksum byte
-       
+    sentence_[checksumPos]   = 'x';
+    sentence_[checksumPos+1] = 'x';
+
     //Re-calculate our own copy of the checksum
     addCheckSum();
 
     //Now compare our saved version with our new ones
-    if( (chksum_HIB == *ptr) && (chksum_LOB == *(ptr+1)) ) {
+    if( (chksum_HIB == sentence_[checksumPos]) && (chksum_LOB == sentence_[checksumPos+1]) ) {
         //all looked good!
         checkSumOK_ = true;
         return true;
@@ -160,9 +154,9 @@ NmeaMessage::testChecksumOk()
 // the checksum, and that the checksum delimiter is there
 void 
 NmeaMessage::addCheckSum()
-{         
-    assert( haveSentence_ && "calling addCheckSum() without a sentence" );
-    
+{
+    assert( haveSentence() && "calling addCheckSum() without a sentence" );
+
     haveCheckSum_ = true;
 
     //check that we have the '$' at the start
@@ -172,12 +166,11 @@ NmeaMessage::addCheckSum()
 
     unsigned char chkRunning = 0;
     
-    int loopCount;
-    unsigned char nextChar;
     // we start from 1 to skip the leading '$'
-    for( loopCount=1; loopCount<MAX_SENTENCE_LEN; ++loopCount ) 
+    int loopCount;
+    for ( loopCount = 1; loopCount < (int)(sentence_.size()); loopCount++ )
     { 
-        nextChar = static_cast<unsigned char>(sentence_[loopCount]);
+        unsigned char nextChar = static_cast<unsigned char>(sentence_[loopCount]);
     
         // no delimiter uh oh
         if( (nextChar=='\r') || (nextChar=='\n') || (nextChar=='\0') ) {
@@ -196,9 +189,14 @@ NmeaMessage::addCheckSum()
         // Keep the running XOR total
         chkRunning ^= nextChar;
     }
+
+    if ( loopCount+2 >= (int)(sentence_.size()) )
+    {
+        throw NmeaException("addCheckSum(): no space for checksum of '*' not found.");
+    }
         
     //Put the byte values as upper case HEX back into the message
-    sprintf( sentence_ + loopCount + 1,"%02X", chkRunning );
+    sprintf( &(sentence_[loopCount + 1]),"%02X", chkRunning );
 }
 
 // Parse the data fields of our message...
@@ -217,4 +215,40 @@ NmeaMessage::parseTokens()
 
     //keep track of what we have done.
     haveTokens_ = true;
+}
+
+bool
+NmeaMessage::isDataTokenEmpty(int i) const
+{
+    if ( i >= (int)(dataTokens_.size()) )
+    {
+        stringstream ss;
+        ss << "NmeaMessage::" << __func__ 
+           << ": attempt to getDataToken("<<i<<") but only " << dataTokens_.size() << " exist in sentence: "
+           << sentence_;
+        throw NmeaException( ss.str() );
+    }
+    return dataTokens_[i].empty();    
+}
+
+const std::string &
+NmeaMessage::getDataToken(int i) const
+{
+    if ( i >= (int)(dataTokens_.size()) )
+    {
+        stringstream ss;
+        ss << "NmeaMessage::" << __func__ 
+           << ": attempt to getDataToken("<<i<<") but only " << dataTokens_.size() << " exist in sentence: "
+           << sentence_;
+        throw NmeaException( ss.str() );
+    }
+    if ( dataTokens_[i].empty() )
+    {
+        stringstream ss;
+        ss << "NmeaMessage::" << __func__ 
+           << ": attempt to getDataToken("<<i<<") but this token is empty in sentence: "
+           << sentence_;
+        throw NmeaException( ss.str() );        
+    }
+    return dataTokens_[i];
 }

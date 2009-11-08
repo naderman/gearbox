@@ -78,14 +78,14 @@ class NmeaMessage
 {
 public:
     NmeaMessage();
-    NmeaMessage(const char *sentence, int testCheckSum=DontTestOrAddChecksum );
+    NmeaMessage(const std::string &sentence, NmeaMessageOptions addOrTestCheckSum=DontTestOrAddChecksum );
 
     // Set up the internal data for a sentence.
     // May throw NmeaException if TestChecksum is specified.
-    void setSentence(const char *data, int testCheckSum=DontTestOrAddChecksum );
+    void setSentence(const std::string &data, NmeaMessageOptions addOrTestCheckSum=DontTestOrAddChecksum );
 
-    // Do we only have the raw string?
-    bool haveSentence() const { return haveSentence_; };
+    // Do we have the raw string?
+    bool haveSentence() const { return !sentence_.empty(); };
 
     // Do we have parsed fields?
     bool haveTokens() const { return haveTokens_; };
@@ -101,10 +101,13 @@ public:
     bool testChecksumOk();
 
     // Return the raw sentence string
-    const char* sentence() { return sentence_; };
+    const std::string &sentence() const { return sentence_; };
 
-    // Return a single data token as a string
-    std::string& getDataToken(int i) { return dataTokens_[i]; };
+    // Return a single data token as a string.
+    // Throws an exception if that token is empty (see 'isDataTokenEmpty()')
+    const std::string &getDataToken(int i) const;
+
+    bool isDataTokenEmpty(int i) const;
 
     // Return the number of fields
     int numDataTokens() const { return dataTokens_.size(); };
@@ -116,15 +119,14 @@ private:
     void init();
     // May throw NmeaException.
     void addCheckSum();
-    // Do we only have the raw string ?
-    bool haveSentence_;
     // Have we parsed data into tokens ?
     bool haveTokens_;
     // Have we a checksum and is it valid?
     bool haveCheckSum_;
     bool checkSumOK_;
     // The raw sentence, allow for terminator
-    char sentence_[MAX_SENTENCE_LEN+1];
+//    char sentence_[MAX_SENTENCE_LEN+1];
+    std::string sentence_;
     // The tokenised data
     std::vector<std::string> dataTokens_;
 };

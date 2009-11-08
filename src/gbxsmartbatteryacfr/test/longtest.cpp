@@ -58,10 +58,15 @@ int main( int argc, char **argv )
         
         while (true)    
         {   
-            cout << "TRACE(test): Reading record " << numRecords << endl;
+            cout << "Reading record " << numRecords << endl;
             numRecords++;         
             
             gbxsmartbatteryacfr::OceanServerSystem data = oceanserver.getData();
+            if ( data.isEmpty() )
+            {
+                cout << "Data was empty. No worries, keep trying to read." << endl;
+                continue;
+            }
             vector<string> shortWarning;
             vector<string> verboseWarning;
             const bool printRawRecord = true;

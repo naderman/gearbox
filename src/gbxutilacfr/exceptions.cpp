@@ -25,7 +25,7 @@ Exception::~Exception() throw()
 }
 
 const char *
-Exception::basename( const char *s )
+Exception::basename( const char *s ) const
 {
 #ifndef WIN32
     return strrchr( s, '/' )+1;
@@ -35,7 +35,7 @@ Exception::basename( const char *s )
 };
 
 std::string
-Exception::toMessageString( const char *file, const char *line, const std::string &message )
+Exception::toMessageString( const char *file, const char *line, const std::string &message ) const
 {
     std::string msg = "\n *** ERROR(";
     // not to confuse our local basename() with gbxutilacfr::basename()

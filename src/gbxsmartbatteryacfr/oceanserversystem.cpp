@@ -49,17 +49,18 @@ string toLogString( const vector<bool> &flags )
 //
 // Non-member functions
 //
+
 string toString( const OceanServerSystem &system )
 {
     stringstream ss;
-    ss << "Charge:          \t" << system.percentCharge << endl;
-    ss << "Minutes to empty:\t" << system.minToEmpty << endl;
-    ss << "Available batt.: \t" << toString( system.availableBatteries ) << endl;
-    ss << "Charging:        \t" << toString( system.chargingStates ) << endl;
-    ss << "Supplying power: \t" << toString( system.supplyingPowerStates ) << endl;
-    ss << "Charge power:    \t" << toString( system.chargePowerPresentStates ) << endl;
-    ss << "Power no good:   \t" << toString( system.powerNoGoodStates ) << endl;
-    ss << "Charge inhibited:\t" << toString( system.chargeInhibitedStates ) << endl;
+    ss << "Charge:          \t" << system.percentCharge() << endl;
+    ss << "Minutes to empty:\t" << system.minToEmpty() << endl;
+    ss << "Available batt.: \t" << toString( system.availableBatteries() ) << endl;
+    ss << "Charging:        \t" << toString( system.chargingStates() ) << endl;
+    ss << "Supplying power: \t" << toString( system.supplyingPowerStates() ) << endl;
+    ss << "Charge power:    \t" << toString( system.chargePowerPresentStates() ) << endl;
+    ss << "Power no good:   \t" << toString( system.powerNoGoodStates() ) << endl;
+    ss << "Charge inhibited:\t" << toString( system.chargeInhibitedStates() ) << endl;
     
     map<int,SmartBattery>::const_iterator it;
     for (it=system.batteries().begin(); it!=system.batteries().end(); it++)
@@ -74,14 +75,14 @@ string toString( const OceanServerSystem &system )
 string toLogString( const OceanServerSystem &system )
 {
     stringstream ss;
-    ss << system.percentCharge << " ";
-    ss << system.minToEmpty << " ";
-    ss << toLogString( system.availableBatteries ) << " ";
-    ss << toLogString( system.chargingStates ) << " ";
-    ss << toLogString( system.supplyingPowerStates ) << " ";
-    ss << toLogString( system.chargePowerPresentStates ) << " ";
-    ss << toLogString( system.powerNoGoodStates ) << " ";
-    ss << toLogString( system.chargeInhibitedStates ) << endl;
+    ss << system.percentCharge() << " ";
+    ss << system.minToEmpty() << " ";
+    ss << toLogString( system.availableBatteries() ) << " ";
+    ss << toLogString( system.chargingStates() ) << " ";
+    ss << toLogString( system.supplyingPowerStates() ) << " ";
+    ss << toLogString( system.chargePowerPresentStates() ) << " ";
+    ss << toLogString( system.powerNoGoodStates() ) << " ";
+    ss << toLogString( system.chargeInhibitedStates() ) << endl;
     
     ss << system.batteries().size();
     
@@ -97,19 +98,19 @@ string toLogString( const OceanServerSystem &system )
 void updateWithNewData( const OceanServerSystem &from, 
                         OceanServerSystem       &to )
 {
-    to.rawRecord = from.rawRecord;
+    to.rawRecord() = from.rawRecord();
     
     typedef map<int,SmartBattery>::const_iterator BatIt;
     
-    to.availableBatteries = from.availableBatteries;
-    to.percentCharge = from.percentCharge;
-    to.minToEmpty = from.minToEmpty;
-    to.messageToSystem = from.messageToSystem;
-    to.chargingStates = from.chargingStates;
-    to.supplyingPowerStates = from.supplyingPowerStates;
-    to.chargePowerPresentStates = from.chargePowerPresentStates;
-    to.powerNoGoodStates = from.powerNoGoodStates;
-    to.chargeInhibitedStates = from.chargeInhibitedStates;
+    to.setPercentCharge( from.percentCharge() );
+    to.setMinToEmpty( from.minToEmpty() );
+    to.setMessageToSystem( from.messageToSystem() );
+    to.availableBatteries() = from.availableBatteries();
+    to.chargingStates() = from.chargingStates();
+    to.supplyingPowerStates() = from.supplyingPowerStates();
+    to.chargePowerPresentStates() = from.chargePowerPresentStates();
+    to.powerNoGoodStates() = from.powerNoGoodStates();
+    to.chargeInhibitedStates() = from.chargeInhibitedStates();
     
     for (BatIt it=from.batteries().begin(); it!=from.batteries().end(); it++)
     {        
@@ -177,23 +178,35 @@ void updateWithNewData( const OceanServerSystem &from,
     
 }
 
+bool isSystemOnCharge( const gbxsmartbatteryacfr::OceanServerSystem &batterySystem )
+{
+    for (unsigned int i=0; i<batterySystem.chargingStates().size(); ++i)
+    {
+        if (batterySystem.chargingStates()[i]==true)
+            return true;
+    }
+
+    return false;
+}
+
 
 //
 // Member functions
 //
 OceanServerSystem::OceanServerSystem()
-    : percentCharge(0),
-      minToEmpty(0),
-      messageToSystem("")
+    : isEmpty_(true),
+      percentCharge_(0),
+      minToEmpty_(0),
+      messageToSystem_("")
 {
     // fixed number of slots for oceanserver system
     const int NUM_BATTERY_SLOTS = 8;
-    availableBatteries.resize(NUM_BATTERY_SLOTS);
-    chargingStates.resize(NUM_BATTERY_SLOTS);
-    supplyingPowerStates.resize(NUM_BATTERY_SLOTS);
-    chargePowerPresentStates.resize(NUM_BATTERY_SLOTS);
-    powerNoGoodStates.resize(NUM_BATTERY_SLOTS);
-    chargeInhibitedStates.resize(NUM_BATTERY_SLOTS);
+    availableBatteries_.resize(NUM_BATTERY_SLOTS);
+    chargingStates_.resize(NUM_BATTERY_SLOTS);
+    supplyingPowerStates_.resize(NUM_BATTERY_SLOTS);
+    chargePowerPresentStates_.resize(NUM_BATTERY_SLOTS);
+    powerNoGoodStates_.resize(NUM_BATTERY_SLOTS);
+    chargeInhibitedStates_.resize(NUM_BATTERY_SLOTS);
 }
 
 // read access to all batteries
@@ -207,6 +220,8 @@ OceanServerSystem::batteries() const
 SmartBattery& 
 OceanServerSystem::battery( unsigned int batteryNumber )
 {
+    isEmpty_=false;
+    
     map<int,SmartBattery>::iterator it = batteries_.find(batteryNumber);
     if ( it==batteries_.end() )
     {

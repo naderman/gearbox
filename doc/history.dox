@@ -46,6 +46,13 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par Updated libraries
 
+-libGbxSmartBatteryAcfr (tobi)
+  - improved robustness by encapsulating data of the oceanserversystem class and implementing access/set and check-for-empty functions
+  - improved healthcheck functions
+  - bug fix related to initialisation
+  - improved exception and error handling
+  - added a raw data record to the oceanserversystem data record useful for debugging
+
 - libflexiport
   - The UDP port type now properly supports sending and receiving broadcast packets on all operating systems.
     (GeoffB)
@@ -56,7 +63,7 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
   - Thread class: now derives from gbxutilacfr::Stoppable. No changes in user code are requried. (alexm)
   - Function checkedSleep() is defined in terms of the new light interface class gbxutilacfr::Stoppable.
     No changes in user code are required. (alexm)
-  - Implemented store::peek() (Alexb)
+  - Implemented store::peek() (AlexB)
 
 - libGbxUtilAcfr:
   - Status class: removed SubsystemStalled from the list of health types for a subsystem. The stall condition

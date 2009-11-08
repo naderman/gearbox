@@ -85,6 +85,7 @@ enum FixType
     //! Differentially corrected
     Differential
 };
+std::string toString( const FixType &f );
 
 //! Fix data structure. Note that when fixType is Invalid, all other data except the time stamps
 //! are meaningless.
@@ -114,7 +115,9 @@ public:
     double latitude;
     //! Longitude [degrees]
     double longitude;
-    //! Altitude [metres above ellipsoid]
+    //! Altitude is meaningful if and only if isAltitudeKnown
+    bool isAltitudeKnown;
+    //! Altitude [metres above ellipsoid] (only meaningful if isAltitudeKnown)
     double altitude;
     
     //! Fix type. When fixType is Invalid, all other data except the time stamps
@@ -130,6 +133,9 @@ public:
     //! Height of geoid (mean sea level) above WGS84 ellipsoid [metres]
     double geoidalSeparation;    
 };
+std::string toString( const GgaData &d );
+inline std::ostream &operator<<( std::ostream &s, const GgaData &d )
+{ return s << toString(d); }
 
 //! Vector track and speed over ground data structure.
 class VtgData : public GenericData
@@ -143,6 +149,10 @@ public:
     //! Time (according to the computer clock) when data was measured.
     //! Number of microseconds
     int timeStampUsec;
+
+    //! When false, means that the GPS unit can't make a valid measurement
+    //! (so all data other than the timestamp is meaningless).
+    bool isValid;
     
     //! Heading/track/course with respect to true North [rad]
     double headingTrue; 
@@ -151,6 +161,9 @@ public:
     //! Horizontal velocity [metres/second]
     double speed;
 };
+std::string toString( const VtgData &d );
+inline std::ostream &operator<<( std::ostream &s, const VtgData &d )
+{ return s << toString(d); }
 
 //! Gps data structure
 class RmeData : public GenericData
@@ -165,6 +178,14 @@ public:
     //! Number of microseconds
     int timeStampUsec;
     
+    //! When false, means that the GPS unit can't make a valid measurement
+    //! (so all data other than the timestamp is meaningless).
+    bool isValid;
+
+    //! When false, means that the GPS unit can't tell us anything
+    //! about our vertical error
+    bool isVerticalPositionErrorValid;
+    
     //! Horizontal position error: one standard deviation [metres)]
     double horizontalPositionError;
     //! Vertical position error: one standard deviation [metres]
@@ -173,6 +194,9 @@ public:
     //! Estimated position error.
     double estimatedPositionError;
 };
+std::string toString( const RmeData &d );
+inline std::ostream &operator<<( std::ostream &s, const RmeData &d )
+{ return s << toString(d); }
 
 /*! 
 Garmin GPS driver.

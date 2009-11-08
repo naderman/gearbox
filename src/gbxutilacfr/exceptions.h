@@ -72,12 +72,12 @@ public:
     virtual const char* what() const throw() { return message_.c_str(); }
 
 protected:
-    std::string toMessageString( const char *file, const char *line, const std::string &message );
+    std::string toMessageString( const char *file, const char *line, const std::string &message ) const;
 
     std::string  message_;
 
 private:
-    const char *basename( const char *s );
+    const char *basename( const char *s ) const;
 };
 
 //! This exception is raised when something is wrong with the hardware.

@@ -34,16 +34,16 @@ OceanServerParser::parseSystemData( const map<string,string> &keyValuePairs,
     for (it=keyValuePairs.begin(); it!=keyValuePairs.end(); it++)
     {   
         if (it->first=="01") {
-            batterySystem.minToEmpty = readMinutes(it->second);
+            batterySystem.setMinToEmpty( readMinutes(it->second) );
         }
         else if (it->first=="02") {
             // reserved, do nothing
         }
         else if (it->first=="03") {
-            batterySystem.messageToSystem = it->second;
+            batterySystem.setMessageToSystem( it->second );
         }
         else if (it->first=="04") {
-            batterySystem.percentCharge = readPercentByte(it->second);
+            batterySystem.setPercentCharge( readPercentByte(it->second) );
         }
         else 
         {
@@ -66,30 +66,30 @@ OceanServerParser::parseControllerData( const map<string,string> &keyValuePairs,
         
         if (it->first=="01") {
             readFlags(it->second, states);
-            batterySystem.availableBatteries = states;
+            batterySystem.availableBatteries() = states;
         }
         else if (it->first=="02") {
             readFlags(it->second, states);
-            batterySystem.chargingStates = states;
+            batterySystem.chargingStates() = states;
         }
         else if (it->first=="03") {
             readFlags(it->second, states);
-            batterySystem.supplyingPowerStates = states;
+            batterySystem.supplyingPowerStates() = states;
         }
         else if (it->first=="04") {
             // reserved, do nothing
         }
         else if (it->first=="05") {
             readFlags(it->second, states);
-            batterySystem.chargePowerPresentStates = states;
+            batterySystem.chargePowerPresentStates() = states;
         }
         else if (it->first=="06") {
             readFlags(it->second, states);
-            batterySystem.powerNoGoodStates = states;
+            batterySystem.powerNoGoodStates() = states;
         }
         else if (it->first=="07") {
             readFlags(it->second, states);
-            batterySystem.chargeInhibitedStates = states;
+            batterySystem.chargeInhibitedStates() = states;
         }
         else 
         {
@@ -254,7 +254,7 @@ OceanServerParser::parse( vector<string>    &stringList,
 {
     // put the raw record into the batterySystem representation
     // useful for "higher-level" debugging: the caller can choose how to make use of this information
-    batterySystem.rawRecord = stringList;
+    batterySystem.rawRecord() = stringList;
         
     //
     // Debugging output

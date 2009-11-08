@@ -76,7 +76,7 @@ int main( int argc, char **argv )
 
     string checksumStr = ss.str();
     for (unsigned int i=0; i<checksumStr.size(); i++)
-        checksumStr[i] = toupper( checksumStr[i] );
+        checksumStr[i] = (char)(toupper( checksumStr[i] ));
 
     cout << "Expected checksum result is:\t" << resultHex << endl;
     cout << "Computed checksum result is:\t" << checksumStr << endl << endl;

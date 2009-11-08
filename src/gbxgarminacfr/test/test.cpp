@@ -32,22 +32,31 @@ int main( int argc, char **argv )
     // defaults
     string port = "/dev/ttyS0";
     bool quiet = false;
+    int numReads = 30;
+    int debugLevel = 5;
 
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:q")) != -1)
+    while ((opt = getopt(argc, argv, "p:n:d:q")) != -1)
     {
         switch ( opt )
         {
         case 'p':
             port = optarg;
             break;
+        case 'n':
+            numReads=atoi(optarg);
+            break;
+        case 'd':
+            debugLevel=atoi(optarg);
+            break;
         case 'q':
             quiet = true;
             break;
         default:
             cout << "Usage: " << argv[0] << " [-p port]" << endl << endl
-                 << "-p port\tPort the device is connected to. E.g. /dev/ttyS0" 
-                 << "-q     \tMakes normal operation quiet, only errors are traced." << endl;
+                 << "-p port    \tPort the device is connected to. E.g. /dev/ttyS0" << endl
+                 << "-n numReads\tNumber of times to read from the device" << endl
+                 << "-q         \tMakes normal operation quiet, only errors are traced." << endl;
             return 1;
         }
     }
@@ -66,17 +75,16 @@ int main( int argc, char **argv )
     cout << "Using configuration: " << config.toString() << endl;
 
     // Instantiate objects to handle messages from the driver
-    bool debug = 5;
     if ( quiet )
-        debug = 0;
-    gbxutilacfr::TrivialTracer tracer( debug );
+        debugLevel = 0;
+    gbxutilacfr::TrivialTracer tracer( debugLevel );
     gbxutilacfr::TrivialStatus status( tracer );
 
     // Instantiate the driver itself
-    gbxgarminacfr::Driver* device;
+    std::auto_ptr<gbxgarminacfr::Driver> device;
     try 
     {
-        device = new gbxgarminacfr::Driver( config, tracer, status );
+        device.reset( new gbxgarminacfr::Driver( config, tracer, status ) );
     }
     catch ( const std::exception& e )
     {
@@ -88,7 +96,6 @@ int main( int argc, char **argv )
     std::auto_ptr<gbxgarminacfr::GenericData> data;
 
     // Read a few times
-    const int numReads = 30 + 10000000;
     for ( int i=0; i < numReads; i++ )
     {
         try 
@@ -142,7 +149,5 @@ int main( int argc, char **argv )
             cout <<"Test: Failed to read data: "<<e.what()<<endl;
         }    
     }
-
-    delete device;
     return 0;
 }

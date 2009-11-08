@@ -893,6 +893,7 @@ parseBufferForResponses( const uChar  *buffer,
         if ( checksumFailed )
         {
             IceUtil::Time t = IceUtil::Time::now();
+            cout << "========== Checksum failed, timestamp: " << t.toDateTime() << endl;
             // cout << "WARN(messages.cpp): " << t.toDateTime() << ": Checksum failed at buf pos " <<bytesParsed << endl;
             // cout<<"TRACE(messages.cpp): checksum was over: " << toHexString( &(buffer[bytesParsed]), telegramLength ) << endl;
             bytesParsed++;

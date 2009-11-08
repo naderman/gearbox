@@ -18,12 +18,24 @@ namespace gbxsmartbatteryacfr
 {
     namespace 
     {
-    
+
+        bool isRecordEmpty( const OceanServerSystem &batteryData,
+                            vector<string>          &warnShort,
+                            vector<string>          &warnVerbose)
+        {
+            if ( !batteryData.isEmpty() )
+                return false;
+
+            warnVerbose.push_back("The OceanServerSystem data record was empty");
+            warnShort.push_back("EMPTY RECORD");
+            return true;
+        }
+              
         bool haveBattery( const OceanServerSystem &batteryData, 
                           vector<string>          &warnShort, 
                           vector<string>          &warnVerbose )
         {
-            const vector<bool> &bats = batteryData.availableBatteries;
+            const vector<bool> &bats = batteryData.availableBatteries();
             bool haveBattery = false;
             for (unsigned int i=0; i<bats.size(); i++)
             {
@@ -58,10 +70,12 @@ bool checkNumberOfBatteries( const OceanServerSystem  &batteryData,
                              std::vector<std::string> &warnVerbose,
                              int                       expectedNumBatteries )
 {
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
+    
     bool haveWarning = false;
     
     int numBatteries = 0;
-    const vector<bool> &bats = batteryData.availableBatteries;
+    const vector<bool> &bats = batteryData.availableBatteries();
     
     for (unsigned int i=0; i<bats.size(); i++)
     {
@@ -72,10 +86,10 @@ bool checkNumberOfBatteries( const OceanServerSystem  &batteryData,
     if ( numBatteries!=expectedNumBatteries )
     {
         stringstream ssWarnShort;
-        ssWarnShort << "ONLY " << numBatteries << " BATTERIES! ";
+        ssWarnShort << "HAVE " << numBatteries << ", EXP " << expectedNumBatteries << " BAT! ";
         warnShort.push_back(ssWarnShort.str());
         stringstream ssWarnVerbose;
-        ssWarnVerbose << "Only found " << numBatteries << " battery modules (expected to see " << expectedNumBatteries << ")" << endl;
+        ssWarnVerbose << "Found " << numBatteries << " battery modules (expected to see " << expectedNumBatteries << ")" << endl;
         warnVerbose.push_back( ssWarnVerbose.str() );
         haveWarning = true;
     }
@@ -89,6 +103,8 @@ bool checkNumCycles( const OceanServerSystem &batteryData,
                      int                      numCyclesThreshhold,
                      bool                     printRawRecord  )
 {
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
+
     bool haveWarning = false;
     
     map<int,SmartBattery>::const_iterator it;
@@ -114,7 +130,7 @@ bool checkNumCycles( const OceanServerSystem &batteryData,
     if (haveWarning && printRawRecord)
     {
         stringstream ssWarnVerbose;
-        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord) << endl;
+        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord()) << endl;
         warnVerbose.push_back(ssWarnVerbose.str());
     }
     
@@ -128,7 +144,9 @@ bool checkTemperatures(const OceanServerSystem &batteryData,
                         double                  chargeTempThreshhold,
                         double                  dischargeTempThreshhold,
                         bool                    printRawRecord   )
-{          
+{
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
+
     bool haveWarning = false;
     
     map<int,SmartBattery>::const_iterator it;
@@ -139,8 +157,8 @@ bool checkTemperatures(const OceanServerSystem &batteryData,
         const SmartBattery &bat = batteryData.battery( batteryNumber );
         if ( !bat.has(Temperature) ) continue;
 
-        assert( (int)batteryData.chargingStates.size() >= batteryNumber-1 );
-        bool isCharging = batteryData.chargingStates[batteryNumber-1];
+        assert( (int)batteryData.chargingStates().size() >= batteryNumber-1 );
+        bool isCharging = batteryData.chargingStates()[batteryNumber-1];
     
         double tempThreshhold = 0.0;
         if (isCharging) {
@@ -165,7 +183,7 @@ bool checkTemperatures(const OceanServerSystem &batteryData,
     if (haveWarning && printRawRecord)
     {
         stringstream ssWarnVerbose;
-        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord) << endl;
+        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord()) << endl;
         warnVerbose.push_back(ssWarnVerbose.str());
     }
     
@@ -178,6 +196,12 @@ bool checkCharges(const OceanServerSystem &batteryData,
                   int                      chargeWarnThreshhold,
                   int                      chargeDeviationThreshold )
 {
+
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
+
+    // if the system is charging, don't bother issuing warnings
+    if ( isSystemOnCharge(batteryData) ) return false;
+    
     bool haveWarning = false;
     
     map<int,SmartBattery>::const_iterator it;
@@ -189,7 +213,7 @@ bool checkCharges(const OceanServerSystem &batteryData,
         if ( !bat.has(RelativeStateOfCharge) ) continue;
     
         int charge = bat.relativeStateOfCharge();
-        const int avgCharge = batteryData.percentCharge;
+        const int avgCharge = batteryData.percentCharge();
         
         // check whether battery charge is lower than the average
         if ( charge < (avgCharge - chargeDeviationThreshold) )
@@ -202,8 +226,7 @@ bool checkCharges(const OceanServerSystem &batteryData,
             ssWarnVerbose << "Inconsistent charge! Battery no " << batteryNumber << "'s charge is " << charge << "% (average: " << avgCharge << "%)"  << endl;
             warnVerbose.push_back(ssWarnVerbose.str());
         }
-        
-        // check whether battery charge is below a threshhold
+
         if (charge < chargeWarnThreshhold)
         {
             haveWarning = true;
@@ -219,14 +242,17 @@ bool checkCharges(const OceanServerSystem &batteryData,
     return haveWarning;
 }
 
-bool checkModuleHealth( const OceanServerSystem &batteryData, 
+bool checkModuleHealth( const OceanServerSystem &batteryData,
                         vector<string>          &warnShort, 
                         vector<string>          &warnVerbose )
 {
+
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
+
     bool haveWarning = false;
     
     // check the flags
-    const vector<bool> &badPower = batteryData.powerNoGoodStates;
+    const vector<bool> &badPower = batteryData.powerNoGoodStates();
     for (unsigned int i=0; i<badPower.size(); i++)
     {
         if (badPower[i]==true)
@@ -241,7 +267,7 @@ bool checkModuleHealth( const OceanServerSystem &batteryData,
         }
     }
     
-    const vector<bool> &chargeInhibit = batteryData.chargeInhibitedStates;
+    const vector<bool> &chargeInhibit = batteryData.chargeInhibitedStates();
     for (unsigned int i=0; i<chargeInhibit.size(); i++)
     {
         if (chargeInhibit[i]==true)
@@ -265,20 +291,29 @@ bool conductAllHealthChecks( const OceanServerSystem          &batteryData,
                              std::vector<std::string>         &warnVerbose,
                              bool                              printRawRecord   )
 {
-    if ( !haveBattery( batteryData, warnShort, warnVerbose ) ) return true;
+    if ( isRecordEmpty(batteryData, warnShort, warnVerbose) ) return true;
 
-    bool warnNumBatteries = checkNumberOfBatteries( batteryData, warnShort, warnVerbose, batteryConfig.expectedNumBatteries );
-    bool warnModule = checkModuleHealth( batteryData, warnShort, warnVerbose );    
-    bool warnCycle = checkNumCycles( batteryData, warnShort, warnVerbose, batteryConfig.numCyclesThreshhold, false );
-    bool warnTemp = checkTemperatures( batteryData, warnShort, warnVerbose, batteryConfig.chargeTempThreshhold, batteryConfig.dischargeTempThreshhold, false );    
-    bool warnCharge = checkCharges( batteryData, warnShort, warnVerbose, batteryConfig.chargeWarnThreshhold, batteryConfig.chargeDeviationThreshold );
-    
-    bool haveWarnings = warnNumBatteries || warnModule || warnCycle || warnTemp || warnCharge;
+    bool haveWarnings = false;
+
+    if ( haveBattery( batteryData, warnShort, warnVerbose ) )
+    {
+        bool warnNumBatteries = checkNumberOfBatteries( batteryData, warnShort, warnVerbose, batteryConfig.expectedNumBatteries );
+        bool warnModule = checkModuleHealth( batteryData, warnShort, warnVerbose );
+        bool warnCycle = checkNumCycles( batteryData, warnShort, warnVerbose, batteryConfig.numCyclesThreshhold, false );
+        bool warnTemp = checkTemperatures( batteryData, warnShort, warnVerbose, batteryConfig.chargeTempThreshhold, batteryConfig.dischargeTempThreshhold, false );
+        bool warnCharge = checkCharges( batteryData, warnShort, warnVerbose, batteryConfig.chargeWarnThreshhold, batteryConfig.chargeDeviationThreshold );
+
+        haveWarnings = warnNumBatteries || warnModule || warnCycle || warnTemp || warnCharge;
+    }
+    else
+    {
+        haveWarnings = true;
+    }
     
     if (printRawRecord && haveWarnings )
     {
         stringstream ssWarnVerbose;
-        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord) << endl;
+        ssWarnVerbose << "Latest raw record: " << endl << toString(batteryData.rawRecord()) << endl;
         warnVerbose.push_back(ssWarnVerbose.str());
     }
     

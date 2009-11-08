@@ -36,7 +36,7 @@ OceanServer::getData()
         // read new data, this may throw
         reader_->read(data);
         
-        // if successful, reset counter and string
+        // successful read: reset counter and string
         exceptionCounter_ = 0;
         exceptionString_ = "";
         
@@ -54,8 +54,8 @@ OceanServer::getData()
         exceptionCounter_++;
         stringstream ssEx;
         ssEx << e.what() << endl;
-        for (unsigned int i=0; i<data.rawRecord.size(); i++)
-            ssEx << data.rawRecord[i] << endl;
+        for (unsigned int i=0; i<data.rawRecord().size(); i++)
+            ssEx << data.rawRecord()[i] << endl;
         ssEx << endl;
         exceptionString_ = exceptionString_ + ssEx.str();
 
@@ -79,7 +79,8 @@ OceanServer::getData()
     }
     
     // return updated internal storage
-    // if there was an exception on read, we just return the previous record
+    // if there was an exception on read which does not get re-thrown above,
+    // the internal storage will contain the previous record
     return data_;
 }
 

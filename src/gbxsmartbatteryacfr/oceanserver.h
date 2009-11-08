@@ -38,6 +38,7 @@ public:
     //! Reads data from OceanServer, incrementally updates internal storage    
     //! Returns a reference to the internal storage
     //! May throw gbxutilacfr::Exception
+    //! May return an empty record ( check with isEmpty() )
     const gbxsmartbatteryacfr::OceanServerSystem& getData();
     
 private:

@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
@@ -28,30 +27,35 @@ using namespace std;
 //
 int main( int argc, char **argv )
 {
-    int opt;
     int baud = 38400;
     string port = "/dev/ttyS0";
     int debug = 0;
     bool showScan = false;
 
     // Get some options from the command line
-    while ((opt = getopt(argc, argv, "p:b:vs")) != -1)
+    for ( int i=1; i < argc; i++ )
     {
-        switch ( opt )
+        if ( !strcmp(argv[i],"-p") && i < argc-1 )
         {
-        case 'p':
-            port = optarg;
-            break;
-        case 'b':
-            baud = atoi( optarg );
-            break;
-        case 'v':
-            debug = 5;
-            break;
-        case 's':
+            port = argv[i+1];
+            i++;
+        }
+        else if ( !strcmp(argv[i],"-b") && i < argc-1 )
+        {
+            baud = atoi(argv[i+1]);
+            i++;
+        }
+        else if ( !strcmp(argv[i],"-v") )
+        {
+            debug = true;
+        }
+        else if ( !strcmp(argv[i],"-s") )
+        {
             showScan = true;
-            break;
-        default:
+        }
+        else
+        {
+            cout << "Unknown option: " << argv[i] << endl;
             cout << "Usage: " << argv[0] << " [-p port] [-b baud] [-v(erbose)] [-s(how scan)]" << endl << endl
                  << "-p port\tPort the laser scanner is connected to. E.g. /dev/ttyS0" << endl
                  << "-b baud\tBaud rate to connect at (9600, 19200, 38400, or 500000)." << endl;
