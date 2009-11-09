@@ -23,12 +23,21 @@ class LockFileException : public std::exception
 { 
     std::string  message_;
 public:
-    LockFileException(const char *message)
-        : message_(message) {}
-    LockFileException(const std::string &message)
+    LockFileException( const std::string &message )
         : message_(message) {}
     ~LockFileException()throw(){}
     virtual const char* what() const throw() { return message_.c_str(); }
+};
+
+//!
+//! @brief Thrown when we try to lock a resource which has been locked by another process.
+//!
+class LockedByOtherProcessException : public LockFileException
+{
+public:
+    LockedByOtherProcessException( const std::string &message )
+        : LockFileException(message) {}
+    ~LockedByOtherProcessException()throw(){}
 };
 
 //!

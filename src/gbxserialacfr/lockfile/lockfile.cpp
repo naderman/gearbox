@@ -109,7 +109,8 @@ namespace {
             {
                 unlink(pbuf);
                 stringstream ss; ss << "device " << dev << " is already locked by process PID " << pidOfLocker;
-                throw LockFileException( ss.str() );
+                // Throw a special exception which indicates this case
+                throw LockedByOtherProcessException( ss.str() );
             }
             else if ( errno == ESRCH )
             {

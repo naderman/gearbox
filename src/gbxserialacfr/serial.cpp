@@ -349,11 +349,17 @@ Serial::Serial( const std::string &dev,
         try { 
             lockFile_ = new lockfile::LockFile( dev );
         }
+        catch ( const lockfile::LockedByOtherProcessException &e )
+        {
+            stringstream ss;
+            ss << "Couldn't get lock for device " << dev << ": " << e.what();
+            throw lockfile::LockedByOtherProcessException( ss.str() );
+        }
         catch ( const lockfile::LockFileException &e )
         {
             stringstream ss;
             ss << "Couldn't get lock for device " << dev << ": " << e.what();
-            throw SerialException( ss.str() );
+            throw lockfile::LockFileException( ss.str() );
         }
     }
 
