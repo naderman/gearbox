@@ -1,5 +1,6 @@
 set( lib_name GbxSmartBatteryAcfr )
 set( lib_version 1.0.0 )
+set( lib_desc "Interface library for Ocean Server battery systems. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
@@ -18,7 +19,7 @@ if( build )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
     target_link_libraries( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "Interface library for Ocean Server battery systems" proj_libs dep_libs "" "" ${lib_version} )
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} dep_libs "" "" "" ${lib_version} )
 
     GBX_ADD_HEADERS( gbxsmartbatteryacfr ${hdrs} )
 

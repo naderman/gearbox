@@ -1,5 +1,6 @@
 set( lib_name GbxSickAcfr )
 set( lib_version 1.0.0 )
+set( lib_desc "SICK laser scanner driver. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
@@ -11,7 +12,7 @@ add_subdirectory( gbxiceutilacfr )
 set( dep_libs GbxUtilAcfr GbxIceUtilAcfr GbxSerialAcfr )
 GBX_REQUIRE_LIBS( build LIB ${lib_name} ${dep_libs} )
 
-# these are built internally
+# these are built internally, so we don't have to check for them
 set( dep_libs ${dep_libs} GbxSerialDeviceAcfr )
 
 if( build )
@@ -26,7 +27,7 @@ if( build )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
     target_link_libraries( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "Drives SICK hardware, directly connected to the computer." proj_libs dep_libs "" "" ${lib_version} )
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} dep_libs "" "" "" ${lib_version} )
 
     GBX_ADD_HEADERS( gbxsickacfr ${hdrs} )
 

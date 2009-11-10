@@ -1,5 +1,6 @@
 set( lib_name GbxSerialAcfr )
 set( lib_version 1.0.0 )
+set( lib_desc "C++ class wrapping a serial port. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
@@ -24,7 +25,7 @@ if( build )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
     target_link_libraries( ${lib_name} ${dep_libs} )
-    GBX_ADD_PKGCONFIG( ${lib_name} "C++ class wrapping a serial port." "" dep_libs "" "" ${lib_version})
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} dep_libs "" "" "" ${lib_version})
 
     GBX_ADD_HEADERS( gbxserialacfr ${hdrs} )
 
