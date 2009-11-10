@@ -24,7 +24,7 @@ if (build)
 	endif (WIN32)
 	GBX_ADD_LIBRARY (${libName} DEFAULT ${libVersion} ${srcs})
 	target_link_libraries (${libName} ${reqLibs})
-	GBX_ADD_PKGCONFIG (${libName} ${libDesc} ${reqLibs} "" "" "" ${libVersion})
+	GBX_ADD_PKGCONFIG (${libName} ${libDesc} reqLibs "" "" "" ${libVersion})
 
 	GBX_ADD_HEADERS (${libName} ${hdrs})
 
