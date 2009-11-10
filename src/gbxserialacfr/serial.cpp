@@ -25,7 +25,7 @@
 #if __linux
 #  include <linux/serial.h>
 #endif
- 
+
 #include <config.h>
 #if HAVE_FILIO_H
 // FIONREAD
@@ -34,7 +34,7 @@
 
 //////////////////////////////
 
-// Ensure we have strnlen 
+// Ensure we have strnlen
 // eg. Solaris doesn't define strnlen in string.h, so define it here.
 #if !HAVE_STRNLEN
 
@@ -42,7 +42,7 @@
 
 // inline the fucker to guard against multiple inclusion, without the
 // hassle of a special lib.
-inline size_t strnlen(const char *s, size_t maxlen) 
+inline size_t strnlen(const char *s, size_t maxlen)
 {
     char *p;
     if (s == NULL) {
@@ -137,7 +137,7 @@ namespace gbxserialacfr {
                 stringstream ss;
                 ss << "Serial::"<<__func__<<"() Invalid baud rate: " << baudRate;
                 throw SerialException( ss.str() );
-            }            
+            }
         }
 
         int iBaudrate( int baudRate )
@@ -210,7 +210,7 @@ namespace gbxserialacfr {
                 stringstream ss;
                 ss << "Serial::"<<__func__<<"() Invalid baud rate: " << baudRate;
                 throw SerialException( ss.str() );
-            }            
+            }
         }
 
         //Allow streaming of the term status structure type
@@ -225,13 +225,13 @@ namespace gbxserialacfr {
             s << "c_lflag -> 0x"  << setw(4) <<  stat.c_lflag << endl;
 
             s << "c_cc_array ->" << endl;
-            s << "VINTR 0x"      << setw(2) <<  static_cast<int>(stat.c_cc[VINTR])  
-              << ", VQUIT 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VQUIT]) 
-              << ", VERASE 0x"   << setw(2) <<  static_cast<int>(stat.c_cc[VERASE]) 
+            s << "VINTR 0x"      << setw(2) <<  static_cast<int>(stat.c_cc[VINTR])
+              << ", VQUIT 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VQUIT])
+              << ", VERASE 0x"   << setw(2) <<  static_cast<int>(stat.c_cc[VERASE])
               << ", VKILL 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VKILL]) << endl ;
             s << "VEOF 0x"       << setw(2) <<  static_cast<int>(stat.c_cc[VEOF])
               << ", VEOL 0x"     << setw(2) <<  static_cast<int>(stat.c_cc[VEOL])
-              << ", VEOL2 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VEOL2]) 
+              << ", VEOL2 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VEOL2])
               << ", VSTART 0x"   << setw(2) <<  static_cast<int>(stat.c_cc[VSTART]) << endl ;
             s << "VSTOP 0x"      << setw(2) <<  static_cast<int>(stat.c_cc[VSTOP])
               << ", VSUSP 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VSUSP])
@@ -239,7 +239,7 @@ namespace gbxserialacfr {
               << ", VLNEXT 0x"   << setw(2) <<  static_cast<int>(stat.c_cc[VLNEXT]) << endl;
             s << "VMIN 0x"       << setw(2) <<  static_cast<int>(stat.c_cc[VMIN])
               << ", VTIME 0x"    << setw(2) <<  static_cast<int>(stat.c_cc[VTIME]) << endl;
-   
+
 
             s << "c_iflag, Bits set" << endl;
             if (stat.c_iflag & IGNBRK) { s << "IGNBRK,";}
@@ -282,7 +282,9 @@ namespace gbxserialacfr {
             if (stat.c_cflag & PARODD){ s << "PARODD,";}
             if (stat.c_cflag & HUPCL){ s << "HUPCL,";}
             if (stat.c_cflag & CLOCAL){ s << "CLOCAL,";}
+#if defined(CIBAUD)
             if (stat.c_cflag & CIBAUD){ s << "CIBAUD,";}
+#endif
             s << endl;
 
 
@@ -333,7 +335,7 @@ namespace gbxserialacfr {
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-    
+
 Serial::Serial( const std::string &dev,
                 int                baudRate,
                 const Timeout     &timeout,
@@ -346,7 +348,7 @@ Serial::Serial( const std::string &dev,
 {
     if ( useLockFile )
     {
-        try { 
+        try {
             lockFile_ = new lockfile::LockFile( dev );
         }
         catch ( const lockfile::LockedByOtherProcessException &e )
@@ -366,7 +368,7 @@ Serial::Serial( const std::string &dev,
     try {
         open();
         setBaudRate( baudRate );
-    
+
         if(debugLevel_ > 2){
             cout << "At end of Serial::Serial(): " << getStatusString();
         }
@@ -377,21 +379,21 @@ Serial::Serial( const std::string &dev,
         throw;
     }
 }
-    
+
 Serial::~Serial()
 {
     close();
     if ( lockFile_ ) delete lockFile_;
 }
 
-void 
+void
 Serial::setTimeout( const Timeout &timeout )
 {
     bool newTimeoutsEnabled = !( timeout.sec == 0 && timeout.usec == 0 );
     if ( timeoutsEnabled() != newTimeoutsEnabled )
     {
         stringstream ss;
-        ss << "setTimeout() for port " << dev_ 
+        ss << "setTimeout() for port " << dev_
            <<" tried to change enabled state of timeouts!  Timeouts previously enabled: " << timeoutsEnabled();
         throw SerialException( ss.str() );
     }
@@ -429,7 +431,7 @@ Serial::close() throw()
     portFd_ = -1;
 }
 
-void 
+void
 Serial::setBaudRate(int baud)
 {
     struct termios localOptions;
@@ -466,17 +468,17 @@ Serial::setBaudRate(int baud)
         //
         struct serial_struct  serinfo;
         serinfo.reserved_char[0] = 0;
-        if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0) 
+        if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0)
         {
             stringstream ss;
             ss << "Serial::"<<__func__<<"("<<baud<<"): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
             throw SerialException( ss.str() );
         }
-    
+
         serinfo.flags &= ~ASYNC_SPD_CUST;
         serinfo.custom_divisor = 0;
-    
-        if (ioctl(portFd_, TIOCSSERIAL, &serinfo) < 0) 
+
+        if (ioctl(portFd_, TIOCSSERIAL, &serinfo) < 0)
         {
             stringstream ss;
             ss << "Serial::"<<__func__<<"("<<baud<<"): error calling 'ioctl(portFd_, TIOCSSERIAL, &serinfo)': "<<strerror(errno);
@@ -492,11 +494,11 @@ Serial::setBaudRate(int baud)
     }
 }
 
-void 
+void
 Serial::open(int flags)
 {
     struct termios localOptions;
-    
+
     if ( timeoutsEnabled() )
         flags |= O_NONBLOCK;
 
@@ -572,7 +574,7 @@ Serial::read(void *buf, int count)
         ss << "Serial::"<<__func__<<"(): " << strerror(errno);
         throw SerialException( ss.str() );
     }
-    
+
     if ( debugLevel_ > 1 )
     {
         cout<<"TRACE(serial.cpp): just read: '";
@@ -595,7 +597,7 @@ Serial::readFull(void *buf, int count)
     char* bufPtr = static_cast<char*>(buf);
 
     int got=0;
-    while ( got < count ) 
+    while ( got < count )
     {
         char *offset = bufPtr + got;
         int ret = ::read(portFd_, offset, count-got);
@@ -611,14 +613,14 @@ Serial::readFull(void *buf, int count)
                 return -1;
             }
         }
-        
+
         else
         {
             stringstream ss;
             ss << "Serial::"<<__func__<<": read(): "<<strerror(errno);
             throw SerialException( ss.str() );
         }
-   
+
     }
 
     return got; //The number of bytes that we read.
@@ -629,8 +631,8 @@ Serial::readStringUntil( std::string &str, char termchar )
 {
     if ( debugLevel_ > 0 ){
         cout<<"TRACE(serial.cpp): "<<__func__<<"(): ";
-        if(timeoutsEnabled()){ 
-            cout << "timeouts enabled"<<endl; 
+        if(timeoutsEnabled()){
+            cout << "timeouts enabled"<<endl;
         }else{
             cout << "timeouts not enabled"<<endl;
         }
@@ -726,12 +728,12 @@ Serial::waitForDataOrTimeout()
         ss << "Serial::"<<__func__<<": select(): "<<strerror(errno);
         throw SerialException( ss.str() );
     }
-    
+
     return DATA_AVAILABLE;
 }
 
 
-int 
+int
 Serial::writeString(const char *str)
 {
     if ( debugLevel_ > 0 )
@@ -782,12 +784,12 @@ Serial::getStatusString()
 
     stringstream ss;
     ss << endl << " Device " << dev_ << " Status:-" << endl;
-    ss << "In baud_rate: " << iBaudrate(cfgetispeed(&status)) 
+    ss << "In baud_rate: " << iBaudrate(cfgetispeed(&status))
          << " Out baud_rate: " << iBaudrate(cfgetospeed(&status)) << endl;
     ss << status;
-    
+
     struct serial_struct  serinfo;
-    if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0) 
+    if (ioctl(portFd_, TIOCGSERIAL, &serinfo) < 0)
     {
         stringstream ss;
         ss << "Serial::"<<__func__<<"(): error calling 'ioctl(portFd_, TIOCGSERIAL, &serinfo)': "<<strerror(errno);
@@ -799,7 +801,7 @@ Serial::getStatusString()
 }
 
 
-void 
+void
 Serial::flush()
 {
     int ret = tcflush(portFd_,TCIOFLUSH);
@@ -811,7 +813,7 @@ Serial::flush()
     }
 }
 
-void 
+void
 Serial::drain()
 {
     // wait till all output sent
@@ -823,7 +825,7 @@ Serial::drain()
     }
 }
 
-int 
+int
 Serial::write(const void *buf, int count)
 {
     if ( debugLevel_ > 0 )
