@@ -27,6 +27,10 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 @par Project wide
 
+- build system
+  - added new variable GBX_DISABLE_ALL for the cases where only a few targets need to be built.
+  - cleaned up install directory definitions, all done in one place now.
+
 @par New libraries
 
 @par Updated libraries
@@ -41,6 +45,10 @@ Developers: as you make substantial changes in the code (add features, fix bugs,
 
 - libflexiport
   - Bugfix: Don't redeclare timespec if it already has been on Windows. (gbiggs)
+
+- libGbxUtilAcfr
+  - class History: API simplified and is rewritten for periodic storage of history (more suitable for
+    computers which can be powered off abruptly.
 
 @section gbx_doc_history_907 Changes in Release 9.07
 
