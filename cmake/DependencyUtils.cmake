@@ -37,7 +37,7 @@ macro( GBX_UTIL_MAKE_OPTION_NAME option_name module_type module_name )
 endmacro( GBX_UTIL_MAKE_OPTION_NAME option_name module_name )
 
 #
-# GBX_REQUIRE_OPTION( cumulative_var [EXE | LIB] module_name default_option_value [option_name] [OPTION DESCRIPTION] )
+# GBX_REQUIRE_OPTION( cumulative_var [EXE | LIB] module_name devel_option_value [option_name] [OPTION DESCRIPTION] )
 #
 # E.g.
 # Initialize a variable first
@@ -47,25 +47,34 @@ endmacro( GBX_UTIL_MAKE_OPTION_NAME option_name module_name )
 # This does the same thing
 #   GBX_REQUIRE_OPTION ( build EXE localiser ON BUILD_LOCALISER )
 #
-macro( GBX_REQUIRE_OPTION cumulative_var module_type module_name default_option_value )
+macro( GBX_REQUIRE_OPTION cumulative_var module_type module_name devel_option_value )
 
     GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
 
     if( ${ARGC} GREATER 5 )
         set( option_name ${ARGV6} )
-    else( ${ARGC} GREATER 5 )
+    else()
         GBX_UTIL_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
-    endif( ${ARGC} GREATER 5 )
+    endif()
 
     if( ${ARGC} GREATER 6 )
         set( option_descr ${ARGV7} )
-    else( ${ARGC} GREATER 6 )
+    else()
         set( option_descr "disabled by user, use ccmake to enable" )
-    endif( ${ARGC} GREATER 6 )
+    endif()
+
+    # only affects the default option for this target
+    # individual targets can still be enabled
+    if( GBX_DISABLE_ALL )
+        set( default_option_value OFF )
+        set( option_descr "disabled by GBX_DISABLE_ALL, use ccmake to enable" )
+    else()
+        set( default_option_value ${devel_option_value} )
+    endif()
 
     # debug
 #     message( STATUS
-#         "GBX_REQUIRE_OPTION (CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, default_option_value=${default_option_value}, OPT_NAME=${option_name}, OPT_DESC=${option_descr})" )
+#         "GBX_REQUIRE_OPTION (CUM_VAR=${cumulative_var}, MOD_TYPE=${module_type}, MOD_NAME=${module_name}, devel_option_value=${devel_option_value}, OPT_NAME=${option_name}, OPT_DESC=${option_descr})" )
 
     # set up the option
     if( is_exe )
@@ -140,15 +149,15 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
     if( ${cumulative_var} )
 
         GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
-    
+
         if( ${ARGC} GREATER 5 )
             set( reason ${ARGV6} )
         else( ${ARGC} GREATER 5 )
             set( reason "${target_name} is not being built" )
         endif( ${ARGC} GREATER 5 )
-    
+
         GET_TARGET_PROPERTY( target_location ${target_name} LOCATION )
-    
+
         # must dereference both var and option names once (!) and IF will evaluate their values
         if( NOT target_location  )
             set( ${cumulative_var} FALSE )
