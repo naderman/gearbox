@@ -27,11 +27,13 @@ install(
     FILES ${_output_dir}/${_output_file}
     DESTINATION ${_destination} )
 
-# export targets
-install(
-    EXPORT ${PROJECT_NAME}-targets
-#     NAMESPACE import_
-    DESTINATION ${_destination} )
+# export targets (make sure there's something to export)
+if( DEFINED ${PROJECT_NAME}-targets )
+    install(
+        EXPORT ${PROJECT_NAME}-targets
+    #     NAMESPACE import_
+        DESTINATION ${_destination} )
+endif()
 
 set( _input_dir )
 set( _output_dir )
