@@ -2309,7 +2309,8 @@ void HokuyoLaser::ProcessIILine (const char *buffer, HokuyoSensorInfo *info)
 		info->measureState = &buffer[5];
 	else if (strncmp (buffer, "SBPS", 4) == 0)
 	{
-		if (strncmp (&buffer[5], "USB only", 8) == 0)
+		if (strncmp (&buffer[5], "USB only", 8) == 0 ||
+			strncmp (&buffer[5], "USB Full Speed", 14) == 0)
 		{
 			// No baud rate for USB-only devices such as the UHG-08LX
 			info->baud = 0;
