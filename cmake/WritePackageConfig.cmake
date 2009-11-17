@@ -28,12 +28,15 @@ install(
     DESTINATION ${_destination} )
 
 # export targets (make sure there's something to export)
-if( DEFINED ${PROJECT_NAME}-targets )
+# TODO: it's not clear how to check if ${PROJECT_NAME}-targets is non-empty
+# what is this thing? a list? does not seem to a variable?
+# As it is now it will barf when all targets are disabled, e.g. with GBX_DISABLE_ALL=ON
+# if( DEFINED ${PROJECT_NAME}-targets )
     install(
         EXPORT ${PROJECT_NAME}-targets
     #     NAMESPACE import_
         DESTINATION ${_destination} )
-endif()
+# endif()
 
 set( _input_dir )
 set( _output_dir )
