@@ -156,6 +156,7 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
             set( reason "${target_name} is not being built" )
         endif( ${ARGC} GREATER 5 )
 
+        # TODO: should simply use this signature: if(NOT TARGET target_name)
         GET_TARGET_PROPERTY( target_location ${target_name} LOCATION )
 
         # must dereference both var and option names once (!) and IF will evaluate their values
