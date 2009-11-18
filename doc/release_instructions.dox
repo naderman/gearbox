@@ -1,5 +1,5 @@
 /*
- * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics 
+ * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
  *               http://gearbox.sf.net/
  * Copyright (c) 2008 GearBox Team
  *
@@ -37,13 +37,14 @@ $ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gear
   -# Create tar-ball, named eg. 'gearbox-9.02.tar.gz'
   -# Now the tar-ball is ready to roll. But first test that the original untars and builds cleanly.
   -# Copy the tar-ball to a machine with external access.
--# On a machine with external access:
-  -# sftp [USERNAME]\@frs.sf.net
-  -# cd uploads
-  -# 'put' the tarball
 -# Create a new distro through the sourceforge web interface
   - Login a project administrator
-  - (Go through "'Admin' -> 'File Releases'" from the GearBox project page)
+  - Click on the 'Edit' link
+  - Click on "'Project Admin' -> 'File Manager'"
+  - Click on the gear icon next to 'gearbox' directory -> New Folder
+  - Name it with the new version name, e.g. 9.02
+  - Click on the gear icon next to the new folder -> Uploads Here
+  - Click on the 'Upload File' link above the directory listing, select the tar archive, wait for upload.
 -# Update the web page
   - change temporatily the last line of the script to say [USERNAME],gearbox@shell.sourceforge.net
   - Use the script: <distro>/doc/rebuild_docco.sh
