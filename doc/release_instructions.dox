@@ -48,6 +48,8 @@ $ svn copy https://gearbox.svn.sf.net/svnroot/gearbox/gearbox/trunk https://gear
 -# Update the web page
   - change temporatily the last line of the script to say [USERNAME],gearbox@shell.sourceforge.net
   - Use the script: <distro>/doc/rebuild_docco.sh
--# Increment the version numbers (eg '9.02' -> '9.02+') in the top-level CMakeLists.txt files.
+-# Move on to the next development cycle
+  - Increment the version numbers (eg '9.02.0' -> '9.02.+') in the top-level CMakeLists.txt files.
+  - Copy template headings into doc/history.dox
 
 */
