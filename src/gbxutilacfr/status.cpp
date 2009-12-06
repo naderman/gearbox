@@ -31,6 +31,7 @@ std::string toString( SubsystemState state )
     default:
         assert( !"gbxutilacfr::toString(SubsystemState) should never get to default" );
     }
+	return ""; // Shuts up MSVC
 }
 
 std::string toString( SubsystemHealth health )
@@ -46,6 +47,7 @@ std::string toString( SubsystemHealth health )
     default:
         assert( !"gbxutilacfr::toString(SubsystemHealth) should never get to default" );
     }
+	return ""; // Shuts up MSVC
 }
 
 std::string toString( const SubsystemStatus& status )
@@ -56,6 +58,7 @@ std::string toString( const SubsystemStatus& status )
        << " msg='"<<status.message<<"'"
        << " since hearbeat="<<status.sinceHeartbeat;
     return ss.str();
+	return ""; // Shuts up MSVC
 }
 
 std::string toString( SubsystemType type )
@@ -69,6 +72,7 @@ std::string toString( SubsystemType type )
     default:
         assert( !"gbxutilacfr::toString(SubsystemType) should never get to default" );
     }
+	return ""; // Shuts up MSVC
 }
 
 } // namespace
