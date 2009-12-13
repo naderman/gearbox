@@ -1,7 +1,7 @@
 /*
  * GearBox Project: Peer-Reviewed Open-Source Libraries for Robotics
  *               http://gearbox.sf.net/
- * Copyright (c) 2004-2008 Duncan Mercer, Alex Brooks, Alexei Makarenko, Tobias Kaupp
+ * Copyright (c) 2004-2009 Duncan Mercer, Alex Brooks, Alexei Makarenko, Tobias Kaupp, Michael Warren
  *
  * This distribution is licensed to you under the terms described in
  * the LICENSE file included in this distribution.
@@ -178,6 +178,80 @@ GenericData* extractRmeData( const gbxgpsutilacfr::NmeaMessage& msg, int timeSec
     return data.release();
 }
 
+// RMC provides a combination of GGA and VTG data
+GenericData* extractRmcData( const gbxgpsutilacfr::NmeaMessage& msg, int timeSec, int timeUsec )
+{
+    std::auto_ptr<RmcData> data( new RmcData );
+
+    data->timeStampSec = timeSec;
+    data->timeStampUsec = timeUsec;
+
+    //Names for the RMC message items
+    enum RmcTokens{MsgType=0,UTC,Status,Lat,LatDir,Lon,LonDir,SpeedKnots,
+                    HeadingTrue,DiffAge,MagneticVar,MagneticDir,ModeInd};
+
+    //Check for an empty string. Means that we can't tell anything useful.
+    if ( msg.isDataTokenEmpty(HeadingTrue) )
+    {
+        data->isValid = false;
+        data->headingTrue = 0.0;
+        data->headingMagnetic = 0.0;
+        data->speed = 0.0;
+        return data.release();
+    }
+    data->isValid = true;
+
+    //UTC time 
+    sscanf(msg.getDataToken(UTC).c_str(),"%02d%02d%lf",
+           &data->utcTimeHrs, &data->utcTimeMin, &data->utcTimeSec );
+
+    //position
+    int deg;
+    double min;
+    double dir;
+    
+    //latitude
+    sscanf(msg.getDataToken(Lat).c_str(),"%02d%lf",&deg,&min);
+    dir = (*msg.getDataToken(LatDir).c_str()=='N') ? 1.0 : -1.0;
+    data->latitude=dir*(deg+(min/60.0));
+    //longitude
+    sscanf(msg.getDataToken(Lon).c_str(),"%03d%lf",&deg,&min);
+    dir = (*msg.getDataToken(LonDir).c_str()=='E') ? 1.0 : -1.0;
+    data->longitude=dir*(deg+(min/60.0));
+
+    // true heading
+    double headingRad = DEG2RAD(atof(msg.getDataToken(HeadingTrue).c_str()));
+    NORMALISE_ANGLE( headingRad );
+    data->headingTrue=headingRad;
+
+    // magnetic heading
+    double headingVar;
+    try {
+        // Magnetic deviation from true
+        headingVar = DEG2RAD(atof(msg.getDataToken(MagneticVar).c_str()));
+        // Direction of magnetic deviation
+        if (*msg.getDataToken(MagneticDir).c_str() == 'E')
+            headingRad -= headingVar;
+        else 
+            headingRad += headingVar;
+    }
+    catch ( const gbxgpsutilacfr::NmeaException& e ) {
+        // If this occurs, cannot get magnetic heading. Set it to 0.
+        headingRad = 0.0;
+    }
+    NORMALISE_ANGLE( headingRad );
+    data->headingMagnetic=headingRad;
+
+    //speed - converted from knots to m/s
+    data->speed=atof(msg.getDataToken(SpeedKnots).c_str());
+    // knots to kph
+    data->speed*=1.852;
+    // kph to m/s
+    data->speed*=(1000/3600.0);
+
+    return data.release();
+}
+
 }
 
 ///////////////////////////////////////
@@ -200,7 +274,7 @@ Config::toString() const
     std::stringstream ss;
     ss << "Garmin driver config: " << endl 
        << "\tdevice="<<device << endl
-       << "\twill read sentences: GPGGA="<<readGga<<" GPVTG="<<readVtg<<" PGRME="<<readRme;
+       << "\twill read sentences: GPGGA="<<readGga<<" GPVTG="<<readVtg<<" PGRME="<<readRme<<" GPRMC="<<readRmc;
     return ss.str();
 }
 
@@ -265,7 +339,7 @@ Driver::init()
 void
 Driver::enableDevice()
 {
-    tracer_.info("Configure Garmin GPS device");
+    tracer_.info("Configure GPS device");
 
     //Create the messages that we are going to send and add the checksums
     //Note that the checksum field is filled with 'x's before we start
@@ -290,6 +364,10 @@ Driver::enableDevice()
     if ( config_.readRme ) {
         gbxgpsutilacfr::NmeaMessage enableRmeMsg( "$PGRMO,PGRME,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableRmeMsg.sentence() );
+    }
+    if ( config_.readRmc ) {
+        gbxgpsutilacfr::NmeaMessage enableRmcMsg( "$PGRMO,GPRMC,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
+        serial_->writeString( enableRmcMsg.sentence() );
     }
 
     // alexb: what is this sleep for?
@@ -327,7 +405,7 @@ Driver::read()
         timeval now;
         if ( gettimeofday( &now, 0 ) != 0 ) {
             stringstream ss;
-            ss << "Pproblem getting timeofday: " << strerror(errno) << endl;
+            ss << "Problem getting timeofday: " << strerror(errno) << endl;
             throw gbxutilacfr::Exception( ERROR_INFO,ss.str() );
         }
     
@@ -442,6 +520,17 @@ Driver::read()
             else
                 continue;
         }
+        else if ( MsgType == "$GPRMC" ) {
+            if ( config_.readRmc )
+                tracer_.debug("got GPRMC message",4);
+            else
+                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRMC message" );
+            genericData.reset( extractRmcData( nmeaMessage, now.tv_sec, now.tv_usec ) );
+            if ( genericData.get() )
+                break;
+            else
+                continue;
+        }
         else if ( MsgType == "$PGRMO" ) {
             //This message is sent by us to control msg transmission and then echoed by GPS
             //So we can just ignore it and wait for the next one.
@@ -512,6 +601,24 @@ std::string toString( const RmeData &d )
        << "  isVerticalPositionErrorValid : " << d.isVerticalPositionErrorValid << endl
        << "  verticalPositionError        : " << d.verticalPositionError << endl
        << "  estimatedPositionError       : " << d.estimatedPositionError;
+    return ss.str();
+}
+
+std::string toString( const RmcData &d )
+{
+    stringstream ss;
+    ss << endl;
+    ss << "  timeStampSec    : " << d.timeStampSec << endl
+       << "  timeStampUsec   : " << d.timeStampUsec << endl
+       << "  utcTimeHrs      : " << d.utcTimeHrs << endl
+       << "  utcTimeMin      : " << d.utcTimeMin << endl
+       << "  utcTimeSec      : " << d.utcTimeSec << endl
+       << "  latitude        : " << d.latitude << endl
+       << "  longitude       : " << d.longitude << endl
+       << "  isValid         : " << d.isValid << endl
+       << "  headingTrue     : " << d.headingTrue << endl 
+       << "  headingMagnetic : " << d.headingMagnetic << endl 
+       << "  speed           : " << d.speed;
     return ss.str();
 }
 

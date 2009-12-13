@@ -44,7 +44,9 @@ public:
     //! Read GPVTG sentence
     bool readVtg;
     //! Read PGRME sentence
-    bool readRme;
+    bool readRme; 
+    //! Read GPRMC sentence
+    bool readRmc;
 
     //! Ignore unknown messages. This driver tries to turn off all messages and then explicitely enables
     //! the ones it understands. But with some devices this does not work and many messages types are received. 
@@ -60,7 +62,9 @@ enum DataType
     //! Contents of PGVTG message.
     GpVtg,
     //! Contents of PGRME message.
-    PgRme
+    PgRme,
+    //! Contents of GPRMC message.
+    GpRmc
 };
 
 //! Generic data type returned by a read
@@ -166,6 +170,7 @@ inline std::ostream &operator<<( std::ostream &s, const VtgData &d )
 { return s << toString(d); }
 
 //! Gps data structure
+//! (This one is Garmin-specific)
 class RmeData : public GenericData
 {
 public:
@@ -198,6 +203,51 @@ std::string toString( const RmeData &d );
 inline std::ostream &operator<<( std::ostream &s, const RmeData &d )
 { return s << toString(d); }
 
+//! Gps data structure
+class RmcData : public GenericData
+{
+public:
+    DataType type() const { return GpRmc; }
+
+    //! Time (according to the computer clock) when data was measured.
+    //! Number of seconds
+    int timeStampSec;
+    //! Time (according to the computer clock) when data was measured.
+    //! Number of microseconds
+    int timeStampUsec;
+
+    //! UTC time (according to the GPS device), reference is Greenwich.
+    //! Hour [0..23]
+    int utcTimeHrs;
+    //! UTC time (according to the GPS device), reference is Greenwich.
+    //! Minutes [0..59]
+    int utcTimeMin;
+    //! UTC time (according to the GPS device), reference is Greenwich.
+    //! Seconds [0.0..59.9999(9)]
+    double utcTimeSec;
+
+    //! Latitude [degrees]
+    double latitude;
+    //! Longitude [degrees]
+    double longitude;
+
+    //! When false, means that the GPS unit can't make a valid measurement
+    //! (so all data other than the timestamp is meaningless).
+    bool isValid;
+    
+    //! Heading/track/course with respect to true North [rad]
+    double headingTrue; 
+    //! Heading/track/course with respect to magnetic North [rad]
+    double headingMagnetic; 
+    //! Horizontal velocity [metres/second]
+    double speed;
+};
+std::string toString( const RmcData &d );
+inline std::ostream &operator<<( std::ostream &s, const RmcData &d )
+{ return s << toString(d); }
+
+
+
 /*! 
 Garmin GPS driver.
 
@@ -207,8 +257,9 @@ This standard dictates a transfer rate of 4800 baud.
 
 This driver can read only the following messages (sentences):
 - GPGGA fix data 
-- PGRME (estimated error) - not sent if set to 0183 1.5 
+- PGRME (estimated error) - not sent if set to 0183 1.5 (garmin-specific)
 - GPVTG vector track and speed over ground 
+- GPRMC 
 
 Processing of individual messages can be disabled in the Config structure.
 
