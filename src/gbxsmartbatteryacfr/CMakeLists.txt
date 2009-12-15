@@ -1,5 +1,5 @@
 set( lib_name GbxSmartBatteryAcfr )
-set( lib_version 1.0.0 )
+set( lib_version 1.1.0 )
 set( lib_desc "Interface library for Ocean Server battery systems. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
