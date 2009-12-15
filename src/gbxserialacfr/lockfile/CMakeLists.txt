@@ -1,5 +1,6 @@
 set( lib_name GbxLockFileAcfr )
 set( lib_version 1.0.0 )
+set( lib_desc "Create lock files in /var/lock to control resource access. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
@@ -17,6 +18,7 @@ if( build )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
     target_link_libraries( ${lib_name} ${dep_libs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} "" "" "" "" ${lib_version} )
 
     GBX_ADD_HEADERS( gbxserialacfr/lockfile ${hdrs} )
 

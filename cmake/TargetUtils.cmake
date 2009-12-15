@@ -186,7 +186,7 @@ macro( GBX_ADD_PKGCONFIG name desc ext_deps int_deps cflags libflags version )
     set( PKG_DESC ${desc} )
     set( PKG_CFLAGS ${cflags} )
     set( PKG_LIBFLAGS ${libflags} )
-    set( PKG_EXTERNAL_DEPS ${${ext_deps}} )
+    LIST_TO_STRING( PKG_EXTERNAL_DEPS "${${ext_deps}}" )
     set( PKG_INTERNAL_DEPS "" )
     set( PKG_VERSION ${version} )
     if( ${int_deps} )
@@ -412,3 +412,13 @@ macro( GBX_RESET_ALL_TARGET_LISTS )
 
     set( LICENSE_LIST  "" CACHE INTERNAL "Global list of directories and their licenses" FORCE )
 endmacro( GBX_RESET_ALL_TARGET_LISTS )
+
+#
+# Macro to turn a list into a string (why doesn't CMake have this built-in?)
+#
+MACRO (LIST_TO_STRING _string _list)
+    SET (${_string})
+    FOREACH (_item ${_list})
+        SET (${_string} "${${_string}} ${_item}")
+    ENDFOREACH (_item)
+ENDMACRO (LIST_TO_STRING)

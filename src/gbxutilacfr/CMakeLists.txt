@@ -1,5 +1,6 @@
 set( lib_name GbxUtilAcfr )
 set( lib_version 1.0.0 )
+set( lib_desc "Utilities including status tracing and exceptions. Part of GearBox." )
 GBX_ADD_LICENSE( LGPL2+ )
 
 set( build TRUE )
@@ -23,6 +24,7 @@ if( build )
     include_directories( ${PROJECT_BINARY_DIR} )
 
     GBX_ADD_LIBRARY( ${lib_name} DEFAULT ${lib_version} ${srcs} )
+    GBX_ADD_PKGCONFIG( ${lib_name} ${lib_desc} "" "" "" "" ${lib_version} )
 
     GBX_ADD_HEADERS( gbxutilacfr ${hdrs} )
 
