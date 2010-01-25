@@ -39,6 +39,9 @@ public:
     //! Serial device. e.g. "/dev/ttyS0"
     std::string device;
 
+    //! Serial Protocol: Garmin or NMEA
+    std::string protocol;
+
     //! Read GPGGA sentence
     bool readGga;
     //! Read GPVTG sentence

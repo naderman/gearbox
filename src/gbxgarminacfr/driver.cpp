@@ -339,12 +339,18 @@ Driver::init()
 void
 Driver::enableDevice()
 {
-    tracer_.info("Configure GPS device");
+    stringstream ss;
+    ss << "Configure GPS device. Protocol: " << config_.protocol;
+    tracer_.info(ss.str());
+
+    // Non-Garmin devices do not support message enabling and disabling
+    if (config_.protocol != "Garmin") return;
 
     //Create the messages that we are going to send and add the checksums
     //Note that the checksum field is filled with 'x's before we start
 
     //First disables all output messages then enable selected ones only.
+    tracer_.debug( "Driver::enableDevice(): calling disableAllMsg", 10 );
     gbxgpsutilacfr::NmeaMessage disableAllMsg( "$PGRMO,,2*xx\r\n",gbxgpsutilacfr::AddChecksum );
     serial_->writeString( disableAllMsg.sentence() );
 
@@ -352,20 +358,24 @@ Driver::enableDevice()
     sleep(1);
     
     if ( config_.readGga ) {
+        tracer_.debug( "Driver::enableDevice(): calling enableGgaMsg", 10 );
         gbxgpsutilacfr::NmeaMessage enableGgaMsg( "$PGRMO,GPGGA,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableGgaMsg.sentence() );
     }
 
     if ( config_.readVtg ) {
+        tracer_.debug( "Driver::enableDevice(): calling enableVtgMsg", 10 );
         gbxgpsutilacfr::NmeaMessage enableVtgMsg( "$PGRMO,GPVTG,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableVtgMsg.sentence() );
     }
 
     if ( config_.readRme ) {
+        tracer_.debug( "Driver::enableDevice(): calling enableRmeMsg", 10 );
         gbxgpsutilacfr::NmeaMessage enableRmeMsg( "$PGRMO,PGRME,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableRmeMsg.sentence() );
     }
     if ( config_.readRmc ) {
+        tracer_.debug( "Driver::enableDevice(): calling enableRmcMsg", 10 );
         gbxgpsutilacfr::NmeaMessage enableRmcMsg( "$PGRMO,GPRMC,1*xx\r\n",gbxgpsutilacfr::AddChecksum );
         serial_->writeString( enableRmcMsg.sentence() );
     }
@@ -524,7 +534,7 @@ Driver::read()
             if ( config_.readRmc )
                 tracer_.debug("got GPRMC message",4);
             else
-                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected PGRMC message" );
+                throw gbxutilacfr::Exception( ERROR_INFO, "got unexpected GPRMC message" );
             genericData.reset( extractRmcData( nmeaMessage, now.tv_sec, now.tv_usec ) );
             if ( genericData.get() )
                 break;
