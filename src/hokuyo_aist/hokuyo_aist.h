@@ -9,7 +9,7 @@
  * this distribution.
  *
  * This work is a product of the National Institute of Advanced Industrial Science and Technology,
- * Japan. Registration number: H20PRO-880
+ * Japan. Registration number: H22PRO-1086.
  *
  * This file is part of hokuyo_aist.
  *
