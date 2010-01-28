@@ -47,7 +47,7 @@ Header file:
   Geoffrey Biggs
 
 @par License
-  LGPL
+  EPL1.0 (http://www.opensource.org/licenses/eclipse-1.0.txt)
 
 @par Dependencies
   @ref Flexiport

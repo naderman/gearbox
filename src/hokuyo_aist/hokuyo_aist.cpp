@@ -13,16 +13,8 @@
  *
  * This file is part of hokuyo_aist.
  *
- * hokuyo_aist is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- *
- * hokuyo_aist is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along with hokuyo_aist.
- * If not, see <http://www.gnu.org/licenses/>.
+ * This software is licensed under the Eclipse Public License -v 1.0 (EPL). See
+ * http://www.opensource.org/licenses/eclipse-1.0.txt
  */
 
 #include "hokuyo_aist.h"
