@@ -25,6 +25,13 @@ namespace {
     void removeParsedData( std::vector<char> &buffer,
                            int numBytesParsed )
     {
+        if ( numBytesParsed > (int)(buffer.size()) )
+        {
+            stringstream ss;
+            ss << "Huh? numBytesParsed("<<numBytesParsed<<") is bigger than buffer.size()("<<buffer.size()<<")";
+            throw gbxutilacfr::Exception( ERROR_INFO, ss.str() );
+        }
+
         if ( numBytesParsed > 0 )
         {
             int numBytesBeyond = buffer.size()-numBytesParsed;
@@ -32,6 +39,7 @@ namespace {
             {
                 memmove( &(buffer[0]), &(buffer[numBytesParsed]), numBytesBeyond*sizeof(char) );
             }
+            assert( numBytesBeyond >= 0 );
             buffer.resize( numBytesBeyond );
         }
     }
@@ -228,7 +236,6 @@ SerialDeviceHandler::processBuffer()
             tracer_.warning( ss.str() );
             throw;
         }
-
         removeParsedData( buffer_, numBytesParsed );
 
         if ( gotMessage )

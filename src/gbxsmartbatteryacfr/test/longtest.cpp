@@ -16,6 +16,17 @@ string toString( const vector<string> &stringList )
     
 }
 
+string checkMinToEmpty( const gbxsmartbatteryacfr::OceanServerSystem &data )
+{
+    if ( data.minToEmpty()<1 )
+    {
+        stringstream ss;
+        ss << "*********** YES: MinToEmpty is close to zero: " << data.minToEmpty();
+        return ss.str();
+    }
+    else
+        return "NO";
+}
 
 int main( int argc, char **argv )
 {
@@ -47,7 +58,7 @@ int main( int argc, char **argv )
     try 
     {
         gbxsmartbatteryacfr::BatteryHealthWarningConfig config;
-        config.expectedNumBatteries = 2;
+        config.expectedNumBatteries = 1;
         config.numCyclesThreshhold = 300;
         config.chargeTempThreshhold = 40.0;
         config.dischargeTempThreshhold = 45.0;
@@ -58,7 +69,8 @@ int main( int argc, char **argv )
         
         while (true)    
         {   
-            cout << "Reading record " << numRecords << endl;
+            cout << "========================================================" << endl
+                 << "Reading record " << numRecords << endl;
             numRecords++;         
             
             gbxsmartbatteryacfr::OceanServerSystem data = oceanserver.getData();
@@ -67,9 +79,16 @@ int main( int argc, char **argv )
                 cout << "Data was empty. No worries, keep trying to read." << endl;
                 continue;
             }
+
+            cout << gbxsmartbatteryacfr::toString( data ) << endl
+                 << "minToEmpty<1?: " << checkMinToEmpty(data) << endl
+                 << "isSystemOnCharge?: " << isSystemOnCharge(data) << endl
+                 << "raw record: " << endl
+                 << toString(data.rawRecord()) << endl;
+            
             vector<string> shortWarning;
             vector<string> verboseWarning;
-            const bool printRawRecord = true;
+            const bool printRawRecord = false;
             bool haveWarnings = conductAllHealthChecks( data, config, shortWarning, verboseWarning, printRawRecord );
             
             if (haveWarnings)

@@ -21,6 +21,15 @@ TEMPLATE
 
 Developers: as you make substantial changes in the code (add features, fix bugs, etc.), add an item in the section on changes. When the next version is released, this list will be copied into the release notes.
 
+POST 9.11 CHANGES
+
+@par Project wide
+
+- Build system
+  - GBX_REQUIRE_LIB macro now uses a direct check for target existence.
+  - new GBX_ADD_HEADER_ONLY_LIBRARY macro for handling dependencies on header-only libraries.
+
+
 @section gbx_doc_history_todo To-Do List for Next Release
 
 None.

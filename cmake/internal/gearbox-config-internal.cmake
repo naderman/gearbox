@@ -11,5 +11,7 @@ set( GEARBOX_CMAKE_DIR "${CMAKE_SOURCE_DIR}/gearbox/cmake" )
 
 set( GEARBOX_USE_FILE "${GEARBOX_CMAKE_DIR}/gearbox-use-file.cmake" )
 
-# this is where Gearbox libs will be installed
-set( GEARBOX_LINK_DIR ${CMAKE_INSTALL_PREFIX}/${GBX_LIB_INSTALL_DIR} )
+# this is where Gearbox libs will be installed.
+# we cannot use GBX_LIB_INSTALL_DIR here because this script is loaded from another
+# project (it's only used under special super-project configuration)
+set( GEARBOX_LINK_DIR ${CMAKE_INSTALL_PREFIX}/lib/gearbox )

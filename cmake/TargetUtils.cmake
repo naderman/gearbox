@@ -108,7 +108,30 @@ macro( GBX_ADD_LIBRARY name type soversion )
         set( libTypeDesc "static" )
     endif( libType STREQUAL SHARED )
     message( STATUS "Planning to build ${libTypeDesc} library:  ${name}-${soversion}" )
-endmacro( GBX_ADD_LIBRARY name )
+endmacro( GBX_ADD_LIBRARY )
+
+#
+# Special macro for handling dependencies on header-only libraries.
+# Internally creates a dummy target which other libraries can depend on.
+# This is helpful if the header-only library has external dependencies.
+# The header-only library can check its dependencies once and all libraries
+# can use internal dependency checking mechanism from then on.
+#
+macro( GBX_ADD_HEADER_ONLY_LIBRARY name )
+    if( COMMAND cmake_policy )
+        cmake_policy( SET CMP0003 NEW )
+    endif( COMMAND cmake_policy )
+
+#     message( STATUS "DEBUG: adding header-only library '${name}'" )
+
+    add_custom_target( ${name} )
+
+    set( templist ${LIB_LIST} )
+    list( APPEND templist ${name} )
+    set( LIB_LIST ${templist} CACHE INTERNAL "Global list of libraries to build" FORCE )
+
+    message( STATUS "Considering header-only library as 'built':  ${name}" )
+endmacro( GBX_ADD_HEADER_ONLY_LIBRARY )
 
 #
 # GBX_ADD_HEADERS( install_subdir FILE0 [FILE1 FILE2 ...] )

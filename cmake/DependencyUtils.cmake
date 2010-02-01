@@ -149,26 +149,22 @@ macro( GBX_REQUIRE_LIB cumulative_var module_type module_name target_name )
     if( ${cumulative_var} )
 
         GBX_UTIL_CHECK_MODULE_TYPE( ${module_type} is_exe is_lib )
-
+    
         if( ${ARGC} GREATER 5 )
             set( reason ${ARGV6} )
         else( ${ARGC} GREATER 5 )
             set( reason "${target_name} is not being built" )
         endif( ${ARGC} GREATER 5 )
-
-        # TODO: should simply use this signature: if(NOT TARGET target_name)
-        GET_TARGET_PROPERTY( target_location ${target_name} LOCATION )
-
-        # must dereference both var and option names once (!) and IF will evaluate their values
-        if( NOT target_location  )
+        
+        if( NOT TARGET ${target_name} )
             set( ${cumulative_var} FALSE )
             GBX_UTIL_MAKE_OPTION_NAME( option_name ${module_type} ${module_name} )
             if( is_exe )
                 GBX_NOT_ADD_EXECUTABLE( ${module_name} ${reason} )
             else( is_exe )
-                GBX_NOT_add_library( ${module_name} ${reason} )
+                GBX_NOT_ADD_LIBRARY( ${module_name} ${reason} )
             endif( is_exe )
-        endif( NOT target_location )
+        endif( NOT TARGET ${target_name} )
 
     endif( ${cumulative_var} )
 
