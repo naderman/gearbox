@@ -26,6 +26,7 @@ public:
         readGga(true),
         readVtg(true),
         readRme(true),
+        readRmc(false),
         ignoreUnknown(false) {};
 
     //! Returns true if the configuration is sane. Checks include:
