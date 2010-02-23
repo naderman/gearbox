@@ -28,10 +28,14 @@ const char *
 Exception::basename( const char *s ) const
 {
 #ifndef WIN32
-    return strrchr( s, '/' )+1;
+    char *slashPos = strrchr( s, '/' );
 #else
-    return strrchr( s, '\\' )+1;
+    char *slashPos = strrchr( s, '\\' );
 #endif
+    if ( slashPos == NULL )
+        return s; // no slash found
+    else
+        return slashPos+1;
 };
 
 std::string
